@@ -1,0 +1,3 @@
+[submodule "osu"]
+	path = osu
+	url = https://github.com/ppy/osu
