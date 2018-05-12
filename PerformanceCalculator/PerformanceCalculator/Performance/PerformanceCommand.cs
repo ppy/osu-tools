@@ -11,12 +11,12 @@ namespace PerformanceCalculator.Performance
     {
         [UsedImplicitly]
         [Required, FileExists]
-        [Argument(0, Name = "beatmap", Description = "Required. The beatmap corresponding to the replays.")]
+        [Argument(0, Name = "beatmap", Description = "Required. The beatmap file corresponding to the replays.")]
         public string Beatmap { get; }
 
         [UsedImplicitly]
         [FileExists]
-        [Option("-r|--replay", Description = "One for each replay. The replay file.")]
+        [Option(Template = "-r|--replay <file>", Description = "One for each replay. The replay file.")]
         public string[] Replays { get; }
 
         protected override Processor CreateProcessor() => new PerformanceProcessor(this);
