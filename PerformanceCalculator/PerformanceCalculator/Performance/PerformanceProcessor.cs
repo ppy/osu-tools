@@ -2,6 +2,7 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
 using System.Collections.Generic;
+using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
@@ -43,10 +44,10 @@ namespace PerformanceCalculator.Performance
                 var categoryAttribs = new Dictionary<string, double>();
                 double pp = ruleset.CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
                 
-                command.Console.Out.WriteLine(f);
+                command.Console.WriteLine(f);
                 foreach (var kvp in categoryAttribs)
-                    command.Console.Out.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
-                command.Console.Out.WriteLine($"{"pp".PadRight(15)}: {pp}");
+                    command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
+                command.Console.WriteLine($"{"pp".PadRight(15)}: {pp}");
             }
         }
     }

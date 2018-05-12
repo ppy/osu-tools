@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using McMaster.Extensions.CommandLineUtils;
 using osu.Framework.Extensions;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
@@ -57,8 +58,8 @@ namespace PerformanceCalculator.Difficulty
             double pp = ruleset.CreateDifficultyCalculator(converted, workingBeatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
                 
             foreach (var kvp in categoryAttribs)
-                command.Console.Out.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
-            command.Console.Out.WriteLine($"{"stars".PadRight(15)}: {pp}");
+                command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
+            command.Console.WriteLine($"{"stars".PadRight(15)}: {pp}");
         }
 
         private Ruleset getRuleset(BeatmapInfo beatmap)
