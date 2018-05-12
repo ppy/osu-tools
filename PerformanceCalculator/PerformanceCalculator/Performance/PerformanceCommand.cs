@@ -7,6 +7,7 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator.Performance
 {
+    [Command(Name = "performance", Description = "Computes the performance (pp) of replays on a beatmap.")]
     public class PerformanceCommand : ProcessorCommand
     {
         [UsedImplicitly]
