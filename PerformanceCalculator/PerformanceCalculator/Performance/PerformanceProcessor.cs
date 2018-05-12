@@ -38,8 +38,7 @@ namespace PerformanceCalculator.Performance
                 workingBeatmap.Mods.Value = score.Mods;
 
                 // Convert + process beatmap
-                IBeatmap converted = ruleset.CreateBeatmapConverter(workingBeatmap.GetPlayableBeatmap(score.Ruleset)).Convert();
-                ruleset.CreateBeatmapProcessor(converted).PostProcess();
+                IBeatmap converted = workingBeatmap.GetPlayableBeatmap(score.Ruleset);
 
                 var categoryAttribs = new Dictionary<string, double>();
                 double pp = ruleset.CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
