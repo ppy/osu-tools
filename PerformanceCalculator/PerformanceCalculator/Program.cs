@@ -2,11 +2,13 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
 
 using McMaster.Extensions.CommandLineUtils;
+using PerformanceCalculator.Difficulty;
 using PerformanceCalculator.Performance;
 
 namespace PerformanceCalculator
 {
     [Command("main")]
+    [Subcommand("difficulty", typeof(DifficultyCommand))]
     [Subcommand("performance", typeof(PerformanceCommand))]
     public class Program : CommandBase
     {
