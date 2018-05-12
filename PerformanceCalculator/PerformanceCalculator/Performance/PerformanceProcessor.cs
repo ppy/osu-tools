@@ -1,40 +1,31 @@
 ﻿// Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
-// Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
+// Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
 using System.Collections.Generic;
-using McMaster.Extensions.CommandLineUtils;
-using osu.Framework.Allocation;
-using osu.Framework.Graphics;
-using osu.Framework.Platform;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
 
-namespace PerformanceCalculator
+namespace PerformanceCalculator.Performance
 {
-    public class Calculator : Component
+    public class PerformanceProcessor : Processor
     {
-        private readonly string beatmapFile;
-        private readonly string[] replayFiles;
-        private readonly IConsole console;
+        private readonly PerformanceCommand command;
 
-        public Calculator(string beatmapFile, string[] replayFiles, IConsole console)
+        public PerformanceProcessor(PerformanceCommand command)
         {
-            this.beatmapFile = beatmapFile;
-            this.replayFiles = replayFiles;
-            this.console = console;
+            this.command = command;
         }
 
         private WorkingBeatmap workingBeatmap;
         private Ruleset ruleset;
 
-        [BackgroundDependencyLoader]
-        private void load(BeatmapManager beatmaps, ScoreStore scores, GameHost host)
+        protected override void Execute(BeatmapManager beatmaps, ScoreStore scores)
         {
             if (workingBeatmap == null)
-                beatmaps.Import(new SingleFileArchiveReader(beatmapFile));
+                beatmaps.Import(new SingleFileArchiveReader(command.Beatmap));
 
-            foreach (var f in replayFiles)
+            foreach (var f in command.Replays)
             {
                 var score = scores.ReadReplayFile(f);
 
@@ -53,13 +44,11 @@ namespace PerformanceCalculator
                 var categoryAttribs = new Dictionary<string, double>();
                 double pp = ruleset.CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
                 
-                console.Out.WriteLine(f);
+                command.Console.Out.WriteLine(f);
                 foreach (var kvp in categoryAttribs)
-                    console.Out.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
-                console.Out.WriteLine($"{"pp".PadRight(15)}: {pp}");
+                    command.Console.Out.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
+                command.Console.Out.WriteLine($"{"pp".PadRight(15)}: {pp}");
             }
-            
-            host.Exit();
         }
     }
 }
