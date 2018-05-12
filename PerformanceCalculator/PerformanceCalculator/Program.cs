@@ -7,7 +7,7 @@ using PerformanceCalculator.Performance;
 
 namespace PerformanceCalculator
 {
-    [Command("main")]
+    [Command("dotnet PerformanceCalculator.dll")]
     [Subcommand("difficulty", typeof(DifficultyCommand))]
     [Subcommand("performance", typeof(PerformanceCommand))]
     public class Program : CommandBase
