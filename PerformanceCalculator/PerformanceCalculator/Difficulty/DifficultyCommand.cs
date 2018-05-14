@@ -12,15 +12,15 @@ namespace PerformanceCalculator.Difficulty
     {
         [UsedImplicitly]
         [Required, FileExists]
-        [Argument(0, Name = "beatmap", Description = "Required. The beatmap (.osu) to compute the difficulty for.")]
+        [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu) to compute the difficulty for.")]
         public string Beatmap { get; }
-        
+
         [UsedImplicitly]
         [Option(CommandOptionType.SingleOrNoValue, Template = "-r|--ruleset:<ruleset-id>", Description = "Optional. The ruleset to compute the beatmap difficulty for, if it's a convertible beatmap.\n"
                                                                                                          + "Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania")]
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
-        
+
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
