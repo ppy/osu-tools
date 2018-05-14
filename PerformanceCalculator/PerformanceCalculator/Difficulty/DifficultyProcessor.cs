@@ -27,7 +27,7 @@ namespace PerformanceCalculator.Difficulty
 
         protected override void Execute(BeatmapManager beatmaps, ScoreStore scores)
         {
-            var beatmap = new SingleFileWorkingBeatmap(command.Beatmap);
+            var beatmap = new ProcessorWorkingBeatmap(command.Beatmap);
 
             // Get the ruleset
             var ruleset = getRuleset(command.Ruleset ?? beatmap.BeatmapInfo.RulesetID);

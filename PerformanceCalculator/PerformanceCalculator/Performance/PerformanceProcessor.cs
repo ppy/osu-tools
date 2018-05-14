@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
-using osu.Game.IO.Archives;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
 
@@ -21,44 +20,30 @@ namespace PerformanceCalculator.Performance
             this.command = command;
         }
 
-        private WorkingBeatmap workingBeatmap;
         private Ruleset ruleset;
 
         protected override void Execute(BeatmapManager beatmaps, ScoreStore scores)
         {
-            if (workingBeatmap == null)
-            {
-                try
-                {
-                    // Try import as .osz archive
-                    using (var stream = File.OpenRead(command.Beatmap))
-                        beatmaps.Import(new ZipArchiveReader(stream, command.Beatmap));
-                }
-                catch
-                {
-                    // Import as .osu
-                    beatmaps.Import(new SingleFileArchiveReader(command.Beatmap));
-                }
-            }
+            var workingBeatmap = new ProcessorWorkingBeatmap(command.Beatmap);
+            var scoreParser = new ProcessorScoreParser(workingBeatmap);
 
             foreach (var f in command.Replays)
             {
-                var score = scores.ReadReplayFile(f);
+                Score score;
+                using (var stream = File.OpenRead(f))
+                    score = scoreParser.Parse(stream);
 
-                if (ruleset == null)
-                    ruleset = score.Ruleset.CreateInstance();
-
-                // Create beatmap
-                if (workingBeatmap == null)
-                    workingBeatmap = beatmaps.GetWorkingBeatmap(score.Beatmap);
                 workingBeatmap.Mods.Value = score.Mods;
 
                 // Convert + process beatmap
                 IBeatmap converted = workingBeatmap.GetPlayableBeatmap(score.Ruleset);
 
+                if (ruleset == null)
+                    ruleset = score.Ruleset.CreateInstance();
+
                 var categoryAttribs = new Dictionary<string, double>();
                 double pp = ruleset.CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
-                
+
                 command.Console.WriteLine(f);
                 command.Console.WriteLine($"{"Player".PadRight(15)}: {score.User.Username}");
                 command.Console.WriteLine($"{"Mods".PadRight(15)}: {score.Mods.Select(m => m.ShortenedName).Aggregate((c, n) => $"{c}, {n}")}");

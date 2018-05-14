@@ -12,31 +12,31 @@ namespace PerformanceCalculator
     /// <summary>
     /// A <see cref="WorkingBeatmap"/> which reads from a .osu file.
     /// </summary>
-    public class SingleFileWorkingBeatmap : WorkingBeatmap
+    public class ProcessorWorkingBeatmap : WorkingBeatmap
     {
         private readonly Beatmap beatmap;
 
         /// <summary>
-        /// Constructs a new <see cref="SingleFileWorkingBeatmap"/> from a .osu file.
+        /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a .osu file.
         /// </summary>
         /// <param name="file">The .osu file.</param>
-        public SingleFileWorkingBeatmap(string file)
+        public ProcessorWorkingBeatmap(string file)
             : this(File.OpenRead(file))
         {
         }
 
-        private SingleFileWorkingBeatmap(Stream stream)
+        private ProcessorWorkingBeatmap(Stream stream)
             : this(new StreamReader(stream))
         {
             stream.Dispose();
         }
 
-        private SingleFileWorkingBeatmap(StreamReader streamReader)
+        private ProcessorWorkingBeatmap(StreamReader streamReader)
             : this(Decoder.GetDecoder<Beatmap>(streamReader).Decode(streamReader))
         {
         }
 
-        private SingleFileWorkingBeatmap(Beatmap beatmap)
+        private ProcessorWorkingBeatmap(Beatmap beatmap)
             : base(beatmap.BeatmapInfo)
         {
             this.beatmap = beatmap;
