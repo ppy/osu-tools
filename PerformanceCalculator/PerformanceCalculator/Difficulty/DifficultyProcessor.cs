@@ -11,7 +11,6 @@ using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 
 namespace PerformanceCalculator.Difficulty
@@ -25,7 +24,7 @@ namespace PerformanceCalculator.Difficulty
             this.command = command;
         }
 
-        protected override void Execute(BeatmapManager beatmaps, ScoreStore scores)
+        protected override void Execute()
         {
             var beatmap = new ProcessorWorkingBeatmap(command.Beatmap);
 

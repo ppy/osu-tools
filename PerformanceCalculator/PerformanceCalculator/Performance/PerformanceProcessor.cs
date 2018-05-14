@@ -22,7 +22,7 @@ namespace PerformanceCalculator.Performance
 
         private Ruleset ruleset;
 
-        protected override void Execute(BeatmapManager beatmaps, ScoreStore scores)
+        protected override void Execute()
         {
             var workingBeatmap = new ProcessorWorkingBeatmap(command.Beatmap);
             var scoreParser = new ProcessorScoreParser(workingBeatmap);

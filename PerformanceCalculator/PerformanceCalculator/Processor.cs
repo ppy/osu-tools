@@ -4,20 +4,18 @@
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Platform;
-using osu.Game.Beatmaps;
-using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator
 {
     public abstract class Processor : Component
     {
         [BackgroundDependencyLoader]
-        private void load(BeatmapManager beatmaps, ScoreStore scores, GameHost host)
+        private void load(GameHost host)
         {
-            Execute(beatmaps, scores);
+            Execute();
             host.Exit();
         }
-        
-        protected abstract void Execute(BeatmapManager beatmaps, ScoreStore scores);
+
+        protected abstract void Execute();
     }
 }
