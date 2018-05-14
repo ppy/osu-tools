@@ -2,9 +2,11 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
+using osu.Game.IO.Archives;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
 
@@ -25,7 +27,19 @@ namespace PerformanceCalculator.Performance
         protected override void Execute(BeatmapManager beatmaps, ScoreStore scores)
         {
             if (workingBeatmap == null)
-                beatmaps.Import(new SingleFileArchiveReader(command.Beatmap));
+            {
+                try
+                {
+                    // Try import as .osz archive
+                    using (var stream = File.OpenRead(command.Beatmap))
+                        beatmaps.Import(new ZipArchiveReader(stream, command.Beatmap));
+                }
+                catch
+                {
+                    // Import as .osu
+                    beatmaps.Import(new SingleFileArchiveReader(command.Beatmap));
+                }
+            }
 
             foreach (var f in command.Replays)
             {
