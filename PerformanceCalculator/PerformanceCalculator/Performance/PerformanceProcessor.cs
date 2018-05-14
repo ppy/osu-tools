@@ -2,6 +2,7 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
 
 using System.Collections.Generic;
+using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
@@ -45,6 +46,8 @@ namespace PerformanceCalculator.Performance
                 double pp = ruleset.CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
                 
                 command.Console.WriteLine(f);
+                command.Console.WriteLine($"{"Player".PadRight(15)}: {score.User.Username}");
+                command.Console.WriteLine($"{"Mods".PadRight(15)}: {score.Mods.Select(m => m.ShortenedName).Aggregate((c, n) => $"{c}, {n}")}");
                 foreach (var kvp in categoryAttribs)
                     command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
                 command.Console.WriteLine($"{"pp".PadRight(15)}: {pp}");
