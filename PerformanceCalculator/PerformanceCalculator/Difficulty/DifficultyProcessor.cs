@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
-using osu.Framework.Extensions;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
@@ -26,51 +24,34 @@ namespace PerformanceCalculator.Difficulty
         {
             this.command = command;
         }
-        
+
         protected override void Execute(BeatmapManager beatmaps, ScoreStore scores)
         {
-            // Get the beatmap
-            string hash;
-            
-            using (var raw = File.OpenRead(command.Beatmap))
-            using (var ms = new MemoryStream()) // memory stream to seek
-            {
-                raw.CopyTo(ms);
-                ms.Position = 0;
-
-                hash = ms.ComputeSHA2Hash();
-            }
-            
-            var setInfo = beatmaps.Import(new SingleFileArchiveReader(command.Beatmap));
-            var beatmapInfo = setInfo.Beatmaps.First(b => b.Hash == hash);
+            var beatmap = new SingleFileWorkingBeatmap(command.Beatmap);
 
             // Get the ruleset
-            var ruleset = getRuleset(beatmapInfo);
+            var ruleset = getRuleset(command.Ruleset ?? beatmap.BeatmapInfo.RulesetID);
 
             // Create beatmap
-            var workingBeatmap = beatmaps.GetWorkingBeatmap(beatmapInfo);
-            workingBeatmap.Mods.Value = getMods(ruleset);
+            beatmap.Mods.Value = getMods(ruleset);
 
             // Convert + process beatmap
-            IBeatmap converted = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
+            IBeatmap converted = beatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
             var categoryAttribs = new Dictionary<string, double>();
-            double pp = ruleset.CreateDifficultyCalculator(converted, workingBeatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
-                
+            double pp = ruleset.CreateDifficultyCalculator(converted, beatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
+
             foreach (var kvp in categoryAttribs)
                 command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
             command.Console.WriteLine($"{"stars".PadRight(15)}: {pp}");
         }
 
-        private Ruleset getRuleset(BeatmapInfo beatmap)
+        private Ruleset getRuleset(int rulesetId)
         {
-            switch (command.Ruleset)
+            switch (rulesetId)
             {
                 default:
-                    // Should never happen due to command validation
-                    throw new ArgumentException($"Invalid ruleset provided: {command.Ruleset}");
-                case null:
-                    return beatmap.Ruleset.CreateInstance();
+                    throw new ArgumentException("Invalid ruleset id provided.");
                 case 0:
                     return new OsuRuleset();
                 case 1:
@@ -87,7 +68,7 @@ namespace PerformanceCalculator.Difficulty
             var mods = new List<Mod>();
             if (command.Mods == null)
                 return mods;
-            
+
             var availableMods = ruleset.GetAllMods().ToList();
             foreach (var modString in command.Mods)
             {
