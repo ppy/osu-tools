@@ -55,6 +55,7 @@ namespace PerformanceCalculator.Difficulty
             var categoryAttribs = new Dictionary<string, double>();
             double pp = ruleset.CreateDifficultyCalculator(converted, beatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
 
+            command.Console.WriteLine($"{"Ruleset".PadRight(15)}: {ruleset.ShortName}");
             foreach (var kvp in categoryAttribs)
                 command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
             command.Console.WriteLine($"{"stars".PadRight(15)}: {pp}");
