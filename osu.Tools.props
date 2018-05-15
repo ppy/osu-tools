@@ -4,7 +4,7 @@
     <LangVersion>7</LangVersion>
   </PropertyGroup>
   <ItemGroup Label="License">
-    <None Include="..\..\osu-tools.licenseheader">
+    <None Include="..\osu-tools.licenseheader">
       <Link>osu-tools.licenseheader</Link>
     </None>
   </ItemGroup>
