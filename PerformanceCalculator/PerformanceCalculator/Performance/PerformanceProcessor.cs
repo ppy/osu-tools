@@ -50,6 +50,7 @@ namespace PerformanceCalculator.Performance
                 foreach (var kvp in categoryAttribs)
                     command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
                 command.Console.WriteLine($"{"pp".PadRight(15)}: {pp}");
+                command.Console.WriteLine();
             }
         }
     }

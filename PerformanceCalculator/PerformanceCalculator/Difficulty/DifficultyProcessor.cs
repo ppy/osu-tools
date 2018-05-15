@@ -58,6 +58,7 @@ namespace PerformanceCalculator.Difficulty
             foreach (var kvp in categoryAttribs)
                 command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
             command.Console.WriteLine($"{"stars".PadRight(15)}: {pp}");
+            command.Console.WriteLine();
         }
 
         private Ruleset getRuleset(int rulesetId)
