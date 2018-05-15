@@ -1,4 +1,4 @@
-# osu!tools [![Build status](https://ci.appveyor.com/api/projects/status/70owdbhaaepp70u5?svg=true)](https://ci.appveyor.com/project/peppy/osu)  [![CodeFactor](https://www.codefactor.io/repository/github/ppy/osu-tools/badge)](https://www.codefactor.io/repository/github/ppy/osu-tools) [![dev chat](https://discordapp.com/api/guilds/188630481301012481/widget.png?style=shield)](https://discord.gg/ppy)
+# osu!tools [![Build status](https://ci.appveyor.com/api/projects/status/70owdbhaaepp70u5?svg=true)](https://ci.appveyor.com/project/peppy/osu-tools)  [![CodeFactor](https://www.codefactor.io/repository/github/ppy/osu-tools/badge)](https://www.codefactor.io/repository/github/ppy/osu-tools) [![dev chat](https://discordapp.com/api/guilds/188630481301012481/widget.png?style=shield)](https://discord.gg/ppy)
 
 Tools for [osu!](https://osu.ppy.sh).
 
