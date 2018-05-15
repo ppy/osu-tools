@@ -1,0 +1,15 @@
+<!-- Contains required properties for osu!tools projects. -->
+<Project>
+  <PropertyGroup Label="C#">
+    <LangVersion>7</LangVersion>
+  </PropertyGroup>
+  <ItemGroup Label="License">
+    <None Include="..\..\osu-tools.licenseheader">
+      <Link>osu-tools.licenseheader</Link>
+    </None>
+  </ItemGroup>
+  <PropertyGroup Label="Project">
+    <Company>ppy Pty Ltd</Company>
+    <Copyright>ppy Pty Ltd 2007-2018</Copyright>
+  </PropertyGroup>
+</Project>
