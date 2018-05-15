@@ -16,7 +16,7 @@ using osu.Game.Rulesets.Taiko;
 
 namespace PerformanceCalculator.Difficulty
 {
-    public class DifficultyProcessor : Processor
+    public class DifficultyProcessor : IProcessor
     {
         private readonly DifficultyCommand command;
 
@@ -25,7 +25,7 @@ namespace PerformanceCalculator.Difficulty
             this.command = command;
         }
 
-        protected override void Execute()
+        public void Execute()
         {
             if (Directory.Exists(command.Path))
             {

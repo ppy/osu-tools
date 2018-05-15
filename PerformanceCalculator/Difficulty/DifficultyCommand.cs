@@ -26,6 +26,6 @@ namespace PerformanceCalculator.Difficulty
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
         public string[] Mods { get; }
 
-        protected override Processor CreateProcessor() => new DifficultyProcessor(this);
+        protected override IProcessor CreateProcessor() => new DifficultyProcessor(this);
     }
 }

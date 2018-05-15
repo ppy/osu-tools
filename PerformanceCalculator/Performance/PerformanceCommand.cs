@@ -20,6 +20,6 @@ namespace PerformanceCalculator.Performance
         [Option(Template = "-r|--replay <file>", Description = "One for each replay. The replay file.")]
         public string[] Replays { get; }
 
-        protected override Processor CreateProcessor() => new PerformanceProcessor(this);
+        protected override IProcessor CreateProcessor() => new PerformanceProcessor(this);
     }
 }

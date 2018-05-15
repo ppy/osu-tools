@@ -2,8 +2,6 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
 
 using McMaster.Extensions.CommandLineUtils;
-using osu.Framework.Platform;
-using osu.Game;
 
 namespace PerformanceCalculator
 {
@@ -17,16 +15,13 @@ namespace PerformanceCalculator
         public void OnExecute(CommandLineApplication app, IConsole console)
         {
             Console = console;
-
-            using (var host = new HeadlessGameHost("performance"))
-            {
-                var game = new OsuGameBase();
-                game.OnLoadComplete += _ => game.Add(CreateProcessor());
-
-                host.Run(game);
-            }
+            CreateProcessor().Execute();
         }
 
-        protected abstract Processor CreateProcessor();
+        /// <summary>
+        /// Creates the <see cref="IProcessor"/> to process this <see cref="ProcessorCommand"/>.
+        /// </summary>
+        /// <returns>The <see cref="IProcessor"/>.</returns>
+        protected abstract IProcessor CreateProcessor();
     }
 }
