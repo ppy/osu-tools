@@ -11,7 +11,7 @@ using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator.Performance
 {
-    public class PerformanceProcessor : Processor
+    public class PerformanceProcessor : IProcessor
     {
         private readonly PerformanceCommand command;
 
@@ -22,7 +22,7 @@ namespace PerformanceCalculator.Performance
 
         private Ruleset ruleset;
 
-        protected override void Execute()
+        public void Execute()
         {
             var workingBeatmap = new ProcessorWorkingBeatmap(command.Beatmap);
             var scoreParser = new ProcessorScoreParser(workingBeatmap);
