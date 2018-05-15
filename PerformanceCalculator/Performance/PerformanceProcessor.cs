@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
-using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator.Performance
@@ -19,8 +18,6 @@ namespace PerformanceCalculator.Performance
         {
             this.command = command;
         }
-
-        private Ruleset ruleset;
 
         public void Execute()
         {
@@ -38,11 +35,8 @@ namespace PerformanceCalculator.Performance
                 // Convert + process beatmap
                 IBeatmap converted = workingBeatmap.GetPlayableBeatmap(score.Ruleset);
 
-                if (ruleset == null)
-                    ruleset = score.Ruleset.CreateInstance();
-
                 var categoryAttribs = new Dictionary<string, double>();
-                double pp = ruleset.CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
+                double pp = score.Ruleset.CreateInstance().CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
 
                 command.Console.WriteLine(f);
                 command.Console.WriteLine($"{"Player".PadRight(15)}: {score.User.Username}");
