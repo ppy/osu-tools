@@ -13,11 +13,11 @@ namespace PerformanceCalculator
         /// The console.
         /// </summary>
         public IConsole Console { get; private set; }
-        
+
         public void OnExecute(CommandLineApplication app, IConsole console)
         {
             Console = console;
-            
+
             using (var host = new HeadlessGameHost("performance"))
             {
                 var game = new OsuGameBase();
