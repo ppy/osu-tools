@@ -2,6 +2,7 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
 
 using McMaster.Extensions.CommandLineUtils;
+using osu.Framework.Logging;
 using PerformanceCalculator.Difficulty;
 using PerformanceCalculator.Performance;
 
@@ -13,8 +14,11 @@ namespace PerformanceCalculator
     public class Program : CommandBase
     {
         public static void Main(string[] args)
-            => CommandLineApplication.Execute<Program>(args);
-        
+        {
+            Logger.Enabled = false;
+            CommandLineApplication.Execute<Program>(args);
+        }
+
         public int OnExecute(CommandLineApplication app, IConsole console)
         {
             console.WriteLine("You must specify a subcommand.");
