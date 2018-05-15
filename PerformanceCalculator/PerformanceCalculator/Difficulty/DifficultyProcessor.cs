@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
@@ -26,8 +27,22 @@ namespace PerformanceCalculator.Difficulty
 
         protected override void Execute()
         {
-            var beatmap = new ProcessorWorkingBeatmap(command.Beatmap);
+            if (Directory.Exists(command.Path))
+            {
+                foreach (string file in Directory.GetFiles(command.Path, "*.osu", SearchOption.AllDirectories))
+                {
+                    var beatmap = new ProcessorWorkingBeatmap(file);
+                    command.Console.WriteLine(beatmap.BeatmapInfo.ToString());
 
+                    processBeatmap(beatmap);
+                }
+            }
+            else
+                processBeatmap(new ProcessorWorkingBeatmap(command.Path));
+        }
+
+        private void processBeatmap(WorkingBeatmap beatmap)
+        {
             // Get the ruleset
             var ruleset = getRuleset(command.Ruleset ?? beatmap.BeatmapInfo.RulesetID);
 
