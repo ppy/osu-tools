@@ -4,7 +4,7 @@ Tools for [osu!](https://osu.ppy.sh).
 
 For more detailed information see per-tool READMEs.
 
-- [PerformanceCalculator](https://github.com/ppy/osu-tools/blob/master/PeformanceCalculator/README.md) - A CLI tool for calculating the difficulty of beatmaps and the performance of replays.
+- [PerformanceCalculator](https://github.com/ppy/osu-tools/blob/master/PerformanceCalculator/README.md) - A CLI tool for calculating the difficulty of beatmaps and the performance of replays.
 
 # Requirements
 
