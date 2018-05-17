@@ -40,8 +40,9 @@ namespace PerformanceCalculator.Performance
 
                 command.Console.WriteLine(f);
                 command.Console.WriteLine($"{"Player".PadRight(15)}: {score.User.Username}");
-                if (score.Mods.Length > 0)
-                    command.Console.WriteLine($"{"Mods".PadRight(15)}: {score.Mods.Select(m => m.ShortenedName).Aggregate((c, n) => $"{c}, {n}")}");
+                command.Console.WriteLine(score.Mods.Length > 0
+                    ? $"{"Mods".PadRight(15)}: {score.Mods.Select(m => m.ShortenedName).Aggregate((c, n) => $"{c}, {n}")}"
+                    : $"{"Mods".PadRight(15)}: None");
                 foreach (var kvp in categoryAttribs)
                     command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
                 command.Console.WriteLine($"{"pp".PadRight(15)}: {pp}");
