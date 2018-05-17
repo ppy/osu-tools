@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
@@ -53,14 +54,16 @@ namespace PerformanceCalculator.Difficulty
             IBeatmap converted = beatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
             var categoryAttribs = new Dictionary<string, double>();
-            double pp = ruleset.CreateDifficultyCalculator(converted, beatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
+            double stars = ruleset.CreateDifficultyCalculator(converted, beatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
 
-            command.Console.WriteLine($"{"Ruleset".PadRight(15)}: {ruleset.ShortName}");
+            writeAttribute("Ruleset", ruleset.ShortName);
             foreach (var kvp in categoryAttribs)
-                command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
-            command.Console.WriteLine($"{"stars".PadRight(15)}: {pp}");
+                writeAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
+            writeAttribute("stars", stars.ToString(CultureInfo.InvariantCulture));
             command.Console.WriteLine();
         }
+
+        private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
 
         private Ruleset getRuleset(int rulesetId)
         {
