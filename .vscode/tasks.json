@@ -10,8 +10,6 @@
             "args": [
                 "build",
                 "--no-restore",
-                "PerformanceCalculator",
-                "/p:TargetFramework=netcoreapp2.0",
                 "/p:GenerateFullPaths=true",
                 "/m",
                 "/verbosity:m"
@@ -26,8 +24,6 @@
             "args": [
                 "build",
                 "--no-restore",
-                "PerformanceCalculator",
-                "/p:TargetFramework=netcoreapp2.0",
                 "/p:Configuration=Release",
                 "/p:GenerateFullPaths=true",
                 "/m",

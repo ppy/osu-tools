@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug",
+            "name": "Debug (Performance Calculator)",
             "type": "coreclr",
             "request": "launch",
             "program": "dotnet",
@@ -16,7 +16,7 @@
             "console": "internalConsole"
         },
         {
-            "name": "Release",
+            "name": "Release (Performance Calculator)",
             "type": "coreclr",
             "request": "launch",
             "program": "dotnet",
