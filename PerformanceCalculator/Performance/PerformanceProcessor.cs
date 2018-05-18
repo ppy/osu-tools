@@ -2,6 +2,7 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
@@ -39,13 +40,17 @@ namespace PerformanceCalculator.Performance
                 double pp = score.Ruleset.CreateInstance().CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
 
                 command.Console.WriteLine(f);
-                command.Console.WriteLine($"{"Player".PadRight(15)}: {score.User.Username}");
-                command.Console.WriteLine($"{"Mods".PadRight(15)}: {score.Mods.Select(m => m.ShortenedName).Aggregate((c, n) => $"{c}, {n}")}");
+                writeAttribute("Player", score.User.Username);
+                writeAttribute("Mods", score.Mods.Length > 0
+                    ? score.Mods.Select(m => m.ShortenedName).Aggregate((c, n) => $"{c}, {n}")
+                    : "None");
                 foreach (var kvp in categoryAttribs)
-                    command.Console.WriteLine($"{kvp.Key.PadRight(15)}: {kvp.Value}");
-                command.Console.WriteLine($"{"pp".PadRight(15)}: {pp}");
+                    writeAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
+                writeAttribute("pp", pp.ToString(CultureInfo.InvariantCulture));
                 command.Console.WriteLine();
             }
         }
+
+        private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
     }
 }
