@@ -53,12 +53,27 @@ namespace PerformanceCalculator.Difficulty
             // Convert + process beatmap
             IBeatmap converted = beatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
-            var categoryAttribs = new Dictionary<string, double>();
+            var categoryAttribs = new Dictionary<string, object>();
             double stars = ruleset.CreateDifficultyCalculator(converted, beatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
 
             writeAttribute("Ruleset", ruleset.ShortName);
+
             foreach (var kvp in categoryAttribs)
-                writeAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
+            {
+                switch (kvp.Value)
+                {
+                    case double d:
+                        writeAttribute(kvp.Key, d.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case int i:
+                        writeAttribute(kvp.Key, i.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    default:
+                        writeAttribute(kvp.Key, kvp.Value.ToString());
+                        break;
+                }
+            }
+
             writeAttribute("stars", stars.ToString(CultureInfo.InvariantCulture));
             command.Console.WriteLine();
         }

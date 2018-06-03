@@ -36,7 +36,7 @@ namespace PerformanceCalculator.Performance
                 // Convert + process beatmap
                 IBeatmap converted = workingBeatmap.GetPlayableBeatmap(score.Ruleset);
 
-                var categoryAttribs = new Dictionary<string, double>();
+                var categoryAttribs = new Dictionary<string, object>();
                 double pp = score.Ruleset.CreateInstance().CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
 
                 command.Console.WriteLine(f);
@@ -44,8 +44,23 @@ namespace PerformanceCalculator.Performance
                 writeAttribute("Mods", score.Mods.Length > 0
                     ? score.Mods.Select(m => m.ShortenedName).Aggregate((c, n) => $"{c}, {n}")
                     : "None");
+
                 foreach (var kvp in categoryAttribs)
-                    writeAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
+                {
+                    switch (kvp.Value)
+                    {
+                        case double d:
+                            writeAttribute(kvp.Key, d.ToString(CultureInfo.InvariantCulture));
+                            break;
+                        case int i:
+                            writeAttribute(kvp.Key, i.ToString(CultureInfo.InvariantCulture));
+                            break;
+                        default:
+                            writeAttribute(kvp.Key, kvp.Value.ToString());
+                            break;
+                    }
+                }
+
                 writeAttribute("pp", pp.ToString(CultureInfo.InvariantCulture));
                 command.Console.WriteLine();
             }
