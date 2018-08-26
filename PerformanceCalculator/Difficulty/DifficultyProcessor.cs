@@ -10,10 +10,14 @@ using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Mania.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Taiko;
+using osu.Game.Rulesets.Taiko.Difficulty;
 
 namespace PerformanceCalculator.Difficulty
 {
@@ -46,35 +50,33 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = getRuleset(command.Ruleset ?? beatmap.BeatmapInfo.RulesetID);
-
-            // Create beatmap
-            beatmap.Mods.Value = getMods(ruleset);
-
-            // Convert + process beatmap
-            IBeatmap converted = beatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
-
-            var categoryAttribs = new Dictionary<string, object>();
-            double stars = ruleset.CreateDifficultyCalculator(converted, beatmap.Mods.Value.ToArray()).Calculate(categoryAttribs);
+            var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(getMods(ruleset).ToArray());
 
             writeAttribute("Ruleset", ruleset.ShortName);
+            writeAttribute("Stars", attributes.StarRating.ToString(CultureInfo.InvariantCulture));
 
-            foreach (var kvp in categoryAttribs)
+            switch (attributes)
             {
-                switch (kvp.Value)
-                {
-                    case double d:
-                        writeAttribute(kvp.Key, d.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    case int i:
-                        writeAttribute(kvp.Key, i.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    default:
-                        writeAttribute(kvp.Key, kvp.Value.ToString());
-                        break;
-                }
+                case OsuDifficultyAttributes osu:
+                    writeAttribute("Aim", osu.AimStrain.ToString(CultureInfo.InvariantCulture));
+                    writeAttribute("Speed", osu.SpeedStrain.ToString(CultureInfo.InvariantCulture));
+                    writeAttribute("MaxCombo", osu.MaxCombo.ToString(CultureInfo.InvariantCulture));
+                    writeAttribute("AR", osu.ApproachRate.ToString(CultureInfo.InvariantCulture));
+                    writeAttribute("OD", osu.OverallDifficulty.ToString(CultureInfo.InvariantCulture));
+                    break;
+                case TaikoDifficultyAttributes taiko:
+                    writeAttribute("HitWindow", taiko.GreatHitWindow.ToString(CultureInfo.InvariantCulture));
+                    writeAttribute("MaxCombo", taiko.MaxCombo.ToString(CultureInfo.InvariantCulture));
+                    break;
+                case CatchDifficultyAttributes c:
+                    writeAttribute("MaxCombo", c.MaxCombo.ToString(CultureInfo.InvariantCulture));
+                    writeAttribute("AR", c.ApproachRate.ToString(CultureInfo.InvariantCulture));
+                    break;
+                case ManiaDifficultyAttributes mania:
+                    writeAttribute("HitWindow", mania.GreatHitWindow.ToString(CultureInfo.InvariantCulture));
+                    break;
             }
 
-            writeAttribute("stars", stars.ToString(CultureInfo.InvariantCulture));
             command.Console.WriteLine();
         }
 

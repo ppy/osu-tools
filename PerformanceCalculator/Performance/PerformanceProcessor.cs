@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
-using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator.Performance
@@ -34,10 +33,8 @@ namespace PerformanceCalculator.Performance
                 workingBeatmap.Mods.Value = score.Mods;
 
                 // Convert + process beatmap
-                IBeatmap converted = workingBeatmap.GetPlayableBeatmap(score.Ruleset);
-
-                var categoryAttribs = new Dictionary<string, object>();
-                double pp = score.Ruleset.CreateInstance().CreatePerformanceCalculator(converted, score).Calculate(categoryAttribs);
+                var categoryAttribs = new Dictionary<string, double>();
+                double pp = score.Ruleset.CreateInstance().CreatePerformanceCalculator(workingBeatmap, score).Calculate(categoryAttribs);
 
                 command.Console.WriteLine(f);
                 writeAttribute("Player", score.User.Username);
@@ -46,20 +43,7 @@ namespace PerformanceCalculator.Performance
                     : "None");
 
                 foreach (var kvp in categoryAttribs)
-                {
-                    switch (kvp.Value)
-                    {
-                        case double d:
-                            writeAttribute(kvp.Key, d.ToString(CultureInfo.InvariantCulture));
-                            break;
-                        case int i:
-                            writeAttribute(kvp.Key, i.ToString(CultureInfo.InvariantCulture));
-                            break;
-                        default:
-                            writeAttribute(kvp.Key, kvp.Value.ToString());
-                            break;
-                    }
-                }
+                    writeAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
 
                 writeAttribute("pp", pp.ToString(CultureInfo.InvariantCulture));
                 command.Console.WriteLine();
