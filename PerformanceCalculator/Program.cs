@@ -3,6 +3,7 @@
 
 using McMaster.Extensions.CommandLineUtils;
 using osu.Framework.Logging;
+using osu.Game.Beatmaps.Formats;
 using PerformanceCalculator.Difficulty;
 using PerformanceCalculator.Performance;
 
@@ -15,6 +16,8 @@ namespace PerformanceCalculator
     {
         public static void Main(string[] args)
         {
+            LegacyDifficultyCalculatorBeatmapDecoder.Register();
+
             Logger.Enabled = false;
             CommandLineApplication.Execute<Program>(args);
         }

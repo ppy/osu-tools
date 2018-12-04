@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceCalculator", "Pe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Game.Resources", "osu\osu-resources\osu.Game.Resources\osu.Game.Resources.csproj", "{951ADBA5-82C1-4271-A49C-AD60871FE590}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Framework", "osu\osu-framework\osu.Framework\osu.Framework.csproj", "{357CB6D7-1173-4B76-AE38-1D14DBC8B4B6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Game.Rulesets.Catch", "osu\osu.Game.Rulesets.Catch\osu.Game.Rulesets.Catch.csproj", "{529AA3DB-787C-4DA6-82D3-2EE35AE23E92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Game.Rulesets.Mania", "osu\osu.Game.Rulesets.Mania\osu.Game.Rulesets.Mania.csproj", "{9247E89D-5C49-4D3E-B949-29B512D5FC84}"
@@ -30,10 +28,6 @@ Global
         {951ADBA5-82C1-4271-A49C-AD60871FE590}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {951ADBA5-82C1-4271-A49C-AD60871FE590}.Release|Any CPU.ActiveCfg = Release|Any CPU
         {951ADBA5-82C1-4271-A49C-AD60871FE590}.Release|Any CPU.Build.0 = Release|Any CPU
-        {357CB6D7-1173-4B76-AE38-1D14DBC8B4B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {357CB6D7-1173-4B76-AE38-1D14DBC8B4B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {357CB6D7-1173-4B76-AE38-1D14DBC8B4B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {357CB6D7-1173-4B76-AE38-1D14DBC8B4B6}.Release|Any CPU.Build.0 = Release|Any CPU
         {529AA3DB-787C-4DA6-82D3-2EE35AE23E92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
         {529AA3DB-787C-4DA6-82D3-2EE35AE23E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {529AA3DB-787C-4DA6-82D3-2EE35AE23E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
