@@ -28,13 +28,17 @@ namespace PerformanceCalculator.Simulate.Taiko
         public void Execute()
         {
             var ruleset = new TaikoRuleset();
+
+            var mods = getMods(ruleset).ToArray();
+
             var workingBeatmap = new ProcessorWorkingBeatmap(command.Beatmap);
+            workingBeatmap.Mods.Value = mods;
+
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
             var accuracy = command.Accuracy/100 ?? 1.0;
             var maxCombo = command.MaxCombo ?? beatmap.HitObjects.OfType<Hit>().Count();
             var statistics = generateHitResults(beatmap, command.Misses ?? 0);
-            var mods = getMods(ruleset).ToArray();
 
             var scoreInfo = new ScoreInfo()
             {
@@ -51,6 +55,10 @@ namespace PerformanceCalculator.Simulate.Taiko
             double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
 
             command.Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
+
+            writeAttribute("Accuracy", (accuracy*100).ToString(CultureInfo.InvariantCulture) + "%");
+            writeAttribute("Max Combo", maxCombo.ToString(CultureInfo.InvariantCulture));
+            writeAttribute("Misses", statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture));
 
             writeAttribute("Mods", mods.Length > 0
                 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
