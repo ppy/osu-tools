@@ -33,7 +33,7 @@ namespace PerformanceCalculator.Simulate
 
             var accuracy = command.Accuracy/100 ?? 1.0;
             var maxCombo = command.MaxCombo ?? (beatmap.HitObjects.Count + beatmap.HitObjects.OfType<Slider>().Sum(s => s.NestedHitObjects.Count - 1));
-            var statistics = generateHitResults(accuracy, beatmap);
+            var statistics = generateHitResults(accuracy, beatmap, command.Misses ?? 0);
             var mods = getMods(ruleset).ToArray();
 
             var scoreInfo = new ScoreInfo()
@@ -76,17 +76,31 @@ namespace PerformanceCalculator.Simulate
             return mods;
         }
 
-        private Dictionary<HitResult, int> generateHitResults(double accuracy, IBeatmap beatmap)
+        private Dictionary<HitResult, int> generateHitResults(double accuracy, IBeatmap beatmap, int amountMiss)
         {
-            var amountHitObjects = beatmap.HitObjects.Count();
-            var good = (int) Math.Round((1-accuracy) * amountHitObjects * 300/200);
-            var great = amountHitObjects - good;
+            var totalHitObjects = beatmap.HitObjects.Count();
+
+            // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
+            var targetTotal = (int) Math.Round(accuracy*totalHitObjects*6);
+
+            // Start by assuming every non miss is a meh
+            // This is how much increase is needed by greats and goods
+            var delta = targetTotal - (totalHitObjects - amountMiss);
+
+            // Each great increases total by 5 (great-meh=5)
+            var amountGreat = delta / 5;
+            // Each good increases total by 1 (good-meh=1). Covers remaining difference.
+            var amountGood = delta % 5;
+            // Mehs are left over. Could be negative if impossible value of amountMiss chosen
+            var amountMeh = totalHitObjects - amountGreat - amountGood - amountMiss;
+
+
             return new Dictionary<HitResult, int>()
             {
-                {HitResult.Great, great},
-                {HitResult.Good, good},
-                {HitResult.Meh, 0},
-                {HitResult.Miss, 0}
+                {HitResult.Great, amountGreat},
+                {HitResult.Good, amountGood},
+                {HitResult.Meh, amountMeh},
+                {HitResult.Miss, amountMiss}
             };
         }
 
