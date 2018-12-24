@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 
-namespace PerformanceCalculator.Simulate.Osu
+namespace PerformanceCalculator.Simulate.Taiko
 {
-    [Command(Name = "simulate osu", Description = "Computes the performance (pp) of a simulated osu play.")]
-    public class OsuSimulateCommand : ProcessorCommand
+    [Command(Name = "simulate taiko", Description = "Computes the performance (pp) of a simulated taiko play.")]
+    public class TaikoSimulateCommand : ProcessorCommand
     {
         [UsedImplicitly]
         [Required, FileExists]
@@ -16,7 +16,7 @@ namespace PerformanceCalculator.Simulate.Osu
         public string Beatmap { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well.")]
+        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100.")]
         public double? Accuracy { get; }
 
         [UsedImplicitly]
@@ -32,6 +32,6 @@ namespace PerformanceCalculator.Simulate.Osu
         [Option(Template = "-M|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
         public int? Misses { get; }
 
-        protected override IProcessor CreateProcessor() => new OsuSimulateProcessor(this);
+        protected override IProcessor CreateProcessor() => new TaikoSimulateProcessor(this);
     }
 }
