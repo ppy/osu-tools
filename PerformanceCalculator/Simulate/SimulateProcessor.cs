@@ -50,6 +50,8 @@ namespace PerformanceCalculator.Simulate
             var categoryAttribs = new Dictionary<string, double>();
             double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
 
+            command.Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
+
             foreach (var kvp in categoryAttribs)
                 writeAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
 
