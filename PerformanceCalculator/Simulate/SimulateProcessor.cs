@@ -52,6 +52,10 @@ namespace PerformanceCalculator.Simulate
 
             command.Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
 
+            writeAttribute("Mods", mods.Length > 0
+                ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
+                : "None");
+
             foreach (var kvp in categoryAttribs)
                 writeAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
 
