@@ -6,12 +6,14 @@ using osu.Framework.Logging;
 using osu.Game.Beatmaps.Formats;
 using PerformanceCalculator.Difficulty;
 using PerformanceCalculator.Performance;
+using PerformanceCalculator.Simulate;
 
 namespace PerformanceCalculator
 {
     [Command("dotnet PerformanceCalculator.dll")]
     [Subcommand("difficulty", typeof(DifficultyCommand))]
     [Subcommand("performance", typeof(PerformanceCommand))]
+    [Subcommand("simulate", typeof(SimulateCommand))]
     public class Program : CommandBase
     {
         public static void Main(string[] args)
