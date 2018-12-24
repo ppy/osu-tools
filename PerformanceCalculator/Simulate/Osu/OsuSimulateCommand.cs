@@ -20,8 +20,13 @@ namespace PerformanceCalculator.Simulate.Osu
         public double? Accuracy { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-c|--combo|--max-combo <combo>", Description = "Maximum Combo. Defaults to beatmap maximum.")]
-        public int? MaxCombo { get; }
+        [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
+        public int? Combo { get; }
+
+        [UsedImplicitly]
+        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option."
+                                                                       + " Enter as decimal 0-100.")]
+        public double? PercentCombo { get; }
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."

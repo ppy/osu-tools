@@ -37,7 +37,9 @@ namespace PerformanceCalculator.Simulate.Taiko
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
             var accuracy = command.Accuracy/100 ?? 1.0;
-            var maxCombo = command.MaxCombo ?? beatmap.HitObjects.OfType<Hit>().Count();
+            var beatmapMaxCombo = beatmap.HitObjects.OfType<Hit>().Count();
+            var maxCombo = command.Combo ??
+                           (int) Math.Round((command.PercentCombo ?? 100)/100 * beatmapMaxCombo);
             var statistics = generateHitResults(beatmap, command.Misses ?? 0);
 
             var scoreInfo = new ScoreInfo()
@@ -57,7 +59,7 @@ namespace PerformanceCalculator.Simulate.Taiko
             command.Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
 
             writeAttribute("Accuracy", (accuracy*100).ToString(CultureInfo.InvariantCulture) + "%");
-            writeAttribute("Max Combo", maxCombo.ToString(CultureInfo.InvariantCulture));
+            writeAttribute("Combo", FormattableString.Invariant($"{maxCombo}/{beatmapMaxCombo} ({Math.Round(100.0 * maxCombo/beatmapMaxCombo, 2)}%)"));
             writeAttribute("Misses", statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture));
 
             writeAttribute("Mods", mods.Length > 0
