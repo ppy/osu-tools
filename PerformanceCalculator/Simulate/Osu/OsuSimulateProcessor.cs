@@ -14,13 +14,13 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 
-namespace PerformanceCalculator.Simulate
+namespace PerformanceCalculator.Simulate.Osu
 {
-    public class SimulateProcessor : IProcessor
+    public class OsuSimulateProcessor : IProcessor
     {
-        private readonly SimulateCommand command;
+        private readonly OsuSimulateCommand command;
 
-        public SimulateProcessor(SimulateCommand command)
+        public OsuSimulateProcessor(OsuSimulateCommand command)
         {
             this.command = command;
         }
