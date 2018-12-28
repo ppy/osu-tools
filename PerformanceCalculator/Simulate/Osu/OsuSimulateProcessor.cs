@@ -48,7 +48,6 @@ namespace PerformanceCalculator.Simulate.Osu
                 MaxCombo = maxCombo,
                 Statistics = statistics,
                 Mods = mods
-
             };
 
             var categoryAttribs = new Dictionary<string, double>();
@@ -105,7 +104,6 @@ namespace PerformanceCalculator.Simulate.Osu
             var amountGood = delta % 5;
             // Mehs are left over. Could be negative if impossible value of amountMiss chosen
             var amountMeh = totalHitObjects - amountGreat - amountGood - amountMiss;
-
 
             return new Dictionary<HitResult, int>()
             {

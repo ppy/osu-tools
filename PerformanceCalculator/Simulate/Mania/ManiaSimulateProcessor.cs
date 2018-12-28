@@ -43,7 +43,6 @@ namespace PerformanceCalculator.Simulate.Mania
                 TotalScore = score,
                 Statistics = statistics,
                 Mods = mods
-
             };
 
             var categoryAttribs = new Dictionary<string, double>();

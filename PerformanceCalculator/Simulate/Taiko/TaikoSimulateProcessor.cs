@@ -48,7 +48,6 @@ namespace PerformanceCalculator.Simulate.Taiko
                 MaxCombo = maxCombo,
                 Statistics = statistics,
                 Mods = mods
-
             };
 
             workingBeatmap.Mods.Value = mods;
