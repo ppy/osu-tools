@@ -21,7 +21,7 @@ namespace PerformanceCalculator.Simulate.Mania
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
-                                                                                            + "Values: hr, dt, fl, 4k, 5k, etc...")]
+                                                                                            + " Values: hr, dt, fl, 4k, 5k, etc...")]
         public string[] Mods { get; }
 
         protected override IProcessor CreateProcessor() => new ManiaSimulateProcessor(this);

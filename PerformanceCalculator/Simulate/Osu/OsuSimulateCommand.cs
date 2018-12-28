@@ -30,7 +30,7 @@ namespace PerformanceCalculator.Simulate.Osu
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
-                                                                                            + "Values: hr, dt, hd, fl, ez, etc...")]
+                                                                                            + " Values: hr, dt, hd, fl, ez, etc...")]
         public string[] Mods { get; }
 
         [UsedImplicitly]
