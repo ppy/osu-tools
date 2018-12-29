@@ -7,7 +7,7 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator.Simulate.Taiko
 {
-    [Command(Name = "simulate taiko", Description = "Computes the performance (pp) of a simulated taiko play.")]
+    [Command(Name = "simulate taiko", Description = "Computes the performance (pp) of a simulated osu!taiko play.")]
     public class TaikoSimulateCommand : ProcessorCommand
     {
         [UsedImplicitly]

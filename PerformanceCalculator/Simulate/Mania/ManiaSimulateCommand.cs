@@ -7,7 +7,7 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator.Simulate.Mania
 {
-    [Command(Name = "simulate mania", Description = "Computes the performance (pp) of a simulated mania play.")]
+    [Command(Name = "simulate mania", Description = "Computes the performance (pp) of a simulated osu!mania play.")]
     public class ManiaSimulateCommand : ProcessorCommand
     {
         [UsedImplicitly]

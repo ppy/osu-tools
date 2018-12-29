@@ -106,11 +106,11 @@ Run 'simulate [command] --help' for more information about a command.
 Computes the performance of a simulated play on a beatmap. The provided output includes raw performance attributes and pp value.
 
 
-#### Osu
+#### osu!
 ```
 > dotnet PerformanceCalculator.dll simulate osu --help
 
-Computes the performance (pp) of a simulated osu play.
+Computes the performance (pp) of a simulated osu! play.
 
 Usage: dotnet PerformanceCalculator.dll simulate osu [arguments] [options]
 
@@ -126,11 +126,11 @@ Options:
   -M|--misses <misses>        Number of misses. Defaults to 0.
 ```
 
-#### Taiko
+#### osu!taiko
 ```
 > dotnet PerformanceCalculator.dll simulate taiko --help
 
-Computes the performance (pp) of a simulated taiko play.
+Computes the performance (pp) of a simulated osu!taiko play.
 
 Usage: dotnet PerformanceCalculator.dll simulate taiko [arguments] [options]
 
@@ -146,11 +146,11 @@ Options:
   -M|--misses <misses>        Number of misses. Defaults to 0.
 ```
 
-#### Mania
+#### osu!mania
 ```
 > dotnet PerformanceCalculator.dll simulate mania --help
 
-Computes the performance (pp) of a simulated mania play.
+Computes the performance (pp) of a simulated osu!mania play.
 
 Usage: dotnet PerformanceCalculator.dll simulate mania [arguments] [options]
 

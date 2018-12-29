@@ -7,7 +7,7 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator.Simulate.Osu
 {
-    [Command(Name = "simulate osu", Description = "Computes the performance (pp) of a simulated osu play.")]
+    [Command(Name = "simulate osu", Description = "Computes the performance (pp) of a simulated osu! play.")]
     public class OsuSimulateCommand : ProcessorCommand
     {
         [UsedImplicitly]
