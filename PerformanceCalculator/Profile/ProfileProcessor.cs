@@ -134,15 +134,16 @@ namespace PerformanceCalculator.Profile
                 writeAttribute("Mods", finalMods.Length > 0
                     ? finalMods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
                     : "None");
-                
-                writeAttribute("raw pp:", pp[i].ToString());
             }
             //reorder the top 100 by public
             Array.Sort(pp);
             Array.Reverse(pp);
             double ppNet = 0;
             for (int w=0; w<100; w++)
+            {
                 ppNet += Math.Pow(0.95,w)*pp[w];
+                writeAttribute("raw pp/weighted pp", pp[w].ToString() + " / " + (Math.Pow(0.95,w)*pp[w]).ToString());
+             }
             writeAttribute("Top 100 Listed Above. Net PP", ppNet.ToString());
         }
 
