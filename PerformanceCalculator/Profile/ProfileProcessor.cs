@@ -32,7 +32,7 @@ namespace PerformanceCalculator.Profile
         public void Execute()
         {
             //initializing pp-holding array
-            double[] pp = null;
+            double[] pp = new double[100];
             
             //get data for all 100 top plays
             var getPlayData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user_best?k="+command.Key+"&u="+command.ProfileName+"&limit=100&type=username");
@@ -135,10 +135,11 @@ namespace PerformanceCalculator.Profile
                     ? finalMods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
                     : "None");
                 
-                writeAttribute("raw pp:", pp.ToString());
+                writeAttribute("raw pp:", pp[i].ToString());
             }
             //reorder the top 100 by public
             Array.Sort(pp);
+            Array.Reverse(pp);
             double ppNet = 0;
             for (int w=0; w<100; w++)
                 ppNet += Math.Pow(0.95,w)*pp[w];
