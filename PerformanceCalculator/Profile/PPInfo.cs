@@ -5,7 +5,7 @@ namespace PerformanceCalculator.Profile
 {
     public class PPInfo
     {
-        public string beatmapInfo {get; set; }
-        public string modInfo {get; set; }
+        public string BeatmapInfo;
+        public string ModInfo;
     }
 }
