@@ -18,10 +18,10 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace PerformanceCalculator.Profile
 {
-
     public class ProfileProcessor : IProcessor
     {
         private readonly ProfileCommand command;
@@ -47,6 +47,31 @@ namespace PerformanceCalculator.Profile
             receiveStream.Close();
             readStream.Close();
 
+            //get user data (used for bonus pp calculation)
+            var getUserData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user?k="+command.Key+"&u="+command.ProfileName+"&type=username");
+            response = (HttpWebResponse)getUserData.GetResponse();
+            receiveStream = response.GetResponseStream();
+            readStream = new StreamReader(receiveStream);
+            json = readStream.ReadToEnd();
+            var userData = JsonConvert.DeserializeObject<dynamic>(json);
+            response.Close();
+            receiveStream.Close();
+            readStream.Close();
+
+            double bonusPP = 0;
+            //inactive players have 0pp to take them out of the leaderboard
+            if(userData[0].pp_raw == 0)
+                Console.Write("The player has 0 pp or is inactive, so bonus pp cannot be calculated");
+            //calculate bonus pp as difference of user pp and sum of other pps
+            else
+            {
+                double oldPP = 0;
+                for(int j=0; j<100; j++) {
+                    oldPP += (double)playData[j].pp * Math.Pow(0.95,j);
+                }
+                bonusPP = userData[0].pp_raw - oldPP;
+            }
+
             for(int i=0; i<100; i++)
             {
                 //for each beatmap, download it
@@ -60,6 +85,7 @@ namespace PerformanceCalculator.Profile
                         Console.Write("Error in Downloading Beatmaps");
                     }
                 }
+
                 var workingBeatmap = new ProcessorWorkingBeatmap(command.Path);
 
                 //Stats Calculation
@@ -119,9 +145,7 @@ namespace PerformanceCalculator.Profile
                     MaxCombo = maxCombo,
                     Mods = finalMods,
                     Statistics = statistics
-
                 };
-
 
                 workingBeatmap.Mods.Value = finalMods;
 
@@ -134,8 +158,6 @@ namespace PerformanceCalculator.Profile
                     : "None"
                 };
                 sortedPP.Add(pp, outputInfo);
-
-
             }
             double ppNet = 0;
             int w = 0;
@@ -148,6 +170,8 @@ namespace PerformanceCalculator.Profile
                 writeAttribute("raw pp/weighted pp", kvp.Key.ToString() + " / " + (Math.Pow(0.95,w)*kvp.Key).ToString());
                 w++;
             }
+            //add on bonus pp
+            ppNet += bonusPP;
             writeAttribute("Top 100 Listed Above. Net PP", ppNet.ToString());
         }
 
@@ -169,10 +193,5 @@ namespace PerformanceCalculator.Profile
             Flashlight     = 1024,
             SpunOut        = 4096,
         }
-    }
-    public class PPInfo
-    {
-        public string beatmapInfo {get; set;}
-        public string modInfo {get; set;}
     }
 }
