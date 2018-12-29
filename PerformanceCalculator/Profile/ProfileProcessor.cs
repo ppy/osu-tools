@@ -33,6 +33,8 @@ namespace PerformanceCalculator.Profile
         {
             //initializing pp-holding array
             double[] pp = new double[100];
+            string[] beatmapInfo = new string[100];
+            string[] modInfo = new string[100];
             
             //get data for all 100 top plays
             var getPlayData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user_best?k="+command.Key+"&u="+command.ProfileName+"&limit=100&type=username");
@@ -46,10 +48,8 @@ namespace PerformanceCalculator.Profile
             receiveStream.Close();
             readStream.Close();
 
-            for (var i = 0; i<100; i++)
+            for(int i=0; i<100; i++)
             {
-                //if (!File.Exists(command.Path))
-                    //File.Create(command.Path);
                 //for each beatmap, download it
                 using (var client = new WebClient()) {
                     try
@@ -129,21 +129,24 @@ namespace PerformanceCalculator.Profile
                 var categoryAttribs = new Dictionary<string, double>();
                 pp[i] = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
 
-                command.Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
+                beatmapInfo[i] = workingBeatmap.BeatmapInfo.ToString();
 
-                writeAttribute("Mods", finalMods.Length > 0
+                modInfo[i] = finalMods.Length > 0
                     ? finalMods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
-                    : "None");
+                    : "None";
             }
             //reorder the top 100 by public
             Array.Sort(pp);
             Array.Reverse(pp);
             double ppNet = 0;
-            for (int w=0; w<100; w++)
+            for(int w=0; w<100; w++)
             {
                 ppNet += Math.Pow(0.95,w)*pp[w];
+
+                writeAttribute((w+1) + ".Beatmap", beatmapInfo[w]);
+                writeAttribute("Mods", modInfo[w]);
                 writeAttribute("raw pp/weighted pp", pp[w].ToString() + " / " + (Math.Pow(0.95,w)*pp[w]).ToString());
-             }
+            }
             writeAttribute("Top 100 Listed Above. Net PP", ppNet.ToString());
         }
 
