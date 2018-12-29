@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -20,9 +21,9 @@ using Newtonsoft.Json;
 
 namespace PerformanceCalculator.Profile
 {
+
     public class ProfileProcessor : IProcessor
     {
-
         private readonly ProfileCommand command;
         public ProfileProcessor(ProfileCommand command)
         {
@@ -31,11 +32,9 @@ namespace PerformanceCalculator.Profile
 
         public void Execute()
         {
-            //initializing pp-holding array
-            double[] pp = new double[100];
-            string[] beatmapInfo = new string[100];
-            string[] modInfo = new string[100];
-            
+            //initializing information-holding sorted list
+            var sortedPP = new SortedDictionary<double,PPInfo>();
+
             //get data for all 100 top plays
             var getPlayData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user_best?k="+command.Key+"&u="+command.ProfileName+"&limit=100&type=username");
             HttpWebResponse response = (HttpWebResponse)getPlayData.GetResponse();
@@ -127,25 +126,27 @@ namespace PerformanceCalculator.Profile
                 workingBeatmap.Mods.Value = finalMods;
 
                 var categoryAttribs = new Dictionary<string, double>();
-                pp[i] = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
-
-                beatmapInfo[i] = workingBeatmap.BeatmapInfo.ToString();
-
-                modInfo[i] = finalMods.Length > 0
+                double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
+                var outputInfo = new PPInfo(){
+                    beatmapInfo = workingBeatmap.BeatmapInfo.ToString(),
+                    modInfo = finalMods.Length > 0
                     ? finalMods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
-                    : "None";
-            }
-            //reorder the top 100 by public
-            Array.Sort(pp);
-            Array.Reverse(pp);
-            double ppNet = 0;
-            for(int w=0; w<100; w++)
-            {
-                ppNet += Math.Pow(0.95,w)*pp[w];
+                    : "None"
+                };
+                sortedPP.Add(pp, outputInfo);
 
-                writeAttribute((w+1) + ".Beatmap", beatmapInfo[w]);
-                writeAttribute("Mods", modInfo[w]);
-                writeAttribute("raw pp/weighted pp", pp[w].ToString() + " / " + (Math.Pow(0.95,w)*pp[w]).ToString());
+
+            }
+            double ppNet = 0;
+            int w = 0;
+            foreach(KeyValuePair<double,PPInfo> kvp in sortedPP.Reverse())
+            {
+                ppNet += Math.Pow(0.95,w)*(kvp.Key);
+
+                writeAttribute((w+1) + ".Beatmap", kvp.Value.beatmapInfo);
+                writeAttribute("Mods", kvp.Value.modInfo);
+                writeAttribute("raw pp/weighted pp", kvp.Key.ToString() + " / " + (Math.Pow(0.95,w)*kvp.Key).ToString());
+                w++;
             }
             writeAttribute("Top 100 Listed Above. Net PP", ppNet.ToString());
         }
@@ -168,5 +169,10 @@ namespace PerformanceCalculator.Profile
             Flashlight     = 1024,
             SpunOut        = 4096,
         }
+    }
+    public class PPInfo
+    {
+        public string beatmapInfo {get; set;}
+        public string modInfo {get; set;}
     }
 }
