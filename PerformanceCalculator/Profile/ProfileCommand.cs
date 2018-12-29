@@ -22,7 +22,7 @@ namespace PerformanceCalculator.Profile
 
         [UsedImplicitly]
         [Required]
-        [Argument(2, Name = "path", Description = "Required. Path to a txt file that will be created. Must end with .txt")]
+        [Argument(2, Name = "path", Description = "Required. Path to a txt file that is currently made. Must end with .txt")]
         public string Path { get; }
 
         protected override IProcessor CreateProcessor() => new ProfileProcessor(this);
