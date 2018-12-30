@@ -42,7 +42,7 @@ namespace PerformanceCalculator.Simulate.Taiko
                            (int) Math.Round((command.PercentCombo ?? 100)/100 * beatmapMaxCombo);
             var statistics = generateHitResults(beatmap, command.Misses ?? 0);
 
-            var scoreInfo = new ScoreInfo()
+            var scoreInfo = new ScoreInfo
             {
                 Accuracy = accuracy,
                 MaxCombo = maxCombo,
@@ -91,12 +91,12 @@ namespace PerformanceCalculator.Simulate.Taiko
 
         private Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, int amountMiss)
         {
-            var totalHitObjects = beatmap.HitObjects.Count();
+            var totalHitObjects = beatmap.HitObjects.Count;
 
             // Does not need to match acc currently since only total and miss count matters
             var amountGreat = totalHitObjects - amountMiss;
 
-            return new Dictionary<HitResult, int>()
+            return new Dictionary<HitResult, int>
             {
                 {HitResult.Great, amountGreat},
                 {HitResult.Good, 0},

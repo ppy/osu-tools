@@ -42,7 +42,7 @@ namespace PerformanceCalculator.Simulate.Osu
                            (int) Math.Round((command.PercentCombo ?? 100)/100 * beatmapMaxCombo);
             var statistics = generateHitResults(accuracy, beatmap, command.Misses ?? 0);
 
-            var scoreInfo = new ScoreInfo()
+            var scoreInfo = new ScoreInfo
             {
                 Accuracy = accuracy,
                 MaxCombo = maxCombo,
@@ -89,7 +89,7 @@ namespace PerformanceCalculator.Simulate.Osu
 
         private Dictionary<HitResult, int> generateHitResults(double accuracy, IBeatmap beatmap, int amountMiss)
         {
-            var totalHitObjects = beatmap.HitObjects.Count();
+            var totalHitObjects = beatmap.HitObjects.Count;
 
             // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
             var targetTotal = (int) Math.Round(accuracy*totalHitObjects*6);
@@ -105,7 +105,7 @@ namespace PerformanceCalculator.Simulate.Osu
             // Mehs are left over. Could be negative if impossible value of amountMiss chosen
             var amountMeh = totalHitObjects - amountGreat - amountGood - amountMiss;
 
-            return new Dictionary<HitResult, int>()
+            return new Dictionary<HitResult, int>
             {
                 {HitResult.Great, amountGreat},
                 {HitResult.Good, amountGood},

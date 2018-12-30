@@ -38,7 +38,7 @@ namespace PerformanceCalculator.Simulate.Mania
             var score = command.Score;
             var statistics = generateHitResults(beatmap);
 
-            var scoreInfo = new ScoreInfo()
+            var scoreInfo = new ScoreInfo
             {
                 TotalScore = score,
                 Statistics = statistics,
@@ -82,10 +82,10 @@ namespace PerformanceCalculator.Simulate.Mania
 
         private Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap)
         {
-            var totalHits = beatmap.HitObjects.Count();
+            var totalHits = beatmap.HitObjects.Count;
 
             // Only total number of hits is considered currently, so specifics don't matter
-            return new Dictionary<HitResult, int>()
+            return new Dictionary<HitResult, int>
             {
                 {HitResult.Perfect, totalHits},
                 {HitResult.Great, 0},
