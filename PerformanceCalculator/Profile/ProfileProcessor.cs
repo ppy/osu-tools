@@ -41,31 +41,6 @@ namespace PerformanceCalculator.Profile
             receiveStream.Close();
             readStream.Close();
 
-            //get user data (used for bonus pp calculation)
-            var getUserData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user?k="+command.Key+"&u="+command.ProfileName+"&type=username");
-            response = (HttpWebResponse)getUserData.GetResponse();
-            receiveStream = response.GetResponseStream();
-            readStream = new StreamReader(receiveStream);
-            json = readStream.ReadToEnd();
-            var userData = JsonConvert.DeserializeObject<dynamic>(json);
-            response.Close();
-            receiveStream.Close();
-            readStream.Close();
-
-            double bonusPP = 0;
-            //inactive players have 0pp to take them out of the leaderboard
-            if(userData[0].pp_raw == 0)
-                Console.Write("The player has 0 pp or is inactive, so bonus pp cannot be calculated");
-            //calculate bonus pp as difference of user pp and sum of other pps
-            else
-            {
-                double oldPP = 0;
-                for(int j=0; j<100; j++) {
-                    oldPP += (double)playData[j].pp * Math.Pow(0.95,j);
-                }
-                bonusPP = userData[0].pp_raw - oldPP;
-            }
-
             for(int i=0; i<100; i++)
             {
                 //for each beatmap, download it
@@ -146,6 +121,7 @@ namespace PerformanceCalculator.Profile
                 double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
                 var outputInfo = new PPInfo
                 {
+                    OldPP = (double)playData[i].pp,
                     BeatmapInfo = workingBeatmap.BeatmapInfo.ToString(),
                     ModInfo = finalMods.Length > 0
                     ? finalMods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
@@ -153,20 +129,47 @@ namespace PerformanceCalculator.Profile
                 };
                 sortedPP.Add(pp, outputInfo);
             }
+
+            double oldPPNet = 0;
             double ppNet = 0;
             int w = 0;
             foreach(KeyValuePair<double,PPInfo> kvp in sortedPP.Reverse())
             {
                 ppNet += Math.Pow(0.95,w)*kvp.Key;
+                oldPPNet += Math.Pow(0.95,w)*kvp.Value.OldPP;
 
                 writeAttribute(w+1 + ".Beatmap", kvp.Value.BeatmapInfo);
                 writeAttribute("Mods", kvp.Value.ModInfo);
-                writeAttribute("raw pp/weighted pp", kvp.Key.ToString(CultureInfo.InvariantCulture) + " / " + (Math.Pow(0.95,w)*kvp.Key).ToString(CultureInfo.InvariantCulture));
+                writeAttribute("old/new pp", kvp.Value.OldPP.ToString(CultureInfo.InvariantCulture) + " / " + kvp.Key.ToString(CultureInfo.InvariantCulture));
                 w++;
             }
-            //add on bonus pp
-            ppNet += bonusPP;
-            writeAttribute("Top 100 Listed Above. Net PP", ppNet.ToString(CultureInfo.InvariantCulture));
+
+            if(command.Bonus == 1)
+            {
+                //get user data (used for bonus pp calculation)
+                var getUserData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user?k="+command.Key+"&u="+command.ProfileName+"&type=username");
+                response = (HttpWebResponse)getUserData.GetResponse();
+                receiveStream = response.GetResponseStream();
+                readStream = new StreamReader(receiveStream);
+                json = readStream.ReadToEnd();
+                var userData = JsonConvert.DeserializeObject<dynamic>(json);
+                response.Close();
+                receiveStream.Close();
+                readStream.Close();
+
+                double bonusPP = 0;
+                //inactive players have 0pp to take them out of the leaderboard
+                if(userData[0].pp_raw == 0)
+                    Console.Write("The player has 0 pp or is inactive, so bonus pp cannot be calculated");
+                //calculate bonus pp as difference of user pp and sum of other pps
+                else
+                {
+                    bonusPP = userData[0].pp_raw - oldPPNet;
+                }
+                //add on bonus pp
+                ppNet += bonusPP;
+            }
+            writeAttribute("Top 100 Listed Above. Old/New Net PP", ppNet.ToString(CultureInfo.InvariantCulture) + " / " + oldPPNet.ToString(CultureInfo.InvariantCulture));
         }
 
         private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
