@@ -169,7 +169,7 @@ namespace PerformanceCalculator.Profile
                 //add on bonus pp
                 ppNet += bonusPP;
             }
-            writeAttribute("Top 100 Listed Above. Old/New Net PP", ppNet.ToString(CultureInfo.InvariantCulture) + " / " + oldPPNet.ToString(CultureInfo.InvariantCulture));
+            writeAttribute("Top 100 Listed Above. Old/New Net PP", oldPPNet.ToString(CultureInfo.InvariantCulture) + " / " + ppNet.ToString(CultureInfo.InvariantCulture));
         }
 
         private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
