@@ -21,9 +21,13 @@ namespace PerformanceCalculator.Profile
         public string Key { get; }
 
         [UsedImplicitly]
-        [Required]
+        [Required,FileExists]
         [Argument(2, Name = "path", Description = "Required. Path to a txt file that is currently made. Must end with .txt")]
         public string Path { get; }
+
+        [UsedImplicitly]
+        [Option(Template = "-b|--bonus <number>", Description = "Whether or not Bonus PP should be included. 1 is included, 0 is not included. Default is 0.")]
+        public int? Bonus { get; }
 
         protected override IProcessor CreateProcessor() => new ProfileProcessor(this);
     }
