@@ -36,10 +36,10 @@ namespace PerformanceCalculator.Simulate.Osu
 
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
-            var accuracy = command.Accuracy/100 ?? 1.0;
+            var accuracy = command.Accuracy / 100 ?? 1.0;
             var beatmapMaxCombo = beatmap.HitObjects.Count + beatmap.HitObjects.OfType<Slider>().Sum(s => s.NestedHitObjects.Count - 1);
             var maxCombo = command.Combo ??
-                           (int) Math.Round((command.PercentCombo ?? 100)/100 * beatmapMaxCombo);
+                           (int)Math.Round((command.PercentCombo ?? 100) / 100 * beatmapMaxCombo);
             var statistics = generateHitResults(accuracy, beatmap, command.Misses ?? 0);
 
             var scoreInfo = new ScoreInfo
@@ -55,8 +55,8 @@ namespace PerformanceCalculator.Simulate.Osu
 
             command.Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
 
-            writeAttribute("Accuracy", (accuracy*100).ToString(CultureInfo.InvariantCulture) + "%");
-            writeAttribute("Combo", FormattableString.Invariant($"{maxCombo} ({Math.Round(100.0 * maxCombo/beatmapMaxCombo, 2)}%)"));
+            writeAttribute("Accuracy", (accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%");
+            writeAttribute("Combo", FormattableString.Invariant($"{maxCombo} ({Math.Round(100.0 * maxCombo / beatmapMaxCombo, 2)}%)"));
             writeAttribute("Misses", statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture));
 
             writeAttribute("Mods", mods.Length > 0
@@ -92,7 +92,7 @@ namespace PerformanceCalculator.Simulate.Osu
             var totalHitObjects = beatmap.HitObjects.Count;
 
             // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
-            var targetTotal = (int) Math.Round(accuracy*totalHitObjects*6);
+            var targetTotal = (int)Math.Round(accuracy * totalHitObjects * 6);
 
             // Start by assuming every non miss is a meh
             // This is how much increase is needed by greats and goods
@@ -107,10 +107,10 @@ namespace PerformanceCalculator.Simulate.Osu
 
             return new Dictionary<HitResult, int>
             {
-                {HitResult.Great, amountGreat},
-                {HitResult.Good, amountGood},
-                {HitResult.Meh, amountMeh},
-                {HitResult.Miss, amountMiss}
+                { HitResult.Great, amountGreat },
+                { HitResult.Good, amountGood },
+                { HitResult.Meh, amountMeh },
+                { HitResult.Miss, amountMiss }
             };
         }
 

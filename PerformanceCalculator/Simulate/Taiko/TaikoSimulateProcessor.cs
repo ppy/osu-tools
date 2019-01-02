@@ -36,10 +36,10 @@ namespace PerformanceCalculator.Simulate.Taiko
 
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
-            var accuracy = command.Accuracy/100 ?? 1.0;
+            var accuracy = command.Accuracy / 100 ?? 1.0;
             var beatmapMaxCombo = beatmap.HitObjects.OfType<Hit>().Count();
             var maxCombo = command.Combo ??
-                           (int) Math.Round((command.PercentCombo ?? 100)/100 * beatmapMaxCombo);
+                           (int)Math.Round((command.PercentCombo ?? 100) / 100 * beatmapMaxCombo);
             var statistics = generateHitResults(beatmap, command.Misses ?? 0);
 
             var scoreInfo = new ScoreInfo
@@ -57,8 +57,8 @@ namespace PerformanceCalculator.Simulate.Taiko
 
             command.Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
 
-            writeAttribute("Accuracy", (accuracy*100).ToString(CultureInfo.InvariantCulture) + "%");
-            writeAttribute("Combo", FormattableString.Invariant($"{maxCombo}/{beatmapMaxCombo} ({Math.Round(100.0 * maxCombo/beatmapMaxCombo, 2)}%)"));
+            writeAttribute("Accuracy", (accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%");
+            writeAttribute("Combo", FormattableString.Invariant($"{maxCombo}/{beatmapMaxCombo} ({Math.Round(100.0 * maxCombo / beatmapMaxCombo, 2)}%)"));
             writeAttribute("Misses", statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture));
 
             writeAttribute("Mods", mods.Length > 0
@@ -98,10 +98,10 @@ namespace PerformanceCalculator.Simulate.Taiko
 
             return new Dictionary<HitResult, int>
             {
-                {HitResult.Great, amountGreat},
-                {HitResult.Good, 0},
-                {HitResult.Meh, 0},
-                {HitResult.Miss, amountMiss}
+                { HitResult.Great, amountGreat },
+                { HitResult.Good, 0 },
+                { HitResult.Meh, 0 },
+                { HitResult.Miss, amountMiss }
             };
         }
 

@@ -87,12 +87,12 @@ namespace PerformanceCalculator.Simulate.Mania
             // Only total number of hits is considered currently, so specifics don't matter
             return new Dictionary<HitResult, int>
             {
-                {HitResult.Perfect, totalHits},
-                {HitResult.Great, 0},
-                {HitResult.Ok, 0},
-                {HitResult.Good, 0},
-                {HitResult.Meh, 0},
-                {HitResult.Miss, 0}
+                { HitResult.Perfect, totalHits },
+                { HitResult.Great, 0 },
+                { HitResult.Ok, 0 },
+                { HitResult.Good, 0 },
+                { HitResult.Meh, 0 },
+                { HitResult.Miss, 0 }
             };
         }
 
