@@ -46,7 +46,7 @@ namespace PerformanceCalculator.Profile
             //create the file if it doesnt exist
             if(!File.Exists(path))
             {
-                using(File.Create(path)) {};
+                using(File.Create(path)) ;
             }
 
             for(int i=0; i<100; i++)
@@ -73,7 +73,7 @@ namespace PerformanceCalculator.Profile
                 double count100 = playData[i].count100;
                 double count300 = playData[i].count300;
 
-                double accuracy = count50 + (2 * count100) + (6 * count300) / 6 / (countmiss + count50 + count100 + count300);
+                double accuracy = (count50 + 2 * count100 + 6 * count300) / (6 * (countmiss + count50 + count100 + count300));
                 var maxCombo = (int)playData[i].maxcombo;
 
                 var statistics = new Dictionary<HitResult, object>
