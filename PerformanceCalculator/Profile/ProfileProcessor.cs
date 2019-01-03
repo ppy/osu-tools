@@ -46,7 +46,7 @@ namespace PerformanceCalculator.Profile
             //create the file if it doesnt exist
             if(!File.Exists(path))
             {
-                using(File.Create(path)) ;
+                File.Create(path).Dispose();
             }
 
             for(int i=0; i<100; i++)
