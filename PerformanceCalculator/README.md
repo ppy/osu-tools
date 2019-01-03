@@ -82,3 +82,36 @@ Speed          : 44.7315288123673
 Accuracy       : 61.9354071284508
 pp             : 235.580094436267
 ```
+
+### Profile
+```
+> dotnet PerformanceCalculator.dll profile --help
+
+Computes the total performance (pp) of a profile.
+
+Usage: dotnet PerformanceCalculator.dll profile [arguments] [options]
+
+Arguments:
+  profile name         Required. Username of the osu account to be checked (not user id)
+  api key              Required. API Key, which you can get from here: https://osu.ppy.sh/p/api
+  path                 Required. Path to an open directory. Will create a txt file in that directory called ProfileCalculator.txt that will take up a few KB.
+
+Options:
+  -?|-h|--help         Show help information
+  -b|--bonus <number>  Optional. Whether or not Bonus PP should be included. 1 is included, 0 is not included. Default is 0.
+```
+
+Computes the performance of a user profile's performance. Takes 100 top plays of a user on Bancho and recalculates and reorders them in order of the performance calculator's calculated performance.
+```
+1.Beatmap      : ARCIEN - Future Son (Mishima Yurara) [N A S Y A'S OK DAD]
+Mods           : HD, DT
+old/new pp     : 338.971 / 353.035079202098
+2.Beatmap      : 07th Expansion - rog-unlimitation (AngelHoney) [AngelHoney]
+Mods           : None
+old/new pp     : 221.547 / 252.188414571819
+...
+100.Beatmap    : Feint - Vagrant (feat. Veela) (Aia) [Still Alive]
+Mods           : None
+old/new pp     : 144.025 / 145.889050437811
+Top 100 Listed Above. Old/New Net PP: 3879.37586477693 / 4234.28970113726
+```
