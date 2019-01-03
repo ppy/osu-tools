@@ -34,11 +34,11 @@ namespace PerformanceCalculator.Simulate
 
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
-            var accuracy = command.Accuracy / 100;
             var beatmapMaxCombo = GetMaxCombo(beatmap);
             var maxCombo = command.Combo ?? (int)Math.Round(command.PercentCombo / 100 * beatmapMaxCombo);
-            var statistics = GenerateHitResults(accuracy, beatmap, command.Misses);
+            var statistics = GenerateHitResults(command.Accuracy / 100, beatmap, command.Misses, command.Mehs, command.Goods);
             var score = command.Score;
+            var accuracy = GetAccuracy(statistics);
 
             var scoreInfo = new ScoreInfo
             {
@@ -88,7 +88,9 @@ namespace PerformanceCalculator.Simulate
 
         protected abstract int GetMaxCombo(IBeatmap beatmap);
 
-        protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int amountMiss);
+        protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
+
+        protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 
         protected void WriteAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
     }

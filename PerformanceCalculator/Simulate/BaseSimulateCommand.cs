@@ -29,5 +29,11 @@ namespace PerformanceCalculator.Simulate
 
         [UsedImplicitly]
         public virtual int Misses { get; }
+
+        [UsedImplicitly]
+        public virtual int? Mehs { get; }
+
+        [UsedImplicitly]
+        public virtual int? Goods { get; }
     }
 }

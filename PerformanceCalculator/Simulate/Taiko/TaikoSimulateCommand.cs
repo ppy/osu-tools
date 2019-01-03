@@ -18,7 +18,8 @@ namespace PerformanceCalculator.Simulate.Taiko
         public override string Beatmap { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100.")]
+        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100."
+                                                                     + " Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
         public override double Accuracy { get; } = 100;
 
         [UsedImplicitly]
@@ -36,8 +37,12 @@ namespace PerformanceCalculator.Simulate.Taiko
         public override string[] Mods { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-M|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
+        [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
         public override int Misses { get; }
+
+        [UsedImplicitly]
+        [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
+        public override int? Goods { get; }
 
         public override Ruleset Ruleset => new TaikoRuleset();
 

@@ -13,7 +13,7 @@ namespace PerformanceCalculator.Simulate.Mania
     {
         protected override int GetMaxCombo(IBeatmap beatmap) => 0;
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int amountMiss)
+        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
             var totalHits = beatmap.HitObjects.Count;
 
