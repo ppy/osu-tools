@@ -29,6 +29,8 @@ namespace PerformanceCalculator.Profile
         {
             //initializing information-holding sorted list
             var sortedPP = new SortedDictionary<double,PPInfo>();
+            //initialize path to download beatmap files
+            string path = command.Path + @"\ProfileCalculator.txt";
 
             //get data for all 100 top plays
             var getPlayData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user_best?k="+command.Key+"&u="+command.ProfileName+"&limit=100&type=username");
@@ -41,21 +43,27 @@ namespace PerformanceCalculator.Profile
             receiveStream.Close();
             readStream.Close();
 
+            //create the file if it doesnt exist
+            if(!File.Exists(path))
+            {
+                using(File.Create(path)) {};
+            }
+
             for(int i=0; i<100; i++)
             {
                 //for each beatmap, download it
                 using (var client = new WebClient()) {
                     try
                     {
-                        client.DownloadFile("https://osu.ppy.sh/osu/" + playData[i].beatmap_id, command.Path);
+                        client.DownloadFile("https://osu.ppy.sh/osu/" + playData[i].beatmap_id, path);
                     }
                     catch
                     {
-                        Console.Write("Error in Downloading Beatmaps");
+                        Console.WriteLine("Error in Downloading Beatmaps");
                     }
                 }
 
-                var workingBeatmap = new ProcessorWorkingBeatmap(command.Path);
+                var workingBeatmap = new ProcessorWorkingBeatmap(path);
 
                 //Stats Calculation
                 var ruleset = new OsuRuleset();
@@ -65,7 +73,7 @@ namespace PerformanceCalculator.Profile
                 double count100 = playData[i].count100;
                 double count300 = playData[i].count300;
 
-                double accuracy = (count50 + (2 * count100) + (6 * count300)) / (6 * (countmiss + count50 + count100 + count300));
+                double accuracy = count50 + (2 * count100) + (6 * count300) / 6 / (countmiss + count50 + count100 + count300);
                 var maxCombo = (int)playData[i].maxcombo;
 
                 var statistics = new Dictionary<HitResult, object>
