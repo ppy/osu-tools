@@ -60,20 +60,20 @@ namespace PerformanceCalculator.Profile
                 //Stats Calculation
                 var ruleset = new OsuRuleset();
 
-                int countmiss = (int)playData[i].countmiss;
-                int count50 = (int)playData[i].count50;
-                int count100 = (int)playData[i].count100;
-                int count300 = (int)playData[i].count300;
+                double countmiss = playData[i].countmiss;
+                double count50 = playData[i].count50;
+                double count100 = playData[i].count100;
+                double count300 = playData[i].count300;
 
-                double accuracy = (double)(count50 + (2 * count100) + (6 * count300)) / (double)(6 * (countmiss + count50 + count100 + count300));
+                double accuracy = (count50 + (2 * count100) + (6 * count300)) / (6 * (countmiss + count50 + count100 + count300));
                 var maxCombo = (int)playData[i].maxcombo;
 
                 var statistics = new Dictionary<HitResult, object>
                 {
-                    {HitResult.Great, count300},
-                    {HitResult.Good, count100},
-                    {HitResult.Meh, count50},
-                    {HitResult.Miss, countmiss}
+                    {HitResult.Great, (int)count300},
+                    {HitResult.Good, (int)count100},
+                    {HitResult.Meh, (int)count50},
+                    {HitResult.Miss, (int)countmiss}
                 };
 
                 //mods are in a bitwise binary sum, with each mod given by the enum Mods
@@ -160,11 +160,12 @@ namespace PerformanceCalculator.Profile
                 double bonusPP = 0;
                 //inactive players have 0pp to take them out of the leaderboard
                 if(userData[0].pp_raw == 0)
-                    Console.Write("The player has 0 pp or is inactive, so bonus pp cannot be calculated");
+                    command.Console.WriteLine("The player has 0 pp or is inactive, so bonus pp cannot be calculated");
                 //calculate bonus pp as difference of user pp and sum of other pps
                 else
                 {
                     bonusPP = userData[0].pp_raw - oldPPNet;
+                    oldPPNet = userData[0].pp_raw;
                 }
                 //add on bonus pp
                 ppNet += bonusPP;
