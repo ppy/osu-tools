@@ -4,25 +4,29 @@
 using System.ComponentModel.DataAnnotations;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mania;
 
 namespace PerformanceCalculator.Simulate.Mania
 {
     [Command(Name = "simulate mania", Description = "Computes the performance (pp) of a simulated osu!mania play.")]
-    public class ManiaSimulateCommand : ProcessorCommand
+    public class ManiaSimulateCommand : BaseSimulateCommand
     {
         [UsedImplicitly]
         [Required, FileExists]
         [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu).")]
-        public string Beatmap { get; }
+        public override string Beatmap { get; }
 
         [UsedImplicitly]
         [Option(Template = "-s|--score <score>", Description = "Score. An integer 0-1000000.")]
-        public int Score { get; }
+        public override int Score { get; } = 1000000;
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
                                                                                             + " Values: hr, dt, fl, 4k, 5k, etc...")]
-        public string[] Mods { get; }
+        public override string[] Mods { get; }
+
+        public override Ruleset Ruleset => new ManiaRuleset();
 
         protected override IProcessor CreateProcessor() => new ManiaSimulateProcessor(this);
     }

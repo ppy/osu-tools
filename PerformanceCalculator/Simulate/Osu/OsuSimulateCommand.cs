@@ -4,38 +4,42 @@
 using System.ComponentModel.DataAnnotations;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Osu;
 
 namespace PerformanceCalculator.Simulate.Osu
 {
     [Command(Name = "simulate osu", Description = "Computes the performance (pp) of a simulated osu! play.")]
-    public class OsuSimulateCommand : ProcessorCommand
+    public class OsuSimulateCommand : BaseSimulateCommand
     {
         [UsedImplicitly]
         [Required, FileExists]
         [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu).")]
-        public string Beatmap { get; }
+        public override string Beatmap { get; }
 
         [UsedImplicitly]
         [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well.")]
-        public double? Accuracy { get; }
+        public override double Accuracy { get; } = 100;
 
         [UsedImplicitly]
         [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
-        public int? Combo { get; }
+        public override int? Combo { get; }
 
         [UsedImplicitly]
         [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option."
                                                                        + " Enter as decimal 0-100.")]
-        public double? PercentCombo { get; }
+        public override double PercentCombo { get; } = 100;
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
                                                                                             + " Values: hr, dt, hd, fl, ez, etc...")]
-        public string[] Mods { get; }
+        public override string[] Mods { get; }
 
         [UsedImplicitly]
         [Option(Template = "-M|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
-        public int? Misses { get; }
+        public override int Misses { get; }
+
+        public override Ruleset Ruleset => new OsuRuleset();
 
         protected override IProcessor CreateProcessor() => new OsuSimulateProcessor(this);
     }
