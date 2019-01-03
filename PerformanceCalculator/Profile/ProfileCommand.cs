@@ -7,7 +7,7 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator.Profile
 {
-    [Command(Name = "profile", Description = "Computes the total pp of a profile.")]
+    [Command(Name = "profile", Description = "Computes the total performance (pp) of a profile.")]
     public class ProfileCommand : ProcessorCommand
     {
         [UsedImplicitly]
