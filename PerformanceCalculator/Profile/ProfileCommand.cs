@@ -20,14 +20,8 @@ namespace PerformanceCalculator.Profile
         [Argument(1, Name = "api key", Description = "Required. API Key, which you can get from here: https://osu.ppy.sh/p/api")]
         public string Key { get; }
 
-        [UsedImplicitly]
-        [Required]
-        [Argument(2, Name = "path", Description = "Required. Path to an open directory. Will create a txt file in that directory called ProfileCalculator.txt that will take up a few KB.")]
-        public string Path { get; }
-
-        [UsedImplicitly]
-        [Option(Template = "-b|--bonus <number>", Description = "Optional. Whether or not Bonus PP should be included. 1 is included, 0 is not included. Default is 0.")]
-        public int? Bonus { get; }
+        [Option(Template = "-b|--bonus", Description = "Optional. Include the argument if (approxiamate) Bonus PP should be included.")]
+        public bool Bonus { get; }
 
         protected override IProcessor CreateProcessor() => new ProfileProcessor(this);
     }

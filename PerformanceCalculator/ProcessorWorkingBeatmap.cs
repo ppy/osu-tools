@@ -29,7 +29,11 @@ namespace PerformanceCalculator
         {
         }
 
-        private ProcessorWorkingBeatmap(Stream stream)
+        /// <summary>
+        /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a stream.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        public ProcessorWorkingBeatmap(Stream stream)
             : this(new StreamReader(stream))
         {
             stream.Dispose();
