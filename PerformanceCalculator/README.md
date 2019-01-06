@@ -94,11 +94,10 @@ Usage: dotnet PerformanceCalculator.dll profile [arguments] [options]
 Arguments:
   profile name         Required. Username of the osu account to be checked (not user id)
   api key              Required. API Key, which you can get from here: https://osu.ppy.sh/p/api
-  path                 Required. Path to an open directory. Will create a txt file in that directory called ProfileCalculator.txt that will take up a few KB.
 
 Options:
   -?|-h|--help         Show help information
-  -b|--bonus <number>  Optional. Whether or not Bonus PP should be included. 1 is included, 0 is not included. Default is 0.
+  -b|--bonus <number>  Optional. Include the argument if (approxiamate)Bonus PP should be included.
 ```
 
 Computes the performance of a user profile's performance. Takes 100 top plays of a user on Bancho and recalculates and reorders them in order of the performance calculator's calculated performance.
