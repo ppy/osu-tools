@@ -29,9 +29,11 @@ namespace PerformanceCalculator.Profile
         {
             //initializing information-holding sorted list
             var sortedPP = new SortedDictionary<double,PPInfo>();
+            //initialize path to download beatmap files
+            string path = command.Path + @"\ProfileCalculator.txt";
 
             //get data for all 100 top plays
-            var getPlayData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user_best?k=" + command.Key+ "&u=" + command.ProfileName+"&limit=100&type=username");
+            var getPlayData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user_best?k="+command.Key+"&u="+command.ProfileName+"&limit=100&type=username");
             HttpWebResponse response = (HttpWebResponse)getPlayData.GetResponse();
             var receiveStream = response.GetResponseStream();
             var readStream = new StreamReader(receiveStream);
@@ -41,15 +43,27 @@ namespace PerformanceCalculator.Profile
             receiveStream.Close();
             readStream.Close();
 
+            //create the file if it doesnt exist
+            if(!File.Exists(path))
+            {
+                File.Create(path).Dispose();
+            }
+
             for(int i=0; i<100; i++)
             {
                 //for each beatmap, download it
-                var getBeatmap = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/osu/" + playData[i].beatmap_id);
-                HttpWebResponse beatmapResponse = (HttpWebResponse)getBeatmap.GetResponse();
-                var beatmapStream = beatmapResponse.GetResponseStream();                      
-                var workingBeatmap = new ProcessorWorkingBeatmap(beatmapStream);
-                beatmapResponse.Close();
-                beatmapStream.Close();
+                using (var client = new WebClient()) {
+                    try
+                    {
+                        client.DownloadFile("https://osu.ppy.sh/osu/" + playData[i].beatmap_id, path);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Error in Downloading Beatmaps");
+                    }
+                }
+
+                var workingBeatmap = new ProcessorWorkingBeatmap(path);
 
                 //Stats Calculation
                 var ruleset = new OsuRuleset();
@@ -111,7 +125,8 @@ namespace PerformanceCalculator.Profile
 
                 workingBeatmap.Mods.Value = finalMods;
 
-                double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate();
+                var categoryAttribs = new Dictionary<string, double>();
+                double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
                 var outputInfo = new PPInfo
                 {
                     OldPP = (double)playData[i].pp,
@@ -137,7 +152,7 @@ namespace PerformanceCalculator.Profile
                 w++;
             }
 
-            if(command.Bonus == true)
+            if(command.Bonus == 1)
             {
                 //get user data (used for bonus pp calculation)
                 var getUserData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user?k="+command.Key+"&u="+command.ProfileName+"&type=username");
