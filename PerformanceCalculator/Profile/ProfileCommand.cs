@@ -20,6 +20,12 @@ namespace PerformanceCalculator.Profile
         [Argument(1, Name = "api key", Description = "Required. API Key, which you can get from here: https://osu.ppy.sh/p/api")]
         public string Key { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "Optional. The ruleset to compute the profile for; only osu and taiko are currently implemented. \n"
+                                                                     + "Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. It is 0 by default.")]
+        [AllowedValues("0", "1", "2", "3")]
+        public int? Ruleset { get; }
+
         [Option(Template = "-b|--bonus", Description = "Optional. Include the argument if (approxiamate) Bonus PP should be included.")]
         public bool Bonus { get; }
 

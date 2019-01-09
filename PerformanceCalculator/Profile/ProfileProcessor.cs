@@ -9,10 +9,14 @@ using System.Globalization;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps.Legacy;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
+using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using Newtonsoft.Json;
 
@@ -33,12 +37,14 @@ namespace PerformanceCalculator.Profile
             //initialize the information from the top 100 plays, held in a dynamic
             dynamic playData;
             //gets top 100 plays
-            var userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key+ "&u=" + command.ProfileName + "&limit=100&type=username";
+            var userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset +"&limit=100&type=username";
             //gets the .osu file for a beatmap
             var getBeatmapPath = "https://osu.ppy.sh/osu/";
 
+            var ruleset = getRuleset(command.Ruleset ?? 0);
+
             //get data for all 100 top plays
-            using(var readStream = apiReader(userBestPath)) 
+            using(var readStream = apiReader(userBestPath))
             {
                 var json = readStream.ReadToEnd();
                 playData = JsonConvert.DeserializeObject<dynamic>(json);
@@ -54,14 +60,22 @@ namespace PerformanceCalculator.Profile
                 }
 
                 //Stats Calculation
-                var ruleset = new OsuRuleset();
-
                 double countmiss = playData[i].countmiss;
                 double count50 = playData[i].count50;
                 double count100 = playData[i].count100;
                 double count300 = playData[i].count300;
+                double totalHits = countmiss + count50 + count100 + count300;
+                double accuracy = 0;
 
-                double accuracy = (count50 + 2 * count100 + 6 * count300) / (6 * (countmiss + count50 + count100 + count300));
+                if(command.Ruleset == 0 || command.Ruleset == null)
+                {
+                    accuracy = (count50 + 2 * count100 + 6 * count300) / (6 * totalHits);
+                }
+                else if (command.Ruleset == 1)
+                {
+                    accuracy = (0.5 * count100 + count300) / (totalHits);
+                }
+
                 var maxCombo = (int)playData[i].maxcombo;
 
                 var statistics = new Dictionary<HitResult, object>
@@ -115,9 +129,9 @@ namespace PerformanceCalculator.Profile
             if(command.Bonus == true)
             {
                 //get user data (used for bonus pp calculation)
-                var userPath = "https://osu.ppy.sh/api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&type=username";
+                var userPath = "https://osu.ppy.sh/api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&type=username";
                 dynamic userData;
-                using(var readStream = apiReader(userPath)) 
+                using(var readStream = apiReader(userPath))
                 {
                     var json = readStream.ReadToEnd();
                     userData = JsonConvert.DeserializeObject<dynamic>(json);
@@ -143,8 +157,25 @@ namespace PerformanceCalculator.Profile
 
         private StreamReader apiReader(string path)
         {
-            var readStream = new StreamReader(WebRequest.Create(path).GetResponse().GetResponseStream()); 
+            var readStream = new StreamReader(WebRequest.Create(path).GetResponse().GetResponseStream());
             return readStream;
+        }
+
+        private Ruleset getRuleset(int rulesetId)
+        {
+            switch (rulesetId)
+            {
+                default:
+                    throw new ArgumentException("Invalid ruleset id provided.");
+                case 0:
+                    return new OsuRuleset();
+                case 1:
+                    return new TaikoRuleset();
+                case 2:
+                    return new CatchRuleset();
+                case 3:
+                    return new ManiaRuleset();
+            }
         }
     }
 }

@@ -97,6 +97,8 @@ Arguments:
 
 Options:
   -?|-h|--help         Show help information
+  -r|--ruleset:<ruleset-id>  Optional. The ruleset to compute the profile for; only osu and taiko are currently implemented.
+                             Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania  
   -b|--bonus <number>  Optional. Include the argument if (approxiamate)Bonus PP should be included.
 ```
 
