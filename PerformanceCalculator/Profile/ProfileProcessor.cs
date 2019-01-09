@@ -37,8 +37,6 @@ namespace PerformanceCalculator.Profile
             dynamic playData;
             //gets top 100 plays
             string userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset +"&limit=100&type=username";
-            //gets the .osu file for a beatmap
-            const string getBeatmapPath = "https://osu.ppy.sh/osu/";
 
             var ruleset = getRuleset(command.Ruleset ?? 0);
 
@@ -53,7 +51,7 @@ namespace PerformanceCalculator.Profile
             {
                 ProcessorWorkingBeatmap workingBeatmap;
                 //for each beatmap, download it
-                using(var readStream = apiReader(getBeatmapPath + playData[i].beatmap_id))
+                using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
                 {
                     workingBeatmap = new ProcessorWorkingBeatmap(readStream);
                 }
