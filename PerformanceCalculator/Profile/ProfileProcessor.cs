@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
+using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Mods;
@@ -27,29 +28,30 @@ namespace PerformanceCalculator.Profile
 
         public void Execute()
         {
-            //initializing information-holding sorted list
+            //initializing pp-information-holding sorted list
             var sortedPP = new SortedDictionary<double,PPInfo>();
+            //initialize the information from the top 100 plays, held in a dynamic
+            dynamic playData;
+            //gets top 100 plays
+            var userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key+ "&u=" + command.ProfileName + "&limit=100&type=username";
+            //gets the .osu file for a beatmap
+            var getBeatmapPath = "https://osu.ppy.sh/osu/";
 
             //get data for all 100 top plays
-            var getPlayData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user_best?k=" + command.Key+ "&u=" + command.ProfileName+"&limit=100&type=username");
-            HttpWebResponse response = (HttpWebResponse)getPlayData.GetResponse();
-            var receiveStream = response.GetResponseStream();
-            var readStream = new StreamReader(receiveStream);
-            string json = readStream.ReadToEnd();
-            var playData = JsonConvert.DeserializeObject<dynamic>(json);
-            response.Close();
-            receiveStream.Close();
-            readStream.Close();
+            using(var readStream = apiReader(userBestPath)) 
+            {
+                var json = readStream.ReadToEnd();
+                playData = JsonConvert.DeserializeObject<dynamic>(json);
+            }
 
             for(int i=0; i<100; i++)
             {
+                ProcessorWorkingBeatmap workingBeatmap;
                 //for each beatmap, download it
-                var getBeatmap = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/osu/" + playData[i].beatmap_id);
-                HttpWebResponse beatmapResponse = (HttpWebResponse)getBeatmap.GetResponse();
-                var beatmapStream = beatmapResponse.GetResponseStream();                      
-                var workingBeatmap = new ProcessorWorkingBeatmap(beatmapStream);
-                beatmapResponse.Close();
-                beatmapStream.Close();
+                using(var readStream = apiReader(getBeatmapPath + playData[i].beatmap_id))
+                {
+                    workingBeatmap = new ProcessorWorkingBeatmap(readStream);
+                }
 
                 //Stats Calculation
                 var ruleset = new OsuRuleset();
@@ -70,34 +72,7 @@ namespace PerformanceCalculator.Profile
                     {HitResult.Miss, (int)countmiss}
                 };
 
-                //mods are in a bitwise binary sum, with each mod given by the enum Mods
-                List<Mod> mods = new List<Mod>();
-                int enabledMods = (int)playData[i].enabled_mods;
-
-                if(((int)Mods.Hidden & enabledMods) != 0)
-                    mods.Add(new OsuModHidden());
-
-                if(((int)Mods.Flashlight & enabledMods) != 0)
-                    mods.Add(new OsuModFlashlight());
-
-                //no need to include Nightcore because all nightcore maps also return DoubleTime by default
-                if(((int)Mods.DoubleTime & enabledMods) != 0)
-                    mods.Add(new OsuModDoubleTime());
-
-                if(((int)Mods.HalfTime & enabledMods) != 0)
-                    mods.Add(new OsuModHalfTime());
-
-                if(((int)Mods.HardRock & enabledMods) != 0)
-                    mods.Add(new OsuModHardRock());
-
-                if(((int)Mods.Easy & enabledMods) != 0)
-                    mods.Add(new OsuModEasy());
-
-                if(((int)Mods.NoFail & enabledMods) != 0)
-                    mods.Add(new OsuModNoFail());
-
-                if(((int)Mods.SpunOut & enabledMods) != 0)
-                    mods.Add(new OsuModSpunOut());
+                IEnumerable<Mod> mods = ruleset.ConvertLegacyMods((LegacyMods) playData[i].enabled_mods);
 
                 Mod[] finalMods = mods.ToArray();
 
@@ -140,15 +115,13 @@ namespace PerformanceCalculator.Profile
             if(command.Bonus == true)
             {
                 //get user data (used for bonus pp calculation)
-                var getUserData = (HttpWebRequest) WebRequest.Create("https://osu.ppy.sh/api/get_user?k="+command.Key+"&u="+command.ProfileName+"&type=username");
-                response = (HttpWebResponse)getUserData.GetResponse();
-                receiveStream = response.GetResponseStream();
-                readStream = new StreamReader(receiveStream);
-                json = readStream.ReadToEnd();
-                var userData = JsonConvert.DeserializeObject<dynamic>(json);
-                response.Close();
-                receiveStream.Close();
-                readStream.Close();
+                var userPath = "https://osu.ppy.sh/api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&type=username";
+                dynamic userData;
+                using(var readStream = apiReader(userPath)) 
+                {
+                    var json = readStream.ReadToEnd();
+                    userData = JsonConvert.DeserializeObject<dynamic>(json);
+                }
 
                 double bonusPP = 0;
                 //inactive players have 0pp to take them out of the leaderboard
@@ -167,22 +140,11 @@ namespace PerformanceCalculator.Profile
         }
 
         private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
-        //enum for mods
-        public enum Mods
+
+        private StreamReader apiReader(string path)
         {
-            None           = 0,
-            NoFail         = 1,
-            Easy           = 2,
-            TouchDevice    = 4,
-            Hidden         = 8,
-            HardRock       = 16,
-            SuddenDeath    = 32,
-            DoubleTime     = 64,
-            Relax          = 128,
-            HalfTime       = 256,
-            Nightcore      = 512, // Only set along with DoubleTime. i.e: NC only gives 576
-            Flashlight     = 1024,
-            SpunOut        = 4096,
+            var readStream = new StreamReader(WebRequest.Create(path).GetResponse().GetResponseStream()); 
+            return readStream;
         }
     }
 }

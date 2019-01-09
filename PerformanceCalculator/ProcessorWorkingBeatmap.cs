@@ -39,7 +39,11 @@ namespace PerformanceCalculator
             stream.Dispose();
         }
 
-        private ProcessorWorkingBeatmap(StreamReader streamReader)
+        /// <summary>
+        /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a stream reader.
+        /// </summary>
+        /// <param name="streamReader">The stream reader.</param>
+        public ProcessorWorkingBeatmap(StreamReader streamReader)
             : this(Decoder.GetDecoder<Beatmap>(streamReader).Decode(streamReader))
         {
         }
