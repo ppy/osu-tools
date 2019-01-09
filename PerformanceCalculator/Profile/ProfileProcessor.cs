@@ -14,7 +14,6 @@ using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
@@ -37,9 +36,9 @@ namespace PerformanceCalculator.Profile
             //initialize the information from the top 100 plays, held in a dynamic
             dynamic playData;
             //gets top 100 plays
-            var userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset +"&limit=100&type=username";
+            string userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset +"&limit=100&type=username";
             //gets the .osu file for a beatmap
-            var getBeatmapPath = "https://osu.ppy.sh/osu/";
+            const string getBeatmapPath = "https://osu.ppy.sh/osu/";
 
             var ruleset = getRuleset(command.Ruleset ?? 0);
 
@@ -73,7 +72,7 @@ namespace PerformanceCalculator.Profile
                 }
                 else if (command.Ruleset == 1)
                 {
-                    accuracy = (0.5 * count100 + count300) / (totalHits);
+                    accuracy = (0.5 * count100 + count300) / totalHits;
                 }
 
                 var maxCombo = (int)playData[i].maxcombo;
@@ -126,7 +125,7 @@ namespace PerformanceCalculator.Profile
                 w++;
             }
 
-            if(command.Bonus == true)
+            if(command.Bonus)
             {
                 //get user data (used for bonus pp calculation)
                 var userPath = "https://osu.ppy.sh/api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&type=username";

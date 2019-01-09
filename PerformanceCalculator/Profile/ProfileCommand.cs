@@ -26,6 +26,7 @@ namespace PerformanceCalculator.Profile
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
 
+        [UsedImplicitly]
         [Option(Template = "-b|--bonus", Description = "Optional. Include the argument if (approxiamate) Bonus PP should be included.")]
         public bool Bonus { get; }
 
