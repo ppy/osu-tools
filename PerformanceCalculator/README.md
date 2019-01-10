@@ -98,7 +98,8 @@ Arguments:
 Options:
   -?|-h|--help         Show help information
   -r|--ruleset:<ruleset-id>  Optional. The ruleset to compute the profile for; only osu and taiko are currently implemented.
-                             Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania  
+                             Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania 
+  -c|--cache:<caching-path>  Optional. Caches files in the specified directory. Also use if you are trying to use previously cached files in that directory. Useful for running the same profile multiple times.
   -b|--bonus <number>  Optional. Include the argument if (approxiamate)Bonus PP should be included.
 ```
 

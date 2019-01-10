@@ -55,10 +55,10 @@ namespace PerformanceCalculator.Profile
                     if(command.CachePath != null)
                     {
                         string cachePath = command.CachePath + @"\" + playData[i].beatmap_id + ".txt";
-                        
+
                         if(!File.Exists(cachePath))
                         {
-                            File.Create(cachePath).Dispose();    
+                            File.Create(cachePath).Dispose();
 
                             using(var writeStream = new StreamWriter(cachePath, true))
                             {
