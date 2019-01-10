@@ -27,6 +27,10 @@ namespace PerformanceCalculator.Profile
         public int? Ruleset { get; }
 
         [UsedImplicitly]
+        [Option(Template = "-c|--cache:<caching-path>", Description = "Optional. Caches files in the specified directory. Also use if you are trying to use previously cached files in that directory. Useful for running the same profile multiple times.")]
+        public string CachePath { get; }
+
+        [UsedImplicitly]
         [Option(Template = "-b|--bonus", Description = "Optional. Include the argument if (approxiamate) Bonus PP should be included.")]
         public bool Bonus { get; }
 

@@ -51,10 +51,34 @@ namespace PerformanceCalculator.Profile
             {
                 ProcessorWorkingBeatmap workingBeatmap;
                 //for each beatmap, download it
-                using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
-                {
-                    workingBeatmap = new ProcessorWorkingBeatmap(readStream);
-                }
+                    //cache the file
+                    if(command.CachePath != null)
+                    {
+                        string cachePath = command.CachePath + @"\" + playData[i].beatmap_id + ".txt";
+                        
+                        if(!File.Exists(cachePath))
+                        {
+                            File.Create(cachePath).Dispose();    
+
+                            using(var writeStream = new StreamWriter(cachePath, true))
+                            {
+                                using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
+                                {
+                                    var text = readStream.ReadToEnd();
+                                    writeStream.Write(text);
+                                }
+                            }
+                        }
+
+                        workingBeatmap = new ProcessorWorkingBeatmap(cachePath);
+                    }
+                    else
+                    {
+                        using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
+                        {
+                            workingBeatmap = new ProcessorWorkingBeatmap(readStream);
+                        }
+                    }
 
                 //Stats Calculation
                 double countmiss = playData[i].countmiss;
