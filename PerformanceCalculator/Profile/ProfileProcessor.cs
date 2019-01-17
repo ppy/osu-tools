@@ -90,11 +90,11 @@ namespace PerformanceCalculator.Profile
 
                 if(command.Ruleset == 0 || command.Ruleset == null)
                 {
-                    accuracy = (count50 + 2 * count100 + 6 * count300) / (6 * totalHits);
+                    accuracy = (count50 + (2 * count100) + (6 * count300)) / (6 * totalHits);
                 }
                 else if (command.Ruleset == 1)
                 {
-                    accuracy = (0.5 * count100 + count300) / totalHits;
+                    accuracy = ((0.5 * count100) + count300) / totalHits;
                 }
 
                 var maxCombo = (int)playData[i].maxcombo;
