@@ -27,6 +27,7 @@ Options:
 Commands:
   difficulty    Computes the difficulty of a beatmap.
   performance   Computes the performance (pp) of replays on a beatmap.
+  simulate      Computes the performance (pp) of a simulated play.
 
 Run 'dotnet PerformanceCalculator.dll [command] --help' for more information about a command.
 ```
@@ -116,4 +117,86 @@ old/new pp     : 221.547 / 252.188414571819
 Mods           : None
 old/new pp     : 144.025 / 145.889050437811
 Top 100 Listed Above. Old/New Net PP: 3879.37586477693 / 4234.28970113726
+```
+=======
+### Simulate
+```
+> dotnet PerformanceCalculator.dll simulate
+
+Computes the performance (pp) of a simulated play.
+
+Usage: dotnet PerformanceCalculator.dll simulate [options] [command]
+
+Options:
+  -?|-h|--help  Show help information
+
+Commands:
+  mania         Computes the performance (pp) of a simulated mania play.
+  osu           Computes the performance (pp) of a simulated osu play.
+  taiko         Computes the performance (pp) of a simulated taiko play.
+
+Run 'simulate [command] --help' for more information about a command.
+
+```
+Computes the performance of a simulated play on a beatmap. The provided output includes raw performance attributes and pp value.
+
+
+#### osu!
+```
+> dotnet PerformanceCalculator.dll simulate osu --help
+
+Computes the performance (pp) of a simulated osu! play.
+
+Usage: dotnet PerformanceCalculator.dll simulate osu [arguments] [options]
+
+Arguments:
+  beatmap                     Required. The beatmap file (.osu).
+
+Options:
+  -?|-h|--help                Show help information
+  -a|--accuracy <accuracy>    Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
+  -c|--combo <combo>          Maximum combo during play. Defaults to beatmap maximum.
+  -C|--percent-combo <combo>  Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
+  -m|--mod <mod>              One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
+  -X|--misses <misses>        Number of misses. Defaults to 0.
+  -M|--mehs <mehs>            Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.
+  -G|--goods <goods>          Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+```
+
+#### osu!taiko
+```
+> dotnet PerformanceCalculator.dll simulate taiko --help
+
+Computes the performance (pp) of a simulated osu!taiko play.
+
+Usage: dotnet PerformanceCalculator.dll simulate taiko [arguments] [options]
+
+Arguments:
+  beatmap                     Required. The beatmap file (.osu).
+
+Options:
+  -?|-h|--help                Show help information
+  -a|--accuracy <accuracy>    Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
+  -c|--combo <combo>          Maximum combo during play. Defaults to beatmap maximum.
+  -C|--percent-combo <combo>  Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
+  -m|--mod <mod>              One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
+  -X|--misses <misses>        Number of misses. Defaults to 0.
+  -G|--goods <goods>          Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+```
+
+#### osu!mania
+```
+> dotnet PerformanceCalculator.dll simulate mania --help
+
+Computes the performance (pp) of a simulated osu!mania play.
+
+Usage: dotnet PerformanceCalculator.dll simulate mania [arguments] [options]
+
+Arguments:
+  beatmap             Required. The beatmap file (.osu).
+
+Options:
+  -?|-h|--help        Show help information
+  -s|--score <score>  Score. An integer 0-1000000.
+  -m|--mod <mod>      One for each mod. The mods to compute the performance with. Values: hr, dt, fl, 4k, 5k, etc...
 ```
