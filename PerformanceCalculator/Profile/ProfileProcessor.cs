@@ -99,7 +99,7 @@ namespace PerformanceCalculator.Profile
 
                 var maxCombo = (int)playData[i].maxcombo;
 
-                var statistics = new Dictionary<HitResult, object>
+                var statistics = new Dictionary<HitResult, int>
                 {
                     {HitResult.Great, (int)count300},
                     {HitResult.Good, (int)count100},
