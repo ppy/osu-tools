@@ -36,7 +36,7 @@ namespace PerformanceCalculator.Profile
             //initialize the information from the top 100 plays, held in a dynamic
             dynamic playData;
             //gets top 100 plays
-            string userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset +"&limit=100&type=username";
+            string userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&limit=100&type=username";
 
             var ruleset = getRuleset(command.Ruleset ?? 0);
 
@@ -50,35 +50,34 @@ namespace PerformanceCalculator.Profile
             for(int i=0; i<100; i++)
             {
                 ProcessorWorkingBeatmap workingBeatmap;
-                //for each beatmap, download it
-                    //cache the file
-                    if(command.CachePath != null)
+
+                if(command.CachePath != null)
+                {
+                    string cachePath = command.CachePath + @"\" + playData[i].beatmap_id + ".txt";
+
+                    if(!File.Exists(cachePath))
                     {
-                        string cachePath = command.CachePath + @"\" + playData[i].beatmap_id + ".txt";
+                        File.Create(cachePath).Dispose();
 
-                        if(!File.Exists(cachePath))
+                        using(var writeStream = new StreamWriter(cachePath, true))
                         {
-                            File.Create(cachePath).Dispose();
-
-                            using(var writeStream = new StreamWriter(cachePath, true))
+                            using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
                             {
-                                using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
-                                {
-                                    var text = readStream.ReadToEnd();
-                                    writeStream.Write(text);
-                                }
+                                var text = readStream.ReadToEnd();
+                                writeStream.Write(text);
                             }
                         }
+                    }
 
-                        workingBeatmap = new ProcessorWorkingBeatmap(cachePath);
-                    }
-                    else
+                    workingBeatmap = new ProcessorWorkingBeatmap(cachePath);
+                }
+                else
+                {
+                    using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
                     {
-                        using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
-                        {
-                            workingBeatmap = new ProcessorWorkingBeatmap(readStream);
-                        }
+                        workingBeatmap = new ProcessorWorkingBeatmap(readStream);
                     }
+                }
 
                 //Stats Calculation
                 double countmiss = playData[i].countmiss;
@@ -124,7 +123,7 @@ namespace PerformanceCalculator.Profile
                 double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate();
                 var outputInfo = new PPInfo
                 {
-                    OldPP = (double)playData[i].pp,
+                    LivePP = (double)playData[i].pp,
                     BeatmapInfo = workingBeatmap.BeatmapInfo.ToString(),
                     ModInfo = finalMods.Length > 0
                     ? finalMods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
@@ -133,17 +132,17 @@ namespace PerformanceCalculator.Profile
                 sortedPP.Add(pp, outputInfo);
             }
 
-            double oldPPNet = 0;
+            double livePPNet = 0;
             double ppNet = 0;
             int w = 0;
             foreach(KeyValuePair<double,PPInfo> kvp in sortedPP.Reverse())
             {
                 ppNet += Math.Pow(0.95,w)*kvp.Key;
-                oldPPNet += Math.Pow(0.95,w)*kvp.Value.OldPP;
+                livePPNet += Math.Pow(0.95,w)*kvp.Value.LivePP;
 
                 writeAttribute(w+1 + ".Beatmap", kvp.Value.BeatmapInfo);
                 writeAttribute("Mods", kvp.Value.ModInfo);
-                writeAttribute("old/new pp", kvp.Value.OldPP.ToString(CultureInfo.InvariantCulture) + " / " + kvp.Key.ToString(CultureInfo.InvariantCulture));
+                writeAttribute("old/new pp", kvp.Value.LivePP.ToString(CultureInfo.InvariantCulture) + " / " + kvp.Key.ToString(CultureInfo.InvariantCulture));
                 w++;
             }
 
@@ -165,13 +164,13 @@ namespace PerformanceCalculator.Profile
                 //calculate bonus pp as difference of user pp and sum of other pps
                 else
                 {
-                    bonusPP = userData[0].pp_raw - oldPPNet;
-                    oldPPNet = userData[0].pp_raw;
+                    bonusPP = userData[0].pp_raw - livePPNet;
+                    livePPNet = userData[0].pp_raw;
                 }
                 //add on bonus pp
                 ppNet += bonusPP;
             }
-            writeAttribute("Top 100 Listed Above. Old/New Net PP", oldPPNet.ToString(CultureInfo.InvariantCulture) + " / " + ppNet.ToString(CultureInfo.InvariantCulture));
+            writeAttribute("Top 100 Listed Above. Old/New Net PP", livePPNet.ToString(CultureInfo.InvariantCulture) + " / " + ppNet.ToString(CultureInfo.InvariantCulture));
         }
 
         private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");

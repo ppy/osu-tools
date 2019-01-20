@@ -3,9 +3,13 @@
 
 namespace PerformanceCalculator.Profile
 {
+    
+    /// <summary>
+    /// Holds the live pp value, beatmap name, and mods for a user play.
+    /// </summary>
     public class PPInfo
     {
-        public double OldPP;
+        public double LivePP;
         public string BeatmapInfo;
         public string ModInfo;
     }
