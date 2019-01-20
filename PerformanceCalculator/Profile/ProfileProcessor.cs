@@ -32,7 +32,7 @@ namespace PerformanceCalculator.Profile
         public void Execute()
         {
             //initializing pp-information-holding sorted list
-            var sortedPP = new SortedDictionary<double,PPInfo>();
+            var sortedPP = new SortedDictionary<double, PPInfo>();
             //initialize the information from the top 100 plays, held in a dynamic
             dynamic playData;
             //gets top 100 plays
@@ -41,27 +41,25 @@ namespace PerformanceCalculator.Profile
             var ruleset = getRuleset(command.Ruleset ?? 0);
 
             //get data for all 100 top plays
-            using(var readStream = apiReader(userBestPath))
+            using (var readStream = apiReader(userBestPath))
             {
                 var json = readStream.ReadToEnd();
                 playData = JsonConvert.DeserializeObject<dynamic>(json);
             }
 
-            for(int i=0; i<100; i++)
+            for (int i = 0; i < 100; i++)
             {
                 ProcessorWorkingBeatmap workingBeatmap;
 
-                if(command.CachePath != null)
+                if (command.CachePath != null)
                 {
                     string cachePath = command.CachePath + @"\" + playData[i].beatmap_id + ".txt";
 
-                    if(!File.Exists(cachePath))
+                    if (!File.Exists(cachePath))
                     {
-                        File.Create(cachePath).Dispose();
-
-                        using(var writeStream = new StreamWriter(cachePath, true))
+                        using (var writeStream = new StreamWriter(cachePath, true))
                         {
-                            using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
+                            using (var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
                             {
                                 var text = readStream.ReadToEnd();
                                 writeStream.Write(text);
@@ -73,7 +71,7 @@ namespace PerformanceCalculator.Profile
                 }
                 else
                 {
-                    using(var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
+                    using (var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
                     {
                         workingBeatmap = new ProcessorWorkingBeatmap(readStream);
                     }
@@ -87,7 +85,7 @@ namespace PerformanceCalculator.Profile
                 double totalHits = countmiss + count50 + count100 + count300;
                 double accuracy = 0;
 
-                if(command.Ruleset == 0 || command.Ruleset == null)
+                if (command.Ruleset == 0 || command.Ruleset == null)
                 {
                     accuracy = (count50 + (2 * count100) + (6 * count300)) / (6 * totalHits);
                 }
@@ -106,7 +104,7 @@ namespace PerformanceCalculator.Profile
                     {HitResult.Miss, (int)countmiss}
                 };
 
-                IEnumerable<Mod> mods = ruleset.ConvertLegacyMods((LegacyMods) playData[i].enabled_mods);
+                IEnumerable<Mod> mods = ruleset.ConvertLegacyMods((LegacyMods)playData[i].enabled_mods);
 
                 Mod[] finalMods = mods.ToArray();
 
@@ -124,8 +122,8 @@ namespace PerformanceCalculator.Profile
                 var outputInfo = new PPInfo
                 {
                     LivePP = (double)playData[i].pp,
-                    BeatmapInfo = workingBeatmap.BeatmapInfo.ToString(),
-                    ModInfo = finalMods.Length > 0
+                    BeatmapName = workingBeatmap.BeatmapInfo.ToString(),
+                    ModsAbbreviated = finalMods.Length > 0
                     ? finalMods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
                     : "None"
                 };
@@ -135,23 +133,23 @@ namespace PerformanceCalculator.Profile
             double livePPNet = 0;
             double ppNet = 0;
             int w = 0;
-            foreach(KeyValuePair<double,PPInfo> kvp in sortedPP.Reverse())
+            foreach (KeyValuePair<double, PPInfo> kvp in sortedPP.Reverse())
             {
-                ppNet += Math.Pow(0.95,w)*kvp.Key;
-                livePPNet += Math.Pow(0.95,w)*kvp.Value.LivePP;
+                ppNet += Math.Pow(0.95, w) * kvp.Key;
+                livePPNet += Math.Pow(0.95, w) * kvp.Value.LivePP;
 
-                writeAttribute(w+1 + ".Beatmap", kvp.Value.BeatmapInfo);
-                writeAttribute("Mods", kvp.Value.ModInfo);
+                writeAttribute(w + 1 + ".Beatmap", kvp.Value.BeatmapName);
+                writeAttribute("Mods", kvp.Value.ModsAbbreviated);
                 writeAttribute("old/new pp", kvp.Value.LivePP.ToString(CultureInfo.InvariantCulture) + " / " + kvp.Key.ToString(CultureInfo.InvariantCulture));
                 w++;
             }
 
-            if(command.Bonus)
+            if (command.Bonus)
             {
                 //get user data (used for bonus pp calculation)
                 var userPath = "https://osu.ppy.sh/api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&type=username";
                 dynamic userData;
-                using(var readStream = apiReader(userPath))
+                using (var readStream = apiReader(userPath))
                 {
                     var json = readStream.ReadToEnd();
                     userData = JsonConvert.DeserializeObject<dynamic>(json);
@@ -159,7 +157,7 @@ namespace PerformanceCalculator.Profile
 
                 double bonusPP = 0;
                 //inactive players have 0pp to take them out of the leaderboard
-                if(userData[0].pp_raw == 0)
+                if (userData[0].pp_raw == 0)
                     command.Console.WriteLine("The player has 0 pp or is inactive, so bonus pp cannot be calculated");
                 //calculate bonus pp as difference of user pp and sum of other pps
                 else

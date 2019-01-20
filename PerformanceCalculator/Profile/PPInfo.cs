@@ -9,7 +9,7 @@ namespace PerformanceCalculator.Profile
     public class PPInfo
     {
         public double LivePP;
-        public string BeatmapInfo;
-        public string ModInfo;
+        public string BeatmapName;
+        public string ModsAbbreviated;
     }
 }
