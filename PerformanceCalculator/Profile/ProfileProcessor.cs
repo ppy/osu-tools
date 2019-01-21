@@ -35,7 +35,7 @@ namespace PerformanceCalculator.Profile
             var sortedPP = new SortedDictionary<double, PPInfo>();
             //initialize the information from the top 100 plays, held in a dynamic
             dynamic playData;
-            string baseUrl = "https://osu.ppy.sh/";
+            const string baseUrl = "https://osu.ppy.sh/";
             //gets top 100 plays
             string userBestUrl = baseUrl + "api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&limit=100&type=username";
 
