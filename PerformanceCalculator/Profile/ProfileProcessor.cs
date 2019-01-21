@@ -35,13 +35,14 @@ namespace PerformanceCalculator.Profile
             var sortedPP = new SortedDictionary<double, PPInfo>();
             //initialize the information from the top 100 plays, held in a dynamic
             dynamic playData;
+            string baseUrl = "https://osu.ppy.sh/";
             //gets top 100 plays
-            string userBestPath = "https://osu.ppy.sh/api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&limit=100&type=username";
+            string userBestUrl = baseUrl + "api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&limit=100&type=username";
 
             var ruleset = getRuleset(command.Ruleset ?? 0);
 
             //get data for all 100 top plays
-            using (var readStream = apiReader(userBestPath))
+            using (var readStream = apiReader(userBestUrl))
             {
                 var json = readStream.ReadToEnd();
                 playData = JsonConvert.DeserializeObject<dynamic>(json);
@@ -51,15 +52,18 @@ namespace PerformanceCalculator.Profile
             {
                 ProcessorWorkingBeatmap workingBeatmap;
 
+                string beatmapID = playData[i].beatmap_id;
+                string beatmapAccessUrl = baseUrl + "osu/" + beatmapID;
+
                 if (command.CachePath != null)
                 {
-                    string cachePath = command.CachePath + @"\" + playData[i].beatmap_id + ".txt";
+                    string cachePath = Path.Combine(command.CachePath, beatmapID + ".txt");
 
                     if (!File.Exists(cachePath))
                     {
                         using (var writeStream = new StreamWriter(cachePath, true))
                         {
-                            using (var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
+                            using (var readStream = apiReader(beatmapAccessUrl))
                             {
                                 var text = readStream.ReadToEnd();
                                 writeStream.Write(text);
@@ -71,7 +75,7 @@ namespace PerformanceCalculator.Profile
                 }
                 else
                 {
-                    using (var readStream = apiReader("https://osu.ppy.sh/osu/" + playData[i].beatmap_id))
+                    using (var readStream = apiReader(beatmapAccessUrl))
                     {
                         workingBeatmap = new ProcessorWorkingBeatmap(readStream);
                     }
@@ -147,9 +151,9 @@ namespace PerformanceCalculator.Profile
             if (command.Bonus)
             {
                 //get user data (used for bonus pp calculation)
-                var userPath = "https://osu.ppy.sh/api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&type=username";
+                var userUrl = baseUrl + "api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&type=username";
                 dynamic userData;
-                using (var readStream = apiReader(userPath))
+                using (var readStream = apiReader(userUrl))
                 {
                     var json = readStream.ReadToEnd();
                     userData = JsonConvert.DeserializeObject<dynamic>(json);
@@ -173,9 +177,9 @@ namespace PerformanceCalculator.Profile
 
         private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
 
-        private StreamReader apiReader(string path)
+        private StreamReader apiReader(string url)
         {
-            var readStream = new StreamReader(WebRequest.Create(path).GetResponse().GetResponseStream());
+            var readStream = new StreamReader(WebRequest.Create(url).GetResponse().GetResponseStream());
             return readStream;
         }
 
