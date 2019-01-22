@@ -35,9 +35,9 @@ namespace PerformanceCalculator.Profile
             var sortedPP = new SortedDictionary<double, PPInfo>();
             //initialize the information from the top 100 plays, held in a dynamic
             dynamic playData;
-            const string baseUrl = "https://osu.ppy.sh/";
+            const string base_url = "https://osu.ppy.sh/";
             //gets top 100 plays
-            string userBestUrl = baseUrl + "api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&limit=100&type=username";
+            string userBestUrl = base_url + "api/get_user_best?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&limit=100&type=username";
 
             var ruleset = getRuleset(command.Ruleset ?? 0);
 
@@ -53,7 +53,7 @@ namespace PerformanceCalculator.Profile
                 ProcessorWorkingBeatmap workingBeatmap;
 
                 string beatmapID = playData[i].beatmap_id;
-                string beatmapAccessUrl = baseUrl + "osu/" + beatmapID;
+                string beatmapAccessUrl = base_url + "osu/" + beatmapID;
 
                 if (command.CachePath != null)
                 {
@@ -151,7 +151,7 @@ namespace PerformanceCalculator.Profile
             if (command.Bonus)
             {
                 //get user data (used for bonus pp calculation)
-                var userUrl = baseUrl + "api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&type=username";
+                var userUrl = base_url + "api/get_user?k=" + command.Key + "&u=" + command.ProfileName + "&m=" + command.Ruleset + "&type=username";
                 dynamic userData;
                 using (var readStream = apiReader(userUrl))
                 {
