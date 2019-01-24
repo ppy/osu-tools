@@ -31,13 +31,20 @@ namespace PerformanceCalculator.Profile
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(command.Ruleset ?? 0);
 
+            Console.WriteLine("Getting user data...");
+            dynamic userData = getJsonFromApi($"get_user?k={command.Key}&u={command.ProfileName}&m={command.Ruleset}&type=username")[0];
+
+            Console.WriteLine("Getting user top scores...");
             foreach (var play in getJsonFromApi($"get_user_best?k={command.Key}&u={command.ProfileName}&m={command.Ruleset}&limit=100&type=username"))
             {
                 string beatmapID = play.beatmap_id;
 
                 string cachePath = Path.Combine("cache", $"{beatmapID}.osu");
                 if (!File.Exists(cachePath))
+                {
+                    Console.WriteLine($"Downloading {beatmapID}.osu...");
                     new FileWebRequest(cachePath, $"{base_url}/osu/{beatmapID}").Perform();
+                }
 
                 Mod[] mods = ruleset.ConvertLegacyMods((LegacyMods)play.enabled_mods).ToArray();
 
@@ -69,8 +76,6 @@ namespace PerformanceCalculator.Profile
 
                 displayPlays.Add(thisPlay);
             }
-
-            dynamic userData = getJsonFromApi($"get_user?k={command.Key}&u={command.ProfileName}&m={command.Ruleset}&type=username")[0];
 
             var localOrdered = displayPlays.OrderByDescending(p => p.LocalPP).ToList();
             var liveOrdered = displayPlays.OrderByDescending(p => p.LivePP).ToList();
