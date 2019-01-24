@@ -25,10 +25,6 @@ namespace PerformanceCalculator.Profile
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
 
-        [UsedImplicitly]
-        [Option(Template = "-b|--bonus", Description = "Include the argument if (approxiamate) Bonus PP should be included.")]
-        public bool IncludeBonus { get; }
-
         protected override IProcessor CreateProcessor() => new ProfileProcessor(this);
     }
 }

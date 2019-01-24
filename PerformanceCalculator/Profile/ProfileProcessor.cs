@@ -1,4 +1,4 @@
-// Copyright (c) 2007-2019 ppy Pty Ltd <contact@ppy.sh>.
+// Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
 using System;
@@ -8,13 +8,8 @@ using System.Linq;
 using Alba.CsConsoleFormat;
 using osu.Framework.IO.Network;
 using osu.Game.Beatmaps.Legacy;
-using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
-using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 
 namespace PerformanceCalculator.Profile
@@ -36,7 +31,7 @@ namespace PerformanceCalculator.Profile
             var displayPlays = new List<UserPlayInfo>();
             //initialize the information from the top 100 plays, held in a dynamic
 
-            var ruleset = getRuleset(command.Ruleset ?? 0);
+            var ruleset = LegacyHelper.GetRulesetFromLegacyID(command.Ruleset ?? 0);
 
             foreach (var play in getJsonFromApi($"get_user_best?k={command.Key}&u={command.ProfileName}&m={command.Ruleset}&limit=100&type=username"))
             {
@@ -85,18 +80,17 @@ namespace PerformanceCalculator.Profile
             int index = 0;
             double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
             double totalLivePP = userData.pp_raw;
-            double playcountPP = 0;
 
             index = 0;
             double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);
 
             //todo: implement properly. this is pretty damn wrong.
-            playcountPP = (totalLivePP - nonBonusLivePP);
-            totalLocalPP += playcountPP;
+            var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+            totalLocalPP += playcountBonusPP;
 
-            var doc = new Document(
+            outputDocument(new Document(
                 new Span($"User:     {userData.username}"), "\n",
-                new Span($"Live PP:  {totalLivePP:F1} (including {playcountPP:F1}pp from playcount)"), "\n",
+                new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
                 new Span($"Local PP: {totalLocalPP:F1}"), "\n",
                 new Grid
                 {
@@ -114,20 +108,25 @@ namespace PerformanceCalculator.Profile
                             new Cell($"{item.LivePP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
-                            new Cell($"{localOrdered.IndexOf(item) - liveOrdered.IndexOf(item)}"),
+                            new Cell($"{localOrdered.IndexOf(item) - liveOrdered.IndexOf(item)}") { Align = Align.Right },
                         })
                     }
                 }
-            );
+            ));
+        }
 
+        private void outputDocument(Document document)
+        {
+            // todo: make usable by other command
             using (var writer = new StringWriter())
             {
-                ConsoleRenderer.RenderDocumentToText(doc, new TextRenderTarget(writer));
+                ConsoleRenderer.RenderDocumentToText(document, new TextRenderTarget(writer));
 
                 var str = writer.GetStringBuilder().ToString();
 
                 Console.Write(str);
-                File.WriteAllText("output.txt", str);
+                if (command.OutputFile != null)
+                    File.WriteAllText(command.OutputFile, str);
             }
         }
 
@@ -136,23 +135,6 @@ namespace PerformanceCalculator.Profile
             var req = new JsonWebRequest<dynamic>($"{base_url}/api/{request}");
             req.Perform();
             return req.ResponseObject;
-        }
-
-        private Ruleset getRuleset(int rulesetId)
-        {
-            switch (rulesetId)
-            {
-                default:
-                    throw new ArgumentException("Invalid ruleset id provided.");
-                case 0:
-                    return new OsuRuleset();
-                case 1:
-                    return new TaikoRuleset();
-                case 2:
-                    return new CatchRuleset();
-                case 3:
-                    return new ManiaRuleset();
-            }
         }
     }
 }

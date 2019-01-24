@@ -3,10 +3,6 @@
 
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
-using osu.Game.Rulesets.Mania;
-using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 
@@ -31,22 +27,7 @@ namespace PerformanceCalculator
             return score;
         }
 
-        protected override Ruleset GetRuleset(int rulesetId)
-        {
-            switch (rulesetId)
-            {
-                case 0:
-                    return new OsuRuleset();
-                case 1:
-                    return new TaikoRuleset();
-                case 2:
-                    return new CatchRuleset();
-                case 3:
-                    return new ManiaRuleset();
-            }
-
-            return null;
-        }
+        protected override Ruleset GetRuleset(int rulesetId) => LegacyHelper.GetRulesetFromLegacyID(rulesetId);
 
         protected override WorkingBeatmap GetBeatmap(string md5Hash) => beatmap;
     }

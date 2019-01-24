@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
 
+using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator
@@ -11,6 +12,10 @@ namespace PerformanceCalculator
         /// The console.
         /// </summary>
         public IConsole Console { get; private set; }
+
+        [UsedImplicitly]
+        [Option(Template = "-o|--output <file.txt>", Description = "Output results to text file.")]
+        public string OutputFile { get; }
 
         public void OnExecute(CommandLineApplication app, IConsole console)
         {
