@@ -27,9 +27,7 @@ namespace PerformanceCalculator.Profile
 
         public void Execute()
         {
-            //initializing pp-information-holding sorted list
             var displayPlays = new List<UserPlayInfo>();
-            //initialize the information from the top 100 plays, held in a dynamic
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(command.Ruleset ?? 0);
 
