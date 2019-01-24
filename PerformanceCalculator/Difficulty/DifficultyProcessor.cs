@@ -9,14 +9,10 @@ using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Difficulty;
-using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mania.Difficulty;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Difficulty;
-using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Difficulty;
 
 namespace PerformanceCalculator.Difficulty
@@ -49,7 +45,7 @@ namespace PerformanceCalculator.Difficulty
         private void processBeatmap(WorkingBeatmap beatmap)
         {
             // Get the ruleset
-            var ruleset = getRuleset(command.Ruleset ?? beatmap.BeatmapInfo.RulesetID);
+            var ruleset = LegacyHelper.GetRulesetFromLegacyID(command.Ruleset ?? beatmap.BeatmapInfo.RulesetID);
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(getMods(ruleset).ToArray());
 
             writeAttribute("Ruleset", ruleset.ShortName);
@@ -81,23 +77,6 @@ namespace PerformanceCalculator.Difficulty
         }
 
         private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
-
-        private Ruleset getRuleset(int rulesetId)
-        {
-            switch (rulesetId)
-            {
-                default:
-                    throw new ArgumentException("Invalid ruleset id provided.");
-                case 0:
-                    return new OsuRuleset();
-                case 1:
-                    return new TaikoRuleset();
-                case 2:
-                    return new CatchRuleset();
-                case 3:
-                    return new ManiaRuleset();
-            }
-        }
 
         private List<Mod> getMods(Ruleset ruleset)
         {
