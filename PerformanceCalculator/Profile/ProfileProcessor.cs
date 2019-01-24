@@ -124,6 +124,11 @@ namespace PerformanceCalculator.Profile
 
                 var str = writer.GetStringBuilder().ToString();
 
+                var lines = str.Split('\n');
+                for (int i = 0; i < lines.Length; i++)
+                    lines[i] = lines[i].TrimEnd();
+                str = string.Join('\n', lines);
+
                 Console.Write(str);
                 if (command.OutputFile != null)
                     File.WriteAllText(command.OutputFile, str);
