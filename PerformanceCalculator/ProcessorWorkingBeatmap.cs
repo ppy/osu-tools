@@ -24,27 +24,13 @@ namespace PerformanceCalculator
         /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a .osu file.
         /// </summary>
         /// <param name="file">The .osu file.</param>
-        public ProcessorWorkingBeatmap(string file)
-            : this(File.OpenRead(file))
+        /// <param name="beatmapId">An optional beatmap ID (for cases where .osu file doesn't have one).</param>
+        public ProcessorWorkingBeatmap(string file, int? beatmapId = null)
+            : this(readFromFile(file), beatmapId)
         {
         }
 
-        private ProcessorWorkingBeatmap(Stream stream)
-            : this(new StreamReader(stream))
-        {
-            stream.Dispose();
-        }
-
-        /// <summary>
-        /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a stream reader.
-        /// </summary>
-        /// <param name="streamReader">The stream reader.</param>
-        public ProcessorWorkingBeatmap(StreamReader streamReader)
-            : this(Decoder.GetDecoder<Beatmap>(streamReader).Decode(streamReader))
-        {
-        }
-
-        private ProcessorWorkingBeatmap(Beatmap beatmap)
+        private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null)
             : base(beatmap.BeatmapInfo)
         {
             this.beatmap = beatmap;
@@ -64,6 +50,16 @@ namespace PerformanceCalculator
                     beatmap.BeatmapInfo.Ruleset = new ManiaRuleset().RulesetInfo;
                     break;
             }
+
+            if (beatmapId.HasValue)
+                beatmap.BeatmapInfo.OnlineBeatmapID = beatmapId;
+        }
+
+        private static Beatmap readFromFile(string filename)
+        {
+            using (var stream = File.OpenRead(filename))
+            using (var streamReader = new StreamReader(stream))
+                return Decoder.GetDecoder<Beatmap>(streamReader).Decode(streamReader);
         }
 
         protected override IBeatmap GetBeatmap() => beatmap;

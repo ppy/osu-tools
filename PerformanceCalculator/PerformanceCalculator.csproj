@@ -12,6 +12,7 @@
     <ProjectReference Include="..\osu\osu.Game\osu.Game.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Alba.CsConsoleFormat" Version="1.0.0" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.3" />
   </ItemGroup>
 </Project>

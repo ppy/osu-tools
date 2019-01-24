@@ -3,10 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using McMaster.Extensions.CommandLineUtils;
+using Alba.CsConsoleFormat;
 using osu.Framework.IO.Network;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets;
@@ -49,7 +48,7 @@ namespace PerformanceCalculator.Profile
 
                 Mod[] mods = ruleset.ConvertLegacyMods((LegacyMods)play.enabled_mods).ToArray();
 
-                var working = new ProcessorWorkingBeatmap(cachePath) { Mods = { Value = mods } };
+                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id) { Mods = { Value = mods } };
 
                 var score = new ProcessorScoreParser(working).Parse(new ScoreInfo
                 {
@@ -76,42 +75,61 @@ namespace PerformanceCalculator.Profile
                 };
 
                 displayPlays.Add(thisPlay);
-
-                writeAttribute(thisPlay.Beatmap.ToString(), "");
-                writeAttribute("Mods", thisPlay.Mods);
-                writeAttribute("old/new pp", thisPlay.LivePP.ToString(CultureInfo.InvariantCulture) + " / " + thisPlay.LocalPP.ToString(CultureInfo.InvariantCulture));
             }
+
+            dynamic userData = getJsonFromApi($"get_user?k={command.Key}&u={command.ProfileName}&m={command.Ruleset}&type=username")[0];
+
+            var localOrdered = displayPlays.OrderByDescending(p => p.LocalPP).ToList();
+            var liveOrdered = displayPlays.OrderByDescending(p => p.LivePP).ToList();
 
             int index = 0;
-            double totalLocalPP = displayPlays.OrderByDescending(p => p.LocalPP).Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
+            double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
+            double totalLivePP = userData.pp_raw;
+            double playcountPP = 0;
 
             index = 0;
-            double totalServerPP = displayPlays.OrderByDescending(p => p.LivePP).Sum(play => Math.Pow(0.95, index++) * play.LivePP);
+            double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);
 
-            if (command.IncludeBonus)
-            {
-                //get user data (used for bonus pp calculation)
-                dynamic userData = getJsonFromApi($"get_user?k={command.Key}&u={command.ProfileName}&m={command.Ruleset}&type=username");
+            //todo: implement properly. this is pretty damn wrong.
+            playcountPP = (totalLivePP - nonBonusLivePP);
+            totalLocalPP += playcountPP;
 
-                double bonusPP = 0;
-                //inactive players have 0pp to take them out of the leaderboard
-                if (userData[0].pp_raw == 0)
-                    command.Console.WriteLine("The player has 0 pp or is inactive, so bonus pp cannot be calculated");
-                //calculate bonus pp as difference of user pp and sum of other pps
-                else
+            var doc = new Document(
+                new Span($"User:     {userData.username}"), "\n",
+                new Span($"Live PP:  {totalLivePP:F1} (including {playcountPP:F1}pp from playcount)"), "\n",
+                new Span($"Local PP: {totalLocalPP:F1}"), "\n",
+                new Grid
                 {
-                    bonusPP = userData[0].pp_raw - totalServerPP;
-                    totalServerPP = userData[0].pp_raw;
+                    Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
+                    Children =
+                    {
+                        new Cell("beatmap"),
+                        new Cell("live pp"),
+                        new Cell("local pp"),
+                        new Cell("pp change"),
+                        new Cell("position change"),
+                        localOrdered.Select(item => new[]
+                        {
+                            new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
+                            new Cell($"{item.LivePP:F1}") { Align = Align.Right },
+                            new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
+                            new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
+                            new Cell($"{localOrdered.IndexOf(item) - liveOrdered.IndexOf(item)}"),
+                        })
+                    }
                 }
+            );
 
-                //add on bonus pp
-                totalLocalPP += bonusPP;
+            using (var writer = new StringWriter())
+            {
+                ConsoleRenderer.RenderDocumentToText(doc, new TextRenderTarget(writer));
+
+                var str = writer.GetStringBuilder().ToString();
+
+                Console.Write(str);
+                File.WriteAllText("output.txt", str);
             }
-
-            writeAttribute("Top 100 Listed Above. Old/New Net PP", totalServerPP.ToString(CultureInfo.InvariantCulture) + " / " + totalLocalPP.ToString(CultureInfo.InvariantCulture));
         }
-
-        private void writeAttribute(string name, string value) => command.Console.WriteLine($"{name.PadRight(15)}: {value}");
 
         private dynamic getJsonFromApi(string request)
         {
