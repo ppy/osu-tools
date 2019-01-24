@@ -15,8 +15,9 @@ namespace PerformanceCalculator
     [Subcommand("difficulty", typeof(DifficultyCommand))]
     [Subcommand("performance", typeof(PerformanceCommand))]
     [Subcommand("profile", typeof(ProfileCommand))]
-    [Subcommand("simulate", typeof(SimulateCommand))]
-    public class Program : CommandBase
+    [Subcommand("simulate", typeof(SimulateListing))]
+    [HelpOption("-?|-h|--help")]
+    public class Program
     {
         public static void Main(string[] args)
         {
