@@ -52,10 +52,10 @@ namespace PerformanceCalculator.Profile
                     Mods = mods,
                     Statistics = new Dictionary<HitResult, int>
                     {
-                        { HitResult.Perfect, 0 },
+                        { HitResult.Perfect, (int)play.countgeki },
                         { HitResult.Great, (int)play.count300 },
                         { HitResult.Good, (int)play.count100 },
-                        { HitResult.Ok, 0 },
+                        { HitResult.Ok, (int)play.countkatu },
                         { HitResult.Meh, (int)play.count50 },
                         { HitResult.Miss, (int)play.countmiss }
                     }
