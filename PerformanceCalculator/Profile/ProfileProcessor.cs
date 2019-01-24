@@ -108,7 +108,7 @@ namespace PerformanceCalculator.Profile
                             new Cell($"{item.LivePP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
-                            new Cell($"{localOrdered.IndexOf(item) - liveOrdered.IndexOf(item)}") { Align = Align.Right },
+                            new Cell($"{liveOrdered.IndexOf(item) - localOrdered.IndexOf(item):+0;-0;-}") { Align = Align.Center },
                         })
                     }
                 }
