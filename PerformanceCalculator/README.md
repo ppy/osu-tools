@@ -93,32 +93,41 @@ Computes the total performance (pp) of a profile.
 Usage: dotnet PerformanceCalculator.dll profile [arguments] [options]
 
 Arguments:
-  profile name         Required. Username of the osu account to be checked (not user id)
+  user                 Required. User ID is preferred, but username should also work
   api key              Required. API Key, which you can get from here: https://osu.ppy.sh/p/api
 
 Options:
   -?|-h|--help         Show help information
-  -r|--ruleset:<ruleset-id>  Optional. The ruleset to compute the profile for; only osu and taiko are currently implemented.
-                             Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania 
-  -c|--cache:<caching-path>  Optional. Caches files in the specified directory. Also use if you are trying to use previously cached files in that directory. Useful for running the same profile multiple times.
-  -b|--bonus <number>  Optional. Include the argument if (approxiamate)Bonus PP should be included.
+  -r|--ruleset:<ruleset-id>  Optional. The ruleset to compute the profile for. 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. Defaults to osu!.
 ```
 
-Computes the performance of a user profile's performance. Takes 100 top plays of a user on Bancho and recalculates and reorders them in order of the performance calculator's calculated performance.
+Computes the performance of a user profile's performance. Takes 100 top plays of a user and recalculates and reorders them in order of the performance calculator's calculated performance.
+
 ```
-1.Beatmap      : ARCIEN - Future Son (Mishima Yurara) [N A S Y A'S OK DAD]
-Mods           : HD, DT
-old/new pp     : 338.971 / 353.035079202098
-2.Beatmap      : 07th Expansion - rog-unlimitation (AngelHoney) [AngelHoney]
-Mods           : None
-old/new pp     : 221.547 / 252.188414571819
+User:     peppy
+Live PP:  765.9 (including 100.1pp from playcount)
+Local PP: 766.7
+
+╔═════════════════════════════════════════════════════════════════════════════════════════════════╤═══════╤════════╤═════════╤═══════════════╗
+║beatmap                                                                                          │live pp│local pp│pp change│position change║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
+║22423 - Lix - Tori no Uta -Ethereal House Mix- (James) [Hard]                                    │   64.1│    64.3│      0.2│       -       ║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
+║258467 - Global Deejays - The Sound of San Francisco (Sey) [San Francisco]                       │   49.9│    50.2│      0.2│       -       ║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
+║266885 - Owl City - When Can I See You Again? (Aleks719) [Next year!]                            │   48.9│    49.1│      0.1│       -       ║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
+║197337 - Sakamoto Maaya - Platinum (TV Size) (Flask) [Insane]                                    │   45.7│    45.8│      0.1│       -       ║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
+║119488 - Nakamura Mamechiyo - Kare Kano Kanon (mjw5150) [Hard]                                   │   42.2│    42.3│      0.1│       -       ║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
+║417911 - yanaginagi - Tokohana (TV Size) (Sharlo) [Fycho's Hard]                                 │   39.8│    39.6│     -0.2│       -       ║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
+║80 - Scatman John - Scatman (Extor) [Insane]                                                     │   36.1│    37.6│      1.5│      +1       ║
+╟─────────────────────────────────────────────────────────────────────────────────────────────────┼───────┼────────┼─────────┼───────────────╢
 ...
-100.Beatmap    : Feint - Vagrant (feat. Veela) (Aia) [Still Alive]
-Mods           : None
-old/new pp     : 144.025 / 145.889050437811
-Top 100 Listed Above. Old/New Net PP: 3879.37586477693 / 4234.28970113726
 ```
-=======
+
 ### Simulate
 ```
 > dotnet PerformanceCalculator.dll simulate
@@ -138,8 +147,8 @@ Commands:
 Run 'simulate [command] --help' for more information about a command.
 
 ```
-Computes the performance of a simulated play on a beatmap. The provided output includes raw performance attributes and pp value.
 
+Computes the performance of a simulated play on a beatmap. The provided output includes raw performance attributes and pp value.
 
 #### osu!
 ```
