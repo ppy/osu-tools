@@ -10,7 +10,7 @@ namespace PerformanceCalculator.Simulate
     [Subcommand("osu", typeof(OsuSimulateCommand))]
     [Subcommand("taiko", typeof(TaikoSimulateCommand))]
     [Subcommand("mania", typeof(ManiaSimulateCommand))]
-    public class SimulateListing
+    public class SimulateListingCommand
     {
         [UsedImplicitly]
         public int OnExecute(CommandLineApplication app, IConsole console)

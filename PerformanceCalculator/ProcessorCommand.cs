@@ -46,7 +46,6 @@ namespace PerformanceCalculator
             }
         }
 
-
         public virtual void Execute()
         {
         }

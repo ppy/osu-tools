@@ -24,7 +24,7 @@ namespace PerformanceCalculator.Performance
         [FileExists]
         [Option(Template = "-r|--replay <file>", Description = "One for each replay. The replay file.")]
         public string[] Replays { get; }
-        
+
         public override void Execute()
         {
             var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
