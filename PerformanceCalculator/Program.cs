@@ -1,5 +1,5 @@
-﻿// Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
-// Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
 
 using McMaster.Extensions.CommandLineUtils;
 using osu.Framework.Logging;
@@ -15,8 +15,9 @@ namespace PerformanceCalculator
     [Subcommand("difficulty", typeof(DifficultyCommand))]
     [Subcommand("performance", typeof(PerformanceCommand))]
     [Subcommand("profile", typeof(ProfileCommand))]
-    [Subcommand("simulate", typeof(SimulateCommand))]
-    public class Program : CommandBase
+    [Subcommand("simulate", typeof(SimulateListingCommand))]
+    [HelpOption("-?|-h|--help")]
+    public class Program
     {
         public static void Main(string[] args)
         {

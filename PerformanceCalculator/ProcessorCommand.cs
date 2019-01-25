@@ -1,12 +1,15 @@
-﻿// Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
-// Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu-tools/master/LICENCE
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
 
+using System.IO;
+using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator
 {
-    public abstract class ProcessorCommand : CommandBase
+    [HelpOption("-?|-h|--help")]
+    public abstract class ProcessorCommand
     {
         /// <summary>
         /// The console.
@@ -20,13 +23,31 @@ namespace PerformanceCalculator
         public void OnExecute(CommandLineApplication app, IConsole console)
         {
             Console = console;
-            CreateProcessor().Execute();
+            Execute();
         }
 
-        /// <summary>
-        /// Creates the <see cref="IProcessor"/> to process this <see cref="ProcessorCommand"/>.
-        /// </summary>
-        /// <returns>The <see cref="IProcessor"/>.</returns>
-        protected abstract IProcessor CreateProcessor();
+        public void OutputDocument(Document document)
+        {
+            // todo: make usable by other command
+            using (var writer = new StringWriter())
+            {
+                ConsoleRenderer.RenderDocumentToText(document, new TextRenderTarget(writer));
+
+                var str = writer.GetStringBuilder().ToString();
+
+                var lines = str.Split('\n');
+                for (int i = 0; i < lines.Length; i++)
+                    lines[i] = lines[i].TrimEnd();
+                str = string.Join('\n', lines);
+
+                Console.Write(str);
+                if (OutputFile != null)
+                    File.WriteAllText(OutputFile, str);
+            }
+        }
+
+        public virtual void Execute()
+        {
+        }
     }
 }
