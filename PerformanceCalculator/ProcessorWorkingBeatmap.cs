@@ -6,10 +6,6 @@ using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
-using osu.Game.Rulesets.Catch;
-using osu.Game.Rulesets.Mania;
-using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Taiko;
 
 namespace PerformanceCalculator
 {
@@ -35,21 +31,7 @@ namespace PerformanceCalculator
         {
             this.beatmap = beatmap;
 
-            switch (beatmap.BeatmapInfo.RulesetID)
-            {
-                case 0:
-                    beatmap.BeatmapInfo.Ruleset = new OsuRuleset().RulesetInfo;
-                    break;
-                case 1:
-                    beatmap.BeatmapInfo.Ruleset = new TaikoRuleset().RulesetInfo;
-                    break;
-                case 2:
-                    beatmap.BeatmapInfo.Ruleset = new CatchRuleset().RulesetInfo;
-                    break;
-                case 3:
-                    beatmap.BeatmapInfo.Ruleset = new ManiaRuleset().RulesetInfo;
-                    break;
-            }
+            beatmap.BeatmapInfo.Ruleset = LegacyHelper.GetRulesetFromLegacyID(beatmap.BeatmapInfo.RulesetID).RulesetInfo;
 
             if (beatmapId.HasValue)
                 beatmap.BeatmapInfo.OnlineBeatmapID = beatmapId;
