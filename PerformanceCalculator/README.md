@@ -1,6 +1,6 @@
 # Performance Calculator
 
-A CLI tool for calculating the difficulty of beatmaps and the performance of replays.
+A tool for calculating the difficulty of beatmaps and the performance of replays.
 
 ## Tweaking
 
@@ -17,7 +17,7 @@ Difficulty and performance calculators for all rulesets may be modified to tweak
 
 ### Help
 ```
-> dotnet PerformanceCalculator.dll
+> dotnet run -- --help
 
 Usage: dotnet PerformanceCalculator.dll [options] [command]
 
@@ -27,6 +27,7 @@ Options:
 Commands:
   difficulty    Computes the difficulty of a beatmap.
   performance   Computes the performance (pp) of replays on a beatmap.
+  profile       Computes the total performance (pp) of a profile.
   simulate      Computes the performance (pp) of a simulated play.
 
 Run 'dotnet PerformanceCalculator.dll [command] --help' for more information about a command.
@@ -34,20 +35,21 @@ Run 'dotnet PerformanceCalculator.dll [command] --help' for more information abo
 
 ### Difficulty
 ```
-> dotnet PerformanceCalculator.dll difficulty --help
+> dotnet run -- difficulty --help
 
 Computes the difficulty of a beatmap.
 
 Usage: dotnet PerformanceCalculator.dll difficulty [arguments] [options]
 
 Arguments:
-  beatmap                    Required. The beatmap (.osu) to compute the difficulty for.
+  path                       Required. A beatmap file (.osu), or a folder containing .osu files to compute the difficulty for.
 
 Options:
   -?|-h|--help               Show help information
   -r|--ruleset:<ruleset-id>  Optional. The ruleset to compute the beatmap difficulty for, if it's a convertible beatmap.
                              Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania
   -m|--m <mod>               One for each mod. The mods to compute the difficulty with.Values: hr, dt, hd, fl, ez, 4k, 5k, etc...
+  -o|--output <file.txt>     Output results to text file.
 ```
 
 Computes the difficulty attributes of a beatmap. These attributes are used in performance calculation.
@@ -61,18 +63,19 @@ stars          : 4.69957066421573
 
 ### Performance
 ```
-> dotnet PerformanceCalculator.dll performance --help
+> dotnet run -- performance --help
 
 Computes the performance (pp) of replays on a beatmap.
 
 Usage: dotnet PerformanceCalculator.dll performance [arguments] [options]
 
 Arguments:
-  beatmap             Required. The beatmap file corresponding to the replays.
+  beatmap                 Required. The beatmap file (.osu) corresponding to the replays.
 
 Options:
-  -?|-h|--help        Show help information
-  -r|--replay <file>  One for each replay. The replay file.
+  -?|-h|--help            Show help information
+  -r|--replay <file>      One for each replay. The replay file.
+  -o|--output <file.txt>  Output results to text file.
 ```
 
 Computes the performance of one or more replays on a beatmap. The provided output includes raw performance attributes alongside the un-weighted pp value.
@@ -86,19 +89,20 @@ pp             : 235.580094436267
 
 ### Profile
 ```
-> dotnet PerformanceCalculator.dll profile --help
+> dotnet run -- profile --help
 
 Computes the total performance (pp) of a profile.
 
 Usage: dotnet PerformanceCalculator.dll profile [arguments] [options]
 
 Arguments:
-  user                 Required. User ID is preferred, but username should also work
-  api key              Required. API Key, which you can get from here: https://osu.ppy.sh/p/api
+  user                       User ID is preferred, but username should also work.
+  api key                    API Key, which you can get from here: https://osu.ppy.sh/p/api
 
 Options:
-  -?|-h|--help         Show help information
-  -r|--ruleset:<ruleset-id>  Optional. The ruleset to compute the profile for. 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. Defaults to osu!.
+  -?|-h|--help               Show help information
+  -r|--ruleset:<ruleset-id>  The ruleset to compute the profile for. 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. Defaults to osu!.
+  -o|--output <file.txt>     Output results to text file.
 ```
 
 Computes the performance of a user profile's performance. Takes 100 top plays of a user and recalculates and reorders them in order of the performance calculator's calculated performance.
@@ -130,7 +134,7 @@ Local PP: 766.7
 
 ### Simulate
 ```
-> dotnet PerformanceCalculator.dll simulate
+> dotnet run -- simulate --help
 
 Computes the performance (pp) of a simulated play.
 
@@ -140,19 +144,18 @@ Options:
   -?|-h|--help  Show help information
 
 Commands:
-  mania         Computes the performance (pp) of a simulated mania play.
-  osu           Computes the performance (pp) of a simulated osu play.
-  taiko         Computes the performance (pp) of a simulated taiko play.
+  mania         Computes the performance (pp) of a simulated osu!mania play.
+  osu           Computes the performance (pp) of a simulated osu! play.
+  taiko         Computes the performance (pp) of a simulated osu!taiko play.
 
 Run 'simulate [command] --help' for more information about a command.
-
 ```
 
 Computes the performance of a simulated play on a beatmap. The provided output includes raw performance attributes and pp value.
 
 #### osu!
 ```
-> dotnet PerformanceCalculator.dll simulate osu --help
+> dotnet run -- simulate osu --help
 
 Computes the performance (pp) of a simulated osu! play.
 
@@ -170,11 +173,12 @@ Options:
   -X|--misses <misses>        Number of misses. Defaults to 0.
   -M|--mehs <mehs>            Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.
   -G|--goods <goods>          Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+  -o|--output <file.txt>      Output results to text file.
 ```
 
 #### osu!taiko
 ```
-> dotnet PerformanceCalculator.dll simulate taiko --help
+> dotnet run -- simulate taiko --help
 
 Computes the performance (pp) of a simulated osu!taiko play.
 
@@ -191,21 +195,23 @@ Options:
   -m|--mod <mod>              One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
   -X|--misses <misses>        Number of misses. Defaults to 0.
   -G|--goods <goods>          Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+  -o|--output <file.txt>      Output results to text file.
 ```
 
 #### osu!mania
 ```
-> dotnet PerformanceCalculator.dll simulate mania --help
+> dotnet run -- simulate mania --help
 
 Computes the performance (pp) of a simulated osu!mania play.
 
 Usage: dotnet PerformanceCalculator.dll simulate mania [arguments] [options]
 
 Arguments:
-  beatmap             Required. The beatmap file (.osu).
+  beatmap                 Required. The beatmap file (.osu).
 
 Options:
-  -?|-h|--help        Show help information
-  -s|--score <score>  Score. An integer 0-1000000.
-  -m|--mod <mod>      One for each mod. The mods to compute the performance with. Values: hr, dt, fl, 4k, 5k, etc...
+  -?|-h|--help            Show help information
+  -s|--score <score>      Score. An integer 0-1000000.
+  -m|--mod <mod>          One for each mod. The mods to compute the performance with. Values: hr, dt, fl, 4k, 5k, etc...
+  -o|--output <file.txt>  Output results to text file.
 ```
