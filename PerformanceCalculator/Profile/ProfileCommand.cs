@@ -39,7 +39,7 @@ namespace PerformanceCalculator.Profile
 
         public override void Execute()
         {
-                        var displayPlays = new List<UserPlayInfo>();
+            var displayPlays = new List<UserPlayInfo>();
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? 0);
 
