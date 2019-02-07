@@ -78,23 +78,21 @@ namespace PerformanceCalculator.Difficulty
                     document.Children.Add(new Span("Speed".PadRight(15) + $": {osu.SpeedStrain.ToString(CultureInfo.InvariantCulture)}"), "\n");
                     document.Children.Add(new Span("MaxCombo".PadRight(15) + $": {osu.MaxCombo.ToString(CultureInfo.InvariantCulture)}"), "\n");
                     document.Children.Add(new Span("AR".PadRight(15) + $": {osu.ApproachRate.ToString(CultureInfo.InvariantCulture)}"), "\n");
-                    document.Children.Add(new Span("OD".PadRight(15) + $": {osu.OverallDifficulty.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("OD".PadRight(15) + $": {osu.OverallDifficulty.ToString(CultureInfo.InvariantCulture)}"), "\n", "\n");
                     break;
                 case TaikoDifficultyAttributes taiko:
                     document.Children.Add(new Span("HitWindow".PadRight(15) + $": {taiko.GreatHitWindow.ToString(CultureInfo.InvariantCulture)}"), "\n");
-                    document.Children.Add(new Span("MaxCombo".PadRight(15) + $": {taiko.MaxCombo.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("MaxCombo".PadRight(15) + $": {taiko.MaxCombo.ToString(CultureInfo.InvariantCulture)}"), "\n", "\n");
                     break;
                 case CatchDifficultyAttributes c:
                     document.Children.Add(new Span("MaxCombo".PadRight(15) + $": {c.MaxCombo.ToString(CultureInfo.InvariantCulture)}"), "\n");
-                    document.Children.Add(new Span("AR".PadRight(15) + $": {c.ApproachRate.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("AR".PadRight(15) + $": {c.ApproachRate.ToString(CultureInfo.InvariantCulture)}"), "\n", "\n");
                     break;
                 case ManiaDifficultyAttributes mania:
-                    document.Children.Add(new Span("HitWindow".PadRight(15) + $": {mania.GreatHitWindow.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("HitWindow".PadRight(15) + $": {mania.GreatHitWindow.ToString(CultureInfo.InvariantCulture)}"), "\n", "\n");
                     break;
             }
         }
-
-        private void writeAttribute(string name, string value) => Console.WriteLine($"{name.PadRight(15)}: {value}");
 
         private List<Mod> getMods(Ruleset ruleset)
         {
