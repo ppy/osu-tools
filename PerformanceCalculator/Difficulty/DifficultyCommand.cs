@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
@@ -40,52 +41,57 @@ namespace PerformanceCalculator.Difficulty
 
         public override void Execute()
         {
+            var document = new Document();
             if (Directory.Exists(Path))
             {
                 foreach (string file in Directory.GetFiles(Path, "*.osu", SearchOption.AllDirectories))
                 {
                     var beatmap = new ProcessorWorkingBeatmap(file);
-                    Console.WriteLine(beatmap.BeatmapInfo.ToString());
+                    document.Children.Add(new Span(beatmap.BeatmapInfo.ToString()), "\n");
 
-                    processBeatmap(beatmap);
+                    processBeatmap(beatmap, document);
                 }
             }
             else
-                processBeatmap(new ProcessorWorkingBeatmap(Path));
+            {
+                var beatmap = new ProcessorWorkingBeatmap(Path);
+                document.Children.Add(new Span(beatmap.BeatmapInfo.ToString()), "\n");
+
+                processBeatmap(beatmap, document);
+            }
+            OutputDocument(document);
         }
 
-        private void processBeatmap(WorkingBeatmap beatmap)
+        private void processBeatmap(WorkingBeatmap beatmap, Document document)
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.RulesetID);
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(getMods(ruleset).ToArray());
 
-            writeAttribute("Ruleset", ruleset.ShortName);
-            writeAttribute("Stars", attributes.StarRating.ToString(CultureInfo.InvariantCulture));
+            document.Children.Add(new Span("Ruleset".PadRight(15) + $": {ruleset.ShortName}"), "\n");
+            document.Children.Add(new Span("Stars".PadRight(15) + $": {attributes.StarRating.ToString(CultureInfo.InvariantCulture)}"), "\n");
 
             switch (attributes)
             {
                 case OsuDifficultyAttributes osu:
-                    writeAttribute("Aim", osu.AimStrain.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("Speed", osu.SpeedStrain.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("MaxCombo", osu.MaxCombo.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("AR", osu.ApproachRate.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("OD", osu.OverallDifficulty.ToString(CultureInfo.InvariantCulture));
+                    document.Children.Add(new Span("Aim".PadRight(15) + $": {osu.AimStrain.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("Speed".PadRight(15) + $": {osu.SpeedStrain.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("MaxCombo".PadRight(15) + $": {osu.MaxCombo.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("AR".PadRight(15) + $": {osu.ApproachRate.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("OD".PadRight(15) + $": {osu.OverallDifficulty.ToString(CultureInfo.InvariantCulture)}"), "\n");
                     break;
                 case TaikoDifficultyAttributes taiko:
-                    writeAttribute("HitWindow", taiko.GreatHitWindow.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("MaxCombo", taiko.MaxCombo.ToString(CultureInfo.InvariantCulture));
+                    document.Children.Add(new Span("HitWindow".PadRight(15) + $": {taiko.GreatHitWindow.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("MaxCombo".PadRight(15) + $": {taiko.MaxCombo.ToString(CultureInfo.InvariantCulture)}"), "\n");
                     break;
                 case CatchDifficultyAttributes c:
-                    writeAttribute("MaxCombo", c.MaxCombo.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("AR", c.ApproachRate.ToString(CultureInfo.InvariantCulture));
+                    document.Children.Add(new Span("MaxCombo".PadRight(15) + $": {c.MaxCombo.ToString(CultureInfo.InvariantCulture)}"), "\n");
+                    document.Children.Add(new Span("AR".PadRight(15) + $": {c.ApproachRate.ToString(CultureInfo.InvariantCulture)}"), "\n");
                     break;
                 case ManiaDifficultyAttributes mania:
-                    writeAttribute("HitWindow", mania.GreatHitWindow.ToString(CultureInfo.InvariantCulture));
+                    document.Children.Add(new Span("HitWindow".PadRight(15) + $": {mania.GreatHitWindow.ToString(CultureInfo.InvariantCulture)}"), "\n");
                     break;
             }
-
-            Console.WriteLine();
         }
 
         private void writeAttribute(string name, string value) => Console.WriteLine($"{name.PadRight(15)}: {value}");
