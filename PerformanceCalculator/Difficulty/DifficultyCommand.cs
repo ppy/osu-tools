@@ -40,8 +40,6 @@ namespace PerformanceCalculator.Difficulty
 
         public override void Execute()
         {
-            var document = new Document();
-
             var results = new List<Result>();
 
             if (Directory.Exists(Path))
@@ -54,6 +52,8 @@ namespace PerformanceCalculator.Difficulty
             }
             else
                 results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
+
+            var document = new Document();
 
             foreach (var group in results.GroupBy(r => r.RulesetId))
             {
