@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.IO;
 using System.Linq;
+using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
@@ -40,55 +40,106 @@ namespace PerformanceCalculator.Difficulty
 
         public override void Execute()
         {
+            var results = new List<Result>();
+
             if (Directory.Exists(Path))
             {
                 foreach (string file in Directory.GetFiles(Path, "*.osu", SearchOption.AllDirectories))
                 {
                     var beatmap = new ProcessorWorkingBeatmap(file);
-                    Console.WriteLine(beatmap.BeatmapInfo.ToString());
-
-                    processBeatmap(beatmap);
+                    results.Add(processBeatmap(beatmap));
                 }
             }
             else
-                processBeatmap(new ProcessorWorkingBeatmap(Path));
+                results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
+
+            var document = new Document();
+
+            foreach (var group in results.GroupBy(r => r.RulesetId))
+            {
+                var ruleset = LegacyHelper.GetRulesetFromLegacyID(group.First().RulesetId);
+
+                document.Children.Add(new Span($"Ruleset: {ruleset.ShortName}"), "\n");
+
+                var grid = new Grid();
+
+                grid.Columns.Add(GridLength.Auto, GridLength.Auto);
+                grid.Children.Add(new Cell("beatmap"), new Cell("star rating"));
+
+                foreach (var attribute in group.First().AttributeData)
+                {
+                    grid.Columns.Add(GridLength.Auto);
+                    grid.Children.Add(new Cell(attribute.name));
+                }
+
+                foreach (var result in group)
+                {
+                    grid.Children.Add(new Cell(result.Beatmap), new Cell(result.Stars) { Align = Align.Right });
+                    foreach (var attribute in result.AttributeData)
+                        grid.Children.Add(new Cell(attribute.value) { Align = Align.Right });
+                }
+
+                document.Children.Add(grid);
+
+                document.Children.Add("\n");
+            }
+
+            OutputDocument(document);
         }
 
-        private void processBeatmap(WorkingBeatmap beatmap)
+        private Result processBeatmap(WorkingBeatmap beatmap)
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.RulesetID);
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(getMods(ruleset).ToArray());
 
-            writeAttribute("Ruleset", ruleset.ShortName);
-            writeAttribute("Stars", attributes.StarRating.ToString(CultureInfo.InvariantCulture));
+            var result = new Result
+            {
+                RulesetId = ruleset.RulesetInfo.ID ?? 0,
+                Beatmap = $"{beatmap.BeatmapInfo.OnlineBeatmapID} - {beatmap.BeatmapInfo}",
+                Stars = attributes.StarRating.ToString("N2")
+            };
 
             switch (attributes)
             {
                 case OsuDifficultyAttributes osu:
-                    writeAttribute("Aim", osu.AimStrain.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("Speed", osu.SpeedStrain.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("MaxCombo", osu.MaxCombo.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("AR", osu.ApproachRate.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("OD", osu.OverallDifficulty.ToString(CultureInfo.InvariantCulture));
+                    result.AttributeData = new List<(string, object)>
+                    {
+                        ("aim rating", osu.AimStrain.ToString("N2")),
+                        ("speed rating", osu.SpeedStrain.ToString("N2")),
+                        ("max combo", osu.MaxCombo),
+                        ("approach rate", osu.ApproachRate.ToString("N2")),
+                        ("overall difficulty", osu.OverallDifficulty.ToString("N2"))
+                    };
+
                     break;
                 case TaikoDifficultyAttributes taiko:
-                    writeAttribute("HitWindow", taiko.GreatHitWindow.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("MaxCombo", taiko.MaxCombo.ToString(CultureInfo.InvariantCulture));
+                    result.AttributeData = new List<(string, object)>
+                    {
+                        ("hit window", taiko.GreatHitWindow.ToString("N2")),
+                        ("max combo", taiko.MaxCombo)
+                    };
+
                     break;
-                case CatchDifficultyAttributes c:
-                    writeAttribute("MaxCombo", c.MaxCombo.ToString(CultureInfo.InvariantCulture));
-                    writeAttribute("AR", c.ApproachRate.ToString(CultureInfo.InvariantCulture));
+                case CatchDifficultyAttributes @catch:
+                    result.AttributeData = new List<(string, object)>
+                    {
+                        ("max combo", @catch.MaxCombo),
+                        ("approach rate", @catch.ApproachRate.ToString("N2"))
+                    };
+
                     break;
                 case ManiaDifficultyAttributes mania:
-                    writeAttribute("HitWindow", mania.GreatHitWindow.ToString(CultureInfo.InvariantCulture));
+                    result.AttributeData = new List<(string, object)>
+                    {
+                        ("hit window", mania.GreatHitWindow.ToString("N2"))
+                    };
+
                     break;
             }
 
-            Console.WriteLine();
+            return result;
         }
-
-        private void writeAttribute(string name, string value) => Console.WriteLine($"{name.PadRight(15)}: {value}");
 
         private List<Mod> getMods(Ruleset ruleset)
         {
@@ -106,6 +157,14 @@ namespace PerformanceCalculator.Difficulty
             }
 
             return mods;
+        }
+
+        private struct Result
+        {
+            public int RulesetId;
+            public string Beatmap;
+            public string Stars;
+            public List<(string name, object value)> AttributeData;
         }
     }
 }
