@@ -95,7 +95,6 @@ namespace PerformanceCalculator.Profile
             int index = 0;
             double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
             double totalLivePP = userData.pp_raw;
-            double totalDiffPP = totalLocalPP - totalLivePP;
 
             index = 0;
             double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);
@@ -103,11 +102,12 @@ namespace PerformanceCalculator.Profile
             //todo: implement properly. this is pretty damn wrong.
             var playcountBonusPP = (totalLivePP - nonBonusLivePP);
             totalLocalPP += playcountBonusPP;
+            double totalDiffPP = totalLocalPP - totalLivePP;
 
             OutputDocument(new Document(
                 new Span($"User:     {userData.username}"), "\n",
                 new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
-                new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:F1} Difference)"), "\n",
+                new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
                 new Grid
                 {
                     Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
