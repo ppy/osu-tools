@@ -133,9 +133,11 @@ namespace PerformanceCalculator.Profile
 
         private dynamic getJsonFromApi(string request)
         {
-            var req = new JsonWebRequest<dynamic>($"{base_url}/api/{request}");
-            req.Perform();
-            return req.ResponseObject;
+            using (var req = new JsonWebRequest<dynamic>($"{base_url}/api/{request}"))
+            {
+                req.Perform();
+                return req.ResponseObject;
+            }
         }
     }
 }
