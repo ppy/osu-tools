@@ -44,10 +44,10 @@ namespace PerformanceCalculator.Profile
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? 0);
 
             Console.WriteLine("Getting user data...");
-            dynamic userData = getJsonFromApi($"get_user?k={Key}&u={ProfileName}&m={Ruleset}&type=username")[0];
+            dynamic userData = getJsonFromApi($"get_user?k={Key}&u={ProfileName}&m={Ruleset}")[0];
 
             Console.WriteLine("Getting user top scores...");
-            foreach (var play in getJsonFromApi($"get_user_best?k={Key}&u={ProfileName}&m={Ruleset}&limit=100&type=username"))
+            foreach (var play in getJsonFromApi($"get_user_best?k={Key}&u={ProfileName}&m={Ruleset}&limit=100"))
             {
                 string beatmapID = play.beatmap_id;
 
