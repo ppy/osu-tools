@@ -52,9 +52,8 @@ namespace PerformanceCalculator.Simulate
             var mods = getMods(ruleset).ToArray();
 
             var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
-            workingBeatmap.Mods.Value = mods;
 
-            var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
+            var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
             var beatmapMaxCombo = GetMaxCombo(beatmap);
             var maxCombo = Combo ?? (int)Math.Round(PercentCombo / 100 * beatmapMaxCombo);

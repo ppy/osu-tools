@@ -27,7 +27,7 @@ namespace PerformanceCalculator
         }
 
         private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null)
-            : base(beatmap.BeatmapInfo)
+            : base(beatmap.BeatmapInfo, null)
         {
             this.beatmap = beatmap;
 

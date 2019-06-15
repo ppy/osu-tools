@@ -60,7 +60,7 @@ namespace PerformanceCalculator.Profile
 
                 Mod[] mods = ruleset.ConvertLegacyMods((LegacyMods)play.enabled_mods).ToArray();
 
-                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id) { Mods = { Value = mods } };
+                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id);
 
                 var score = new ProcessorScoreParser(working).Parse(new ScoreInfo
                 {
