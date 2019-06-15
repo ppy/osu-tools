@@ -113,6 +113,7 @@ namespace PerformanceCalculator.Difficulty
                     };
 
                     break;
+
                 case TaikoDifficultyAttributes taiko:
                     result.AttributeData = new List<(string, object)>
                     {
@@ -121,6 +122,7 @@ namespace PerformanceCalculator.Difficulty
                     };
 
                     break;
+
                 case CatchDifficultyAttributes @catch:
                     result.AttributeData = new List<(string, object)>
                     {
@@ -129,6 +131,7 @@ namespace PerformanceCalculator.Difficulty
                     };
 
                     break;
+
                 case ManiaDifficultyAttributes mania:
                     result.AttributeData = new List<(string, object)>
                     {
@@ -148,11 +151,13 @@ namespace PerformanceCalculator.Difficulty
                 return mods;
 
             var availableMods = ruleset.GetAllMods().ToList();
+
             foreach (var modString in Mods)
             {
                 Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
                 if (newMod == null)
                     throw new ArgumentException($"Invalid mod provided: {modString}");
+
                 mods.Add(newMod);
             }
 

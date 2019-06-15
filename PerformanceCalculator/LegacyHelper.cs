@@ -18,12 +18,16 @@ namespace PerformanceCalculator
             {
                 default:
                     throw new ArgumentException("Invalid ruleset ID provided.");
+
                 case 0:
                     return new OsuRuleset();
+
                 case 1:
                     return new TaikoRuleset();
+
                 case 2:
                     return new CatchRuleset();
+
                 case 3:
                     return new ManiaRuleset();
             }

@@ -20,7 +20,7 @@ namespace PerformanceCalculator.Simulate
     [Command(Name = "simulate osu", Description = "Computes the performance (pp) of a simulated osu! play.")]
     public class OsuSimulateCommand : SimulateCommand
     {
-                [UsedImplicitly]
+        [UsedImplicitly]
         [Required, FileExists]
         [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu).")]
         public override string Beatmap { get; }
@@ -111,6 +111,7 @@ namespace PerformanceCalculator.Simulate
         {
             WriteAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%");
             WriteAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)"));
+
             foreach (var statistic in scoreInfo.Statistics)
             {
                 WriteAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture));

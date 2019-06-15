@@ -94,11 +94,13 @@ namespace PerformanceCalculator.Simulate
                 return mods;
 
             var availableMods = ruleset.GetAllMods().ToList();
+
             foreach (var modString in Mods)
             {
                 Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
                 if (newMod == null)
                     throw new ArgumentException($"Invalid mod provided: {modString}");
+
                 mods.Add(newMod);
             }
 
