@@ -36,8 +36,6 @@ namespace PerformanceCalculator.Performance
                 using (var stream = File.OpenRead(f))
                     score = scoreParser.Parse(stream);
 
-                workingBeatmap.Mods.Value = score.ScoreInfo.Mods;
-
                 // Convert + process beatmap
                 var categoryAttribs = new Dictionary<string, double>();
                 double pp = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator(workingBeatmap, score.ScoreInfo).Calculate(categoryAttribs);

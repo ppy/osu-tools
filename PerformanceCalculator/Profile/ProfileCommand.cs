@@ -47,11 +47,13 @@ namespace PerformanceCalculator.Profile
             dynamic userData = getJsonFromApi($"get_user?k={Key}&u={ProfileName}&m={Ruleset}")[0];
 
             Console.WriteLine("Getting user top scores...");
+
             foreach (var play in getJsonFromApi($"get_user_best?k={Key}&u={ProfileName}&m={Ruleset}&limit=100"))
             {
                 string beatmapID = play.beatmap_id;
 
                 string cachePath = Path.Combine("cache", $"{beatmapID}.osu");
+
                 if (!File.Exists(cachePath))
                 {
                     Console.WriteLine($"Downloading {beatmapID}.osu...");
@@ -60,7 +62,7 @@ namespace PerformanceCalculator.Profile
 
                 Mod[] mods = ruleset.ConvertLegacyMods((LegacyMods)play.enabled_mods).ToArray();
 
-                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id) { Mods = { Value = mods } };
+                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id);
 
                 var score = new ProcessorScoreParser(working).Parse(new ScoreInfo
                 {
