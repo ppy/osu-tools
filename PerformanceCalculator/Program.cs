@@ -12,10 +12,10 @@ using PerformanceCalculator.Simulate;
 namespace PerformanceCalculator
 {
     [Command("dotnet PerformanceCalculator.dll")]
-    [Subcommand("difficulty", typeof(DifficultyCommand))]
-    [Subcommand("performance", typeof(PerformanceCommand))]
-    [Subcommand("profile", typeof(ProfileCommand))]
-    [Subcommand("simulate", typeof(SimulateListingCommand))]
+    [Subcommand(typeof(DifficultyCommand))]
+    [Subcommand(typeof(PerformanceCommand))]
+    [Subcommand(typeof(ProfileCommand))]
+    [Subcommand(typeof(SimulateListingCommand))]
     [HelpOption("-?|-h|--help")]
     public class Program
     {

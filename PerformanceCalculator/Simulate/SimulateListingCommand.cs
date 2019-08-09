@@ -6,10 +6,10 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace PerformanceCalculator.Simulate
 {
-    [Command(Name = "performance", Description = "Computes the performance (pp) of a simulated play.")]
-    [Subcommand("osu", typeof(OsuSimulateCommand))]
-    [Subcommand("taiko", typeof(TaikoSimulateCommand))]
-    [Subcommand("mania", typeof(ManiaSimulateCommand))]
+    [Command(Name = "simulate", Description = "Computes the performance (pp) of a simulated play.")]
+    [Subcommand(typeof(OsuSimulateCommand))]
+    [Subcommand(typeof(TaikoSimulateCommand))]
+    [Subcommand(typeof(ManiaSimulateCommand))]
     public class SimulateListingCommand
     {
         [UsedImplicitly]
