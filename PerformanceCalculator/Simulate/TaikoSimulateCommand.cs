@@ -17,7 +17,7 @@ using osu.Game.Scoring;
 
 namespace PerformanceCalculator.Simulate
 {
-    [Command(Name = "simulate taiko", Description = "Computes the performance (pp) of a simulated osu!taiko play.")]
+    [Command(Name = "taiko", Description = "Computes the performance (pp) of a simulated osu!taiko play.")]
     public class TaikoSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]

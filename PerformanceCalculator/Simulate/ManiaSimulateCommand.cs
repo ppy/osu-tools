@@ -14,7 +14,7 @@ using osu.Game.Scoring;
 
 namespace PerformanceCalculator.Simulate
 {
-    [Command(Name = "simulate mania", Description = "Computes the performance (pp) of a simulated osu!mania play.")]
+    [Command(Name = "mania", Description = "Computes the performance (pp) of a simulated osu!mania play.")]
     public class ManiaSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]
