@@ -66,8 +66,8 @@ namespace PerformanceCalculator.Simulate
 
         protected override void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
         {
-            WriteAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%");
-            WriteAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)"));
+            WriteAttribute("ApproachRate", FormattableString.Invariant($"{beatmap.BeatmapInfo.BaseDifficulty.ApproachRate}"));
+            WriteAttribute("MaxCombo", FormattableString.Invariant($"{scoreInfo.MaxCombo}"));
 
             foreach (var statistic in scoreInfo.Statistics)
             {
