@@ -51,7 +51,7 @@ namespace PerformanceCalculator.Simulate
                 [HitResult.Ok] = 0
             };
 
-        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.Count - s.NestedHitObjects.OfType<TinyDroplet>().Count() - 2) + beatmap.HitObjects.OfType<Fruit>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + (beatmap.HitObjects.OfType<JuiceStream>().Count() * 2);
+        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<Fruit>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + (beatmap.HitObjects.OfType<JuiceStream>().Count() * 2) + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<Droplet>().Sum(d => (d is TinyDroplet) ? 0 : 1));
 
         protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
         {
