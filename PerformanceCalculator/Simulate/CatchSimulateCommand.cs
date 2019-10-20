@@ -47,7 +47,7 @@ namespace PerformanceCalculator.Simulate
                 [HitResult.Meh] = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count()),
                 [HitResult.Miss] = 0,
                 [HitResult.Ok] = 0
-            }; ;
+            };
         }
 
         protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.Count() - s.NestedHitObjects.OfType<TinyDroplet>().Count() - 2) + beatmap.HitObjects.OfType<Fruit>().Sum(f => !(f is JuiceStream) && !(f is Droplet) ? 1 : 0) + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + beatmap.HitObjects.OfType<JuiceStream>().Count() * 2;
