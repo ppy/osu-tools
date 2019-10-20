@@ -9,6 +9,7 @@ namespace PerformanceCalculator.Simulate
     [Command(Name = "simulate", Description = "Computes the performance (pp) of a simulated play.")]
     [Subcommand(typeof(OsuSimulateCommand))]
     [Subcommand(typeof(TaikoSimulateCommand))]
+	[Subcommand(typeof(CatchSimulateCommand))]
     [Subcommand(typeof(ManiaSimulateCommand))]
     public class SimulateListingCommand
     {
