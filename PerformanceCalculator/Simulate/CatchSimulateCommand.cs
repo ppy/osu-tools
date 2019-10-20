@@ -41,26 +41,27 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new CatchRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
-        {
-            return new Dictionary<HitResult, int>()
+        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood) =>
+            new Dictionary<HitResult, int>
             {
-                [HitResult.Perfect] = beatmap.HitObjects.OfType<Fruit>().Sum(f => !(f is JuiceStream) && !(f is Droplet) ? 1 : 0) + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + beatmap.HitObjects.OfType<JuiceStream>().Count() * 2/* - beatmap.HitObjects.OfType<BananaShower>().Sum(s => s.NestedHitObjects.Count - 1)*/,
-                [HitResult.Good] = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.Count() - s.NestedHitObjects.OfType<TinyDroplet>().Count() - 2),
+                [HitResult.Perfect] = beatmap.HitObjects.OfType<Fruit>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + (beatmap.HitObjects.OfType<JuiceStream>().Count() * 2) /* - beatmap.HitObjects.OfType<BananaShower>().Sum(s => s.NestedHitObjects.Count - 1)*/,
+                [HitResult.Good] = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<Droplet>().Sum(d => (d is TinyDroplet) ? 0 : 1)), //beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.Count() - s.NestedHitObjects.OfType<TinyDroplet>().Count() - s.RepeatCount - 2), // -2 because of slider start and end objects
                 [HitResult.Meh] = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count()),
                 [HitResult.Miss] = 0,
                 [HitResult.Ok] = 0
             };
-        }
 
-        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.Count() - s.NestedHitObjects.OfType<TinyDroplet>().Count() - 2) + beatmap.HitObjects.OfType<Fruit>().Sum(f => !(f is JuiceStream) && !(f is Droplet) ? 1 : 0) + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + beatmap.HitObjects.OfType<JuiceStream>().Count() * 2;
+        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.Count - s.NestedHitObjects.OfType<TinyDroplet>().Count() - 2) + beatmap.HitObjects.OfType<Fruit>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + (beatmap.HitObjects.OfType<JuiceStream>().Count() * 2);
 
         protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
         {
-            int Fruits = statistics[HitResult.Perfect] + statistics[HitResult.Good] + statistics[HitResult.Meh];
-            int TotalFruits = Fruits + statistics[HitResult.Miss] + statistics[HitResult.Ok];
-            if (TotalFruits == 0) return 1;
-            return (double)Fruits / (double)TotalFruits;
+            double fruits = statistics[HitResult.Perfect] + statistics[HitResult.Good] + statistics[HitResult.Meh];
+            double totalFruits = fruits + statistics[HitResult.Miss] + statistics[HitResult.Ok];
+
+            if (totalFruits == 0)
+                return 1;
+
+            return fruits / totalFruits;
         }
 
         protected override void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
