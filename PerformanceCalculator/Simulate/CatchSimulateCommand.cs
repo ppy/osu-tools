@@ -44,8 +44,8 @@ namespace PerformanceCalculator.Simulate
         protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood) =>
             new Dictionary<HitResult, int>
             {
-                [HitResult.Perfect] = beatmap.HitObjects.OfType<Fruit>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + (beatmap.HitObjects.OfType<JuiceStream>().Count() * 2) /* - beatmap.HitObjects.OfType<BananaShower>().Sum(s => s.NestedHitObjects.Count - 1)*/,
-                [HitResult.Good] = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<Droplet>().Sum(d => (d is TinyDroplet) ? 0 : 1)), //beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.Count() - s.NestedHitObjects.OfType<TinyDroplet>().Count() - s.RepeatCount - 2), // -2 because of slider start and end objects
+                [HitResult.Perfect] = beatmap.HitObjects.OfType<Fruit>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount) + (beatmap.HitObjects.OfType<JuiceStream>().Count() * 2),
+                [HitResult.Good] = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<Droplet>().Sum(d => (d is TinyDroplet) ? 0 : 1)),
                 [HitResult.Meh] = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count()),
                 [HitResult.Miss] = 0,
                 [HitResult.Ok] = 0
