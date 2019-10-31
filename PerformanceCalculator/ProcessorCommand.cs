@@ -31,9 +31,7 @@ namespace PerformanceCalculator
             // todo: make usable by other command
             using (var writer = new StringWriter())
             {
-                var rect = new Rect(0, 0, 250, Size.Infinity);
-
-                ConsoleRenderer.RenderDocumentToText(document, new TextRenderTarget(writer), rect);
+                ConsoleRenderer.RenderDocumentToText(document, new TextRenderTarget(writer), new Rect(0, 0, 250, Size.Infinity));
 
                 var str = writer.GetStringBuilder().ToString();
 
