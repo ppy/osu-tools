@@ -4,8 +4,10 @@
 using System.IO;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.Graphics.Video;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
+using osu.Game.IO;
 
 namespace PerformanceCalculator
 {
@@ -40,12 +42,13 @@ namespace PerformanceCalculator
         private static Beatmap readFromFile(string filename)
         {
             using (var stream = File.OpenRead(filename))
-            using (var streamReader = new StreamReader(stream))
-                return Decoder.GetDecoder<Beatmap>(streamReader).Decode(streamReader);
+            using (var reader = new LineBufferedReader(stream))
+                return Decoder.GetDecoder<Beatmap>(reader).Decode(reader);
         }
 
         protected override IBeatmap GetBeatmap() => beatmap;
         protected override Texture GetBackground() => null;
+        protected override VideoSprite GetVideo() => null;
         protected override Track GetTrack() => null;
     }
 }
