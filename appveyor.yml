@@ -8,7 +8,7 @@ install:
 before_build:
   - ps: dotnet --info # Useful when version mismatch between CI and local
 build:
-  project: osu-tools.sln
+  project: osu.Tools.sln
   parallel: true
   verbosity: minimal
   publish_nuget: false
