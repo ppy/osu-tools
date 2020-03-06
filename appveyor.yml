@@ -7,6 +7,7 @@ install:
   - cmd: git submodule update --init --recursive # Required for submodules
 before_build:
   - ps: dotnet --info # Useful when version mismatch between CI and local
+  - ps: dotnet restore -v quiet
 build:
   project: osu.Tools.sln
   parallel: true
