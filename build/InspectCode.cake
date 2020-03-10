@@ -1,5 +1,5 @@
-#addin "nuget:?package=CodeFileSanity&version=0.0.21"
-#addin "nuget:?package=JetBrains.ReSharper.CommandLineTools&version=2019.1.1"
+#addin "nuget:?package=CodeFileSanity&version=0.0.33"
+#addin "nuget:?package=JetBrains.ReSharper.CommandLineTools&version=2019.3.2"
 #tool "nuget:?package=NVika.MSBuild&version=1.0.1"
 var nVikaToolPath = GetFiles("./tools/NVika.MSBuild.*/tools/NVika.exe").First();
 
@@ -7,31 +7,28 @@ var nVikaToolPath = GetFiles("./tools/NVika.MSBuild.*/tools/NVika.exe").First();
 // ARGUMENTS
 ///////////////////////////////////////////////////////////////////////////////
 
-var target = Argument("target", "Build");
+var target = Argument("target", "CodeAnalysis");
 var configuration = Argument("configuration", "Release");
 
 var rootDirectory = new DirectoryPath("..");
-var solution = rootDirectory.CombineWithFilePath("osu.Tools.sln");
+var sln = rootDirectory.CombineWithFilePath("osu.Tools.sln");
 
 ///////////////////////////////////////////////////////////////////////////////
 // TASKS
 ///////////////////////////////////////////////////////////////////////////////
 
-Task("Compile")
-    .Does(() => {
-        DotNetCoreBuild(solution.FullPath, new DotNetCoreBuildSettings {
-            Configuration = configuration,
-        });
-    });
-
-// windows only because both inspectcore and nvika depend on net45
+// windows only because both inspectcode and nvika depend on net45
 Task("InspectCode")
     .WithCriteria(IsRunningOnWindows())
-    .IsDependentOn("Compile")
     .Does(() => {
-        InspectCode(solution, new InspectCodeSettings {
+        InspectCode(sln, new InspectCodeSettings {
             CachesHome = "inspectcode",
             OutputFile = "inspectcodereport.xml",
+            ArgumentCustomization = arg => {
+                if (AppVeyor.IsRunningOnAppVeyor) // Don't flood CI output
+                    arg.Append("--verbosity:WARN");
+                    return arg;
+            },
         });
 
         int returnCode = StartProcess(nVikaToolPath, $@"parsereport ""inspectcodereport.xml"" --treatwarningsaserrors");
@@ -47,7 +44,7 @@ Task("CodeFileSanity")
         });
     });
 
-Task("Build")
+Task("CodeAnalysis")
     .IsDependentOn("CodeFileSanity")
     .IsDependentOn("InspectCode");
 
