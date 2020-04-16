@@ -28,7 +28,7 @@ namespace PerformanceCalculator.Performance
         public override void Execute()
         {
             var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
-            var scoreParser = new ProcessorScoreParser(workingBeatmap);
+            var scoreParser = new ProcessorScoreDecoder(workingBeatmap);
 
             foreach (var f in Replays)
             {

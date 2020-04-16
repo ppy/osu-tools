@@ -60,11 +60,11 @@ namespace PerformanceCalculator.Profile
                     new FileWebRequest(cachePath, $"{base_url}/osu/{beatmapID}").Perform();
                 }
 
-                Mod[] mods = ruleset.ConvertLegacyMods((LegacyMods)play.enabled_mods).ToArray();
+                Mod[] mods = ruleset.ConvertFromLegacyMods((LegacyMods)play.enabled_mods).ToArray();
 
                 var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id);
 
-                var score = new ProcessorScoreParser(working).Parse(new ScoreInfo
+                var score = new ProcessorScoreDecoder(working).Parse(new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
                     MaxCombo = play.maxcombo,
