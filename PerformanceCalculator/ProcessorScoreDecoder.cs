@@ -9,13 +9,13 @@ using osu.Game.Scoring.Legacy;
 namespace PerformanceCalculator
 {
     /// <summary>
-    /// A <see cref="LegacyScoreParser"/> which has a predefined beatmap and rulesets.
+    /// A <see cref="LegacyScoreDecoder"/> which has a predefined beatmap and rulesets.
     /// </summary>
-    public class ProcessorScoreParser : LegacyScoreParser
+    public class ProcessorScoreDecoder : LegacyScoreDecoder
     {
         private readonly WorkingBeatmap beatmap;
 
-        public ProcessorScoreParser(WorkingBeatmap beatmap)
+        public ProcessorScoreDecoder(WorkingBeatmap beatmap)
         {
             this.beatmap = beatmap;
         }

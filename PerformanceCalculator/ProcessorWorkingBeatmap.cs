@@ -4,7 +4,6 @@
 using System.IO;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
-using osu.Framework.Graphics.Video;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
@@ -48,7 +47,6 @@ namespace PerformanceCalculator
 
         protected override IBeatmap GetBeatmap() => beatmap;
         protected override Texture GetBackground() => null;
-        protected override VideoSprite GetVideo() => null;
         protected override Track GetTrack() => null;
     }
 }
