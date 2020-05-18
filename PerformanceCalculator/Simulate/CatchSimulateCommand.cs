@@ -49,56 +49,52 @@ namespace PerformanceCalculator.Simulate
         public override int Misses { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-M|--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "-T|--tiny-droplets <tinys>", Description = "Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Mehs { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "-D|--droplets <droplets>", Description = "Number of droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Goods { get; }
 
         public override Ruleset Ruleset => new CatchRuleset();
 
-        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.Count(h => h is Fruit) + beatmap.HitObjects.OfType<JuiceStream>().SelectMany(j => j.NestedHitObjects).Count(h => !(h is TinyDroplet));
+        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.Count(h => h is Fruit)
+                                                                + beatmap.HitObjects.OfType<JuiceStream>().SelectMany(j => j.NestedHitObjects).Count(h => !(h is TinyDroplet));
 
         protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
             var maxCombo = GetMaxCombo(beatmap);
-            int maxDroplets = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count());
-            int maxDrops = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<Droplet>().Count()) - maxDroplets;
-
-            int fruits = beatmap.HitObjects.OfType<Fruit>().Count();
-            int repeatCounts = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount);
-            int juiceStreams = 2 * beatmap.HitObjects.OfType<JuiceStream>().Count();
-
-            int maxFruits = fruits + repeatCounts + juiceStreams;
+            int maxTinyDroplets = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count());
+            int maxDroplets = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<Droplet>().Count()) - maxTinyDroplets;
+            int maxFruits = beatmap.HitObjects.OfType<Fruit>().Count() + 2 * beatmap.HitObjects.OfType<JuiceStream>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount);
 
             // Either given or max value minus misses
-            int countDrops = countGood ?? Math.Max(0, maxDrops - countMiss);
+            int countDroplets = countGood ?? Math.Max(0, maxDroplets - countMiss);
 
             // Max value minus whatever misses are left. Negative if impossible missCount
-            int countFruits = maxFruits - (countMiss - (maxDrops - countDrops));
+            int countFruits = maxFruits - (countMiss - (maxDroplets - countDroplets));
 
             // Either given or the max amount of hit objects with respect to accuracy minus the already calculated fruits and drops.
             // Negative if accuracy not feasable with missCount.
-            int countDroplets = countMeh ?? (int)Math.Round(accuracy * (maxCombo + maxDroplets)) - countFruits - countDrops;
+            int countTinyDroplets = countMeh ?? (int)Math.Round(accuracy * (maxCombo + maxTinyDroplets)) - countFruits - countDroplets;
 
             // Whatever droplets are left
-            int dropMisses = maxDroplets - countDroplets;
+            int countTinyMisses = maxTinyDroplets - countTinyDroplets;
 
             return new Dictionary<HitResult, int>
             {
-                { HitResult.Great, countFruits },
-                { HitResult.Good, countDrops },
-                { HitResult.Ok, dropMisses },
-                { HitResult.Meh, countDroplets },
+                { HitResult.Perfect, countFruits },
+                { HitResult.LargeTickHit, countDroplets },
+                { HitResult.SmallTickHit, countTinyDroplets },
+                { HitResult.SmallTickMiss, countTinyMisses },
                 { HitResult.Miss, countMiss }
             };
         }
 
         protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
         {
-            double hits = statistics[HitResult.Great] + statistics[HitResult.Good] + statistics[HitResult.Meh];
-            double total = hits + statistics[HitResult.Miss] + statistics[HitResult.Ok];
+            double hits = statistics[HitResult.Perfect] + statistics[HitResult.LargeTickHit] + statistics[HitResult.SmallTickHit];
+            double total = hits + statistics[HitResult.Miss] + statistics[HitResult.SmallTickMiss];
 
             return hits / total;
         }
