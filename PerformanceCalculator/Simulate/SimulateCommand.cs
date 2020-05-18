@@ -67,7 +67,8 @@ namespace PerformanceCalculator.Simulate
                 MaxCombo = maxCombo,
                 Statistics = statistics,
                 Mods = mods,
-                TotalScore = score
+                TotalScore = score,
+                RulesetID = Ruleset.RulesetInfo.ID ?? 0
             };
 
             var categoryAttribs = new Dictionary<string, double>();
