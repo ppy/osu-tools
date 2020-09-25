@@ -109,17 +109,18 @@ namespace PerformanceCalculator.Simulate
 
         protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
         {
-            var playInfo = new List<string>();
-
-            playInfo.Add(GetAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%"));
-            playInfo.Add(GetAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)")));
+            var playInfo = new List<string>
+            {
+                GetAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%"),
+                GetAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)"))
+            };
 
             foreach (var statistic in scoreInfo.Statistics)
             {
                 playInfo.Add(GetAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture)));
             }
 
-            return String.Join("\n", playInfo);
+            return string.Join("\n", playInfo);
         }
     }
 }
