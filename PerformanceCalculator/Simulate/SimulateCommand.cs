@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
-using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -74,18 +74,22 @@ namespace PerformanceCalculator.Simulate
             var categoryAttribs = new Dictionary<string, double>();
             double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
 
-            Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
+            var document = new Document();
 
-            WritePlayInfo(scoreInfo, beatmap);
+            document.Children.Add(new Span(workingBeatmap.BeatmapInfo.ToString()), "\n");
 
-            WriteAttribute("Mods", mods.Length > 0
+            document.Children.Add(new Span(GetPlayInfo(scoreInfo, beatmap)), "\n");
+
+            document.Children.Add(new Span(GetAttribute("Mods", mods.Length > 0
                 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
-                : "None");
+                : "None")), "\n");
 
             foreach (var kvp in categoryAttribs)
-                WriteAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
+                document.Children.Add(new Span(GetAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture))), "\n");
 
-            WriteAttribute("pp", pp.ToString(CultureInfo.InvariantCulture));
+            document.Children.Add(new Span(GetAttribute("pp", pp.ToString(CultureInfo.InvariantCulture))));
+
+            OutputDocument(document);
         }
 
         private List<Mod> getMods(Ruleset ruleset)
@@ -108,7 +112,7 @@ namespace PerformanceCalculator.Simulate
             return mods;
         }
 
-        protected abstract void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap);
+        protected abstract string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap);
 
         protected abstract int GetMaxCombo(IBeatmap beatmap);
 
@@ -116,6 +120,6 @@ namespace PerformanceCalculator.Simulate
 
         protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 
-        protected void WriteAttribute(string name, string value) => Console.WriteLine($"{name.PadRight(15)}: {value}");
+        protected string GetAttribute(string name, string value) => $"{name.PadRight(15)}: {value}";
     }
 }

@@ -51,9 +51,9 @@ namespace PerformanceCalculator.Simulate
             };
         }
 
-        protected override void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
+        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
         {
-            WriteAttribute("Score", scoreInfo.TotalScore.ToString(CultureInfo.InvariantCulture));
+            return GetAttribute("Score", scoreInfo.TotalScore.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

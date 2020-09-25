@@ -94,13 +94,17 @@ namespace PerformanceCalculator.Simulate
             return (double)((2 * countGreat) + countGood) / (2 * total);
         }
 
-        protected override void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
+        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
         {
-            WriteAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%");
-            WriteAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)"));
-            WriteAttribute("Misses", scoreInfo.Statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture));
-            WriteAttribute("Goods", scoreInfo.Statistics[HitResult.Good].ToString(CultureInfo.InvariantCulture));
-            WriteAttribute("Greats", scoreInfo.Statistics[HitResult.Great].ToString(CultureInfo.InvariantCulture));
+            var playInfo = new List<string>();
+
+            playInfo.Add(GetAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%"));
+            playInfo.Add(GetAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)")));
+            playInfo.Add(GetAttribute("Misses", scoreInfo.Statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture)));
+            playInfo.Add(GetAttribute("Goods", scoreInfo.Statistics[HitResult.Good].ToString(CultureInfo.InvariantCulture)));
+            playInfo.Add(GetAttribute("Greats", scoreInfo.Statistics[HitResult.Great].ToString(CultureInfo.InvariantCulture)));
+
+            return String.Join("\n", playInfo);
         }
     }
 }

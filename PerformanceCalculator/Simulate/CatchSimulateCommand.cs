@@ -99,15 +99,19 @@ namespace PerformanceCalculator.Simulate
             return hits / total;
         }
 
-        protected override void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
+        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
         {
-            WriteAttribute("ApproachRate", FormattableString.Invariant($"{beatmap.BeatmapInfo.BaseDifficulty.ApproachRate}"));
-            WriteAttribute("MaxCombo", FormattableString.Invariant($"{scoreInfo.MaxCombo}"));
+            var playInfo = new List<string>();
+
+            playInfo.Add(GetAttribute("ApproachRate", FormattableString.Invariant($"{beatmap.BeatmapInfo.BaseDifficulty.ApproachRate}")));
+            playInfo.Add(GetAttribute("MaxCombo", FormattableString.Invariant($"{scoreInfo.MaxCombo}")));
 
             foreach (var statistic in scoreInfo.Statistics)
             {
-                WriteAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture));
+                playInfo.Add(GetAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture)));
             }
+
+            return String.Join("\n", playInfo);
         }
     }
 }
