@@ -4,9 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using Newtonsoft.Json.Linq;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -45,6 +48,10 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         public virtual int? Goods { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
+        public bool OutputJson { get; }
+
         public override void Execute()
         {
             var ruleset = Ruleset;
@@ -74,18 +81,49 @@ namespace PerformanceCalculator.Simulate
             var categoryAttribs = new Dictionary<string, double>();
             double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
 
-            Console.WriteLine(workingBeatmap.BeatmapInfo.ToString());
+            if (OutputJson)
+            {
+                var o = new JObject
+                {
+                    { "Beatmap", workingBeatmap.BeatmapInfo.ToString() }
+                };
 
-            WritePlayInfo(scoreInfo, beatmap);
+                foreach (var info in getPlayValues(scoreInfo, beatmap))
+                    o[info.Key] = info.Value;
 
-            WriteAttribute("Mods", mods.Length > 0
-                ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
-                : "None");
+                o["Mods"] = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None";
 
-            foreach (var kvp in categoryAttribs)
-                WriteAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture));
+                foreach (var kvp in categoryAttribs)
+                    o[kvp.Key] = kvp.Value;
 
-            WriteAttribute("pp", pp.ToString(CultureInfo.InvariantCulture));
+                o["pp"] = pp;
+
+                string json = o.ToString();
+
+                Console.Write(json);
+
+                if (OutputFile != null)
+                    File.WriteAllText(OutputFile, json);
+            }
+            else
+            {
+                var document = new Document();
+
+                document.Children.Add(new Span(workingBeatmap.BeatmapInfo.ToString()), "\n");
+
+                document.Children.Add(new Span(GetPlayInfo(scoreInfo, beatmap)), "\n");
+
+                document.Children.Add(new Span(GetAttribute("Mods", mods.Length > 0
+                    ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
+                    : "None")), "\n");
+
+                foreach (var kvp in categoryAttribs)
+                    document.Children.Add(new Span(GetAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture))), "\n");
+
+                document.Children.Add(new Span(GetAttribute("pp", pp.ToString(CultureInfo.InvariantCulture))));
+
+                OutputDocument(document);
+            }
         }
 
         private List<Mod> getMods(Ruleset ruleset)
@@ -108,7 +146,23 @@ namespace PerformanceCalculator.Simulate
             return mods;
         }
 
-        protected abstract void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap);
+        private Dictionary<string, double> getPlayValues(ScoreInfo scoreInfo, IBeatmap beatmap)
+        {
+            var playInfo = new Dictionary<string, double>
+            {
+                { "Accuracy", scoreInfo.Accuracy * 100 },
+                { "Combo", scoreInfo.MaxCombo },
+            };
+
+            foreach (var statistic in scoreInfo.Statistics)
+            {
+                playInfo.Add(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value);
+            }
+
+            return playInfo;
+        }
+
+        protected abstract string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap);
 
         protected abstract int GetMaxCombo(IBeatmap beatmap);
 
@@ -116,6 +170,6 @@ namespace PerformanceCalculator.Simulate
 
         protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 
-        protected void WriteAttribute(string name, string value) => Console.WriteLine($"{name.PadRight(15)}: {value}");
+        protected string GetAttribute(string name, string value) => $"{name.PadRight(15)}: {value}";
     }
 }

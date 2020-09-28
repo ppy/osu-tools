@@ -107,15 +107,20 @@ namespace PerformanceCalculator.Simulate
             return (double)((6 * countGreat) + (2 * countGood) + countMeh) / (6 * total);
         }
 
-        protected override void WritePlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
+        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
         {
-            WriteAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%");
-            WriteAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)"));
+            var playInfo = new List<string>
+            {
+                GetAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%"),
+                GetAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)"))
+            };
 
             foreach (var statistic in scoreInfo.Statistics)
             {
-                WriteAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture));
+                playInfo.Add(GetAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture)));
             }
+
+            return string.Join("\n", playInfo);
         }
     }
 }
