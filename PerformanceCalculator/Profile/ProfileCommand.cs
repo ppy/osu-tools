@@ -67,6 +67,7 @@ namespace PerformanceCalculator.Profile
                 var score = new ProcessorScoreDecoder(working).Parse(new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
+                    TotalScore = play.score,
                     MaxCombo = play.maxcombo,
                     Mods = mods,
                     Statistics = new Dictionary<HitResult, int>
