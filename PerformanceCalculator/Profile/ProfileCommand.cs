@@ -14,6 +14,7 @@ using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
+using osu.Game.Scoring.Legacy;
 
 namespace PerformanceCalculator.Profile
 {
@@ -64,22 +65,23 @@ namespace PerformanceCalculator.Profile
 
                 var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id);
 
-                var score = new ProcessorScoreDecoder(working).Parse(new ScoreInfo
+                var scoreInfo = new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
                     TotalScore = play.score,
                     MaxCombo = play.maxcombo,
                     Mods = mods,
-                    Statistics = new Dictionary<HitResult, int>
-                    {
-                        { HitResult.Perfect, (int)play.countgeki },
-                        { HitResult.Great, (int)play.count300 },
-                        { HitResult.Good, (int)play.count100 },
-                        { HitResult.Ok, (int)play.countkatu },
-                        { HitResult.Meh, (int)play.count50 },
-                        { HitResult.Miss, (int)play.countmiss }
-                    }
-                });
+                    Statistics = new Dictionary<HitResult, int>()
+                };
+
+                scoreInfo.SetCount300((int)play.count300);
+                scoreInfo.SetCountGeki((int)play.countgeki);
+                scoreInfo.SetCount100((int)play.count100);
+                scoreInfo.SetCountKatu((int)play.countkatu);
+                scoreInfo.SetCount50((int)play.count50);
+                scoreInfo.SetCountMiss((int)play.countmiss);
+
+                var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                 var thisPlay = new UserPlayInfo
                 {
