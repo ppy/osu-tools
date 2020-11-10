@@ -72,7 +72,7 @@ namespace PerformanceCalculator.Profile
                     Mods = mods,
                     Statistics = new Dictionary<HitResult, int>
                     {
-                        { HitResult.Perfect, (Ruleset == 2) ? (int)play.count300 : (int)play.countgeki },
+                        { HitResult.Perfect, (int)play.countgeki },
                         { HitResult.Great, (int)play.count300 },
                         { HitResult.Good, (int)play.count100 },
                         { HitResult.Ok, (int)play.countkatu },
