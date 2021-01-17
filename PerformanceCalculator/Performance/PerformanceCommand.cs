@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -38,7 +39,11 @@ namespace PerformanceCalculator.Performance
 
                 // Convert + process beatmap
                 var categoryAttribs = new Dictionary<string, double>();
-                double pp = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator(workingBeatmap, score.ScoreInfo).Calculate(categoryAttribs);
+
+                var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator(workingBeatmap, score.ScoreInfo);
+                Trace.Assert(performanceCalculator != null);
+
+                double pp = performanceCalculator.Calculate(categoryAttribs);
 
                 Console.WriteLine(f);
                 writeAttribute("Player", score.ScoreInfo.User.Username);

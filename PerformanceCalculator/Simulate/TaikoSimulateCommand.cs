@@ -78,7 +78,7 @@ namespace PerformanceCalculator.Simulate
             return new Dictionary<HitResult, int>
             {
                 { HitResult.Great, countGreat },
-                { HitResult.Good, (int)countGood },
+                { HitResult.Ok, (int)countGood },
                 { HitResult.Meh, 0 },
                 { HitResult.Miss, countMiss }
             };
@@ -87,7 +87,7 @@ namespace PerformanceCalculator.Simulate
         protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
         {
             var countGreat = statistics[HitResult.Great];
-            var countGood = statistics[HitResult.Good];
+            var countGood = statistics[HitResult.Ok];
             var countMiss = statistics[HitResult.Miss];
             var total = countGreat + countGood + countMiss;
 
@@ -100,9 +100,9 @@ namespace PerformanceCalculator.Simulate
             {
                 GetAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%"),
                 GetAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)")),
-                GetAttribute("Misses", scoreInfo.Statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture)),
-                GetAttribute("Goods", scoreInfo.Statistics[HitResult.Good].ToString(CultureInfo.InvariantCulture)),
-                GetAttribute("Greats", scoreInfo.Statistics[HitResult.Great].ToString(CultureInfo.InvariantCulture))
+                GetAttribute("Miss", scoreInfo.Statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture)),
+                GetAttribute("Ok", scoreInfo.Statistics[HitResult.Ok].ToString(CultureInfo.InvariantCulture)),
+                GetAttribute("Great", scoreInfo.Statistics[HitResult.Great].ToString(CultureInfo.InvariantCulture))
             };
 
             return string.Join("\n", playInfo);

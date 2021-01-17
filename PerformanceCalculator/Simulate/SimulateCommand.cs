@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -79,7 +80,11 @@ namespace PerformanceCalculator.Simulate
             };
 
             var categoryAttribs = new Dictionary<string, double>();
-            double pp = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo).Calculate(categoryAttribs);
+
+            var performanceCalculator = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo);
+            Trace.Assert(performanceCalculator != null);
+
+            double pp = performanceCalculator.Calculate(categoryAttribs);
 
             if (OutputJson)
             {
