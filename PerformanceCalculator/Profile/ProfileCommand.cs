@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
@@ -83,10 +84,13 @@ namespace PerformanceCalculator.Profile
 
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
+                var performanceCalculator = ruleset.CreatePerformanceCalculator(working, score.ScoreInfo);
+                Trace.Assert(performanceCalculator != null);
+
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
-                    LocalPP = ruleset.CreatePerformanceCalculator(working, score.ScoreInfo).Calculate(),
+                    LocalPP = performanceCalculator.Calculate(),
                     LivePP = play.pp,
                     Mods = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None"
                 };
