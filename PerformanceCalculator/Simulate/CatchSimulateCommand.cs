@@ -83,7 +83,7 @@ namespace PerformanceCalculator.Simulate
 
             return new Dictionary<HitResult, int>
             {
-                { HitResult.Perfect, countFruits },
+                { HitResult.Great, countFruits },
                 { HitResult.LargeTickHit, countDroplets },
                 { HitResult.SmallTickHit, countTinyDroplets },
                 { HitResult.SmallTickMiss, countTinyMisses },
@@ -93,7 +93,7 @@ namespace PerformanceCalculator.Simulate
 
         protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
         {
-            double hits = statistics[HitResult.Perfect] + statistics[HitResult.LargeTickHit] + statistics[HitResult.SmallTickHit];
+            double hits = statistics[HitResult.Great] + statistics[HitResult.LargeTickHit] + statistics[HitResult.SmallTickHit];
             double total = hits + statistics[HitResult.Miss] + statistics[HitResult.SmallTickMiss];
 
             return hits / total;
