@@ -2,7 +2,6 @@
 # It expects the osu directory to be at the same level as the osu-tools directory
 
 
-
 $CSPROJ="PerformanceCalculator/PerformanceCalculator.csproj"
 $SLN="osu.Tools.sln"
 
@@ -19,6 +18,7 @@ dotnet remove $CSPROJ package ppy.osu.Game
 dotnet remove $CSPROJ package ppy.osu.Game.Rulesets.Osu
 dotnet remove $CSPROJ package ppy.osu.Game.Rulesets.Taiko
 dotnet remove $CSPROJ package ppy.osu.Game.Rulesets.Catch
-dotnet remove $CSPROJ package ppy.osu.Game.Rulesets.Mania;
+dotnet remove $CSPROJ package ppy.osu.Game.Rulesets.Mania
+
 dotnet sln $SLN add $DEPENDENCIES
 dotnet add $CSPROJ reference $DEPENDENCIES
