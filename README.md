@@ -20,7 +20,7 @@ Tools for [osu!](https://osu.ppy.sh).
 Most relevant code is in the main [ppy/osu](htts://github.com/ppy/osu) repository. To make any meaningful changes you will likely need to edit that as well.
 
 - Clone all relevant repos into the same directory (`git clone https://github.com/ppy/osu-tools`; `git clone https://github.com/ppy/osu`)
-- Run the `./UseLocalOsu.ps1` powershell script to use your local copy of ppy/osu
+- Run the `./UseLocalOsu.ps1` powershell script (or `./UseLocalOsu.sh`) to use your local copy of ppy/osu
 
 # Contributing
 
