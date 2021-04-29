@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "17:00"
+  open-pull-requests-limit: 99
+  ignore:
+  - dependency-name: ppy.osu.Game.Rulesets.Osu
+    versions:
+    - 2021.226.0
+  - dependency-name: ppy.osu.Game.Rulesets.Taiko
+    versions:
+    - 2021.226.0
+  - dependency-name: ppy.osu.Game.Rulesets.Catch
+    versions:
+    - 2021.226.0
+  - dependency-name: ppy.osu.Game.Rulesets.Mania
+    versions:
+    - 2021.226.0
