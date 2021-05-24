@@ -119,17 +119,21 @@ namespace PerformanceCalculator.Profile
                 new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
                 new Grid
                 {
-                    Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
+                    Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
                     Children =
                     {
+                        new Cell("#"),
                         new Cell("beatmap"),
+                        new Cell("mods"),
                         new Cell("live pp"),
                         new Cell("local pp"),
                         new Cell("pp change"),
                         new Cell("position change"),
                         localOrdered.Select(item => new[]
                         {
+                            new Cell($"{localOrdered.IndexOf(item) + 1}"),
                             new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
+                            new Cell($"{item.Mods}"),
                             new Cell($"{item.LivePP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
