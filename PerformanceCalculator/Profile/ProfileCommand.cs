@@ -13,8 +13,6 @@ using McMaster.Extensions.CommandLineUtils;
 using osu.Framework.IO.Network;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
@@ -38,6 +36,7 @@ namespace PerformanceCalculator.Profile
         [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "The ruleset to compute the profile for. 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. Defaults to osu!.")]
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
+
         private const string base_url = "https://osu.ppy.sh";
 
         public override void Execute()
@@ -94,6 +93,7 @@ namespace PerformanceCalculator.Profile
 
                 pp = performanceCalculator.Calculate(categories);
                 maxCombo = categories["Max Combo"];
+                
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
