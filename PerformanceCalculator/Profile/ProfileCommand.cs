@@ -103,7 +103,6 @@ namespace PerformanceCalculator.Profile
                     System.Console.WriteLine(e);
                 }
                 
-
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
