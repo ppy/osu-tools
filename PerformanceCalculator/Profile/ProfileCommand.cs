@@ -92,7 +92,6 @@ namespace PerformanceCalculator.Profile
 
                 performanceCalculator.Calculate(categories);
                 maxCombo = categories["Max Combo"];
-                
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
