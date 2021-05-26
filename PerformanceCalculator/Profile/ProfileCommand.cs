@@ -87,12 +87,12 @@ namespace PerformanceCalculator.Profile
                 var performanceCalculator = ruleset.CreatePerformanceCalculator(working, score.ScoreInfo);
                 Trace.Assert(performanceCalculator != null);
 
-                var pp = 0.0;
                 var maxCombo = 0.0;
                 var categories = new Dictionary<string, double>();
 
-                pp = performanceCalculator.Calculate(categories);
+                performanceCalculator.Calculate(categories);
                 maxCombo = categories["Max Combo"];
+                
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
