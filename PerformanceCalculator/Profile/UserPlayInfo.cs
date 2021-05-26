@@ -16,7 +16,6 @@ namespace PerformanceCalculator.Profile
         public double Accuracy;
         public double Total;
 
-
         public BeatmapInfo Beatmap;
 
         public string Mods;
