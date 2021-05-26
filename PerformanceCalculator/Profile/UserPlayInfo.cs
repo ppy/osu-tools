@@ -14,7 +14,6 @@ namespace PerformanceCalculator.Profile
         public double LivePP;
         public double MissCount;
         public double Accuracy;
-        public double Total;
 
         public BeatmapInfo Beatmap;
 
