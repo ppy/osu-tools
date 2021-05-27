@@ -88,12 +88,12 @@ namespace PerformanceCalculator.Profile
                 Trace.Assert(performanceCalculator != null);
 
                 var categories = new Dictionary<string, double>();
-                var LocalPP = performanceCalculator.Calculate(categories);
+                var localPP = performanceCalculator.Calculate(categories);
                 var maxCombo = categories["Max Combo"];
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
-                    LocalPP = LocalPP,
+                    LocalPP = localPP,
                     LivePP = play.pp,
                     Mods = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None",
                     MissCount = play.countmiss,
