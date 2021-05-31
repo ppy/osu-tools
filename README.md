@@ -4,10 +4,10 @@ Tools for [osu!](https://osu.ppy.sh).
 
 # Requirements
 
-- A desktop platform with the [.NET Core SDK 2.2](https://www.microsoft.com/net/learn/get-started) or higher installed.
+- A desktop platform with the [.NET SDK 5.0](https://www.microsoft.com/net/learn/get-started) or higher installed.
 - When working with the codebase, we recommend using an IDE with intellisense and syntax highlighting, such as [Visual Studio 2017+](https://visualstudio.microsoft.com/vs/), [Jetbrains Rider](https://www.jetbrains.com/rider/) or [Visual Studio Code](https://code.visualstudio.com/).
 - These instructions assume you have the the [CLI git client](https://git-scm.com/) installed, but any other GUI client such as GitKraken will suffice.
-- Note that there are **[additional requirements for Windows 7 and Windows 8.1](https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore2x)** which you may need to manually install if your operating system is not up-to-date.
+- Note that there are **[additional requirements for Windows 7 and Windows 8.1](https://docs.microsoft.com/en-us/dotnet/core/install/windows?tabs=net50#dependencies)** which you may need to manually install if your operating system is not up-to-date.
 
 # Getting Started
 
