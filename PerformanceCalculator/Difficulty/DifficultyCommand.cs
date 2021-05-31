@@ -41,19 +41,33 @@ namespace PerformanceCalculator.Difficulty
         public override void Execute()
         {
             var results = new List<Result>();
+            var errors = new List<string>();
 
             if (Directory.Exists(Path))
             {
                 foreach (string file in Directory.GetFiles(Path, "*.osu", SearchOption.AllDirectories))
                 {
-                    var beatmap = new ProcessorWorkingBeatmap(file);
-                    results.Add(processBeatmap(beatmap));
+                    try
+                    {
+                        var beatmap = new ProcessorWorkingBeatmap(file);
+                        results.Add(processBeatmap(beatmap));
+                    }
+                    catch (Exception e)
+                    {
+                        errors.Add($"Processing beatmap \"{file}\" failed:\n{e.Message}");
+                    }
                 }
             }
             else
                 results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
 
             var document = new Document();
+
+            foreach (var error in errors)
+                document.Children.Add(new Span(error), "\n");
+
+            if (errors.Any())
+                document.Children.Add("\n");
 
             foreach (var group in results.GroupBy(r => r.RulesetId))
             {
