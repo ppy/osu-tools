@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
@@ -17,11 +16,6 @@ namespace PerformanceCalculator.Simulate
     [Command(Name = "mania", Description = "Computes the performance (pp) of a simulated osu!mania play.")]
     public class ManiaSimulateCommand : SimulateCommand
     {
-        [UsedImplicitly]
-        [Required, FileExists]
-        [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu).")]
-        public override string Beatmap { get; }
-
         [UsedImplicitly]
         [Option(Template = "-s|--score <score>", Description = "Score. An integer 0-1000000.")]
         public override int Score { get; } = 1000000;

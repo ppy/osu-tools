@@ -159,13 +159,13 @@ Computes the performance of a simulated play on a beatmap. The provided output i
 
 Computes the performance (pp) of a simulated osu! play.
 
-Usage: dotnet PerformanceCalculator.dll simulate osu [arguments] [options]
+Usage: dotnet PerformanceCalculator.dll simulate osu <beatmap> [options]
 
 Arguments:
-  beatmap                     Required. The beatmap file (.osu).
+  beatmap                     Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
-  -?|-h|--help                Show help information
+  -?|-h|--help                Show help information.
   -a|--accuracy <accuracy>    Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
   -c|--combo <combo>          Maximum combo during play. Defaults to beatmap maximum.
   -C|--percent-combo <combo>  Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
@@ -173,6 +173,7 @@ Options:
   -X|--misses <misses>        Number of misses. Defaults to 0.
   -M|--mehs <mehs>            Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.
   -G|--goods <goods>          Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+  -j|--json                   Output results as JSON.
   -o|--output <file.txt>      Output results to text file.
 ```
 
@@ -182,21 +183,47 @@ Options:
 
 Computes the performance (pp) of a simulated osu!taiko play.
 
-Usage: dotnet PerformanceCalculator.dll simulate taiko [arguments] [options]
+Usage: dotnet PerformanceCalculator.dll simulate taiko <beatmap> [options]
 
 Arguments:
-  beatmap                     Required. The beatmap file (.osu).
+  beatmap                     Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
-  -?|-h|--help                Show help information
+  -?|-h|--help                Show help information.
   -a|--accuracy <accuracy>    Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
   -c|--combo <combo>          Maximum combo during play. Defaults to beatmap maximum.
   -C|--percent-combo <combo>  Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
   -m|--mod <mod>              One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
   -X|--misses <misses>        Number of misses. Defaults to 0.
   -G|--goods <goods>          Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+  -j|--json                   Output results as JSON.
   -o|--output <file.txt>      Output results to text file.
 ```
+
+#### osu!catch
+```
+> dotnet run -- simulate catch --help
+
+Computes the performance (pp) of a simulated osu!catch play.
+
+Usage: dotnet PerformanceCalculator.dll simulate catch <beatmap> [options]
+
+Arguments:
+  beatmap                     Required. Can be either a path to beatmap file (.osu) or beatmap ID.
+
+Options:
+  -?|-h|--help                Show help information.
+  -a|--accuracy <accuracy>    Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
+  -c|--combo <combo>          Maximum combo during play. Defaults to beatmap maximum.
+  -C|--percent-combo <combo>  Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
+  -m|--mod <mod>              One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
+  -X|--misses <misses>        Number of misses. Defaults to 0.
+  -T|--tiny-droplets <tinys>  Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.
+  -D|--droplets <droplets>    Number of droplets hit. Will override accuracy if used. Otherwise is automatically calculated.
+  -j|--json                   Output results as JSON.
+  -o|--output <file.txt>      Output results to text file.
+```
+
 
 #### osu!mania
 ```
@@ -204,14 +231,15 @@ Options:
 
 Computes the performance (pp) of a simulated osu!mania play.
 
-Usage: dotnet PerformanceCalculator.dll simulate mania [arguments] [options]
+Usage: dotnet PerformanceCalculator.dll simulate mania <beatmap> [options]
 
 Arguments:
-  beatmap                 Required. The beatmap file (.osu).
+  beatmap                 Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
-  -?|-h|--help            Show help information
+  -?|-h|--help            Show help information.
   -s|--score <score>      Score. An integer 0-1000000.
   -m|--mod <mod>          One for each mod. The mods to compute the performance with. Values: hr, dt, fl, 4k, 5k, etc...
+  -j|--json               Output results as JSON.
   -o|--output <file.txt>  Output results to text file.
 ```
