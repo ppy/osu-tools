@@ -87,12 +87,18 @@ namespace PerformanceCalculator.Profile
                 var performanceCalculator = ruleset.CreatePerformanceCalculator(working, score.ScoreInfo);
                 Trace.Assert(performanceCalculator != null);
 
+                var categories = new Dictionary<string, double>();
+                var localPP = performanceCalculator.Calculate(categories);
+                var maxCombo = categories["Max Combo"];
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
-                    LocalPP = performanceCalculator.Calculate(),
+                    LocalPP = localPP,
                     LivePP = play.pp,
-                    Mods = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None"
+                    Mods = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None",
+                    MissCount = play.countmiss,
+                    Accuracy = scoreInfo.Accuracy * 100,
+                    Combo = $"{play.maxcombo.ToString()}/{maxCombo}x"
                 };
 
                 displayPlays.Add(thisPlay);
@@ -119,11 +125,14 @@ namespace PerformanceCalculator.Profile
                 new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
                 new Grid
                 {
-                    Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
+                    Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
                     Children =
                     {
                         new Cell("#"),
                         new Cell("beatmap"),
+                        new Cell("max combo"),
+                        new Cell("accuracy"),
+                        new Cell("misses"),
                         new Cell("mods"),
                         new Cell("live pp"),
                         new Cell("local pp"),
@@ -133,7 +142,10 @@ namespace PerformanceCalculator.Profile
                         {
                             new Cell($"{localOrdered.IndexOf(item) + 1}"),
                             new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
-                            new Cell($"{item.Mods}"),
+                            new Cell($"{item.Combo}") { Align = Align.Right },
+                            new Cell($"{Math.Round(item.Accuracy, 2)}%") { Align = Align.Right },
+                            new Cell($"{item.MissCount}") { Align = Align.Right },
+                            new Cell($"{item.Mods}") { Align = Align.Right },
                             new Cell($"{item.LivePP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },

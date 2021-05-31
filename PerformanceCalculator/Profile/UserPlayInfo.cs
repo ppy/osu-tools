@@ -12,9 +12,12 @@ namespace PerformanceCalculator.Profile
     {
         public double LocalPP;
         public double LivePP;
+        public double MissCount;
+        public double Accuracy;
 
         public BeatmapInfo Beatmap;
 
         public string Mods;
+        public string Combo;
     }
 }
