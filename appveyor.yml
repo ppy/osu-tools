@@ -1,19 +1,14 @@
 clone_depth: 1
 version: '{branch}-{build}'
 image: Visual Studio 2019
-cache:
-  - '%LOCALAPPDATA%\NuGet\v3-cache -> appveyor.yml'
-install:
-  - cmd: git submodule update --init --recursive # Required for submodules
-before_build:
-  - ps: dotnet --info # Useful when version mismatch between CI and local
-  - ps: dotnet restore -v quiet
-build:
-  project: osu.Tools.sln
-  parallel: true
-  verbosity: minimal
-  publish_nuget: false
-after_build:
-  - ps: dotnet tool restore
-  - ps: .\InspectCode.ps1
 test: off
+
+environment:
+  APPVEYOR: true
+
+build_script:
+  - cmd: dotnet tool restore
+  - cmd: dotnet build osu.Tools.sln
+  - cmd: dotnet CodeFileSanity
+  - cmd: dotnet jb inspectcode "osu.Tools.sln" --output="temp/inspectcodereport.xml" --caches-home="temp/inspectcode" --verbosity=WARN
+  - cmd: dotnet nvika parsereport "temp/inspectcodereport.xml" --treatwarningsaserrors
