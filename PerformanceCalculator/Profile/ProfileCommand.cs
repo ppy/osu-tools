@@ -10,6 +10,7 @@ using System.Linq;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using Newtonsoft.Json;
 using osu.Framework.IO.Network;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets.Mods;
@@ -36,6 +37,10 @@ namespace PerformanceCalculator.Profile
         [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "The ruleset to compute the profile for. 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. Defaults to osu!.")]
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
+
+        [UsedImplicitly]
+        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
+        public bool OutputJson { get; }
 
         private const string base_url = "https://osu.ppy.sh";
 
@@ -95,10 +100,11 @@ namespace PerformanceCalculator.Profile
                     Beatmap = working.BeatmapInfo,
                     LocalPP = localPP,
                     LivePP = play.pp,
-                    Mods = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None",
+                    Mods = mods.Select(m => m.Acronym).ToArray(),
                     MissCount = play.countmiss,
                     Accuracy = scoreInfo.Accuracy * 100,
-                    Combo = $"{play.maxcombo.ToString()}/{maxCombo}x"
+                    Combo = play.maxcombo,
+                    MaxCombo = (int)maxCombo
                 };
 
                 displayPlays.Add(thisPlay);
@@ -119,41 +125,71 @@ namespace PerformanceCalculator.Profile
             totalLocalPP += playcountBonusPP;
             double totalDiffPP = totalLocalPP - totalLivePP;
 
-            OutputDocument(new Document(
-                new Span($"User:     {userData.username}"), "\n",
-                new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
-                new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
-                new Grid
+            if (OutputJson)
+            {
+                var json = JsonConvert.SerializeObject(new
                 {
-                    Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
-                    Children =
+                    Username = userData.username,
+                    LivePp = totalLivePP,
+                    LocalPp = totalLocalPP,
+                    PlaycountPp = playcountBonusPP,
+                    Scores = localOrdered.Select(item => new
                     {
-                        new Cell("#"),
-                        new Cell("beatmap"),
-                        new Cell("max combo"),
-                        new Cell("accuracy"),
-                        new Cell("misses"),
-                        new Cell("mods"),
-                        new Cell("live pp"),
-                        new Cell("local pp"),
-                        new Cell("pp change"),
-                        new Cell("position change"),
-                        localOrdered.Select(item => new[]
+                        BeatmapId = item.Beatmap.OnlineBeatmapID,
+                        BeatmapName = item.Beatmap.ToString(),
+                        item.Combo,
+                        item.Accuracy,
+                        item.MissCount,
+                        item.Mods,
+                        LivePp = item.LivePP,
+                        LocalPp = item.LocalPP,
+                        PositionChange = liveOrdered.IndexOf(item) - localOrdered.IndexOf(item)
+                    })
+                });
+
+                Console.Write(json);
+
+                if (OutputFile != null)
+                    File.WriteAllText(OutputFile, json);
+            }
+            else
+            {
+                OutputDocument(new Document(
+                    new Span($"User:     {userData.username}"), "\n",
+                    new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
+                    new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
+                    new Grid
+                    {
+                        Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
+                        Children =
                         {
-                            new Cell($"{localOrdered.IndexOf(item) + 1}"),
-                            new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
-                            new Cell($"{item.Combo}") { Align = Align.Right },
-                            new Cell($"{Math.Round(item.Accuracy, 2)}%") { Align = Align.Right },
-                            new Cell($"{item.MissCount}") { Align = Align.Right },
-                            new Cell($"{item.Mods}") { Align = Align.Right },
-                            new Cell($"{item.LivePP:F1}") { Align = Align.Right },
-                            new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
-                            new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
-                            new Cell($"{liveOrdered.IndexOf(item) - localOrdered.IndexOf(item):+0;-0;-}") { Align = Align.Center },
-                        })
-                    }
-                }
-            ));
+                            new Cell("#"),
+                            new Cell("beatmap"),
+                            new Cell("max combo"),
+                            new Cell("accuracy"),
+                            new Cell("misses"),
+                            new Cell("mods"),
+                            new Cell("live pp"),
+                            new Cell("local pp"),
+                            new Cell("pp change"),
+                            new Cell("position change"),
+                            localOrdered.Select(item => new[]
+                            {
+                                new Cell($"{localOrdered.IndexOf(item) + 1}"),
+                                new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
+                                new Cell($"{item.Combo}/{item.MaxCombo}x") { Align = Align.Right },
+                                new Cell($"{Math.Round(item.Accuracy, 2)}%") { Align = Align.Right },
+                                new Cell($"{item.MissCount}") { Align = Align.Right },
+                                new Cell($"{(item.Mods.Length > 0 ? string.Join(", ", item.Mods) : "None")}") { Align = Align.Right },
+                                new Cell($"{item.LivePP:F1}") { Align = Align.Right },
+                                new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
+                                new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
+                                new Cell($"{liveOrdered.IndexOf(item) - localOrdered.IndexOf(item):+0;-0;-}") { Align = Align.Center },
+                            })
+                        }
+                    })
+                );
+            }
         }
 
         private dynamic getJsonFromApi(string request)

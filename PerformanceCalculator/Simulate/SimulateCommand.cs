@@ -57,7 +57,7 @@ namespace PerformanceCalculator.Simulate
         {
             var ruleset = Ruleset;
 
-            var mods = getMods(ruleset).ToArray();
+            var mods = GetMods(ruleset).ToArray();
 
             var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
 
@@ -131,7 +131,7 @@ namespace PerformanceCalculator.Simulate
             }
         }
 
-        private List<Mod> getMods(Ruleset ruleset)
+        protected List<Mod> GetMods(Ruleset ruleset)
         {
             var mods = new List<Mod>();
             if (Mods == null)
