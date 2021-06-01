@@ -2,10 +2,22 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "cake.tool": {
-      "version": "0.35.0",
+    "CodeFileSanity": {
+      "version": "0.0.36",
       "commands": [
-        "dotnet-cake"
+        "CodeFileSanity"
+      ]
+    },
+    "jetbrains.resharper.globaltools": {
+      "version": "2021.1.3",
+      "commands": [
+        "jb"
+      ]
+    },
+    "nvika": {
+      "version": "2.0.0",
+      "commands": [
+        "nvika"
       ]
     }
   }
