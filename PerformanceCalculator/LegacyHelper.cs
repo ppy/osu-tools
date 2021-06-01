@@ -32,5 +32,26 @@ namespace PerformanceCalculator
                     return new ManiaRuleset();
             }
         }
+
+        public static string GetRulesetShortNameFromId(int id)
+        {
+            switch (id)
+            {
+                default:
+                    throw new ArgumentException("Invalid ruleset ID provided.");
+
+                case 0:
+                    return "osu";
+
+                case 1:
+                    return "taiko";
+
+                case 2:
+                    return "fruits";
+
+                case 3:
+                    return "mania";
+            }
+        }
     }
 }

@@ -7,11 +7,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using Newtonsoft.Json.Linq;
 using osu.Framework.IO.Network;
-using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -29,30 +30,42 @@ namespace PerformanceCalculator.Profile
 
         [UsedImplicitly]
         [Required]
-        [Argument(1, Name = "api key", Description = "API Key, which you can get from here: https://osu.ppy.sh/p/api")]
-        public string Key { get; }
+        [Argument(1, Name = "api key", Description = "API Client ID, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
+        public string ClientId { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "The ruleset to compute the profile for. 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. Defaults to osu!.")]
+        [Required]
+        [Argument(2, Name = "api key", Description = "API Client Secret, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
+        public string ClientSecret { get; }
+
+        [UsedImplicitly]
+        [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "The ruleset to compute the profile for.\n"
+                                                                      + "Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania")]
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
+
+        private string apiAccessToken;
 
         private const string base_url = "https://osu.ppy.sh";
 
         public override void Execute()
         {
+            Console.WriteLine("Getting access token...");
+            apiAccessToken = getAccessToken();
+
             var displayPlays = new List<UserPlayInfo>();
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? 0);
+            var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
 
             Console.WriteLine("Getting user data...");
-            dynamic userData = getJsonFromApi($"get_user?k={Key}&u={ProfileName}&m={Ruleset}")[0];
+            dynamic userData = getJsonFromApi($"users/{ProfileName}/{rulesetApiName}");
 
             Console.WriteLine("Getting user top scores...");
 
-            foreach (var play in getJsonFromApi($"get_user_best?k={Key}&u={ProfileName}&m={Ruleset}&limit=100"))
+            foreach (var play in getJsonFromApi($"users/{userData.id}/scores/best?mode={rulesetApiName}&limit=100"))
             {
-                string beatmapID = play.beatmap_id;
+                string beatmapID = play.beatmap.id;
 
                 string cachePath = Path.Combine("cache", $"{beatmapID}.osu");
 
@@ -62,25 +75,26 @@ namespace PerformanceCalculator.Profile
                     new FileWebRequest(cachePath, $"{base_url}/osu/{beatmapID}").Perform();
                 }
 
-                Mod[] mods = ruleset.ConvertFromLegacyMods((LegacyMods)play.enabled_mods).ToArray();
+                var modsAcronyms = ((JArray)play.mods).Select(x => x.ToString()).ToArray();
+                Mod[] mods = ruleset.GetAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
 
-                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id);
+                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap.id);
 
                 var scoreInfo = new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
                     TotalScore = play.score,
-                    MaxCombo = play.maxcombo,
+                    MaxCombo = play.max_combo,
                     Mods = mods,
                     Statistics = new Dictionary<HitResult, int>()
                 };
 
-                scoreInfo.SetCount300((int)play.count300);
-                scoreInfo.SetCountGeki((int)play.countgeki);
-                scoreInfo.SetCount100((int)play.count100);
-                scoreInfo.SetCountKatu((int)play.countkatu);
-                scoreInfo.SetCount50((int)play.count50);
-                scoreInfo.SetCountMiss((int)play.countmiss);
+                scoreInfo.SetCount300((int)play.statistics.count_300);
+                scoreInfo.SetCountGeki((int)play.statistics.count_geki);
+                scoreInfo.SetCount100((int)play.statistics.count_100);
+                scoreInfo.SetCountKatu((int)play.statistics.count_katu);
+                scoreInfo.SetCount50((int)play.statistics.count_50);
+                scoreInfo.SetCountMiss((int)play.statistics.count_miss);
 
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
@@ -96,9 +110,9 @@ namespace PerformanceCalculator.Profile
                     LocalPP = localPP,
                     LivePP = play.pp,
                     Mods = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None",
-                    MissCount = play.countmiss,
+                    MissCount = play.statistics.count_miss,
                     Accuracy = scoreInfo.Accuracy * 100,
-                    Combo = $"{play.maxcombo.ToString()}/{maxCombo}x"
+                    Combo = $"{play.max_combo.ToString()}/{maxCombo}x"
                 };
 
                 displayPlays.Add(thisPlay);
@@ -109,7 +123,7 @@ namespace PerformanceCalculator.Profile
 
             int index = 0;
             double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
-            double totalLivePP = userData.pp_raw;
+            double totalLivePP = userData.statistics.pp;
 
             index = 0;
             double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);
@@ -158,10 +172,27 @@ namespace PerformanceCalculator.Profile
 
         private dynamic getJsonFromApi(string request)
         {
-            using (var req = new JsonWebRequest<dynamic>($"{base_url}/api/{request}"))
+            using (var req = new JsonWebRequest<dynamic>($"{base_url}/api/v2/{request}"))
             {
+                req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {apiAccessToken}");
                 req.Perform();
+
                 return req.ResponseObject;
+            }
+        }
+
+        private string getAccessToken()
+        {
+            using (var req = new JsonWebRequest<dynamic>($"{base_url}/oauth/token"))
+            {
+                req.Method = HttpMethod.Post;
+                req.AddParameter("client_id", ClientId);
+                req.AddParameter("client_secret", ClientSecret);
+                req.AddParameter("grant_type", "client_credentials");
+                req.AddParameter("scope", "public");
+                req.Perform();
+
+                return req.ResponseObject.access_token.ToString();
             }
         }
     }
