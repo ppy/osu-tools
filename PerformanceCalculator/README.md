@@ -102,6 +102,7 @@ Arguments:
 Options:
   -?|-h|--help               Show help information
   -r|--ruleset:<ruleset-id>  The ruleset to compute the profile for. 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania. Defaults to osu!.
+  -j|--json                  Output results as JSON.
   -o|--output <file.txt>     Output results to text file.
 ```
 
