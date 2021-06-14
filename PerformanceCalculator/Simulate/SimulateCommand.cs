@@ -78,9 +78,9 @@ namespace PerformanceCalculator.Simulate
                 {
                     Console.WriteLine($"Downloading {Beatmap}.osu...");
                     new FileWebRequest(cachePath, $"https://osu.ppy.sh/osu/{Beatmap}").Perform();
-
-                    Beatmap = cachePath;
                 }
+
+                Beatmap = cachePath;
             }
 
             var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
