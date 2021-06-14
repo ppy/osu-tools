@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
 using JetBrains.Annotations;
@@ -20,11 +19,6 @@ namespace PerformanceCalculator.Simulate
     [Command(Name = "mania", Description = "Computes the performance (pp) of a simulated osu!mania play.")]
     public class ManiaSimulateCommand : SimulateCommand
     {
-        [UsedImplicitly]
-        [Required, FileExists]
-        [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu).")]
-        public override string Beatmap { get; }
-
         public override int Score
         {
             get
