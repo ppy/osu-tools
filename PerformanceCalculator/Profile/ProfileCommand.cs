@@ -13,10 +13,10 @@ using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Framework.IO.Network;
 using osu.Game.Beatmaps.Legacy;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
+using osu.Game.Utils;
 
 namespace PerformanceCalculator.Profile
 {
@@ -67,16 +67,20 @@ namespace PerformanceCalculator.Profile
                     new FileWebRequest(cachePath, $"{base_url}/osu/{beatmapID}").Perform();
                 }
 
-                Mod[] mods = ruleset.ConvertFromLegacyMods((LegacyMods)play.enabled_mods).ToArray();
-
                 var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id);
+
+                var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
+                var difficultyCalculationMods = ruleset.ConvertToLegacyMods(ModUtils.FlattenMods(difficultyCalculator.CreateDifficultyAdjustmentModCombinations()).ToArray());
 
                 var scoreInfo = new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
                     TotalScore = play.score,
                     MaxCombo = play.maxcombo,
-                    Mods = mods,
+                    // Consider only the mods relevant to difficulty calculation in order to match live values.
+                    // For example, the osu!mania MR mod changes SR, but is not part of the mod combinations stored to the database.
+                    // Todo: This can probably be removed when osu!lazer is used for realtime pp+diffcalc.
+                    Mods = ruleset.ConvertFromLegacyMods((LegacyMods)(play.enabled_mods) & difficultyCalculationMods).ToArray(),
                     Statistics = new Dictionary<HitResult, int>()
                 };
 
@@ -94,17 +98,16 @@ namespace PerformanceCalculator.Profile
 
                 var categories = new Dictionary<string, double>();
                 var localPP = performanceCalculator.Calculate(categories);
-                var maxCombo = categories["Max Combo"];
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
                     LocalPP = localPP,
                     LivePP = play.pp,
-                    Mods = mods.Select(m => m.Acronym).ToArray(),
+                    Mods = ruleset.ConvertFromLegacyMods((LegacyMods)play.enabled_mods).ToArray().Select(m => m.Acronym).ToArray(),
                     MissCount = play.countmiss,
                     Accuracy = scoreInfo.Accuracy * 100,
                     Combo = play.maxcombo,
-                    MaxCombo = (int)maxCombo
+                    MaxCombo = (int)categories.GetValueOrDefault("Max Combo")
                 };
 
                 displayPlays.Add(thisPlay);
