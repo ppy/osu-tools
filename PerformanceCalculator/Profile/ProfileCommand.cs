@@ -94,7 +94,6 @@ namespace PerformanceCalculator.Profile
 
                 var categories = new Dictionary<string, double>();
                 var localPP = performanceCalculator.Calculate(categories);
-                var maxCombo = categories["Max Combo"];
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
@@ -104,7 +103,7 @@ namespace PerformanceCalculator.Profile
                     MissCount = play.countmiss,
                     Accuracy = scoreInfo.Accuracy * 100,
                     Combo = play.maxcombo,
-                    MaxCombo = (int)maxCombo
+                    MaxCombo = (int)categories.GetValueOrDefault("Max Combo")
                 };
 
                 displayPlays.Add(thisPlay);
