@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -37,12 +36,12 @@ namespace PerformanceCalculator.Performance
                 using (var stream = File.OpenRead(f))
                     score = scoreParser.Parse(stream);
 
-                // Convert + process beatmap
+                var ruleset = score.ScoreInfo.Ruleset.CreateInstance();
+                var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
+                var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, score.ScoreInfo.Mods).ToArray());
+                var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
+
                 var categoryAttribs = new Dictionary<string, double>();
-
-                var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator(workingBeatmap, score.ScoreInfo);
-                Trace.Assert(performanceCalculator != null);
-
                 double pp = performanceCalculator.Calculate(categoryAttribs);
 
                 Console.WriteLine(f);

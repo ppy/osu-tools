@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
@@ -16,7 +15,6 @@ using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
-using osu.Game.Utils;
 
 namespace PerformanceCalculator.Profile
 {
@@ -58,7 +56,6 @@ namespace PerformanceCalculator.Profile
             foreach (var play in getJsonFromApi($"get_user_best?k={Key}&u={ProfileName}&m={Ruleset}&limit=100"))
             {
                 string beatmapID = play.beatmap_id;
-
                 string cachePath = Path.Combine("cache", $"{beatmapID}.osu");
 
                 if (!File.Exists(cachePath))
@@ -68,19 +65,12 @@ namespace PerformanceCalculator.Profile
                 }
 
                 var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap_id);
-
-                var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
-                var difficultyCalculationMods = ruleset.ConvertToLegacyMods(ModUtils.FlattenMods(difficultyCalculator.CreateDifficultyAdjustmentModCombinations()).ToArray());
-
                 var scoreInfo = new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
                     TotalScore = play.score,
                     MaxCombo = play.maxcombo,
-                    // Consider only the mods relevant to difficulty calculation in order to match live values.
-                    // For example, the osu!mania MR mod changes SR, but is not part of the mod combinations stored to the database.
-                    // Todo: This can probably be removed when osu!lazer is used for realtime pp+diffcalc.
-                    Mods = ruleset.ConvertFromLegacyMods((LegacyMods)(play.enabled_mods) & difficultyCalculationMods).ToArray(),
+                    Mods = ruleset.ConvertFromLegacyMods((LegacyMods)play.enabled_mods).ToArray(),
                     Statistics = new Dictionary<HitResult, int>()
                 };
 
@@ -93,8 +83,9 @@ namespace PerformanceCalculator.Profile
 
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
-                var performanceCalculator = ruleset.CreatePerformanceCalculator(working, score.ScoreInfo);
-                Trace.Assert(performanceCalculator != null);
+                var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
+                var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
+                var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
 
                 var categories = new Dictionary<string, double>();
                 var localPP = performanceCalculator.Calculate(categories);
@@ -103,7 +94,7 @@ namespace PerformanceCalculator.Profile
                     Beatmap = working.BeatmapInfo,
                     LocalPP = localPP,
                     LivePP = play.pp,
-                    Mods = ruleset.ConvertFromLegacyMods((LegacyMods)play.enabled_mods).ToArray().Select(m => m.Acronym).ToArray(),
+                    Mods = scoreInfo.Mods.Select(m => m.Acronym).ToArray(),
                     MissCount = play.countmiss,
                     Accuracy = scoreInfo.Accuracy * 100,
                     Combo = play.maxcombo,

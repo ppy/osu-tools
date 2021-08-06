@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -103,11 +102,11 @@ namespace PerformanceCalculator.Simulate
                 RulesetID = Ruleset.RulesetInfo.ID ?? 0
             };
 
+            var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
+            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
+            var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, scoreInfo);
+
             var categoryAttribs = new Dictionary<string, double>();
-
-            var performanceCalculator = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo);
-            Trace.Assert(performanceCalculator != null);
-
             double pp = performanceCalculator.Calculate(categoryAttribs);
 
             if (OutputJson)
