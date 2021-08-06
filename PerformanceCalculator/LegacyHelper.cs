@@ -47,8 +47,17 @@ namespace PerformanceCalculator
         /// </summary>
         public static Mod[] TrimNonDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
         {
+            var beatmap = new EmptyWorkingBeatmap
+            {
+                BeatmapInfo =
+                {
+                    Ruleset = ruleset.RulesetInfo,
+                    BaseDifficulty = new BeatmapDifficulty()
+                }
+            };
+
             var difficultyAdjustmentMods = ModUtils.FlattenMods(
-                                                       ruleset.CreateDifficultyCalculator(new EmptyWorkingBeatmap()).CreateDifficultyAdjustmentModCombinations())
+                                                       ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
                                                    .Select(m => m.GetType())
                                                    .Distinct()
                                                    .ToHashSet();
