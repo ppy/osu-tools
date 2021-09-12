@@ -64,7 +64,7 @@ namespace PerformanceCalculator
 
             // Special case for DT/NC.
             if (mods.Any(m => m is ModDoubleTime))
-                difficultyAdjustmentMods.Add(ruleset.GetAllMods().Single(m => m is ModNightcore).GetType());
+                difficultyAdjustmentMods.Add(ruleset.CreateAllMods().Single(m => m is ModNightcore).GetType());
 
             return mods.Where(m => difficultyAdjustmentMods.Contains(m.GetType())).ToArray();
         }
