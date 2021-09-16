@@ -160,7 +160,7 @@ namespace PerformanceCalculator.Simulate
             if (Mods == null)
                 return mods;
 
-            var availableMods = ruleset.GetAllMods().ToList();
+            var availableMods = ruleset.CreateAllMods().ToList();
 
             foreach (var modString in Mods)
             {
