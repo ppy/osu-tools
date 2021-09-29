@@ -123,7 +123,8 @@ namespace PerformanceCalculator.Difficulty
                         ("speed rating", osu.SpeedStrain.ToString("N2")),
                         ("max combo", osu.MaxCombo),
                         ("approach rate", osu.ApproachRate.ToString("N2")),
-                        ("overall difficulty", osu.OverallDifficulty.ToString("N2"))
+                        ("overall difficulty", osu.OverallDifficulty.ToString("N2")),
+                        ("flashlight rating", osu.FlashlightRating.ToString("N2"))
                     };
 
                     break;
