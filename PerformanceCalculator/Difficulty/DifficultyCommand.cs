@@ -105,7 +105,8 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.RulesetID);
-            var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, getMods(ruleset).ToArray()));
+            var mods = LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, getMods(ruleset).ToArray());
+            var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
 
             var result = new Result
             {
@@ -124,8 +125,10 @@ namespace PerformanceCalculator.Difficulty
                         ("max combo", osu.MaxCombo),
                         ("approach rate", osu.ApproachRate.ToString("N2")),
                         ("overall difficulty", osu.OverallDifficulty.ToString("N2")),
-                        ("flashlight rating", osu.FlashlightRating.ToString("N2"))
                     };
+
+                    if (mods.Any(m => m is ModFlashlight))
+                        result.AttributeData.Add(("flashlight rating", osu.FlashlightRating.ToString("N2")));
 
                     break;
 
