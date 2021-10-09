@@ -59,7 +59,7 @@ namespace PerformanceCalculator
 
                 case 3:
                     return "mania";
-            };
+            }
         }
 
         /// <summary>
