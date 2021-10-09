@@ -166,42 +166,42 @@ namespace PerformanceCalculator.Profile
             }
             else
             {
-            OutputDocument(new Document(
-                new Span($"User:     {userData.username}"), "\n",
-                new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
-                new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
-                new Grid
-                {
-                    Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
-                    Children =
+                OutputDocument(new Document(
+                    new Span($"User:     {userData.username}"), "\n",
+                    new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
+                    new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
+                    new Grid
                     {
-                        new Cell("#"),
-                        new Cell("beatmap"),
-                        new Cell("max combo"),
-                        new Cell("accuracy"),
-                        new Cell("misses"),
-                        new Cell("mods"),
-                        new Cell("live pp"),
-                        new Cell("local pp"),
-                        new Cell("pp change"),
-                        new Cell("position change"),
-                        localOrdered.Select(item => new[]
+                        Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
+                        Children =
                         {
-                            new Cell($"{localOrdered.IndexOf(item) + 1}"),
-                            new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
+                            new Cell("#"),
+                            new Cell("beatmap"),
+                            new Cell("max combo"),
+                            new Cell("accuracy"),
+                            new Cell("misses"),
+                            new Cell("mods"),
+                            new Cell("live pp"),
+                            new Cell("local pp"),
+                            new Cell("pp change"),
+                            new Cell("position change"),
+                            localOrdered.Select(item => new[]
+                            {
+                                new Cell($"{localOrdered.IndexOf(item) + 1}"),
+                                new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
                                 new Cell($"{item.Combo}/{item.MaxCombo}x") { Align = Align.Right },
-                            new Cell($"{Math.Round(item.Accuracy, 2)}%") { Align = Align.Right },
-                            new Cell($"{item.MissCount}") { Align = Align.Right },
+                                new Cell($"{Math.Round(item.Accuracy, 2)}%") { Align = Align.Right },
+                                new Cell($"{item.MissCount}") { Align = Align.Right },
                                 new Cell($"{(item.Mods.Length > 0 ? string.Join(", ", item.Mods) : "None")}") { Align = Align.Right },
-                            new Cell($"{item.LivePP:F1}") { Align = Align.Right },
-                            new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
-                            new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
-                            new Cell($"{liveOrdered.IndexOf(item) - localOrdered.IndexOf(item):+0;-0;-}") { Align = Align.Center },
-                        })
-                    }
+                                new Cell($"{item.LivePP:F1}") { Align = Align.Right },
+                                new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
+                                new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
+                                new Cell($"{liveOrdered.IndexOf(item) - localOrdered.IndexOf(item):+0;-0;-}") { Align = Align.Center },
+                            })
+                        }
                     })
                 );
-                }
+            }
         }
 
         private dynamic getJsonFromApi(string request)
