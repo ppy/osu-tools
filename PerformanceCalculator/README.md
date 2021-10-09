@@ -42,7 +42,7 @@ Computes the difficulty of a beatmap.
 Usage: dotnet PerformanceCalculator.dll difficulty [arguments] [options]
 
 Arguments:
-  path                       Required. A beatmap file (.osu), or a folder containing .osu files to compute the difficulty for.
+  path                       Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.
 
 Options:
   -?|-h|--help               Show help information

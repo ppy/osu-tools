@@ -9,6 +9,7 @@ using System.Linq;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using osu.Framework.IO.Network;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty;
@@ -24,8 +25,8 @@ namespace PerformanceCalculator.Difficulty
     {
         [UsedImplicitly]
         [Required, FileOrDirectoryExists]
-        [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), or a folder containing .osu files to compute the difficulty for.")]
-        public string Path { get; }
+        [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
+        public string Path { get; private set; }
 
         [UsedImplicitly]
         [Option(CommandOptionType.SingleOrNoValue, Template = "-r|--ruleset:<ruleset-id>", Description = "Optional. The ruleset to compute the beatmap difficulty for, if it's a convertible beatmap.\n"
@@ -59,7 +60,28 @@ namespace PerformanceCalculator.Difficulty
                 }
             }
             else
+            {
+                if (!Path.EndsWith(".osu"))
+                {
+                    if (!int.TryParse(Path, out _))
+                    {
+                        Console.WriteLine("Incorrect beatmap ID.");
+                        return;
+                    }
+
+                    string cachePath = System.IO.Path.Combine("cache", $"{Path}.osu");
+
+                    if (!File.Exists(cachePath))
+                    {
+                        Console.WriteLine($"Downloading {Path}.osu...");
+                        new FileWebRequest(cachePath, $"https://osu.ppy.sh/osu/{Path}").Perform();
+                    }
+
+                    Path = cachePath;
+                }
+
                 results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
+            }
 
             var document = new Document();
 
