@@ -24,7 +24,7 @@ namespace PerformanceCalculator.Difficulty
     public class DifficultyCommand : ProcessorCommand
     {
         [UsedImplicitly]
-        [Required, FileOrDirectoryExists]
+        [Required]
         [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
         public string Path { get; private set; }
 
@@ -78,6 +78,12 @@ namespace PerformanceCalculator.Difficulty
                     }
 
                     Path = cachePath;
+                }
+
+                if (!File.Exists(Path))
+                {
+                    Console.WriteLine($"Beatmap file {Path} does not exist.");
+                    return;
                 }
 
                 results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
