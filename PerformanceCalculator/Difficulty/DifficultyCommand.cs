@@ -41,19 +41,33 @@ namespace PerformanceCalculator.Difficulty
         public override void Execute()
         {
             var results = new List<Result>();
+            var errors = new List<string>();
 
             if (Directory.Exists(Path))
             {
                 foreach (string file in Directory.GetFiles(Path, "*.osu", SearchOption.AllDirectories))
                 {
-                    var beatmap = new ProcessorWorkingBeatmap(file);
-                    results.Add(processBeatmap(beatmap));
+                    try
+                    {
+                        var beatmap = new ProcessorWorkingBeatmap(file);
+                        results.Add(processBeatmap(beatmap));
+                    }
+                    catch (Exception e)
+                    {
+                        errors.Add($"Processing beatmap \"{file}\" failed:\n{e.Message}");
+                    }
                 }
             }
             else
                 results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
 
             var document = new Document();
+
+            foreach (var error in errors)
+                document.Children.Add(new Span(error), "\n");
+
+            if (errors.Any())
+                document.Children.Add("\n");
 
             foreach (var group in results.GroupBy(r => r.RulesetId))
             {
@@ -91,7 +105,8 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.RulesetID);
-            var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(getMods(ruleset).ToArray());
+            var mods = LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, getMods(ruleset).ToArray());
+            var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
 
             var result = new Result
             {
@@ -109,8 +124,11 @@ namespace PerformanceCalculator.Difficulty
                         ("speed rating", osu.SpeedStrain.ToString("N2")),
                         ("max combo", osu.MaxCombo),
                         ("approach rate", osu.ApproachRate.ToString("N2")),
-                        ("overall difficulty", osu.OverallDifficulty.ToString("N2"))
+                        ("overall difficulty", osu.OverallDifficulty.ToString("N2")),
                     };
+
+                    if (mods.Any(m => m is ModFlashlight))
+                        result.AttributeData.Add(("flashlight rating", osu.FlashlightRating.ToString("N2")));
 
                     break;
 
@@ -150,7 +168,7 @@ namespace PerformanceCalculator.Difficulty
             if (Mods == null)
                 return mods;
 
-            var availableMods = ruleset.GetAllMods().ToList();
+            var availableMods = ruleset.CreateAllMods().ToList();
 
             foreach (var modString in Mods)
             {

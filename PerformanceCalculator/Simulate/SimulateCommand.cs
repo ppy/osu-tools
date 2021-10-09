@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,6 +11,7 @@ using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json.Linq;
+using osu.Framework.IO.Network;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -21,9 +22,12 @@ namespace PerformanceCalculator.Simulate
 {
     public abstract class SimulateCommand : ProcessorCommand
     {
-        public abstract string Beatmap { get; }
-
         public abstract Ruleset Ruleset { get; }
+
+        [UsedImplicitly]
+        [Required]
+        [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
+        public string Beatmap { get; set; }
 
         [UsedImplicitly]
         public virtual double Accuracy { get; }
@@ -57,7 +61,26 @@ namespace PerformanceCalculator.Simulate
         {
             var ruleset = Ruleset;
 
-            var mods = getMods(ruleset).ToArray();
+            var mods = GetMods(ruleset).ToArray();
+
+            if (!Beatmap.EndsWith(".osu"))
+            {
+                if (!int.TryParse(Beatmap, out _))
+                {
+                    Console.WriteLine("Incorrect beatmap ID.");
+                    return;
+                }
+
+                string cachePath = Path.Combine("cache", $"{Beatmap}.osu");
+
+                if (!File.Exists(cachePath))
+                {
+                    Console.WriteLine($"Downloading {Beatmap}.osu...");
+                    new FileWebRequest(cachePath, $"https://osu.ppy.sh/osu/{Beatmap}").Perform();
+                }
+
+                Beatmap = cachePath;
+            }
 
             var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
 
@@ -79,11 +102,11 @@ namespace PerformanceCalculator.Simulate
                 RulesetID = Ruleset.RulesetInfo.ID ?? 0
             };
 
+            var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
+            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
+            var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, scoreInfo);
+
             var categoryAttribs = new Dictionary<string, double>();
-
-            var performanceCalculator = ruleset.CreatePerformanceCalculator(workingBeatmap, scoreInfo);
-            Trace.Assert(performanceCalculator != null);
-
             double pp = performanceCalculator.Calculate(categoryAttribs);
 
             if (OutputJson)
@@ -131,13 +154,13 @@ namespace PerformanceCalculator.Simulate
             }
         }
 
-        private List<Mod> getMods(Ruleset ruleset)
+        protected List<Mod> GetMods(Ruleset ruleset)
         {
             var mods = new List<Mod>();
             if (Mods == null)
                 return mods;
 
-            var availableMods = ruleset.GetAllMods().ToList();
+            var availableMods = ruleset.CreateAllMods().ToList();
 
             foreach (var modString in Mods)
             {

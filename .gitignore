@@ -268,3 +268,4 @@ __pycache__/
 Staging/
 
 inspectcodereport.xml
+PerformanceCalculator/cache/

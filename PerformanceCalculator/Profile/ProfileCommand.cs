@@ -4,15 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using osu.Framework.IO.Network;
+using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -44,6 +45,10 @@ namespace PerformanceCalculator.Profile
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
+        public bool OutputJson { get; }
+
         private string apiAccessToken;
 
         private const string base_url = "https://osu.ppy.sh";
@@ -66,7 +71,6 @@ namespace PerformanceCalculator.Profile
             foreach (var play in getJsonFromApi($"users/{userData.id}/scores/best?mode={rulesetApiName}&limit=100"))
             {
                 string beatmapID = play.beatmap.id;
-
                 string cachePath = Path.Combine("cache", $"{beatmapID}.osu");
 
                 if (!File.Exists(cachePath))
@@ -76,10 +80,9 @@ namespace PerformanceCalculator.Profile
                 }
 
                 var modsAcronyms = ((JArray)play.mods).Select(x => x.ToString()).ToArray();
-                Mod[] mods = ruleset.GetAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
+                Mod[] mods = ruleset.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
 
                 var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap.id);
-
                 var scoreInfo = new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
@@ -98,21 +101,22 @@ namespace PerformanceCalculator.Profile
 
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
-                var performanceCalculator = ruleset.CreatePerformanceCalculator(working, score.ScoreInfo);
-                Trace.Assert(performanceCalculator != null);
+                var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
+                var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
+                var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
 
                 var categories = new Dictionary<string, double>();
                 var localPP = performanceCalculator.Calculate(categories);
-                var maxCombo = categories["Max Combo"];
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
                     LocalPP = localPP,
                     LivePP = play.pp,
-                    Mods = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None",
+                    Mods = scoreInfo.Mods.Select(m => m.Acronym).ToArray(),
                     MissCount = play.statistics.count_miss,
                     Accuracy = scoreInfo.Accuracy * 100,
-                    Combo = $"{play.max_combo.ToString()}/{maxCombo}x"
+                    Combo = play.max_combo,
+                    MaxCombo = (int)categories.GetValueOrDefault("Max Combo")
                 };
 
                 displayPlays.Add(thisPlay);
@@ -133,6 +137,35 @@ namespace PerformanceCalculator.Profile
             totalLocalPP += playcountBonusPP;
             double totalDiffPP = totalLocalPP - totalLivePP;
 
+            if (OutputJson)
+            {
+                var json = JsonConvert.SerializeObject(new
+                {
+                    Username = userData.username,
+                    LivePp = totalLivePP,
+                    LocalPp = totalLocalPP,
+                    PlaycountPp = playcountBonusPP,
+                    Scores = localOrdered.Select(item => new
+                    {
+                        BeatmapId = item.Beatmap.OnlineBeatmapID,
+                        BeatmapName = item.Beatmap.ToString(),
+                        item.Combo,
+                        item.Accuracy,
+                        item.MissCount,
+                        item.Mods,
+                        LivePp = item.LivePP,
+                        LocalPp = item.LocalPP,
+                        PositionChange = liveOrdered.IndexOf(item) - localOrdered.IndexOf(item)
+                    })
+                });
+
+                Console.Write(json);
+
+                if (OutputFile != null)
+                    File.WriteAllText(OutputFile, json);
+            }
+            else
+            {
             OutputDocument(new Document(
                 new Span($"User:     {userData.username}"), "\n",
                 new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
@@ -156,18 +189,19 @@ namespace PerformanceCalculator.Profile
                         {
                             new Cell($"{localOrdered.IndexOf(item) + 1}"),
                             new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
-                            new Cell($"{item.Combo}") { Align = Align.Right },
+                                new Cell($"{item.Combo}/{item.MaxCombo}x") { Align = Align.Right },
                             new Cell($"{Math.Round(item.Accuracy, 2)}%") { Align = Align.Right },
                             new Cell($"{item.MissCount}") { Align = Align.Right },
-                            new Cell($"{item.Mods}") { Align = Align.Right },
+                                new Cell($"{(item.Mods.Length > 0 ? string.Join(", ", item.Mods) : "None")}") { Align = Align.Right },
                             new Cell($"{item.LivePP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP:F1}") { Align = Align.Right },
                             new Cell($"{item.LocalPP - item.LivePP:F1}") { Align = Align.Right },
                             new Cell($"{liveOrdered.IndexOf(item) - localOrdered.IndexOf(item):+0;-0;-}") { Align = Align.Center },
                         })
                     }
+                    })
+                );
                 }
-            ));
         }
 
         private dynamic getJsonFromApi(string request)

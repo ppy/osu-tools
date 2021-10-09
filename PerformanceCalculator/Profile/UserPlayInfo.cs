@@ -17,7 +17,8 @@ namespace PerformanceCalculator.Profile
 
         public BeatmapInfo Beatmap;
 
-        public string Mods;
-        public string Combo;
+        public string[] Mods;
+        public int Combo;
+        public int MaxCombo;
     }
 }
