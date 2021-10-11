@@ -59,7 +59,7 @@ namespace PerformanceCalculator
             }
 
             if (!int.TryParse(fileOrId, out var beatmapId))
-                throw new ArgumentException("Incorrect beatmap ID.");
+                throw new ArgumentException("Could not parse provided beatmap ID.");
 
             string cachePath = Path.Combine("cache", $"{beatmapId}.osu");
 
