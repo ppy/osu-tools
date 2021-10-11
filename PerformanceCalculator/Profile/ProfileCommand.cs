@@ -31,12 +31,12 @@ namespace PerformanceCalculator.Profile
 
         [UsedImplicitly]
         [Required]
-        [Argument(1, Name = "api key", Description = "API Client ID, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
+        [Argument(1, Name = "client id", Description = "API Client ID, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
         public string ClientId { get; }
 
         [UsedImplicitly]
         [Required]
-        [Argument(2, Name = "api key", Description = "API Client Secret, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
+        [Argument(2, Name = "client secret", Description = "API Client Secret, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
         public string ClientSecret { get; }
 
         [UsedImplicitly]
