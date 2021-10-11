@@ -26,7 +26,7 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
-        public string Beatmap { get; set; }
+        public string Beatmap { get; }
 
         [UsedImplicitly]
         public virtual double Accuracy { get; }

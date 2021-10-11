@@ -25,7 +25,7 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
-        public string Path { get; private set; }
+        public string Path { get; }
 
         [UsedImplicitly]
         [Option(CommandOptionType.SingleOrNoValue, Template = "-r|--ruleset:<ruleset-id>", Description = "Optional. The ruleset to compute the beatmap difficulty for, if it's a convertible beatmap.\n"
