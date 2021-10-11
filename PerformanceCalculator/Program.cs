@@ -4,6 +4,7 @@
 using McMaster.Extensions.CommandLineUtils;
 using osu.Framework.Logging;
 using osu.Game.Beatmaps.Formats;
+using osu.Game.Online;
 using PerformanceCalculator.Difficulty;
 using PerformanceCalculator.Performance;
 using PerformanceCalculator.Profile;
@@ -19,6 +20,8 @@ namespace PerformanceCalculator
     [HelpOption("-?|-h|--help")]
     public class Program
     {
+        public static readonly EndpointConfiguration ENDPOINT_CONFIGURATION = new ProductionEndpointConfiguration();
+
         public static void Main(string[] args)
         {
             LegacyDifficultyCalculatorBeatmapDecoder.Register();

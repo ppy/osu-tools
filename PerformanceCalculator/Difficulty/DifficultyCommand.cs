@@ -9,7 +9,6 @@ using System.Linq;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
-using osu.Framework.IO.Network;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty;
@@ -60,34 +59,7 @@ namespace PerformanceCalculator.Difficulty
                 }
             }
             else
-            {
-                if (!Path.EndsWith(".osu"))
-                {
-                    if (!int.TryParse(Path, out _))
-                    {
-                        Console.WriteLine("Incorrect beatmap ID.");
-                        return;
-                    }
-
-                    string cachePath = System.IO.Path.Combine("cache", $"{Path}.osu");
-
-                    if (!File.Exists(cachePath))
-                    {
-                        Console.WriteLine($"Downloading {Path}.osu...");
-                        new FileWebRequest(cachePath, $"https://osu.ppy.sh/osu/{Path}").Perform();
-                    }
-
-                    Path = cachePath;
-                }
-
-                if (!File.Exists(Path))
-                {
-                    Console.WriteLine($"Beatmap file {Path} does not exist.");
-                    return;
-                }
-
-                results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
-            }
+                results.Add(processBeatmap(ProcessorWorkingBeatmap.FromFileOrId(Path)));
 
             var document = new Document();
 
