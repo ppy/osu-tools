@@ -11,7 +11,6 @@ using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json.Linq;
-using osu.Framework.IO.Network;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -27,7 +26,7 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
-        public string Beatmap { get; set; }
+        public string Beatmap { get; }
 
         [UsedImplicitly]
         public virtual double Accuracy { get; }
@@ -62,28 +61,7 @@ namespace PerformanceCalculator.Simulate
             var ruleset = Ruleset;
 
             var mods = GetMods(ruleset).ToArray();
-
-            if (!Beatmap.EndsWith(".osu"))
-            {
-                if (!int.TryParse(Beatmap, out _))
-                {
-                    Console.WriteLine("Incorrect beatmap ID.");
-                    return;
-                }
-
-                string cachePath = Path.Combine("cache", $"{Beatmap}.osu");
-
-                if (!File.Exists(cachePath))
-                {
-                    Console.WriteLine($"Downloading {Beatmap}.osu...");
-                    new FileWebRequest(cachePath, $"https://osu.ppy.sh/osu/{Beatmap}").Perform();
-                }
-
-                Beatmap = cachePath;
-            }
-
-            var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
-
+            var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
             var beatmapMaxCombo = GetMaxCombo(beatmap);

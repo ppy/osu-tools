@@ -23,8 +23,8 @@ namespace PerformanceCalculator.Difficulty
     public class DifficultyCommand : ProcessorCommand
     {
         [UsedImplicitly]
-        [Required, FileOrDirectoryExists]
-        [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), or a folder containing .osu files to compute the difficulty for.")]
+        [Required]
+        [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
         public string Path { get; }
 
         [UsedImplicitly]
@@ -59,7 +59,7 @@ namespace PerformanceCalculator.Difficulty
                 }
             }
             else
-                results.Add(processBeatmap(new ProcessorWorkingBeatmap(Path)));
+                results.Add(processBeatmap(ProcessorWorkingBeatmap.FromFileOrId(Path)));
 
             var document = new Document();
 

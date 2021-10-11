@@ -17,7 +17,7 @@ namespace PerformanceCalculator.Performance
     {
         [UsedImplicitly]
         [Required, FileExists]
-        [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu) corresponding to the replays.")]
+        [Argument(0, Name = "beatmap", Description = "Required. A beatmap file (.osu) or beatmap ID corresponding to the replays.")]
         public string Beatmap { get; }
 
         [UsedImplicitly]
@@ -27,7 +27,7 @@ namespace PerformanceCalculator.Performance
 
         public override void Execute()
         {
-            var workingBeatmap = new ProcessorWorkingBeatmap(Beatmap);
+            var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
             var scoreParser = new ProcessorScoreDecoder(workingBeatmap);
 
             foreach (var f in Replays)

@@ -50,8 +50,6 @@ namespace PerformanceCalculator.Profile
 
         private string apiAccessToken;
 
-        private const string base_url = "https://osu.ppy.sh";
-
         public override void Execute()
         {
             Console.WriteLine("Getting access token...");
@@ -69,19 +67,11 @@ namespace PerformanceCalculator.Profile
 
             foreach (var play in getJsonFromApi($"users/{userData.id}/scores/best?mode={rulesetApiName}&limit=100"))
             {
-                string beatmapID = play.beatmap.id;
-                string cachePath = Path.Combine("cache", $"{beatmapID}.osu");
-
-                if (!File.Exists(cachePath))
-                {
-                    Console.WriteLine($"Downloading {beatmapID}.osu...");
-                    new FileWebRequest(cachePath, $"{base_url}/osu/{beatmapID}").Perform();
-                }
+                var working = ProcessorWorkingBeatmap.FromFileOrId((string)play.beatmap.id);
 
                 var modsAcronyms = ((JArray)play.mods).Select(x => x.ToString()).ToArray();
                 Mod[] mods = ruleset.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
 
-                var working = new ProcessorWorkingBeatmap(cachePath, (int)play.beatmap.id);
                 var scoreInfo = new ScoreInfo
                 {
                     Ruleset = ruleset.RulesetInfo,
@@ -171,7 +161,10 @@ namespace PerformanceCalculator.Profile
                     new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
                     new Grid
                     {
-                        Columns = { GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto },
+                        Columns =
+                        {
+                            GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto, GridLength.Auto
+                        },
                         Children =
                         {
                             new Cell("#"),
@@ -205,7 +198,7 @@ namespace PerformanceCalculator.Profile
 
         private dynamic getJsonFromApi(string request)
         {
-            using (var req = new JsonWebRequest<dynamic>($"{base_url}/api/v2/{request}"))
+            using (var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}"))
             {
                 req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {apiAccessToken}");
                 req.Perform();
@@ -216,7 +209,7 @@ namespace PerformanceCalculator.Profile
 
         private string getAccessToken()
         {
-            using (var req = new JsonWebRequest<dynamic>($"{base_url}/oauth/token"))
+            using (var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/oauth/token"))
             {
                 req.Method = HttpMethod.Post;
                 req.AddParameter("client_id", ClientId);
