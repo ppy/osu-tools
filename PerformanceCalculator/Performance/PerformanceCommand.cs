@@ -17,7 +17,7 @@ namespace PerformanceCalculator.Performance
     {
         [UsedImplicitly]
         [Required, FileExists]
-        [Argument(0, Name = "beatmap", Description = "Required. The beatmap file (.osu) corresponding to the replays.")]
+        [Argument(0, Name = "beatmap", Description = "Required. A beatmap file (.osu) or beatmap ID corresponding to the replays.")]
         public string Beatmap { get; }
 
         [UsedImplicitly]

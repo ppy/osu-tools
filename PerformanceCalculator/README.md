@@ -70,7 +70,7 @@ Computes the performance (pp) of replays on a beatmap.
 Usage: dotnet PerformanceCalculator.dll performance [arguments] [options]
 
 Arguments:
-  beatmap                 Required. The beatmap file (.osu) corresponding to the replays.
+  beatmap                 Required. A beatmap file (.osu) or beatmap ID corresponding to the replays.
 
 Options:
   -?|-h|--help            Show help information
