@@ -41,6 +41,27 @@ namespace PerformanceCalculator
             }
         }
 
+        public static string GetRulesetShortNameFromId(int id)
+        {
+            switch (id)
+            {
+                default:
+                    throw new ArgumentException("Invalid ruleset ID provided.");
+
+                case 0:
+                    return "osu";
+
+                case 1:
+                    return "taiko";
+
+                case 2:
+                    return "fruits";
+
+                case 3:
+                    return "mania";
+            }
+        }
+
         /// <summary>
         /// Trims all mods from a given <see cref="Mod"/> array which do not adjust difficulty.
         /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
