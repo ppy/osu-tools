@@ -94,7 +94,7 @@ namespace PerformanceCalculator.Simulate
                     { "Beatmap", workingBeatmap.BeatmapInfo.ToString() }
                 };
 
-                o["ScoreStatistics"] = new JObject {};
+                o["ScoreStatistics"] = new JObject();
 
                 foreach (var info in getPlayValues(scoreInfo, beatmap))
                     o["ScoreStatistics"][info.Key] = info.Value;
