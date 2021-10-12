@@ -94,18 +94,17 @@ namespace PerformanceCalculator.Simulate
                     { "Beatmap", workingBeatmap.BeatmapInfo.ToString() }
                 };
 
+                o["ScoreStatistics"] = new JObject {};
+
+                foreach (var info in getPlayValues(scoreInfo, beatmap))
+                    o["ScoreStatistics"][info.Key] = info.Value;
+
                 foreach (var kvp in categoryAttribs)
                     o[kvp.Key] = kvp.Value;
 
                 o["Mods"] = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None";
 
-                o["pp"] = new JObject
-                {
-                    { "Total", pp },
-                };
-
-                foreach (var info in getPlayValues(scoreInfo, beatmap))
-                    o["pp"][info.Key] = info.Value;
+                o["pp"] = pp;
 
                 string json = o.ToString();
 
