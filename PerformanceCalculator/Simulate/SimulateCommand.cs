@@ -94,10 +94,10 @@ namespace PerformanceCalculator.Simulate
                     { "Beatmap", workingBeatmap.BeatmapInfo.ToString() }
                 };
 
-                o["ScoreStatistics"] = new JObject();
+                o["Statistics"] = new JObject();
 
                 foreach (var info in getPlayValues(scoreInfo, beatmap))
-                    o["ScoreStatistics"][info.Key] = info.Value;
+                    o["Statistics"][info.Key] = info.Value;
 
                 foreach (var kvp in categoryAttribs)
                     o[kvp.Key] = kvp.Value;
