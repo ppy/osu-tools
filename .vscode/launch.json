@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "dotnet",
             "args": [
-                "${workspaceRoot}/PerformanceCalculator/bin/Debug/netcoreapp2.0/PerformanceCalculator.dll",
+                "${workspaceRoot}/PerformanceCalculator/bin/Debug/net5.0/PerformanceCalculator.dll",
                 "place-your-arguments-here (launch.json)"
             ],
             "cwd": "${workspaceRoot}",
@@ -21,7 +21,7 @@
             "request": "launch",
             "program": "dotnet",
             "args": [
-                "${workspaceRoot}/PerformanceCalculator/bin/Debug/netcoreapp2.0/PerformanceCalculator.dll",
+                "${workspaceRoot}/PerformanceCalculator/bin/Release/net5.0/PerformanceCalculator.dll",
                 "place-your-arguments-here (launch.json)"
             ],
             "cwd": "${workspaceRoot}",
