@@ -101,7 +101,8 @@ namespace PerformanceCalculator.Simulate
             {
                 { "Star rating", osuDifficultyAttributes.StarRating },
                 { "Aim strain", osuDifficultyAttributes.AimStrain },
-                { "Speed strain", osuDifficultyAttributes.SpeedStrain }
+                { "Speed strain", osuDifficultyAttributes.SpeedStrain },
+                { "Slider factor", osuDifficultyAttributes.SliderFactor }
             };
 
             if (GetMods(Ruleset).Any(m => m is ModFlashlight))

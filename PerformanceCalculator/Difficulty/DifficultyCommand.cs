@@ -170,6 +170,7 @@ namespace PerformanceCalculator.Difficulty
                     {
                         ("aim rating", osu.AimStrain.ToString("N2")),
                         ("speed rating", osu.SpeedStrain.ToString("N2")),
+                        ("slider factor", osu.SliderFactor.ToString("N2")),
                         ("max combo", osu.MaxCombo),
                         ("approach rate", osu.ApproachRate.ToString("N2")),
                         ("overall difficulty", osu.OverallDifficulty.ToString("N2")),
