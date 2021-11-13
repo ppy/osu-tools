@@ -81,10 +81,10 @@ namespace PerformanceCalculator.Difficulty
                     {
                         var jsonResult = new JObject
                         {
-                            ["Ruleset"] = LegacyHelper.GetRulesetFromLegacyID(result.RulesetId).ShortName,
-                            ["Beatmap"] = result.Beatmap,
-                            ["Beatmap ID"] = result.BeatmapId,
-                            ["Star rating"] = Convert.ToDouble(result.Stars)
+                            { "Ruleset", LegacyHelper.GetRulesetFromLegacyID(result.RulesetId).ShortName },
+                            { "Beatmap", result.Beatmap },
+                            { "Beatmap ID", result.BeatmapId },
+                            { "Star rating", Convert.ToDouble(result.Stars) }
                         };
 
                         jsonResult["Attributes"] = new JObject();
