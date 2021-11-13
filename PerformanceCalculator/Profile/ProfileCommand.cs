@@ -136,7 +136,7 @@ namespace PerformanceCalculator.Profile
                     PlaycountPp = playcountBonusPP,
                     Scores = localOrdered.Select(item => new
                     {
-                        BeatmapId = item.Beatmap.OnlineBeatmapID,
+                        BeatmapId = item.Beatmap.OnlineID,
                         BeatmapName = item.Beatmap.ToString(),
                         item.Combo,
                         item.Accuracy,
@@ -180,7 +180,7 @@ namespace PerformanceCalculator.Profile
                             localOrdered.Select(item => new[]
                             {
                                 new Cell($"{localOrdered.IndexOf(item) + 1}"),
-                                new Cell($"{item.Beatmap.OnlineBeatmapID} - {item.Beatmap}"),
+                                new Cell($"{item.Beatmap.OnlineID} - {item.Beatmap}"),
                                 new Cell($"{item.Combo}/{item.MaxCombo}x") { Align = Align.Right },
                                 new Cell($"{Math.Round(item.Accuracy, 2)}%") { Align = Align.Right },
                                 new Cell($"{item.MissCount}") { Align = Align.Right },
