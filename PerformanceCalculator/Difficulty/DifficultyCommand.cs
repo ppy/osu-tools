@@ -75,11 +75,11 @@ namespace PerformanceCalculator.Difficulty
 
                 if (results.Any())
                 {
-                    var json_results = new JArray();
+                    var jsonResults = new JArray();
 
                     foreach (var result in results)
                     {
-                        var json_result = new JObject
+                        var jsonResult = new JObject
                         {
                             ["Ruleset"] = LegacyHelper.GetRulesetFromLegacyID(result.RulesetId).ShortName,
                             ["Beatmap"] = result.Beatmap,
@@ -89,12 +89,12 @@ namespace PerformanceCalculator.Difficulty
                         };
 
                         foreach (var attribute in result.AttributeData)
-                            json_result["Attributes"][attribute.name] = Convert.ToDouble(attribute.value.ToString());
+                            jsonResult["Attributes"][attribute.name] = Convert.ToDouble(attribute.value);
 
-                        json_results.Add(json_result);
+                        jsonResults.Add(jsonResult);
                     }
 
-                    o["Results"] = json_results;
+                    o["Results"] = jsonResults;
                 }
 
                 string json = o.ToString();
