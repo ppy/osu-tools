@@ -9,7 +9,9 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Mania.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -73,6 +75,16 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.Good, 0 },
                 { HitResult.Meh, 0 },
                 { HitResult.Miss, 0 }
+            };
+        }
+
+        protected override Dictionary<string, double> GetDifficultyAttributesSkills(DifficultyAttributes difficultyAttributes)
+        {
+            ManiaDifficultyAttributes maniaDifficultyAttributes = (ManiaDifficultyAttributes)difficultyAttributes;
+
+            return new Dictionary<string, double>
+            {
+                { "Star rating", maniaDifficultyAttributes.StarRating }
             };
         }
 

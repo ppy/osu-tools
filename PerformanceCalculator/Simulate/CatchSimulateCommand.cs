@@ -6,7 +6,9 @@ using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Catch.Objects;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using System;
@@ -82,6 +84,16 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.SmallTickHit, countTinyDroplets },
                 { HitResult.SmallTickMiss, countTinyMisses },
                 { HitResult.Miss, countMiss }
+            };
+        }
+
+        protected override Dictionary<string, double> GetDifficultyAttributesSkills(DifficultyAttributes difficultyAttributes)
+        {
+            CatchDifficultyAttributes catchDifficultyAttributes = (CatchDifficultyAttributes)difficultyAttributes;
+
+            return new Dictionary<string, double>
+            {
+                { "Star rating", catchDifficultyAttributes.StarRating }
             };
         }
 

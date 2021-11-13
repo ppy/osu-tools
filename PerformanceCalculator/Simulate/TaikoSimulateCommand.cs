@@ -9,8 +9,10 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
+using osu.Game.Rulesets.Taiko.Difficulty;
 using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Scoring;
 
@@ -75,6 +77,19 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.Ok, (int)countGood },
                 { HitResult.Meh, 0 },
                 { HitResult.Miss, countMiss }
+            };
+        }
+
+        protected override Dictionary<string, double> GetDifficultyAttributesSkills(DifficultyAttributes difficultyAttributes)
+        {
+            TaikoDifficultyAttributes taikoDifficultyAttributes = (TaikoDifficultyAttributes)difficultyAttributes;
+
+            return new Dictionary<string, double>
+            {
+                { "Star rating", taikoDifficultyAttributes.StarRating },
+                { "Rhythm strain", taikoDifficultyAttributes.RhythmStrain },
+                { "Colour strain", taikoDifficultyAttributes.ColourStrain },
+                { "Stamina strain", taikoDifficultyAttributes.StaminaStrain }
             };
         }
 

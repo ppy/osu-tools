@@ -13,6 +13,7 @@ using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json.Linq;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -106,6 +107,11 @@ namespace PerformanceCalculator.Simulate
 
                 o["pp"] = pp;
 
+                o["Difficulty"] = new JObject();
+
+                foreach (var kvp in GetDifficultyAttributesSkills(difficultyAttributes))
+                    o["Difficulty"][kvp.Key] = kvp.Value;
+
                 string json = o.ToString();
 
                 Console.Write(json);
@@ -126,6 +132,9 @@ namespace PerformanceCalculator.Simulate
                     : "None")), "\n");
 
                 foreach (var kvp in categoryAttribs)
+                    document.Children.Add(new Span(GetAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture))), "\n");
+
+                foreach (var kvp in GetDifficultyAttributesSkills(difficultyAttributes))
                     document.Children.Add(new Span(GetAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture))), "\n");
 
                 document.Children.Add(new Span(GetAttribute("pp", pp.ToString(CultureInfo.InvariantCulture))));
@@ -175,6 +184,8 @@ namespace PerformanceCalculator.Simulate
         protected abstract int GetMaxCombo(IBeatmap beatmap);
 
         protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
+
+        protected abstract Dictionary<string, double> GetDifficultyAttributesSkills(DifficultyAttributes difficultyAttributes);
 
         protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 

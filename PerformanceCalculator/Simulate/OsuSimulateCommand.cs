@@ -9,7 +9,10 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -88,6 +91,23 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.Meh, countMeh ?? 0 },
                 { HitResult.Miss, countMiss }
             };
+        }
+
+        protected override Dictionary<string, double> GetDifficultyAttributesSkills(DifficultyAttributes difficultyAttributes)
+        {
+            OsuDifficultyAttributes osuDifficultyAttributes = (OsuDifficultyAttributes)difficultyAttributes;
+
+            Dictionary<string, double> difficultyAttributesSkills = new Dictionary<string, double>
+            {
+                { "Star rating", osuDifficultyAttributes.StarRating },
+                { "Aim strain", osuDifficultyAttributes.AimStrain },
+                { "Speed strain", osuDifficultyAttributes.SpeedStrain }
+            };
+
+            if (GetMods(Ruleset).Any(m => m is ModFlashlight))
+                difficultyAttributesSkills.Add("Flashlight rating", osuDifficultyAttributes.FlashlightRating);
+
+            return difficultyAttributesSkills;
         }
 
         protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
