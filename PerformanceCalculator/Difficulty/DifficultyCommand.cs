@@ -135,6 +135,9 @@ namespace PerformanceCalculator.Difficulty
                 case TaikoDifficultyAttributes taiko:
                     result.AttributeData = new List<(string, object)>
                     {
+                        ("rhythm strain", taiko.RhythmStrain.ToString("N2")),
+                        ("colour strain", taiko.ColourStrain.ToString("N2")),
+                        ("stamina strain", taiko.StaminaStrain.ToString("N2")),
                         ("hit window", taiko.GreatHitWindow.ToString("N2")),
                         ("max combo", taiko.MaxCombo)
                     };
