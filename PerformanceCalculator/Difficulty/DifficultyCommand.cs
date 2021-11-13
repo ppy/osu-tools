@@ -111,7 +111,7 @@ namespace PerformanceCalculator.Difficulty
             var result = new Result
             {
                 RulesetId = ruleset.RulesetInfo.ID ?? 0,
-                Beatmap = $"{beatmap.BeatmapInfo.OnlineBeatmapID} - {beatmap.BeatmapInfo}",
+                Beatmap = $"{beatmap.BeatmapInfo.OnlineID} - {beatmap.BeatmapInfo}",
                 Stars = attributes.StarRating.ToString("N2")
             };
 
