@@ -84,9 +84,10 @@ namespace PerformanceCalculator.Difficulty
                             ["Ruleset"] = LegacyHelper.GetRulesetFromLegacyID(result.RulesetId).ShortName,
                             ["Beatmap"] = result.Beatmap,
                             ["Beatmap ID"] = result.BeatmapId,
-                            ["Star rating"] = Convert.ToDouble(result.Stars),
-                            ["Attributes"] = new JObject()
+                            ["Star rating"] = Convert.ToDouble(result.Stars)
                         };
+
+                        jsonResult["Attributes"] = new JObject();
 
                         foreach (var attribute in result.AttributeData)
                             jsonResult["Attributes"][attribute.name] = Convert.ToDouble(attribute.value);
