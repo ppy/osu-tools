@@ -83,7 +83,7 @@ namespace PerformanceCalculator.Difficulty
                         {
                             ["Ruleset"] = LegacyHelper.GetRulesetFromLegacyID(result.RulesetId).ShortName,
                             ["Beatmap"] = result.Beatmap,
-                            ["Beatmap ID"] = Convert.ToDouble(result.BeatmapId),
+                            ["Beatmap ID"] = result.BeatmapId,
                             ["Star rating"] = Convert.ToDouble(result.Stars),
                             ["Attributes"] = new JObject()
                         };
@@ -157,7 +157,7 @@ namespace PerformanceCalculator.Difficulty
             var result = new Result
             {
                 RulesetId = ruleset.RulesetInfo.ID ?? 0,
-                BeatmapId = beatmap.BeatmapInfo.OnlineID.ToString(),
+                BeatmapId = beatmap.BeatmapInfo.OnlineID ?? 0,
                 Beatmap = beatmap.BeatmapInfo.ToString(),
                 Stars = attributes.StarRating.ToString("N2")
             };
@@ -235,7 +235,7 @@ namespace PerformanceCalculator.Difficulty
         private struct Result
         {
             public int RulesetId;
-            public string BeatmapId;
+            public int BeatmapId;
             public string Beatmap;
             public string Stars;
             public List<(string name, object value)> AttributeData;
