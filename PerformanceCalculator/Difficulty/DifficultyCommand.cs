@@ -9,6 +9,7 @@ using System.Linq;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using Newtonsoft.Json.Linq;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty;
@@ -38,6 +39,10 @@ namespace PerformanceCalculator.Difficulty
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
         public string[] Mods { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
+        public bool OutputJson { get; }
+
         public override void Execute()
         {
             var results = new List<Result>();
@@ -61,44 +66,85 @@ namespace PerformanceCalculator.Difficulty
             else
                 results.Add(processBeatmap(ProcessorWorkingBeatmap.FromFileOrId(Path)));
 
-            var document = new Document();
-
-            foreach (var error in errors)
-                document.Children.Add(new Span(error), "\n");
-
-            if (errors.Any())
-                document.Children.Add("\n");
-
-            foreach (var group in results.GroupBy(r => r.RulesetId))
+            if (OutputJson)
             {
-                var ruleset = LegacyHelper.GetRulesetFromLegacyID(group.First().RulesetId);
+                var o = new JObject();
 
-                document.Children.Add(new Span($"Ruleset: {ruleset.ShortName}"), "\n");
+                if (errors.Any())
+                    o["Errors"] = JToken.FromObject(errors);
 
-                var grid = new Grid();
-
-                grid.Columns.Add(GridLength.Auto, GridLength.Auto);
-                grid.Children.Add(new Cell("beatmap"), new Cell("star rating"));
-
-                foreach (var attribute in group.First().AttributeData)
+                if (results.Any())
                 {
-                    grid.Columns.Add(GridLength.Auto);
-                    grid.Children.Add(new Cell(attribute.name));
+                    var json_results = new JArray();
+
+                    foreach (var result in results)
+                    {
+                        var json_result = new JObject
+                        {
+                            ["Ruleset"] = LegacyHelper.GetRulesetFromLegacyID(result.RulesetId).ShortName,
+                            ["Beatmap"] = result.Beatmap,
+                            ["Beatmap ID"] = Convert.ToDouble(result.BeatmapId),
+                            ["Star rating"] = Convert.ToDouble(result.Stars),
+                            ["Attributes"] = new JObject()
+                        };
+
+                        foreach (var attribute in result.AttributeData)
+                            json_result["Attributes"][attribute.name] = Convert.ToDouble(attribute.value.ToString());
+
+                        json_results.Add(json_result);
+                    }
+
+                    o["Results"] = json_results;
                 }
 
-                foreach (var result in group)
-                {
-                    grid.Children.Add(new Cell(result.Beatmap), new Cell(result.Stars) { Align = Align.Right });
-                    foreach (var attribute in result.AttributeData)
-                        grid.Children.Add(new Cell(attribute.value) { Align = Align.Right });
-                }
+                string json = o.ToString();
 
-                document.Children.Add(grid);
+                Console.Write(json);
 
-                document.Children.Add("\n");
+                if (OutputFile != null)
+                    File.WriteAllText(OutputFile, json);
             }
+            else
+            {
+                var document = new Document();
 
-            OutputDocument(document);
+                foreach (var error in errors)
+                    document.Children.Add(new Span(error), "\n");
+
+                if (errors.Any())
+                    document.Children.Add("\n");
+
+                foreach (var group in results.GroupBy(r => r.RulesetId))
+                {
+                    var ruleset = LegacyHelper.GetRulesetFromLegacyID(group.First().RulesetId);
+
+                    document.Children.Add(new Span($"Ruleset: {ruleset.ShortName}"), "\n");
+
+                    var grid = new Grid();
+
+                    grid.Columns.Add(GridLength.Auto, GridLength.Auto);
+                    grid.Children.Add(new Cell("beatmap"), new Cell("star rating"));
+
+                    foreach (var attribute in group.First().AttributeData)
+                    {
+                        grid.Columns.Add(GridLength.Auto);
+                        grid.Children.Add(new Cell(attribute.name));
+                    }
+
+                    foreach (var result in group)
+                    {
+                        grid.Children.Add(new Cell($"{result.BeatmapId} - {result.Beatmap}"), new Cell(result.Stars) { Align = Align.Right });
+                        foreach (var attribute in result.AttributeData)
+                            grid.Children.Add(new Cell(attribute.value) { Align = Align.Right });
+                    }
+
+                    document.Children.Add(grid);
+
+                    document.Children.Add("\n");
+                }
+
+                OutputDocument(document);
+            }
         }
 
         private Result processBeatmap(WorkingBeatmap beatmap)
@@ -111,7 +157,8 @@ namespace PerformanceCalculator.Difficulty
             var result = new Result
             {
                 RulesetId = ruleset.RulesetInfo.ID ?? 0,
-                Beatmap = $"{beatmap.BeatmapInfo.OnlineBeatmapID} - {beatmap.BeatmapInfo}",
+                BeatmapId = beatmap.BeatmapInfo.OnlineBeatmapID.ToString(),
+                Beatmap = beatmap.BeatmapInfo.ToString(),
                 Stars = attributes.StarRating.ToString("N2")
             };
 
@@ -188,6 +235,7 @@ namespace PerformanceCalculator.Difficulty
         private struct Result
         {
             public int RulesetId;
+            public string BeatmapId;
             public string Beatmap;
             public string Stars;
             public List<(string name, object value)> AttributeData;
