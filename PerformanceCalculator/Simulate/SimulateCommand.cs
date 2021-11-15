@@ -102,7 +102,7 @@ namespace PerformanceCalculator.Simulate
                     Statistics = statistics
                 },
                 Pp = pp,
-                PerformanceAttributes = categoryAttribs.ToDictionary(k => k.Key.ToLowerInvariant(), k => k.Value),
+                PerformanceAttributes = categoryAttribs.ToDictionary(k => k.Key.ToLowerInvariant().Underscore(), k => k.Value),
                 DifficultyAttributes = difficultyAttributes
             };
 
@@ -142,7 +142,7 @@ namespace PerformanceCalculator.Simulate
                 foreach (var attrib in result.PerformanceAttributes)
                 {
                     // For the time being, we don't have explicitly defined storage for these attributes.
-                    document.Children.Add(FormatDocumentLine(attrib.Key, attrib.Value.ToString("N2")));
+                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize().ToLowerInvariant(), attrib.Value.ToString("N2")));
                 }
 
                 document.Children.Add("---\n");
