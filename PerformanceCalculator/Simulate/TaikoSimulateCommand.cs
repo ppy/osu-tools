@@ -3,18 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
-using osu.Game.Rulesets.Taiko.Difficulty;
 using osu.Game.Rulesets.Taiko.Objects;
-using osu.Game.Scoring;
 
 namespace PerformanceCalculator.Simulate
 {
@@ -80,19 +76,6 @@ namespace PerformanceCalculator.Simulate
             };
         }
 
-        protected override Dictionary<string, double> GetDifficultyAttributesSkills(DifficultyAttributes difficultyAttributes)
-        {
-            TaikoDifficultyAttributes taikoDifficultyAttributes = (TaikoDifficultyAttributes)difficultyAttributes;
-
-            return new Dictionary<string, double>
-            {
-                { "Star rating", taikoDifficultyAttributes.StarRating },
-                { "Rhythm strain", taikoDifficultyAttributes.RhythmStrain },
-                { "Colour strain", taikoDifficultyAttributes.ColourStrain },
-                { "Stamina strain", taikoDifficultyAttributes.StaminaStrain }
-            };
-        }
-
         protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
         {
             var countGreat = statistics[HitResult.Great];
@@ -101,20 +84,6 @@ namespace PerformanceCalculator.Simulate
             var total = countGreat + countGood + countMiss;
 
             return (double)((2 * countGreat) + countGood) / (2 * total);
-        }
-
-        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
-        {
-            var playInfo = new List<string>
-            {
-                GetAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%"),
-                GetAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)")),
-                GetAttribute("Miss", scoreInfo.Statistics[HitResult.Miss].ToString(CultureInfo.InvariantCulture)),
-                GetAttribute("Ok", scoreInfo.Statistics[HitResult.Ok].ToString(CultureInfo.InvariantCulture)),
-                GetAttribute("Great", scoreInfo.Statistics[HitResult.Great].ToString(CultureInfo.InvariantCulture))
-            };
-
-            return string.Join("\n", playInfo);
         }
     }
 }
