@@ -102,7 +102,8 @@ namespace PerformanceCalculator.Simulate
                     Statistics = statistics
                 },
                 Pp = pp,
-                Attributes = difficultyAttributes
+                PerformanceAttributes = categoryAttribs.ToDictionary(k => k.Key.ToLowerInvariant(), k => k.Value),
+                DifficultyAttributes = difficultyAttributes
             };
 
             if (OutputJson)
@@ -129,19 +130,25 @@ namespace PerformanceCalculator.Simulate
 
                 document.Children.Add("---\n");
 
-                // Hit statistics
+                // Hit statistics.
                 foreach (var stat in result.Score.Statistics)
                     document.Children.Add(FormatDocumentLine(stat.Key.ToString().ToLowerInvariant(), stat.Value.ToString(CultureInfo.InvariantCulture)));
 
                 document.Children.Add("---\n");
 
-                // pp.
+                // Performance attributes.
                 document.Children.Add(FormatDocumentLine("pp", result.Pp.ToString("N2", CultureInfo.InvariantCulture)));
+
+                foreach (var attrib in result.PerformanceAttributes)
+                {
+                    // For the time being, we don't have explicitly defined storage for these attributes.
+                    document.Children.Add(FormatDocumentLine(attrib.Key, attrib.Value.ToString("N2")));
+                }
 
                 document.Children.Add("---\n");
 
-                // Difficulty attributes
-                var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.Attributes)) ?? new Dictionary<string, object>();
+                // Difficulty attributes.
+                var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.DifficultyAttributes)) ?? new Dictionary<string, object>();
                 foreach (var attrib in attributeValues)
                     document.Children.Add(FormatDocumentLine(attrib.Key.Humanize(), $"{attrib.Value:N2}"));
 
@@ -185,8 +192,11 @@ namespace PerformanceCalculator.Simulate
             [JsonProperty("pp")]
             public double Pp { get; set; }
 
+            [JsonProperty("performance_attributes")]
+            public IDictionary<string, double> PerformanceAttributes { get; set; }
+
             [JsonProperty("difficulty_attributes")]
-            public DifficultyAttributes Attributes { get; set; }
+            public DifficultyAttributes DifficultyAttributes { get; set; }
         }
 
         /// <summary>
