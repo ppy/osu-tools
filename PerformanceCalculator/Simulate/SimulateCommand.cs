@@ -119,11 +119,11 @@ namespace PerformanceCalculator.Simulate
 
                 // Basic score info.
                 document.Children.Add(
-                    FormatDocumentLine("Beatmap", result.Score.Beatmap),
+                    FormatDocumentLine("Beatmap", $"{result.Score.BeatmapId} - {result.Score.Beatmap}"),
                     FormatDocumentLine("Score", result.Score.Score.ToString(CultureInfo.InvariantCulture)),
                     FormatDocumentLine("Accuracy", result.Score.Accuracy.ToString("N2", CultureInfo.InvariantCulture)),
                     FormatDocumentLine("Combo", result.Score.Combo.ToString(CultureInfo.InvariantCulture)),
-                    FormatDocumentLine("Mods", result.Score.Mods.Count > 0 ? result.Score.Mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None")
+                    FormatDocumentLine("Mods", result.Score.Mods.Count > 0 ? result.Score.Mods.Select(m => m.ToString()).Aggregate((c, n) => $"{c}, {n}") : "None")
                 );
 
                 // Hit statistics
