@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
+using Humanizer;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
@@ -119,19 +120,30 @@ namespace PerformanceCalculator.Simulate
 
                 // Basic score info.
                 document.Children.Add(
-                    FormatDocumentLine("Beatmap", $"{result.Score.BeatmapId} - {result.Score.Beatmap}"),
-                    FormatDocumentLine("Score", result.Score.Score.ToString(CultureInfo.InvariantCulture)),
-                    FormatDocumentLine("Accuracy", result.Score.Accuracy.ToString("N2", CultureInfo.InvariantCulture)),
-                    FormatDocumentLine("Combo", result.Score.Combo.ToString(CultureInfo.InvariantCulture)),
-                    FormatDocumentLine("Mods", result.Score.Mods.Count > 0 ? result.Score.Mods.Select(m => m.ToString()).Aggregate((c, n) => $"{c}, {n}") : "None")
+                    FormatDocumentLine("beatmap", $"{result.Score.BeatmapId} - {result.Score.Beatmap}"),
+                    FormatDocumentLine("score", result.Score.Score.ToString(CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("accuracy", result.Score.Accuracy.ToString("N2", CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("combo", result.Score.Combo.ToString(CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("mods", result.Score.Mods.Count > 0 ? result.Score.Mods.Select(m => m.ToString()).Aggregate((c, n) => $"{c}, {n}") : "None")
                 );
+
+                document.Children.Add("---\n");
 
                 // Hit statistics
                 foreach (var stat in result.Score.Statistics)
-                    document.Children.Add(FormatDocumentLine(stat.Key.ToString(), stat.Value.ToString(CultureInfo.InvariantCulture)));
+                    document.Children.Add(FormatDocumentLine(stat.Key.ToString().ToLowerInvariant(), stat.Value.ToString(CultureInfo.InvariantCulture)));
 
-                // Finally, pp.
+                document.Children.Add("---\n");
+
+                // pp.
                 document.Children.Add(FormatDocumentLine("pp", result.Pp.ToString("N2", CultureInfo.InvariantCulture)));
+
+                document.Children.Add("---\n");
+
+                // Difficulty attributes
+                var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.Attributes)) ?? new Dictionary<string, object>();
+                foreach (var attrib in attributeValues)
+                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize(), $"{attrib.Value:N2}"));
 
                 OutputDocument(document);
             }
@@ -163,7 +175,7 @@ namespace PerformanceCalculator.Simulate
 
         protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 
-        protected string FormatDocumentLine(string name, string value) => $"{name.PadRight(15)}: {value}\n";
+        protected string FormatDocumentLine(string name, string value) => $"{name.PadRight(20)}: {value}\n";
 
         private class Result
         {

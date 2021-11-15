@@ -85,15 +85,14 @@ namespace PerformanceCalculator.Difficulty
                 foreach (var group in resultSet.Results.GroupBy(r => r.RulesetId))
                 {
                     var ruleset = LegacyHelper.GetRulesetFromLegacyID(group.First().RulesetId);
-                    document.Children.Add(new Span($"Ruleset: {ruleset.ShortName}"), "\n");
+                    document.Children.Add(new Span($"ruleset: {ruleset.ShortName}"), "\n");
 
                     Grid grid = new Grid();
                     bool firstResult = true;
 
                     foreach (var result in group)
                     {
-                        var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.Attributes))
-                                              ?? new Dictionary<string, object>();
+                        var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.Attributes)) ?? new Dictionary<string, object>();
 
                         // Headers
                         if (firstResult)
