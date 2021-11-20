@@ -8,10 +8,8 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Scoring;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace PerformanceCalculator.Simulate
@@ -91,22 +89,6 @@ namespace PerformanceCalculator.Simulate
             double total = hits + statistics[HitResult.Miss] + statistics[HitResult.SmallTickMiss];
 
             return hits / total;
-        }
-
-        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
-        {
-            var playInfo = new List<string>
-            {
-                GetAttribute("ApproachRate", FormattableString.Invariant($"{beatmap.BeatmapInfo.BaseDifficulty.ApproachRate}")),
-                GetAttribute("MaxCombo", FormattableString.Invariant($"{scoreInfo.MaxCombo}"))
-            };
-
-            foreach (var statistic in scoreInfo.Statistics)
-            {
-                playInfo.Add(GetAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture)));
-            }
-
-            return string.Join("\n", playInfo);
         }
     }
 }

@@ -7,15 +7,15 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
+using Humanizer;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using Newtonsoft.Json;
 using osu.Game.Beatmaps;
+using osu.Game.Online.API;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch.Difficulty;
-using osu.Game.Rulesets.Mania.Difficulty;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu.Difficulty;
-using osu.Game.Rulesets.Taiko.Difficulty;
 
 namespace PerformanceCalculator.Difficulty
 {
@@ -38,10 +38,13 @@ namespace PerformanceCalculator.Difficulty
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
         public string[] Mods { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
+        public bool OutputJson { get; }
+
         public override void Execute()
         {
-            var results = new List<Result>();
-            var errors = new List<string>();
+            var resultSet = new ResultSet();
 
             if (Directory.Exists(Path))
             {
@@ -50,55 +53,73 @@ namespace PerformanceCalculator.Difficulty
                     try
                     {
                         var beatmap = new ProcessorWorkingBeatmap(file);
-                        results.Add(processBeatmap(beatmap));
+                        resultSet.Results.Add(processBeatmap(beatmap));
                     }
                     catch (Exception e)
                     {
-                        errors.Add($"Processing beatmap \"{file}\" failed:\n{e.Message}");
+                        resultSet.Errors.Add($"Processing beatmap \"{file}\" failed:\n{e.Message}");
                     }
                 }
             }
             else
-                results.Add(processBeatmap(ProcessorWorkingBeatmap.FromFileOrId(Path)));
+                resultSet.Results.Add(processBeatmap(ProcessorWorkingBeatmap.FromFileOrId(Path)));
 
-            var document = new Document();
-
-            foreach (var error in errors)
-                document.Children.Add(new Span(error), "\n");
-
-            if (errors.Any())
-                document.Children.Add("\n");
-
-            foreach (var group in results.GroupBy(r => r.RulesetId))
+            if (OutputJson)
             {
-                var ruleset = LegacyHelper.GetRulesetFromLegacyID(group.First().RulesetId);
+                string json = JsonConvert.SerializeObject(resultSet);
 
-                document.Children.Add(new Span($"Ruleset: {ruleset.ShortName}"), "\n");
+                Console.WriteLine(json);
 
-                var grid = new Grid();
-
-                grid.Columns.Add(GridLength.Auto, GridLength.Auto);
-                grid.Children.Add(new Cell("beatmap"), new Cell("star rating"));
-
-                foreach (var attribute in group.First().AttributeData)
-                {
-                    grid.Columns.Add(GridLength.Auto);
-                    grid.Children.Add(new Cell(attribute.name));
-                }
-
-                foreach (var result in group)
-                {
-                    grid.Children.Add(new Cell(result.Beatmap), new Cell(result.Stars) { Align = Align.Right });
-                    foreach (var attribute in result.AttributeData)
-                        grid.Children.Add(new Cell(attribute.value) { Align = Align.Right });
-                }
-
-                document.Children.Add(grid);
-
-                document.Children.Add("\n");
+                if (OutputFile != null)
+                    File.WriteAllText(OutputFile, json);
             }
+            else
+            {
+                var document = new Document();
 
-            OutputDocument(document);
+                foreach (var error in resultSet.Errors)
+                    document.Children.Add(new Span(error), "\n");
+                if (resultSet.Errors.Count > 0)
+                    document.Children.Add("\n");
+
+                foreach (var group in resultSet.Results.GroupBy(r => r.RulesetId))
+                {
+                    var ruleset = LegacyHelper.GetRulesetFromLegacyID(group.First().RulesetId);
+                    document.Children.Add(new Span($"ruleset: {ruleset.ShortName}"), "\n");
+
+                    Grid grid = new Grid();
+                    bool firstResult = true;
+
+                    foreach (var result in group)
+                    {
+                        var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.Attributes)) ?? new Dictionary<string, object>();
+
+                        // Headers
+                        if (firstResult)
+                        {
+                            grid.Columns.Add(GridLength.Auto);
+                            grid.Children.Add(new Cell("beatmap"));
+
+                            foreach (var column in attributeValues)
+                            {
+                                grid.Columns.Add(GridLength.Auto);
+                                grid.Children.Add(new Cell(column.Key.Humanize()));
+                            }
+                        }
+
+                        // Values
+                        grid.Children.Add(new Cell($"{result.BeatmapId} - {result.Beatmap}"));
+                        foreach (var column in attributeValues)
+                            grid.Children.Add(new Cell($"{column.Value:N2}") { Align = Align.Right });
+
+                        firstResult = false;
+                    }
+
+                    document.Children.Add(grid, "\n");
+                }
+
+                OutputDocument(document);
+            }
         }
 
         private Result processBeatmap(WorkingBeatmap beatmap)
@@ -108,58 +129,14 @@ namespace PerformanceCalculator.Difficulty
             var mods = LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, getMods(ruleset).ToArray());
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
 
-            var result = new Result
+            return new Result
             {
-                RulesetId = ruleset.RulesetInfo.ID ?? 0,
-                Beatmap = $"{beatmap.BeatmapInfo.OnlineID} - {beatmap.BeatmapInfo}",
-                Stars = attributes.StarRating.ToString("N2")
+                RulesetId = ruleset.RulesetInfo.OnlineID,
+                BeatmapId = beatmap.BeatmapInfo.OnlineID ?? 0,
+                Beatmap = beatmap.BeatmapInfo.ToString(),
+                Mods = mods.Select(m => new APIMod(m)).ToList(),
+                Attributes = attributes
             };
-
-            switch (attributes)
-            {
-                case OsuDifficultyAttributes osu:
-                    result.AttributeData = new List<(string, object)>
-                    {
-                        ("aim rating", osu.AimStrain.ToString("N2")),
-                        ("speed rating", osu.SpeedStrain.ToString("N2")),
-                        ("max combo", osu.MaxCombo),
-                        ("approach rate", osu.ApproachRate.ToString("N2")),
-                        ("overall difficulty", osu.OverallDifficulty.ToString("N2")),
-                    };
-
-                    if (mods.Any(m => m is ModFlashlight))
-                        result.AttributeData.Add(("flashlight rating", osu.FlashlightRating.ToString("N2")));
-
-                    break;
-
-                case TaikoDifficultyAttributes taiko:
-                    result.AttributeData = new List<(string, object)>
-                    {
-                        ("hit window", taiko.GreatHitWindow.ToString("N2")),
-                        ("max combo", taiko.MaxCombo)
-                    };
-
-                    break;
-
-                case CatchDifficultyAttributes @catch:
-                    result.AttributeData = new List<(string, object)>
-                    {
-                        ("max combo", @catch.MaxCombo),
-                        ("approach rate", @catch.ApproachRate.ToString("N2"))
-                    };
-
-                    break;
-
-                case ManiaDifficultyAttributes mania:
-                    result.AttributeData = new List<(string, object)>
-                    {
-                        ("hit window", mania.GreatHitWindow.ToString("N2"))
-                    };
-
-                    break;
-            }
-
-            return result;
         }
 
         private List<Mod> getMods(Ruleset ruleset)
@@ -182,12 +159,31 @@ namespace PerformanceCalculator.Difficulty
             return mods;
         }
 
-        private struct Result
+        private class ResultSet
         {
-            public int RulesetId;
-            public string Beatmap;
-            public string Stars;
-            public List<(string name, object value)> AttributeData;
+            [JsonProperty("errors")]
+            public List<string> Errors { get; set; } = new List<string>();
+
+            [JsonProperty("results")]
+            public List<Result> Results { get; set; } = new List<Result>();
+        }
+
+        private class Result
+        {
+            [JsonProperty("ruleset_id")]
+            public int RulesetId { get; set; }
+
+            [JsonProperty("beatmap_id")]
+            public int BeatmapId { get; set; }
+
+            [JsonProperty("beatmap")]
+            public string Beatmap { get; set; }
+
+            [JsonProperty("mods")]
+            public List<APIMod> Mods { get; set; }
+
+            [JsonProperty("attributes")]
+            public DifficultyAttributes Attributes { get; set; }
         }
     }
 }

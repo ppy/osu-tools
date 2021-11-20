@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
@@ -12,7 +11,6 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Scoring;
 
 namespace PerformanceCalculator.Simulate
 {
@@ -74,11 +72,6 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.Meh, 0 },
                 { HitResult.Miss, 0 }
             };
-        }
-
-        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
-        {
-            return GetAttribute("Score", scoreInfo.TotalScore.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

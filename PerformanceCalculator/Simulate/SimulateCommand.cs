@@ -8,11 +8,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
+using Humanizer;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using osu.Game.Beatmaps;
+using osu.Game.Online.API;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -70,43 +73,42 @@ namespace PerformanceCalculator.Simulate
             var score = Score;
             var accuracy = GetAccuracy(statistics);
 
-            var scoreInfo = new ScoreInfo
+            var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
+            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, mods).ToArray());
+            var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
             {
                 Accuracy = accuracy,
                 MaxCombo = maxCombo,
                 Statistics = statistics,
                 Mods = mods,
                 TotalScore = score,
-                RulesetID = Ruleset.RulesetInfo.ID ?? 0
-            };
-
-            var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
-            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
-            var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, scoreInfo);
+                RulesetID = Ruleset.RulesetInfo.ID ?? 0,
+            });
 
             var categoryAttribs = new Dictionary<string, double>();
-            double pp = performanceCalculator.Calculate(categoryAttribs);
+            double pp = performanceCalculator?.Calculate(categoryAttribs) ?? 0;
+
+            var result = new Result
+            {
+                Score = new ScoreStatistics
+                {
+                    RulesetId = ruleset.RulesetInfo.OnlineID,
+                    BeatmapId = workingBeatmap.BeatmapInfo.OnlineID ?? 0,
+                    Beatmap = workingBeatmap.BeatmapInfo.ToString(),
+                    Mods = mods.Select(m => new APIMod(m)).ToList(),
+                    Score = score,
+                    Accuracy = accuracy * 100,
+                    Combo = maxCombo,
+                    Statistics = statistics
+                },
+                Pp = pp,
+                PerformanceAttributes = categoryAttribs.ToDictionary(k => k.Key.ToLowerInvariant().Underscore(), k => k.Value),
+                DifficultyAttributes = difficultyAttributes
+            };
 
             if (OutputJson)
             {
-                var o = new JObject
-                {
-                    { "Beatmap", workingBeatmap.BeatmapInfo.ToString() }
-                };
-
-                o["Statistics"] = new JObject();
-
-                foreach (var info in getPlayValues(scoreInfo, beatmap))
-                    o["Statistics"][info.Key] = info.Value;
-
-                foreach (var kvp in categoryAttribs)
-                    o[kvp.Key] = kvp.Value;
-
-                o["Mods"] = mods.Length > 0 ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}") : "None";
-
-                o["pp"] = pp;
-
-                string json = o.ToString();
+                string json = JsonConvert.SerializeObject(result);
 
                 Console.Write(json);
 
@@ -117,18 +119,38 @@ namespace PerformanceCalculator.Simulate
             {
                 var document = new Document();
 
-                document.Children.Add(new Span(workingBeatmap.BeatmapInfo.ToString()), "\n");
+                // Basic score info.
+                document.Children.Add(
+                    FormatDocumentLine("beatmap", $"{result.Score.BeatmapId} - {result.Score.Beatmap}"),
+                    FormatDocumentLine("score", result.Score.Score.ToString(CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("accuracy", result.Score.Accuracy.ToString("N2", CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("combo", result.Score.Combo.ToString(CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("mods", result.Score.Mods.Count > 0 ? result.Score.Mods.Select(m => m.ToString()).Aggregate((c, n) => $"{c}, {n}") : "None")
+                );
 
-                document.Children.Add(new Span(GetPlayInfo(scoreInfo, beatmap)), "\n");
+                document.Children.Add("---\n");
 
-                document.Children.Add(new Span(GetAttribute("Mods", mods.Length > 0
-                    ? mods.Select(m => m.Acronym).Aggregate((c, n) => $"{c}, {n}")
-                    : "None")), "\n");
+                // Hit statistics.
+                foreach (var stat in result.Score.Statistics)
+                    document.Children.Add(FormatDocumentLine(stat.Key.ToString().ToLowerInvariant(), stat.Value.ToString(CultureInfo.InvariantCulture)));
 
-                foreach (var kvp in categoryAttribs)
-                    document.Children.Add(new Span(GetAttribute(kvp.Key, kvp.Value.ToString(CultureInfo.InvariantCulture))), "\n");
+                document.Children.Add("---\n");
 
-                document.Children.Add(new Span(GetAttribute("pp", pp.ToString(CultureInfo.InvariantCulture))));
+                // Performance attributes.
+                document.Children.Add(FormatDocumentLine("pp", result.Pp.ToString("N2", CultureInfo.InvariantCulture)));
+
+                foreach (var attrib in result.PerformanceAttributes)
+                {
+                    // For the time being, we don't have explicitly defined storage for these attributes.
+                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize().ToLowerInvariant(), attrib.Value.ToString("N2")));
+                }
+
+                document.Children.Add("---\n");
+
+                // Difficulty attributes.
+                var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.DifficultyAttributes)) ?? new Dictionary<string, object>();
+                foreach (var attrib in attributeValues)
+                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize(), $"{attrib.Value:N2}"));
 
                 OutputDocument(document);
             }
@@ -154,30 +176,57 @@ namespace PerformanceCalculator.Simulate
             return mods;
         }
 
-        private Dictionary<string, double> getPlayValues(ScoreInfo scoreInfo, IBeatmap beatmap)
-        {
-            var playInfo = new Dictionary<string, double>
-            {
-                { "Accuracy", scoreInfo.Accuracy * 100 },
-                { "Combo", scoreInfo.MaxCombo },
-            };
-
-            foreach (var statistic in scoreInfo.Statistics)
-            {
-                playInfo.Add(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value);
-            }
-
-            return playInfo;
-        }
-
-        protected abstract string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap);
-
         protected abstract int GetMaxCombo(IBeatmap beatmap);
 
         protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
 
         protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 
-        protected string GetAttribute(string name, string value) => $"{name.PadRight(15)}: {value}";
+        protected string FormatDocumentLine(string name, string value) => $"{name.PadRight(20)}: {value}\n";
+
+        private class Result
+        {
+            [JsonProperty("score")]
+            public ScoreStatistics Score { get; set; }
+
+            [JsonProperty("pp")]
+            public double Pp { get; set; }
+
+            [JsonProperty("performance_attributes")]
+            public IDictionary<string, double> PerformanceAttributes { get; set; }
+
+            [JsonProperty("difficulty_attributes")]
+            public DifficultyAttributes DifficultyAttributes { get; set; }
+        }
+
+        /// <summary>
+        /// A trimmed down score.
+        /// </summary>
+        private class ScoreStatistics
+        {
+            [JsonProperty("ruleset_id")]
+            public int RulesetId { get; set; }
+
+            [JsonProperty("beatmap_id")]
+            public int BeatmapId { get; set; }
+
+            [JsonProperty("beatmap")]
+            public string Beatmap { get; set; }
+
+            [JsonProperty("mods")]
+            public List<APIMod> Mods { get; set; }
+
+            [JsonProperty("total_score")]
+            public long Score { get; set; }
+
+            [JsonProperty("accuracy")]
+            public double Accuracy { get; set; }
+
+            [JsonProperty("combo")]
+            public int Combo { get; set; }
+
+            [JsonProperty("statistics")]
+            public Dictionary<HitResult, int> Statistics { get; set; }
+        }
     }
 }

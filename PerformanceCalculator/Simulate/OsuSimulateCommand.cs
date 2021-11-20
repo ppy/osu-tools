@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
@@ -12,7 +11,6 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Scoring;
 
 namespace PerformanceCalculator.Simulate
 {
@@ -99,22 +97,6 @@ namespace PerformanceCalculator.Simulate
             var total = countGreat + countGood + countMeh + countMiss;
 
             return (double)((6 * countGreat) + (2 * countGood) + countMeh) / (6 * total);
-        }
-
-        protected override string GetPlayInfo(ScoreInfo scoreInfo, IBeatmap beatmap)
-        {
-            var playInfo = new List<string>
-            {
-                GetAttribute("Accuracy", (scoreInfo.Accuracy * 100).ToString(CultureInfo.InvariantCulture) + "%"),
-                GetAttribute("Combo", FormattableString.Invariant($"{scoreInfo.MaxCombo} ({Math.Round(100.0 * scoreInfo.MaxCombo / GetMaxCombo(beatmap), 2)}%)"))
-            };
-
-            foreach (var statistic in scoreInfo.Statistics)
-            {
-                playInfo.Add(GetAttribute(Enum.GetName(typeof(HitResult), statistic.Key), statistic.Value.ToString(CultureInfo.InvariantCulture)));
-            }
-
-            return string.Join("\n", playInfo);
         }
     }
 }
