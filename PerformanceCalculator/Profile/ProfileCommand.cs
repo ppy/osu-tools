@@ -6,13 +6,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using osu.Framework.IO.Network;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -21,22 +19,12 @@ using osu.Game.Scoring.Legacy;
 namespace PerformanceCalculator.Profile
 {
     [Command(Name = "profile", Description = "Computes the total performance (pp) of a profile.")]
-    public class ProfileCommand : ProcessorCommand
+    public class ProfileCommand : ApiCommand
     {
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "user", Description = "User ID is preferred, but username should also work.")]
         public string ProfileName { get; }
-
-        [UsedImplicitly]
-        [Required]
-        [Argument(1, Name = "client id", Description = "API Client ID, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
-        public string ClientId { get; }
-
-        [UsedImplicitly]
-        [Required]
-        [Argument(2, Name = "client secret", Description = "API Client Secret, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
-        public string ClientSecret { get; }
 
         [UsedImplicitly]
         [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "The ruleset to compute the profile for.\n"
@@ -48,24 +36,19 @@ namespace PerformanceCalculator.Profile
         [Option(Template = "-j|--json", Description = "Output results as JSON.")]
         public bool OutputJson { get; }
 
-        private string apiAccessToken;
-
         public override void Execute()
         {
-            Console.WriteLine("Getting access token...");
-            apiAccessToken = getAccessToken();
-
             var displayPlays = new List<UserPlayInfo>();
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? 0);
             var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
 
             Console.WriteLine("Getting user data...");
-            dynamic userData = getJsonFromApi($"users/{ProfileName}/{rulesetApiName}");
+            dynamic userData = GetJsonFromApi($"users/{ProfileName}/{rulesetApiName}");
 
             Console.WriteLine("Getting user top scores...");
 
-            foreach (var play in getJsonFromApi($"users/{userData.id}/scores/best?mode={rulesetApiName}&limit=100"))
+            foreach (var play in GetJsonFromApi($"users/{userData.id}/scores/best?mode={rulesetApiName}&limit=100"))
             {
                 var working = ProcessorWorkingBeatmap.FromFileOrId((string)play.beatmap.id);
 
@@ -193,32 +176,6 @@ namespace PerformanceCalculator.Profile
                         }
                     })
                 );
-            }
-        }
-
-        private dynamic getJsonFromApi(string request)
-        {
-            using (var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}"))
-            {
-                req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {apiAccessToken}");
-                req.Perform();
-
-                return req.ResponseObject;
-            }
-        }
-
-        private string getAccessToken()
-        {
-            using (var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/oauth/token"))
-            {
-                req.Method = HttpMethod.Post;
-                req.AddParameter("client_id", ClientId);
-                req.AddParameter("client_secret", ClientSecret);
-                req.AddParameter("grant_type", "client_credentials");
-                req.AddParameter("scope", "public");
-                req.Perform();
-
-                return req.ResponseObject.access_token.ToString();
             }
         }
     }
