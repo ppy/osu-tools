@@ -19,18 +19,19 @@ Difficulty and performance calculators for all rulesets may be modified to tweak
 ```
 > dotnet run -- --help
 
-Usage: dotnet PerformanceCalculator.dll [options] [command]
+Usage: dotnet PerformanceCalculator.dll [command] [options]
 
 Options:
-  -?|-h|--help  Show help information
+  -?|-h|--help  Show help information.
 
 Commands:
   difficulty    Computes the difficulty of a beatmap.
+  leaderboard   Computes the performance (pp) for every player in a part of the leaderboard.
   performance   Computes the performance (pp) of replays on a beatmap.
   profile       Computes the total performance (pp) of a profile.
   simulate      Computes the performance (pp) of a simulated play.
 
-Run 'dotnet PerformanceCalculator.dll [command] --help' for more information about a command.
+Run 'dotnet PerformanceCalculator.dll [command] -?|-h|--help' for more information about a command.
 ```
 
 ### Difficulty
@@ -250,4 +251,29 @@ Options:
   -m|--mod <mod>          One for each mod. The mods to compute the performance with. Values: hr, dt, fl, 4k, 5k, etc...
   -j|--json               Output results as JSON.
   -o|--output <file.txt>  Output results to text file.
+```
+
+### Leaderboard
+```
+> dotnet run -- leaderboard --help
+
+Computes the performance (pp) for every player in a part of the leaderboard.
+
+Usage: dotnet PerformanceCalculator.dll leaderboard [options] <client id> <client secret>
+
+Arguments:
+  client id                       API Client ID, which you can get from here:
+                                  https://osu.ppy.sh/home/account/edit#new-oauth-application
+  client secret                   API Client Secret, which you can get from here:
+                                  https://osu.ppy.sh/home/account/edit#new-oauth-application
+
+Options:
+  -?|-h|--help                    Show help information.
+  -r|--ruleset <ruleset-id>       The ruleset to compute the leaderboard for.
+                                  Values: 0 - osu!, 1 - osu!taiko, 2 - osu!catch, 3 - osu!mania
+                                  Allowed values are: 0, 1, 2, 3.
+  -l|--limit <amount-of-players>  How many players to compute (max. 50)
+  -p|--page <page-number>         Leaderboard page number.
+  -j|--json                       Output results as JSON.
+  -o|--output <file.txt>          Output results to text file.
 ```

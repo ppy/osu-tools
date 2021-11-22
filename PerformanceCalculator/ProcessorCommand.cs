@@ -20,7 +20,7 @@ namespace PerformanceCalculator
         [Option(Template = "-o|--output <file.txt>", Description = "Output results to text file.")]
         public string OutputFile { get; }
 
-        public void OnExecute(CommandLineApplication app, IConsole console)
+        public virtual void OnExecute(CommandLineApplication app, IConsole console)
         {
             Console = console;
             Execute();
