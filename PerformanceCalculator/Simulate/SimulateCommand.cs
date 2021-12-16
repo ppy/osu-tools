@@ -142,7 +142,7 @@ namespace PerformanceCalculator.Simulate
                 foreach (var attrib in result.PerformanceAttributes)
                 {
                     // For the time being, we don't have explicitly defined storage for these attributes.
-                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize().ToLowerInvariant(), attrib.Value.ToString("N2")));
+                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize().ToLowerInvariant(), attrib.Value.ToString("N2", CultureInfo.InvariantCulture)));
                 }
 
                 document.Children.Add("---\n");
@@ -150,7 +150,7 @@ namespace PerformanceCalculator.Simulate
                 // Difficulty attributes.
                 var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.DifficultyAttributes)) ?? new Dictionary<string, object>();
                 foreach (var attrib in attributeValues)
-                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize(), $"{attrib.Value:N2}"));
+                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize(), FormattableString.Invariant($"{attrib.Value:N2}")));
 
                 OutputDocument(document);
             }
