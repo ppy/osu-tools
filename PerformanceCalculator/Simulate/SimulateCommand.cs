@@ -119,7 +119,8 @@ namespace PerformanceCalculator.Simulate
             {
                 var document = new Document();
 
-                // Basic score info.
+                AddSectionHeader(document, "Basic score info");
+
                 document.Children.Add(
                     FormatDocumentLine("beatmap", $"{result.Score.BeatmapId} - {result.Score.Beatmap}"),
                     FormatDocumentLine("score", result.Score.Score.ToString(CultureInfo.InvariantCulture)),
@@ -128,15 +129,13 @@ namespace PerformanceCalculator.Simulate
                     FormatDocumentLine("mods", result.Score.Mods.Count > 0 ? result.Score.Mods.Select(m => m.ToString()).Aggregate((c, n) => $"{c}, {n}") : "None")
                 );
 
-                document.Children.Add("---\n");
+                AddSectionHeader(document, "Hit statistics");
 
-                // Hit statistics.
                 foreach (var stat in result.Score.Statistics)
                     document.Children.Add(FormatDocumentLine(stat.Key.ToString().ToLowerInvariant(), stat.Value.ToString(CultureInfo.InvariantCulture)));
 
-                document.Children.Add("---\n");
+                AddSectionHeader(document, "Performance attributes");
 
-                // Performance attributes.
                 document.Children.Add(FormatDocumentLine("pp", result.Pp.ToString("N2", CultureInfo.InvariantCulture)));
 
                 foreach (var attrib in result.PerformanceAttributes)
@@ -145,15 +144,23 @@ namespace PerformanceCalculator.Simulate
                     document.Children.Add(FormatDocumentLine(attrib.Key.Humanize().ToLowerInvariant(), attrib.Value.ToString("N2", CultureInfo.InvariantCulture)));
                 }
 
-                document.Children.Add("---\n");
+                AddSectionHeader(document, "Difficulty attributes");
 
-                // Difficulty attributes.
                 var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.DifficultyAttributes)) ?? new Dictionary<string, object>();
                 foreach (var attrib in attributeValues)
                     document.Children.Add(FormatDocumentLine(attrib.Key.Humanize(), FormattableString.Invariant($"{attrib.Value:N2}")));
 
                 OutputDocument(document);
             }
+        }
+
+        protected void AddSectionHeader(Document document, string header)
+        {
+            if (document.Children.Any())
+                document.Children.Add(Environment.NewLine);
+
+            document.Children.Add(header);
+            document.Children.Add(new Separator());
         }
 
         protected List<Mod> GetMods(Ruleset ruleset)
