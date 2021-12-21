@@ -85,8 +85,7 @@ namespace PerformanceCalculator.Simulate
                 RulesetID = Ruleset.RulesetInfo.ID ?? 0,
             });
 
-            var categoryAttribs = new Dictionary<string, double>();
-            double pp = performanceCalculator?.Calculate(categoryAttribs) ?? 0;
+            var ppAttributes = performanceCalculator?.Calculate();
 
             var result = new Result
             {
@@ -101,8 +100,7 @@ namespace PerformanceCalculator.Simulate
                     Combo = maxCombo,
                     Statistics = statistics
                 },
-                Pp = pp,
-                PerformanceAttributes = categoryAttribs.ToDictionary(k => k.Key.ToLowerInvariant().Underscore(), k => k.Value),
+                PerformanceAttributes = ppAttributes,
                 DifficultyAttributes = difficultyAttributes
             };
 
@@ -136,18 +134,14 @@ namespace PerformanceCalculator.Simulate
 
                 AddSectionHeader(document, "Performance attributes");
 
-                document.Children.Add(FormatDocumentLine("pp", result.Pp.ToString("N2", CultureInfo.InvariantCulture)));
-
-                foreach (var attrib in result.PerformanceAttributes)
-                {
-                    // For the time being, we don't have explicitly defined storage for these attributes.
-                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize().ToLowerInvariant(), attrib.Value.ToString("N2", CultureInfo.InvariantCulture)));
-                }
+                var ppAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.PerformanceAttributes)) ?? new Dictionary<string, object>();
+                foreach (var attrib in ppAttributeValues)
+                    document.Children.Add(FormatDocumentLine(attrib.Key.Humanize().ToLower(), FormattableString.Invariant($"{attrib.Value:N2}")));
 
                 AddSectionHeader(document, "Difficulty attributes");
 
-                var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.DifficultyAttributes)) ?? new Dictionary<string, object>();
-                foreach (var attrib in attributeValues)
+                var diffAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.DifficultyAttributes)) ?? new Dictionary<string, object>();
+                foreach (var attrib in diffAttributeValues)
                     document.Children.Add(FormatDocumentLine(attrib.Key.Humanize(), FormattableString.Invariant($"{attrib.Value:N2}")));
 
                 OutputDocument(document);
@@ -196,11 +190,8 @@ namespace PerformanceCalculator.Simulate
             [JsonProperty("score")]
             public ScoreStatistics Score { get; set; }
 
-            [JsonProperty("pp")]
-            public double Pp { get; set; }
-
             [JsonProperty("performance_attributes")]
-            public IDictionary<string, double> PerformanceAttributes { get; set; }
+            public PerformanceAttributes PerformanceAttributes { get; set; }
 
             [JsonProperty("difficulty_attributes")]
             public DifficultyAttributes DifficultyAttributes { get; set; }
