@@ -85,8 +85,7 @@ namespace PerformanceCalculator.Leaderboard
                     var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
                     var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
 
-                    var categories = new Dictionary<string, double>();
-                    plays.Add((performanceCalculator.Calculate(categories), play.pp));
+                    plays.Add((performanceCalculator?.Calculate().Total ?? 0, play.pp));
                 }
 
                 var localOrdered = plays.Select(x => x.Item1).OrderByDescending(x => x).ToList();

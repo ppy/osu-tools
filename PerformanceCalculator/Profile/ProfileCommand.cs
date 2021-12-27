@@ -77,18 +77,17 @@ namespace PerformanceCalculator.Profile
                 var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
                 var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
 
-                var categories = new Dictionary<string, double>();
-                var localPP = performanceCalculator.Calculate(categories);
+                var ppAttributes = performanceCalculator?.Calculate();
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,
-                    LocalPP = localPP,
+                    LocalPP = ppAttributes?.Total ?? 0,
                     LivePP = play.pp,
                     Mods = scoreInfo.Mods.Select(m => m.Acronym).ToArray(),
                     MissCount = play.statistics.count_miss,
                     Accuracy = scoreInfo.Accuracy * 100,
                     Combo = play.max_combo,
-                    MaxCombo = (int)categories.GetValueOrDefault("Max Combo")
+                    MaxCombo = difficultyAttributes.MaxCombo
                 };
 
                 displayPlays.Add(thisPlay);
