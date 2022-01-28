@@ -82,7 +82,7 @@ namespace PerformanceCalculator.Simulate
                 Statistics = statistics,
                 Mods = mods,
                 TotalScore = score,
-                RulesetID = Ruleset.RulesetInfo.ID ?? 0,
+                Ruleset = Ruleset.RulesetInfo,
             });
 
             var ppAttributes = performanceCalculator?.Calculate();
@@ -92,7 +92,7 @@ namespace PerformanceCalculator.Simulate
                 Score = new ScoreStatistics
                 {
                     RulesetId = ruleset.RulesetInfo.OnlineID,
-                    BeatmapId = workingBeatmap.BeatmapInfo.OnlineID ?? 0,
+                    BeatmapId = workingBeatmap.BeatmapInfo.OnlineID,
                     Beatmap = workingBeatmap.BeatmapInfo.ToString(),
                     Mods = mods.Select(m => new APIMod(m)).ToList(),
                     Score = score,
