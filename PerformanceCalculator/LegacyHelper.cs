@@ -73,7 +73,7 @@ namespace PerformanceCalculator
                 BeatmapInfo =
                 {
                     Ruleset = ruleset.RulesetInfo,
-                    BaseDifficulty = new BeatmapDifficulty()
+                    Difficulty = new BeatmapDifficulty()
                 }
             };
 
