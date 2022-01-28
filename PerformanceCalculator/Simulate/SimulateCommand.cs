@@ -75,14 +75,13 @@ namespace PerformanceCalculator.Simulate
 
             var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
             var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, mods).ToArray());
-            var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
+            var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
             {
                 Accuracy = accuracy,
                 MaxCombo = maxCombo,
                 Statistics = statistics,
                 Mods = mods,
                 TotalScore = score,
-                Ruleset = Ruleset.RulesetInfo,
             });
 
             var ppAttributes = performanceCalculator?.Calculate();
