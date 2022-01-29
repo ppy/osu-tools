@@ -63,9 +63,8 @@ namespace PerformanceCalculator.Leaderboard
                     var modsAcronyms = ((JArray)play.mods).Select(x => x.ToString()).ToArray();
                     Mod[] mods = ruleset.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
 
-                    var scoreInfo = new ScoreInfo
+                    var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.RulesetInfo)
                     {
-                        Ruleset = ruleset.RulesetInfo,
                         TotalScore = play.score,
                         MaxCombo = play.max_combo,
                         Mods = mods,
