@@ -74,7 +74,7 @@ namespace PerformanceCalculator.Simulate
             var accuracy = GetAccuracy(statistics);
 
             var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
-            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, mods).ToArray());
+            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, mods).ToArray());
             var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
             {
                 Accuracy = accuracy,

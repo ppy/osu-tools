@@ -40,7 +40,7 @@ namespace PerformanceCalculator.Performance
 
                 var ruleset = score.ScoreInfo.Ruleset.CreateInstance();
                 var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
-                var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, score.ScoreInfo.Mods).ToArray());
+                var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, score.ScoreInfo.Mods).ToArray());
                 var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
 
                 var ppAttributes = performanceCalculator?.Calculate();

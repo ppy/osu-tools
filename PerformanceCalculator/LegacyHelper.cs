@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using osu.Framework.Audio.Track;
@@ -63,10 +64,10 @@ namespace PerformanceCalculator
         }
 
         /// <summary>
-        /// Trims all mods from a given <see cref="Mod"/> array which do not adjust difficulty.
+        /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
         /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
         /// </summary>
-        public static Mod[] TrimNonDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
         {
             var beatmap = new EmptyWorkingBeatmap
             {
@@ -77,17 +78,27 @@ namespace PerformanceCalculator
                 }
             };
 
-            var difficultyAdjustmentMods = ModUtils.FlattenMods(
-                                                       ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
-                                                   .Select(m => m.GetType())
-                                                   .Distinct()
-                                                   .ToHashSet();
+            var allMods = ruleset.CreateAllMods().ToArray();
 
-            // Special case for DT/NC.
+            var allowedMods = ModUtils.FlattenMods(
+                                          ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
+                                      .Select(m => m.GetType())
+                                      .Distinct()
+                                      .ToHashSet();
+
+            // Special case to allow either DT or NC.
             if (mods.Any(m => m is ModDoubleTime))
-                difficultyAdjustmentMods.Add(ruleset.CreateAllMods().Single(m => m is ModNightcore).GetType());
+                allowedMods.Add(allMods.Single(m => m is ModNightcore).GetType());
 
-            return mods.Where(m => difficultyAdjustmentMods.Contains(m.GetType())).ToArray();
+            var result = new List<Mod>();
+
+            var classicMod = allMods.SingleOrDefault(m => m is ModClassic);
+            if (classicMod != null)
+                result.Add(classicMod);
+
+            result.AddRange(mods.Where(m => allowedMods.Contains(m.GetType())));
+
+            return result.ToArray();
         }
 
         private class EmptyWorkingBeatmap : WorkingBeatmap
