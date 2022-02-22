@@ -42,6 +42,10 @@ namespace PerformanceCalculator.Difficulty
         [Option(Template = "-j|--json", Description = "Output results as JSON.")]
         public bool OutputJson { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-l|--lazer", Description = "Excludes the classic mod to compute lazer-first scores.")]
+        public bool Lazer { get; }
+
         public override void Execute()
         {
             var resultSet = new ResultSet();
@@ -126,7 +130,7 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.Ruleset.OnlineID);
-            var mods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, getMods(ruleset).ToArray());
+            var mods = Lazer ? getMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, getMods(ruleset));
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
 
             return new Result
@@ -139,11 +143,11 @@ namespace PerformanceCalculator.Difficulty
             };
         }
 
-        private List<Mod> getMods(Ruleset ruleset)
+        private Mod[] getMods(Ruleset ruleset)
         {
             var mods = new List<Mod>();
             if (Mods == null)
-                return mods;
+                return Array.Empty<Mod>();
 
             var availableMods = ruleset.CreateAllMods().ToList();
 
@@ -156,7 +160,7 @@ namespace PerformanceCalculator.Difficulty
                 mods.Add(newMod);
             }
 
-            return mods;
+            return mods.ToArray();
         }
 
         private class ResultSet
