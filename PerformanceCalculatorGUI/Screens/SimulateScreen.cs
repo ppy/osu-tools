@@ -273,7 +273,7 @@ namespace PerformanceCalculatorGUI.Screens
                 Statistics = generateHitResults(accuracy, working.Beatmap, misses, null, null),
                 Mods = appliedMods.Value.ToArray(),
                 TotalScore = 1,
-                RulesetID = currentRuleset.Value.ID ?? 0,
+                Ruleset = currentRuleset.Value
             });
 
             var ppAttributes = performanceCalculator?.Calculate();
