@@ -8,7 +8,9 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Threading;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
@@ -19,8 +21,9 @@ using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
-using osu.Game.Screens.Edit.Setup;
+using osu.Game.Screens.Play.HUD;
 using osu.Game.Utils;
+using PerformanceCalculatorGUI.Components;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -33,22 +36,22 @@ namespace PerformanceCalculatorGUI.Screens
         private LabelledTextBox beatmapTextBox;
         private LabelledTextBox accuracyTextBox;
         private LabelledTextBox missesTextBox;
+        private LabelledTextBox comboTextBox;
+        private LabelledTextBox scoreTextBox;
 
         private DifficultyAttributes difficultyAttributes;
         private FillFlowContainer difficultyAttributesContainer;
-
         private FillFlowContainer performanceAttributesContainer;
 
         private FillFlowContainer beatmapDataContainer;
-
         private OsuSpriteText beatmapTitle;
+
+        private ModDisplay modDisplay;
 
         private readonly Bindable<IReadOnlyList<Mod>> appliedMods = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
 
-        private readonly Bindable<RulesetInfo> currentRuleset = new Bindable<RulesetInfo>();
-
         [Resolved]
-        private IRulesetStore rulesets { get; set; }
+        private Bindable<RulesetInfo> ruleset { get; set; }
 
         public SimulateScreen()
         {
@@ -58,11 +61,8 @@ namespace PerformanceCalculatorGUI.Screens
         }
 
         [BackgroundDependencyLoader]
-        private void load(Bindable<RulesetInfo> parentRuleset)
+        private void load()
         {
-            // TODO: ruleset changing
-            currentRuleset.BindTarget = parentRuleset;
-
             InternalChildren = new Drawable[]
             {
                 new Container
@@ -97,6 +97,7 @@ namespace PerformanceCalculatorGUI.Screens
                 },
                 beatmapDataContainer = new FillFlowContainer()
                 {
+                    Name = "Beatmap data",
                     Y = 60,
                     RelativeSizeAxes = Axes.Both,
                     Direction = FillDirection.Horizontal,
@@ -104,9 +105,11 @@ namespace PerformanceCalculatorGUI.Screens
                     {
                         new OsuScrollContainer(Direction.Vertical)
                         {
+                            Name = "Score params",
                             ScrollbarVisible = true,
                             RelativeSizeAxes = Axes.Both,
                             Width = 0.5f,
+                            Height = 1.0f,
                             Child = new FillFlowContainer()
                             {
                                 Padding = new MarginPadding(10.0f),
@@ -121,13 +124,25 @@ namespace PerformanceCalculatorGUI.Screens
                                         Height = 20,
                                         Text = "Score params"
                                     },
-                                    new OsuButton()
+                                    new FillFlowContainer
                                     {
-                                        Width = 100,
-                                        Height = 25,
-                                        Margin = new MarginPadding(5.0f),
-                                        Action = () => { userModsSelectOverlay.Show(); },
-                                        Text = "Mods"
+                                        Name = "Mods container",
+                                        Height = 40,
+                                        Direction = FillDirection.Horizontal,
+                                        RelativeSizeAxes = Axes.X,
+                                        Anchor = Anchor.TopLeft,
+                                        AutoSizeAxes = Axes.Y,
+                                        Children = new Drawable[]
+                                        {
+                                            new OsuButton
+                                            {
+                                                Width = 100,
+                                                Margin = new MarginPadding(5.0f),
+                                                Action = () => { userModsSelectOverlay.Show(); },
+                                                Text = "Mods"
+                                            },
+                                            modDisplay = new ModDisplay()
+                                        }
                                     },
                                     accuracyTextBox = new LabelledNumberBox()
                                     {
@@ -142,12 +157,27 @@ namespace PerformanceCalculatorGUI.Screens
                                         Anchor = Anchor.TopLeft,
                                         Label = "Misses",
                                         PlaceholderText = "0"
+                                    },
+                                    comboTextBox = new LabelledNumberBox()
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        Anchor = Anchor.TopLeft,
+                                        Label = "Combo",
+                                        PlaceholderText = "0"
+                                    },
+                                    scoreTextBox = new LabelledNumberBox()
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        Anchor = Anchor.TopLeft,
+                                        Label = "Score",
+                                        PlaceholderText = "1000000"
                                     }
                                 }
                             }
                         },
                         new OsuScrollContainer(Direction.Vertical)
                         {
+                            Name = "Difficulty calculation results",
                             ScrollDistance = 10f,
                             ScrollbarVisible = true,
                             RelativeSizeAxes = Axes.Both,
@@ -209,35 +239,64 @@ namespace PerformanceCalculatorGUI.Screens
             userModsSelectOverlay.Hide();
 
             beatmapTextBox.Current.BindValueChanged(beatmapChanged);
-            accuracyTextBox.Current.BindValueChanged(scoreChanged);
-            missesTextBox.Current.BindValueChanged(scoreChanged);
+
+            accuracyTextBox.Current.BindValueChanged(_ => calculatePerformance());
+            missesTextBox.Current.BindValueChanged(_ => calculatePerformance());
+            comboTextBox.Current.BindValueChanged(_ => calculatePerformance());
+            scoreTextBox.Current.BindValueChanged(_ => calculatePerformance());
+
             appliedMods.BindValueChanged(modsChanged);
+            modDisplay.Current.BindTo(appliedMods);
+
+            ruleset.BindValueChanged(_ =>
+            {
+                appliedMods.Value = Array.Empty<Mod>();
+                calculateDifficulty();
+            });
+        }
+
+        private ModSettingChangeTracker modSettingChangeTracker;
+        private ScheduledDelegate debouncedStatisticsUpdate;
+
+        private void modsChanged(ValueChangedEvent<IReadOnlyList<Mod>> mods)
+        {
+            modSettingChangeTracker?.Dispose();
+
+            modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
+            modSettingChangeTracker.SettingChanged += m =>
+            {
+                debouncedStatisticsUpdate?.Cancel();
+                debouncedStatisticsUpdate = Scheduler.AddDelayed(calculateDifficulty, 100);
+            };
+
+            calculateDifficulty();
         }
 
         private void beatmapChanged(ValueChangedEvent<string> filePath)
         {
             working = ProcessorWorkingBeatmap.FromFileOrId(filePath.NewValue);
 
-            beatmapTitle.Text = $"[{currentRuleset.Value.Name}] {working.BeatmapInfo.GetDisplayTitle()}";
+            if (!working.BeatmapInfo.Ruleset.Equals(ruleset.Value))
+            {
+                ruleset.Value = working.BeatmapInfo.Ruleset;
+                appliedMods.Value = Array.Empty<Mod>();
+            }
+
+            beatmapTitle.Text = $"[{ruleset.Value.Name}] {working.BeatmapInfo.GetDisplayTitle()}";
 
             calculateDifficulty();
 
             beatmapDataContainer.Show();
         }
 
-        private void modsChanged(ValueChangedEvent<IReadOnlyList<Mod>> mods)
-        {
-            calculateDifficulty();
-        }
-
-        private void scoreChanged(ValueChangedEvent<string> filePath)
-        {
-            calculatePerformance();
-        }
-
         private void calculateDifficulty()
         {
-            difficultyAttributes = currentRuleset.Value.CreateInstance().CreateDifficultyCalculator(working).Calculate(appliedMods.Value);
+            if (working == null)
+                return;
+
+            difficultyAttributes = ruleset.Value.CreateInstance().CreateDifficultyCalculator(working).Calculate(appliedMods.Value);
+
+            comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
 
             var diffAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(difficultyAttributes)) ?? new Dictionary<string, object>();
             difficultyAttributesContainer.Children = diffAttributeValues.Select(x =>
@@ -255,6 +314,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void calculatePerformance()
         {
+            if (working == null || difficultyAttributes == null)
+                return;
+
             var accuracy = 1.0;
             if (!string.IsNullOrEmpty(accuracyTextBox.Current?.Value))
                 accuracy = double.Parse(accuracyTextBox.Current.Value) / 100.0;
@@ -266,14 +328,22 @@ namespace PerformanceCalculatorGUI.Screens
             if (!string.IsNullOrEmpty(missesTextBox.Current?.Value))
                 misses = int.Parse(missesTextBox.Current.Value);
 
-            var performanceCalculator = currentRuleset.Value.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
+            var combo = difficultyAttributes.MaxCombo;
+            if (!string.IsNullOrEmpty(comboTextBox.Current?.Value))
+                combo = int.Parse(comboTextBox.Current.Value);
+
+            var score = 1000000;
+            if (!string.IsNullOrEmpty(scoreTextBox.Current?.Value))
+                score = int.Parse(scoreTextBox.Current.Value);
+
+            var performanceCalculator = ruleset.Value.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
             {
                 Accuracy = accuracy,
-                MaxCombo = difficultyAttributes.MaxCombo,
+                MaxCombo = combo,
                 Statistics = generateHitResults(accuracy, working.Beatmap, misses, null, null),
                 Mods = appliedMods.Value.ToArray(),
-                TotalScore = 1,
-                Ruleset = currentRuleset.Value
+                TotalScore = score,
+                Ruleset = ruleset.Value
             });
 
             var ppAttributes = performanceCalculator?.Calculate();
