@@ -1,5 +1,6 @@
 ﻿
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
@@ -7,6 +8,8 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Platform;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Overlays.Toolbar;
+using osu.Game.Rulesets;
 using osuTK;
 using PerformanceCalculatorGUI.Screens;
 
@@ -17,7 +20,12 @@ namespace PerformanceCalculatorGUI
         private Container screens;
         private FillFlowContainer buttons;
 
+        private ToolbarRulesetSelector rulesetSelector;
+
         public const float CONTROL_AREA_HEIGHT = 50;
+
+        [Resolved]
+        private Bindable<RulesetInfo> ruleset { get; set; }
 
         public PerformanceCalculatorSceneManager()
         {
@@ -70,7 +78,8 @@ namespace PerformanceCalculatorGUI
                                                 Height = 40,
                                                 Width = 80,
                                                 Alpha = 0.1f
-                                            }
+                                            },
+                                            rulesetSelector = new ToolbarRulesetSelector()
                                         }
                                     },
                                 },
@@ -108,6 +117,13 @@ namespace PerformanceCalculatorGUI
             //    drawable.Hide();
 
             //SetScreen(typeof(SetupScreen));
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            rulesetSelector.Current.BindTo(ruleset);
         }
     }
 }
