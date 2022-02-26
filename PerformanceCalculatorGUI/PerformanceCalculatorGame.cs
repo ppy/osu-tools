@@ -5,7 +5,6 @@ using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Game;
 using osu.Game.Graphics;
-//using osu.Game.Graphics;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
@@ -22,6 +21,8 @@ namespace PerformanceCalculatorGUI
         private void load(FrameworkConfigManager frameworkConfig)
         {
             windowMode = frameworkConfig.GetBindable<WindowMode>(FrameworkSetting.WindowMode);
+
+            frameworkConfig.GetBindable<double>(FrameworkSetting.VolumeUniversal).Value = 0.1;
 
             Ruleset.Value = new OsuRuleset().RulesetInfo;
 
