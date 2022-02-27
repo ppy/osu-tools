@@ -2,19 +2,17 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
-using osu.Framework.Audio.Track;
-using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Mania;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
-using osu.Game.Skinning;
-using osu.Game.Utils;
+using osu.Game.Rulesets.Taiko.Objects;
 
 namespace PerformanceCalculatorGUI
 {
@@ -41,71 +39,136 @@ namespace PerformanceCalculatorGUI
             }
         }
 
-        public static string GetRulesetShortNameFromId(int id)
+        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
-            switch (id)
+            switch (ruleset.OnlineID)
             {
                 default:
                     throw new ArgumentException("Invalid ruleset ID provided.");
 
                 case 0:
-                    return "osu";
+                    return generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood);
 
                 case 1:
-                    return "taiko";
+                    return generateTaikoHitResults(accuracy, beatmap, countMiss, countGood);
 
                 case 2:
-                    return "fruits";
+                    return generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood);
 
                 case 3:
-                    return "mania";
+                    return generateManiaHitResults(beatmap);
             }
         }
 
-        /// <summary>
-        /// Trims all mods from a given <see cref="Mod"/> array which do not adjust difficulty.
-        /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
-        /// </summary>
-        public static Mod[] TrimNonDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+        private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
-            var beatmap = new EmptyWorkingBeatmap
+            int countGreat;
+
+            var totalResultCount = beatmap.HitObjects.Count;
+
+            if (countMeh != null || countGood != null)
             {
-                BeatmapInfo =
-                {
-                    Ruleset = ruleset.RulesetInfo,
-                    BaseDifficulty = new BeatmapDifficulty()
-                }
+                countGreat = totalResultCount - (countGood ?? 0) - (countMeh ?? 0) - countMiss;
+            }
+            else
+            {
+                // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
+                var targetTotal = (int)Math.Round(accuracy * totalResultCount * 6);
+
+                // Start by assuming every non miss is a meh
+                // This is how much increase is needed by greats and goods
+                var delta = targetTotal - (totalResultCount - countMiss);
+
+                // Each great increases total by 5 (great-meh=5)
+                countGreat = delta / 5;
+                // Each good increases total by 1 (good-meh=1). Covers remaining difference.
+                countGood = delta % 5;
+                // Mehs are left over. Could be negative if impossible value of amountMiss chosen
+                countMeh = totalResultCount - countGreat - countGood - countMiss;
+            }
+
+            return new Dictionary<HitResult, int>
+            {
+                { HitResult.Great, countGreat },
+                { HitResult.Ok, countGood ?? 0 },
+                { HitResult.Meh, countMeh ?? 0 },
+                { HitResult.Miss, countMiss }
             };
-
-            var difficultyAdjustmentMods = ModUtils.FlattenMods(
-                                                       ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
-                                                   .Select(m => m.GetType())
-                                                   .Distinct()
-                                                   .ToHashSet();
-
-            // Special case for DT/NC.
-            if (mods.Any(m => m is ModDoubleTime))
-                difficultyAdjustmentMods.Add(ruleset.CreateAllMods().Single(m => m is ModNightcore).GetType());
-
-            return mods.Where(m => difficultyAdjustmentMods.Contains(m.GetType())).ToArray();
         }
 
-        private class EmptyWorkingBeatmap : WorkingBeatmap
+        private static Dictionary<HitResult, int> generateTaikoHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countGood)
         {
-            public EmptyWorkingBeatmap()
-                : base(new BeatmapInfo(), null)
+            var totalResultCount = beatmap.HitObjects.OfType<Hit>().Count();
+
+            int countGreat;
+
+            if (countGood != null)
             {
+                countGreat = (int)(totalResultCount - countGood - countMiss);
+            }
+            else
+            {
+                // Let Great=2, Good=1, Miss=0. The total should be this.
+                var targetTotal = (int)Math.Round(accuracy * totalResultCount * 2);
+
+                countGreat = targetTotal - (totalResultCount - countMiss);
+                countGood = totalResultCount - countGreat - countMiss;
             }
 
-            protected override IBeatmap GetBeatmap() => throw new NotImplementedException();
+            return new Dictionary<HitResult, int>
+            {
+                { HitResult.Great, countGreat },
+                { HitResult.Ok, (int)countGood },
+                { HitResult.Meh, 0 },
+                { HitResult.Miss, countMiss }
+            };
+        }
 
-            protected override Texture GetBackground() => throw new NotImplementedException();
+        private static Dictionary<HitResult, int> generateCatchHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        {
+            var maxCombo = beatmap.HitObjects.Count(h => h is Fruit) + beatmap.HitObjects.OfType<JuiceStream>().SelectMany(j => j.NestedHitObjects).Count(h => !(h is TinyDroplet));
 
-            protected override Track GetBeatmapTrack() => throw new NotImplementedException();
+            int maxTinyDroplets = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count());
+            int maxDroplets = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<Droplet>().Count()) - maxTinyDroplets;
+            int maxFruits = beatmap.HitObjects.OfType<Fruit>().Count() + 2 * beatmap.HitObjects.OfType<JuiceStream>().Count() + beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.RepeatCount);
 
-            protected override ISkin GetSkin() => throw new NotImplementedException();
+            // Either given or max value minus misses
+            int countDroplets = countGood ?? Math.Max(0, maxDroplets - countMiss);
 
-            public override Stream GetStream(string storagePath) => throw new NotImplementedException();
+            // Max value minus whatever misses are left. Negative if impossible missCount
+            int countFruits = maxFruits - (countMiss - (maxDroplets - countDroplets));
+
+            // Either given or the max amount of hit objects with respect to accuracy minus the already calculated fruits and drops.
+            // Negative if accuracy not feasable with missCount.
+            int countTinyDroplets = countMeh ?? (int)Math.Round(accuracy * (maxCombo + maxTinyDroplets)) - countFruits - countDroplets;
+
+            // Whatever droplets are left
+            int countTinyMisses = maxTinyDroplets - countTinyDroplets;
+
+            return new Dictionary<HitResult, int>
+            {
+                { HitResult.Great, countFruits },
+                { HitResult.LargeTickHit, countDroplets },
+                { HitResult.SmallTickHit, countTinyDroplets },
+                { HitResult.SmallTickMiss, countTinyMisses },
+                { HitResult.Miss, countMiss }
+            };
+        }
+
+        private static Dictionary<HitResult, int> generateManiaHitResults(IBeatmap beatmap)
+        {
+            var totalHits = beatmap.HitObjects.Count;
+
+            // Only total number of hits is considered currently, so specifics don't matter
+            return new Dictionary<HitResult, int>
+            {
+                { HitResult.Perfect, totalHits },
+                { HitResult.Great, 0 },
+                { HitResult.Ok, 0 },
+                { HitResult.Good, 0 },
+                { HitResult.Meh, 0 },
+                { HitResult.Miss, 0 }
+            };
         }
     }
 }

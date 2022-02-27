@@ -34,10 +34,10 @@ namespace PerformanceCalculatorGUI.Screens
         private UserModSelectOverlay userModsSelectOverlay;
 
         private LabelledTextBox beatmapTextBox;
-        private LabelledTextBox accuracyTextBox;
-        private LabelledTextBox missesTextBox;
-        private LabelledTextBox comboTextBox;
-        private LabelledTextBox scoreTextBox;
+        private LabelledFractionalNumberBox accuracyTextBox;
+        private LimitedLabelledNumberBox missesTextBox;
+        private LimitedLabelledNumberBox comboTextBox;
+        private LimitedLabelledNumberBox scoreTextBox;
 
         private DifficultyAttributes difficultyAttributes;
         private FillFlowContainer difficultyAttributesContainer;
@@ -106,14 +106,13 @@ namespace PerformanceCalculatorGUI.Screens
                         new OsuScrollContainer(Direction.Vertical)
                         {
                             Name = "Score params",
-                            ScrollbarVisible = true,
                             RelativeSizeAxes = Axes.Both,
                             Width = 0.5f,
-                            Height = 1.0f,
                             Child = new FillFlowContainer()
                             {
                                 Padding = new MarginPadding(10.0f),
-                                RelativeSizeAxes = Axes.Both,
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical,
                                 Children = new Drawable[]
                                 {
@@ -144,33 +143,41 @@ namespace PerformanceCalculatorGUI.Screens
                                             modDisplay = new ModDisplay()
                                         }
                                     },
-                                    accuracyTextBox = new LabelledNumberBox()
+                                    accuracyTextBox = new LabelledFractionalNumberBox()
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
                                         Label = "Accuracy",
-                                        PlaceholderText = "100"
+                                        PlaceholderText = "100",
+                                        MaxValue = 100.0,
+                                        MinValue = 0.0,
+                                        Value = { Value = 100.0 }
                                     },
-                                    missesTextBox = new LabelledNumberBox()
+                                    missesTextBox = new LimitedLabelledNumberBox()
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
                                         Label = "Misses",
-                                        PlaceholderText = "0"
+                                        PlaceholderText = "0",
+                                        MinValue = 0
                                     },
-                                    comboTextBox = new LabelledNumberBox()
+                                    comboTextBox = new LimitedLabelledNumberBox()
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
                                         Label = "Combo",
-                                        PlaceholderText = "0"
+                                        PlaceholderText = "0",
+                                        MinValue = 0
                                     },
-                                    scoreTextBox = new LabelledNumberBox()
+                                    scoreTextBox = new LimitedLabelledNumberBox()
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
                                         Label = "Score",
-                                        PlaceholderText = "1000000"
+                                        PlaceholderText = "1000000",
+                                        MinValue = 0,
+                                        MaxValue = 1000000,
+                                        Value = { Value = 1000000 }
                                     }
                                 }
                             }
@@ -178,14 +185,13 @@ namespace PerformanceCalculatorGUI.Screens
                         new OsuScrollContainer(Direction.Vertical)
                         {
                             Name = "Difficulty calculation results",
-                            ScrollDistance = 10f,
-                            ScrollbarVisible = true,
                             RelativeSizeAxes = Axes.Both,
                             Width = 0.5f,
                             Child = new FillFlowContainer()
                             {
                                 Padding = new MarginPadding(10.0f),
-                                RelativeSizeAxes = Axes.Both,
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical,
                                 Children = new Drawable[]
                                 {
@@ -240,10 +246,10 @@ namespace PerformanceCalculatorGUI.Screens
 
             beatmapTextBox.Current.BindValueChanged(beatmapChanged);
 
-            accuracyTextBox.Current.BindValueChanged(_ => calculatePerformance());
-            missesTextBox.Current.BindValueChanged(_ => calculatePerformance());
-            comboTextBox.Current.BindValueChanged(_ => calculatePerformance());
-            scoreTextBox.Current.BindValueChanged(_ => calculatePerformance());
+            accuracyTextBox.Value.BindValueChanged(_ => calculatePerformance());
+            missesTextBox.Value.BindValueChanged(_ => calculatePerformance());
+            comboTextBox.Value.BindValueChanged(_ => calculatePerformance());
+            scoreTextBox.Value.BindValueChanged(_ => calculatePerformance());
 
             appliedMods.BindValueChanged(modsChanged);
             modDisplay.Current.BindTo(appliedMods);
@@ -296,7 +302,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             difficultyAttributes = ruleset.Value.CreateInstance().CreateDifficultyCalculator(working).Calculate(appliedMods.Value);
 
-            comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
+            populateScoreParams();
 
             var diffAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(difficultyAttributes)) ?? new Dictionary<string, object>();
             difficultyAttributesContainer.Children = diffAttributeValues.Select(x =>
@@ -317,30 +323,29 @@ namespace PerformanceCalculatorGUI.Screens
             if (working == null || difficultyAttributes == null)
                 return;
 
-            var accuracy = 1.0;
-            if (!string.IsNullOrEmpty(accuracyTextBox.Current?.Value))
-                accuracy = double.Parse(accuracyTextBox.Current.Value) / 100.0;
+            var accuracy = accuracyTextBox.Value.Value / 100.0;
 
-            if (accuracy > 1.0)
-                accuracy = 1.0;
+            var score = scoreTextBox.Value.Value;
 
-            var misses = 0;
-            if (!string.IsNullOrEmpty(missesTextBox.Current?.Value))
-                misses = int.Parse(missesTextBox.Current.Value);
+            if (score == 1000000)
+            {
+                double scoreMultiplier = 1;
 
-            var combo = difficultyAttributes.MaxCombo;
-            if (!string.IsNullOrEmpty(comboTextBox.Current?.Value))
-                combo = int.Parse(comboTextBox.Current.Value);
+                // Cap score depending on difficulty adjustment mods (matters for mania).
+                foreach (var mod in appliedMods.Value)
+                {
+                    if (mod.Type == ModType.DifficultyReduction)
+                        scoreMultiplier *= mod.ScoreMultiplier;
+                }
 
-            var score = 1000000;
-            if (!string.IsNullOrEmpty(scoreTextBox.Current?.Value))
-                score = int.Parse(scoreTextBox.Current.Value);
+                score = (int)Math.Round(1000000 * scoreMultiplier);
+            }
 
             var performanceCalculator = ruleset.Value.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
             {
                 Accuracy = accuracy,
-                MaxCombo = combo,
-                Statistics = generateHitResults(accuracy, working.Beatmap, misses, null, null),
+                MaxCombo = comboTextBox.Value.Value,
+                Statistics = LegacyHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracy, working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value), missesTextBox.Value.Value, null, null),
                 Mods = appliedMods.Value.ToArray(),
                 TotalScore = score,
                 Ruleset = ruleset.Value
@@ -360,41 +365,38 @@ namespace PerformanceCalculatorGUI.Screens
             ).ToArray();
         }
 
-        // TODO: per-ruleset generation
-        private Dictionary<HitResult, int> generateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        private void populateScoreParams()
         {
-            int countGreat;
+            accuracyTextBox.Hide();
+            comboTextBox.Hide();
+            missesTextBox.Hide();
+            scoreTextBox.Hide();
 
-            var totalResultCount = beatmap.HitObjects.Count;
-
-            if (countMeh != null || countGood != null)
+            if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
             {
-                countGreat = totalResultCount - (countGood ?? 0) - (countMeh ?? 0) - countMiss;
-            }
-            else
-            {
-                // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
-                var targetTotal = (int)Math.Round(accuracy * totalResultCount * 6);
-
-                // Start by assuming every non miss is a meh
-                // This is how much increase is needed by greats and goods
-                var delta = targetTotal - (totalResultCount - countMiss);
-
-                // Each great increases total by 5 (great-meh=5)
-                countGreat = delta / 5;
-                // Each good increases total by 1 (good-meh=1). Covers remaining difference.
-                countGood = delta % 5;
-                // Mehs are left over. Could be negative if impossible value of amountMiss chosen
-                countMeh = totalResultCount - countGreat - countGood - countMiss;
+                accuracyTextBox.Text = string.Empty;
+                accuracyTextBox.Show();
             }
 
-            return new Dictionary<HitResult, int>
+            if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
             {
-                { HitResult.Great, countGreat },
-                { HitResult.Ok, countGood ?? 0 },
-                { HitResult.Meh, countMeh ?? 0 },
-                { HitResult.Miss, countMiss }
-            };
+                comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
+                comboTextBox.MaxValue = comboTextBox.Value.Value = difficultyAttributes.MaxCombo;
+                comboTextBox.Show();
+            }
+
+            if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
+            {
+                missesTextBox.MaxValue = difficultyAttributes.MaxCombo;
+                missesTextBox.Text = string.Empty;
+                missesTextBox.Show();
+            }
+
+            if (ruleset.Value.ShortName == "mania")
+            {
+                scoreTextBox.Text = string.Empty;
+                scoreTextBox.Show();
+            }
         }
     }
 }
