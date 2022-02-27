@@ -75,8 +75,7 @@ namespace PerformanceCalculatorGUI.Screens
                     {
                         Label = "Beatmap",
                         FixedLabelWidth = 160f,
-                        PlaceholderText = "Click to select a background image",
-                        Current = { Value = "No beatmap loaded!" }
+                        PlaceholderText = "Click to select a beatmap file"
                     },
                 },
                 new Container
@@ -262,6 +261,12 @@ namespace PerformanceCalculatorGUI.Screens
             });
         }
 
+        public override void Hide()
+        {
+            beatmapTextBox.Current.Value = string.Empty;
+            base.Hide();
+        }
+
         private ModSettingChangeTracker modSettingChangeTracker;
         private ScheduledDelegate debouncedStatisticsUpdate;
 
@@ -281,6 +286,14 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void beatmapChanged(ValueChangedEvent<string> filePath)
         {
+            if (string.IsNullOrEmpty(filePath.NewValue))
+            {
+                working = null;
+                beatmapTitle.Text = "No beatmap loaded!";
+                beatmapDataContainer.Hide();
+                return;
+            }
+
             working = ProcessorWorkingBeatmap.FromFileOrId(filePath.NewValue);
 
             if (!working.BeatmapInfo.Ruleset.Equals(ruleset.Value))
