@@ -55,6 +55,9 @@ namespace PerformanceCalculatorGUI.Screens
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
 
+        private const int file_selection_container_heigth = 40;
+        private const int map_title_container_heigth = 20;
+
         public SimulateScreen()
         {
             RelativeSizeAxes = Axes.Both;
@@ -71,7 +74,7 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     Name = "File selection",
                     RelativeSizeAxes = Axes.X,
-                    Height = 40,
+                    Height = file_selection_container_heigth,
                     Child = beatmapTextBox = new FileChooserLabelledTextBox(".osu")
                     {
                         Label = "Beatmap",
@@ -83,15 +86,15 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     Name = "Beatmap title",
                     RelativeSizeAxes = Axes.X,
-                    Y = 40,
-                    Height = 20,
+                    Y = file_selection_container_heigth,
+                    Height = map_title_container_heigth,
                     Children = new Drawable[]
                     {
                         beatmapTitle = new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Height = 20,
+                            Height = map_title_container_heigth,
                             Text = "No beatmap loaded!"
                         },
                     }
@@ -99,7 +102,7 @@ namespace PerformanceCalculatorGUI.Screens
                 beatmapDataContainer = new FillFlowContainer
                 {
                     Name = "Beatmap data",
-                    Y = 60,
+                    Y = file_selection_container_heigth + map_title_container_heigth,
                     RelativeSizeAxes = Axes.Both,
                     Direction = FillDirection.Horizontal,
                     Children = new Drawable[]
@@ -123,26 +126,6 @@ namespace PerformanceCalculatorGUI.Screens
                                         Origin = Anchor.TopLeft,
                                         Height = 20,
                                         Text = "Score params"
-                                    },
-                                    new FillFlowContainer
-                                    {
-                                        Name = "Mods container",
-                                        Height = 40,
-                                        Direction = FillDirection.Horizontal,
-                                        RelativeSizeAxes = Axes.X,
-                                        Anchor = Anchor.TopLeft,
-                                        AutoSizeAxes = Axes.Y,
-                                        Children = new Drawable[]
-                                        {
-                                            new OsuButton
-                                            {
-                                                Width = 100,
-                                                Margin = new MarginPadding(5.0f),
-                                                Action = () => { userModsSelectOverlay.Show(); },
-                                                Text = "Mods"
-                                            },
-                                            modDisplay = new ModDisplay()
-                                        }
                                     },
                                     accuracyTextBox = new LabelledFractionalNumberBox
                                     {
@@ -179,6 +162,26 @@ namespace PerformanceCalculatorGUI.Screens
                                         MinValue = 0,
                                         MaxValue = 1000000,
                                         Value = { Value = 1000000 }
+                                    },
+                                    new FillFlowContainer
+                                    {
+                                        Name = "Mods container",
+                                        Height = 40,
+                                        Direction = FillDirection.Horizontal,
+                                        RelativeSizeAxes = Axes.X,
+                                        Anchor = Anchor.TopLeft,
+                                        AutoSizeAxes = Axes.Y,
+                                        Children = new Drawable[]
+                                        {
+                                            new OsuButton
+                                            {
+                                                Width = 100,
+                                                Margin = new MarginPadding(5.0f),
+                                                Action = () => { userModsSelectOverlay.Show(); },
+                                                Text = "Mods"
+                                            },
+                                            modDisplay = new ModDisplay()
+                                        }
                                     }
                                 }
                             }

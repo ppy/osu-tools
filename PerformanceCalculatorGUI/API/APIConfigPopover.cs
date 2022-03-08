@@ -36,7 +36,7 @@ namespace PerformanceCalculatorGUI.API
             Add(new Container
             {
                 AutoSizeAxes = Axes.Y,
-                Width = 600,
+                Width = 580,
                 Children = new Drawable[]
                 {
                     new FillFlowContainer
@@ -44,7 +44,7 @@ namespace PerformanceCalculatorGUI.API
                         Direction = FillDirection.Vertical,
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        Spacing = new Vector2(20),
+                        Spacing = new Vector2(18),
                         Children = new Drawable[]
                         {
                             linkContainer = new LinkFlowContainer
