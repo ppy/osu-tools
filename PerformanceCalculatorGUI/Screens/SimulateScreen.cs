@@ -49,7 +49,8 @@ namespace PerformanceCalculatorGUI.Screens
 
         private ModDisplay modDisplay;
 
-        private readonly Bindable<IReadOnlyList<Mod>> appliedMods = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
+        [Resolved]
+        private Bindable<IReadOnlyList<Mod>> appliedMods { get; set; }
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
@@ -86,7 +87,7 @@ namespace PerformanceCalculatorGUI.Screens
                     Height = 20,
                     Children = new Drawable[]
                     {
-                        beatmapTitle = new OsuSpriteText()
+                        beatmapTitle = new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
@@ -95,7 +96,7 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                     }
                 },
-                beatmapDataContainer = new FillFlowContainer()
+                beatmapDataContainer = new FillFlowContainer
                 {
                     Name = "Beatmap data",
                     Y = 60,
@@ -108,7 +109,7 @@ namespace PerformanceCalculatorGUI.Screens
                             Name = "Score params",
                             RelativeSizeAxes = Axes.Both,
                             Width = 0.5f,
-                            Child = new FillFlowContainer()
+                            Child = new FillFlowContainer
                             {
                                 Padding = new MarginPadding(10.0f),
                                 RelativeSizeAxes = Axes.X,
@@ -116,7 +117,7 @@ namespace PerformanceCalculatorGUI.Screens
                                 Direction = FillDirection.Vertical,
                                 Children = new Drawable[]
                                 {
-                                    new OsuSpriteText()
+                                    new OsuSpriteText
                                     {
                                         Margin = new MarginPadding(10.0f),
                                         Origin = Anchor.TopLeft,
@@ -143,7 +144,7 @@ namespace PerformanceCalculatorGUI.Screens
                                             modDisplay = new ModDisplay()
                                         }
                                     },
-                                    accuracyTextBox = new LabelledFractionalNumberBox()
+                                    accuracyTextBox = new LabelledFractionalNumberBox
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
@@ -153,7 +154,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         MinValue = 0.0,
                                         Value = { Value = 100.0 }
                                     },
-                                    missesTextBox = new LimitedLabelledNumberBox()
+                                    missesTextBox = new LimitedLabelledNumberBox
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
@@ -161,7 +162,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         PlaceholderText = "0",
                                         MinValue = 0
                                     },
-                                    comboTextBox = new LimitedLabelledNumberBox()
+                                    comboTextBox = new LimitedLabelledNumberBox
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
@@ -169,7 +170,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         PlaceholderText = "0",
                                         MinValue = 0
                                     },
-                                    scoreTextBox = new LimitedLabelledNumberBox()
+                                    scoreTextBox = new LimitedLabelledNumberBox
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
@@ -187,7 +188,7 @@ namespace PerformanceCalculatorGUI.Screens
                             Name = "Difficulty calculation results",
                             RelativeSizeAxes = Axes.Both,
                             Width = 0.5f,
-                            Child = new FillFlowContainer()
+                            Child = new FillFlowContainer
                             {
                                 Padding = new MarginPadding(10.0f),
                                 RelativeSizeAxes = Axes.X,
@@ -195,28 +196,28 @@ namespace PerformanceCalculatorGUI.Screens
                                 Direction = FillDirection.Vertical,
                                 Children = new Drawable[]
                                 {
-                                    new OsuSpriteText()
+                                    new OsuSpriteText
                                     {
                                         Margin = new MarginPadding(10.0f),
                                         Origin = Anchor.TopLeft,
                                         Height = 20,
                                         Text = "Difficulty Attributes"
                                     },
-                                    difficultyAttributesContainer = new FillFlowContainer()
+                                    difficultyAttributesContainer = new FillFlowContainer
                                     {
                                         Direction = FillDirection.Vertical,
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
                                         AutoSizeAxes = Axes.Y
                                     },
-                                    new OsuSpriteText()
+                                    new OsuSpriteText
                                     {
                                         Margin = new MarginPadding(10.0f),
                                         Origin = Anchor.TopLeft,
                                         Height = 20,
                                         Text = "Performance Attributes"
                                     },
-                                    performanceAttributesContainer = new FillFlowContainer()
+                                    performanceAttributesContainer = new FillFlowContainer
                                     {
                                         Direction = FillDirection.Vertical,
                                         RelativeSizeAxes = Axes.X,
@@ -233,7 +234,7 @@ namespace PerformanceCalculatorGUI.Screens
                     RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.BottomLeft,
                     Origin = Anchor.BottomLeft,
-                    Child = userModsSelectOverlay = new UserModSelectOverlay()
+                    Child = userModsSelectOverlay = new UserModSelectOverlay
                     {
                         IsValidMod = (mod) => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
                         SelectedMods = { BindTarget = appliedMods }
@@ -263,6 +264,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         public override void Hide()
         {
+            userModsSelectOverlay.Hide();
             beatmapTextBox.Current.Value = string.Empty;
             base.Hide();
         }
@@ -291,6 +293,7 @@ namespace PerformanceCalculatorGUI.Screens
                 working = null;
                 beatmapTitle.Text = "No beatmap loaded!";
                 beatmapDataContainer.Hide();
+                appliedMods.Value = Array.Empty<Mod>();
                 return;
             }
 
@@ -320,7 +323,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var diffAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(difficultyAttributes)) ?? new Dictionary<string, object>();
             difficultyAttributesContainer.Children = diffAttributeValues.Select(x =>
-                new LabelledTextBox()
+                new LabelledTextBox
                 {
                     ReadOnly = true,
                     Origin = Anchor.TopLeft,
@@ -369,7 +372,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var perfAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
             performanceAttributesContainer.Children = perfAttributeValues.Select(x =>
-                new LabelledTextBox()
+                new LabelledTextBox
                 {
                     ReadOnly = true,
                     Origin = Anchor.TopLeft,
@@ -385,6 +388,8 @@ namespace PerformanceCalculatorGUI.Screens
             comboTextBox.Hide();
             missesTextBox.Hide();
             scoreTextBox.Hide();
+
+            // TODO: other rulesets?
 
             if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
             {

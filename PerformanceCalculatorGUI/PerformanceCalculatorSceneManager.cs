@@ -59,7 +59,7 @@ namespace PerformanceCalculatorGUI
                                 Height = CONTROL_AREA_HEIGHT,
                                 Children = new Drawable[]
                                 {
-                                    new Box()
+                                    new Box
                                     {
                                         Colour = OsuColour.Gray(0.1f),
                                         RelativeSizeAxes = Axes.Both,

@@ -22,7 +22,7 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
-                new OsuSpriteText()
+                new OsuSpriteText
                 {
                     RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.Centre,
