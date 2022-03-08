@@ -6,11 +6,10 @@ using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Game;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Osu;
+using PerformanceCalculatorGUI.API;
 
 namespace PerformanceCalculatorGUI
 {
@@ -19,6 +18,11 @@ namespace PerformanceCalculatorGUI
         private Bindable<WindowMode> windowMode;
         private LoadingSpinner loadingSpinner;
 
+        private DependencyContainer dependencies;
+
+        protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
+            dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
+
         [BackgroundDependencyLoader]
         private void load(FrameworkConfigManager frameworkConfig)
         {
@@ -26,13 +30,9 @@ namespace PerformanceCalculatorGUI
 
             frameworkConfig.GetBindable<double>(FrameworkSetting.VolumeUniversal).Value = 0.1;
 
-            Ruleset.Value = new OsuRuleset().RulesetInfo;
+            dependencies.CacheAs(new APIConfigManager(Storage));
 
-            LoadComponentAsync(new Background("Menu/menu-background-0")
-            {
-                Colour = OsuColour.Gray(0.5f),
-                Depth = 100
-            }, AddInternal);
+            Ruleset.Value = new OsuRuleset().RulesetInfo;
 
             Add(loadingSpinner = new LoadingSpinner(true, true)
             {

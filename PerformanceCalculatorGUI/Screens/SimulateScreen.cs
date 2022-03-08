@@ -231,6 +231,7 @@ namespace PerformanceCalculatorGUI.Screens
                 },
                 new Container
                 {
+                    Name = "Mod selection overlay",
                     RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.BottomLeft,
                     Origin = Anchor.BottomLeft,

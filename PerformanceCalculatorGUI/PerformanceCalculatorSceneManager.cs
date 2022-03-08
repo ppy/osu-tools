@@ -15,6 +15,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Rulesets;
 using osuTK;
+using PerformanceCalculatorGUI.API;
 using PerformanceCalculatorGUI.Screens;
 
 namespace PerformanceCalculatorGUI
@@ -66,10 +67,11 @@ namespace PerformanceCalculatorGUI
                                     },
                                     new FillFlowContainer
                                     {
-                                        RelativeSizeAxes = Axes.Both,
+                                        RelativeSizeAxes = Axes.Y,
                                         Direction = FillDirection.Horizontal,
                                         Spacing = new Vector2(5),
                                         Padding = new MarginPadding(5),
+                                        AutoSizeAxes = Axes.X,
                                         Children = new Drawable[]
                                         {
                                             new OsuButton
@@ -94,8 +96,21 @@ namespace PerformanceCalculatorGUI
                                                 Width = SCREEN_SWITCH_WIDTH,
                                                 Alpha = 0.1f,
                                                 Action = () => SetScreen(typeof(LeaderboardScreen))
-                                            },
-                                            rulesetSelector = new ToolbarRulesetSelector()
+                                            }
+                                        }
+                                    },
+                                    new FillFlowContainer
+                                    {
+                                        Anchor = Anchor.TopRight,
+                                        Origin = Anchor.TopRight,
+                                        Direction = FillDirection.Horizontal,
+                                        RelativeSizeAxes = Axes.Y,
+                                        AutoSizeAxes = Axes.X,
+                                        Spacing = new Vector2(5),
+                                        Children = new Drawable[]
+                                        {
+                                            rulesetSelector = new ToolbarRulesetSelector(),
+                                            new APIConfigButton()
                                         }
                                     },
                                 },
