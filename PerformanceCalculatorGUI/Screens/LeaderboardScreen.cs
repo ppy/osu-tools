@@ -3,13 +3,14 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 
 namespace PerformanceCalculatorGUI.Screens
 {
-    internal class LeaderboardScreen : CompositeDrawable
+    internal class LeaderboardScreen : PerformanceCalculatorScreen
     {
+        public override bool ShouldShowConfirmationDialogOnSwitch => false;
+
         public LeaderboardScreen()
         {
             RelativeSizeAxes = Axes.Both;
@@ -22,7 +23,7 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
-                new OsuSpriteText()
+                new OsuSpriteText
                 {
                     RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.Centre,

@@ -12,6 +12,8 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Threading;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Overlays;
+using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Rulesets;
 using osuTK;
@@ -33,6 +35,9 @@ namespace PerformanceCalculatorGUI
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        [Resolved(canBeNull: true)]
+        private DialogOverlay dialogOverlay { get; set; }
 
         public PerformanceCalculatorSceneManager()
         {
@@ -79,7 +84,7 @@ namespace PerformanceCalculatorGUI
                                                 Text = "simulate",
                                                 Height = SCREEN_SWITCH_HEIGHT,
                                                 Width = SCREEN_SWITCH_WIDTH,
-                                                Action = () => SetScreen(typeof(SimulateScreen))
+                                                Action = () => trySettingScreen(typeof(SimulateScreen))
                                             },
                                             new OsuButton
                                             {
@@ -87,7 +92,7 @@ namespace PerformanceCalculatorGUI
                                                 Height = SCREEN_SWITCH_HEIGHT,
                                                 Width = SCREEN_SWITCH_WIDTH,
                                                 Alpha = 0.1f,
-                                                Action = () => SetScreen(typeof(ProfileScreen))
+                                                Action = () => trySettingScreen(typeof(ProfileScreen))
                                             },
                                             new OsuButton
                                             {
@@ -95,7 +100,7 @@ namespace PerformanceCalculatorGUI
                                                 Height = SCREEN_SWITCH_HEIGHT,
                                                 Width = SCREEN_SWITCH_WIDTH,
                                                 Alpha = 0.1f,
-                                                Action = () => SetScreen(typeof(LeaderboardScreen))
+                                                Action = () => trySettingScreen(typeof(LeaderboardScreen))
                                             }
                                         }
                                     },
@@ -144,7 +149,7 @@ namespace PerformanceCalculatorGUI
             foreach (var drawable in screens)
                 drawable.Hide();
 
-            SetScreen(typeof(SimulateScreen));
+            setScreen(typeof(SimulateScreen));
         }
 
         protected override void LoadComplete()
@@ -158,7 +163,25 @@ namespace PerformanceCalculatorGUI
         private Drawable currentScreen;
         private ScheduledDelegate scheduledHide;
 
-        public void SetScreen(Type screenType)
+        private void trySettingScreen(Type screenType)
+        {
+            if (currentScreen is PerformanceCalculatorScreen screen)
+            {
+                if (screen.ShouldShowConfirmationDialogOnSwitch)
+                {
+                    dialogOverlay.Push(new ConfirmDialog("Are you sure?", () =>
+                    {
+                        setScreen(screenType);
+                    }));
+                }
+                else
+                {
+                    setScreen(screenType);
+                }
+            }
+        }
+
+        private void setScreen(Type screenType)
         {
             var target = screens.FirstOrDefault(s => s.GetType() == screenType);
 

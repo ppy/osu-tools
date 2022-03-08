@@ -2,12 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Game;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Overlays;
 using osu.Game.Rulesets.Osu;
 using PerformanceCalculatorGUI.API;
 
@@ -15,7 +15,6 @@ namespace PerformanceCalculatorGUI
 {
     public class PerformanceCalculatorGame : OsuGameBase
     {
-        private Bindable<WindowMode> windowMode;
         private LoadingSpinner loadingSpinner;
 
         private DependencyContainer dependencies;
@@ -26,7 +25,7 @@ namespace PerformanceCalculatorGUI
         [BackgroundDependencyLoader]
         private void load(FrameworkConfigManager frameworkConfig)
         {
-            windowMode = frameworkConfig.GetBindable<WindowMode>(FrameworkSetting.WindowMode);
+            var windowMode = frameworkConfig.GetBindable<WindowMode>(FrameworkSetting.WindowMode);
 
             frameworkConfig.GetBindable<double>(FrameworkSetting.VolumeUniversal).Value = 0.1;
 
@@ -43,13 +42,17 @@ namespace PerformanceCalculatorGUI
 
             loadingSpinner.Show();
 
+            var dialogOverlay = new DialogOverlay();
+            dependencies.CacheAs(dialogOverlay);
+
             LoadComponentsAsync(new Drawable[]
             {
                 new OsuContextMenuContainer
                 {
                     RelativeSizeAxes = Axes.Both,
                     Child = new PerformanceCalculatorSceneManager()
-                }
+                },
+                dialogOverlay
             }, drawables =>
             {
                 loadingSpinner.Hide();

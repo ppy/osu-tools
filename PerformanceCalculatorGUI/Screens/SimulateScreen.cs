@@ -17,6 +17,8 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Overlays;
+using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
@@ -28,7 +30,7 @@ using PerformanceCalculatorGUI.Components;
 
 namespace PerformanceCalculatorGUI.Screens
 {
-    public class SimulateScreen : CompositeDrawable
+    public class SimulateScreen : PerformanceCalculatorScreen
     {
         private ProcessorWorkingBeatmap working;
 
@@ -54,6 +56,8 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        public override bool ShouldShowConfirmationDialogOnSwitch => working != null;
 
         private const int file_selection_container_heigth = 40;
         private const int map_title_container_heigth = 20;
