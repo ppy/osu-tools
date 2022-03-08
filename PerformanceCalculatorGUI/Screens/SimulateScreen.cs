@@ -57,8 +57,8 @@ namespace PerformanceCalculatorGUI.Screens
 
         public override bool ShouldShowConfirmationDialogOnSwitch => working != null;
 
-        private const int file_selection_container_heigth = 40;
-        private const int map_title_container_heigth = 20;
+        private const int file_selection_container_height = 40;
+        private const int map_title_container_height = 20;
 
         public SimulateScreen()
         {
@@ -76,7 +76,7 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     Name = "File selection",
                     RelativeSizeAxes = Axes.X,
-                    Height = file_selection_container_heigth,
+                    Height = file_selection_container_height,
                     Child = beatmapTextBox = new FileChooserLabelledTextBox(".osu")
                     {
                         Label = "Beatmap",
@@ -88,15 +88,15 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     Name = "Beatmap title",
                     RelativeSizeAxes = Axes.X,
-                    Y = file_selection_container_heigth,
-                    Height = map_title_container_heigth,
+                    Y = file_selection_container_height,
+                    Height = map_title_container_height,
                     Children = new Drawable[]
                     {
                         beatmapTitle = new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Height = map_title_container_heigth,
+                            Height = map_title_container_height,
                             Text = "No beatmap loaded!"
                         },
                     }
@@ -104,7 +104,7 @@ namespace PerformanceCalculatorGUI.Screens
                 beatmapDataContainer = new FillFlowContainer
                 {
                     Name = "Beatmap data",
-                    Y = file_selection_container_heigth + map_title_container_heigth,
+                    Y = file_selection_container_height + map_title_container_height,
                     RelativeSizeAxes = Axes.Both,
                     Direction = FillDirection.Horizontal,
                     Children = new Drawable[]
