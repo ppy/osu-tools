@@ -17,8 +17,6 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
-using osu.Game.Overlays;
-using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
@@ -350,21 +348,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var accuracy = accuracyTextBox.Value.Value / 100.0;
 
-            var score = scoreTextBox.Value.Value;
-
-            if (score == 1000000)
-            {
-                double scoreMultiplier = 1;
-
-                // Cap score depending on difficulty adjustment mods (matters for mania).
-                foreach (var mod in appliedMods.Value)
-                {
-                    if (mod.Type == ModType.DifficultyReduction)
-                        scoreMultiplier *= mod.ScoreMultiplier;
-                }
-
-                score = (int)Math.Round(1000000 * scoreMultiplier);
-            }
+            var score = LegacyHelper.AdjustManiaScore(scoreTextBox.Value.Value, appliedMods.Value);
 
             var performanceCalculator = ruleset.Value.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
             {

@@ -9,6 +9,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
@@ -37,6 +38,22 @@ namespace PerformanceCalculatorGUI
                 case 3:
                     return new ManiaRuleset();
             }
+        }
+
+        public static int AdjustManiaScore(int score, IReadOnlyList<Mod> mods)
+        {
+            if (score != 1000000) return score;
+
+            double scoreMultiplier = 1;
+
+            // Cap score depending on difficulty adjustment mods (matters for mania).
+            foreach (var mod in mods)
+            {
+                if (mod.Type == ModType.DifficultyReduction)
+                    scoreMultiplier *= mod.ScoreMultiplier;
+            }
+
+            return (int)Math.Round(1000000 * scoreMultiplier);
         }
 
         public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
