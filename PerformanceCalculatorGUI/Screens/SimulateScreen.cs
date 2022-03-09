@@ -63,8 +63,6 @@ namespace PerformanceCalculatorGUI.Screens
         public SimulateScreen()
         {
             RelativeSizeAxes = Axes.Both;
-
-            FillMode = FillMode.Fill;
         }
 
         [BackgroundDependencyLoader]

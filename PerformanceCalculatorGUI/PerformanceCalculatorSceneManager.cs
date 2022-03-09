@@ -54,7 +54,6 @@ namespace PerformanceCalculatorGUI
                     RelativeSizeAxes = Axes.Both,
                     Child = new FillFlowContainer
                     {
-                        FillMode = FillMode.Fill,
                         RelativeSizeAxes = Axes.Both,
                         Direction = FillDirection.Vertical,
                         Children = new Drawable[]
@@ -91,7 +90,6 @@ namespace PerformanceCalculatorGUI
                                                 Text = "profile",
                                                 Height = SCREEN_SWITCH_HEIGHT,
                                                 Width = SCREEN_SWITCH_WIDTH,
-                                                Alpha = 0.1f,
                                                 Action = () => trySettingScreen(typeof(ProfileScreen))
                                             },
                                             new OsuButton
@@ -99,7 +97,6 @@ namespace PerformanceCalculatorGUI
                                                 Text = "leaderboard",
                                                 Height = SCREEN_SWITCH_HEIGHT,
                                                 Width = SCREEN_SWITCH_WIDTH,
-                                                Alpha = 0.1f,
                                                 Action = () => trySettingScreen(typeof(LeaderboardScreen))
                                             }
                                         }
@@ -123,21 +120,14 @@ namespace PerformanceCalculatorGUI
                             new Container
                             {
                                 RelativeSizeAxes = Axes.Both,
-                                Y = CONTROL_AREA_HEIGHT,
-                                FillMode = FillMode.Fill,
-                                Anchor = Anchor.TopLeft,
-                                Origin = Anchor.TopLeft,
-                                Children = new Drawable[]
+                                Child = screens = new Container
                                 {
-                                    screens = new Container
+                                    RelativeSizeAxes = Axes.Both,
+                                    Children = new Drawable[]
                                     {
-                                        RelativeSizeAxes = Axes.Both,
-                                        Children = new Drawable[]
-                                        {
-                                            new SimulateScreen(),
-                                            new ProfileScreen(),
-                                            new LeaderboardScreen()
-                                        }
+                                        new SimulateScreen(),
+                                        new ProfileScreen(),
+                                        new LeaderboardScreen()
                                     }
                                 }
                             }
