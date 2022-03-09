@@ -29,7 +29,9 @@ namespace PerformanceCalculatorGUI
 
             frameworkConfig.GetBindable<double>(FrameworkSetting.VolumeUniversal).Value = 0.1;
 
-            dependencies.CacheAs(new APIConfigManager(Storage));
+            var apiConfig = new APIConfigManager(Storage);
+            dependencies.CacheAs(apiConfig);
+            dependencies.CacheAs(new APIManager(apiConfig));
 
             Ruleset.Value = new OsuRuleset().RulesetInfo;
 

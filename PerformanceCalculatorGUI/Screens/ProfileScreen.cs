@@ -4,13 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.IO.Network;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
@@ -39,10 +37,10 @@ namespace PerformanceCalculatorGUI.Screens
 
         private LabelledTextBox usernameTextBox;
 
-        // TODO: move somewhere global
-        private string apiAccessToken;
-
         private readonly Bindable<APIUser> user = new Bindable<APIUser>();
+
+        [Resolved]
+        private APIManager apiManager { get; set; }
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
@@ -55,10 +53,8 @@ namespace PerformanceCalculatorGUI.Screens
         }
 
         [BackgroundDependencyLoader]
-        private void load(APIConfigManager apiConfigManager)
+        private void load()
         {
-            getAccessToken(apiConfigManager.GetBindable<string>(APISettings.ClientId).Value, apiConfigManager.GetBindable<string>(APISettings.ClientSecret).Value);
-
             InternalChildren = new Drawable[]
             {
                 new FillFlowContainer
@@ -125,34 +121,6 @@ namespace PerformanceCalculatorGUI.Screens
             };
         }
 
-        // TODO: remove
-        protected async Task<T> GetJsonFromApi<T>(string request)
-        {
-            using var req = new JsonWebRequest<T>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
-
-            req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {apiAccessToken}");
-            await req.PerformAsync();
-
-            return req.ResponseObject;
-        }
-
-        // TODO: remove
-        private void getAccessToken(string clientId, string clientSecret)
-        {
-            using var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/oauth/token")
-            {
-                Method = HttpMethod.Post
-            };
-
-            req.AddParameter("client_id", clientId);
-            req.AddParameter("client_secret", clientSecret);
-            req.AddParameter("grant_type", "client_credentials");
-            req.AddParameter("scope", "public");
-            req.Perform();
-
-            apiAccessToken = req.ResponseObject.access_token.ToString();
-        }
-
         private void calculateProfile()
         {
             loadingLayer.Show();
@@ -163,9 +131,7 @@ namespace PerformanceCalculatorGUI.Screens
             Task.Run(async () =>
             {
                 Logger.Log("Getting user data...");
-                var player = await GetJsonFromApi<APIUser>($"users/{usernameTextBox.Current.Value}/{ruleset.Value.ShortName}");
-
-                Logger.Log("Getting user top scores...");
+                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{usernameTextBox.Current.Value}/{ruleset.Value.ShortName}");
 
                 var plays = new List<ExtendedScore>();
 
@@ -173,7 +139,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 Logger.Log($"Calculating {player.Username} top scores...");
 
-                var apiScores = await GetJsonFromApi<List<APIScore>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+                var apiScores = await apiManager.GetJsonFromApi<List<APIScore>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
 
                 foreach (var score in apiScores)
                 {

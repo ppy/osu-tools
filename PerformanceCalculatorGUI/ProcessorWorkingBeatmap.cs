@@ -10,6 +10,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
 using osu.Game.Skinning;
+using PerformanceCalculatorGUI.API;
 
 namespace PerformanceCalculatorGUI
 {
@@ -66,7 +67,7 @@ namespace PerformanceCalculatorGUI
             if (!File.Exists(cachePath))
             {
                 Console.WriteLine($"Downloading {beatmapId}.osu...");
-                new FileWebRequest(cachePath, $"{Program.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
+                new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
             }
 
             return new ProcessorWorkingBeatmap(cachePath, beatmapId);
