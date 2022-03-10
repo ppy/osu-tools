@@ -9,9 +9,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
@@ -20,6 +18,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
+using osu.Game.Users;
 using PerformanceCalculatorGUI.API;
 using PerformanceCalculatorGUI.Components;
 
@@ -31,11 +30,15 @@ namespace PerformanceCalculatorGUI.Screens
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Plum);
 
         private StatefulButton calculationButton;
-        private LoadingLayer loadingLayer;
+        private VerboseLoadingLayer loadingLayer;
 
         private FillFlowContainer scores;
 
         private LabelledTextBox usernameTextBox;
+
+        private FillFlowContainer layout;
+
+        private UserListPanel userPanel;
 
         private readonly Bindable<APIUser> user = new Bindable<APIUser>();
 
@@ -57,7 +60,7 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
-                new FillFlowContainer
+                layout = new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.Both,
                     Direction = FillDirection.Vertical,
@@ -97,28 +100,25 @@ namespace PerformanceCalculatorGUI.Screens
                                 }
                             }
                         },
-                        /*new DetailHeaderContainer
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            User = { BindTarget = user }
-                        },*/
-                        new OsuScrollContainer(Direction.Vertical)
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Child = scores = new FillFlowContainer
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Direction = FillDirection.Vertical
-                            }
-                        },
                     }
                 },
-                loadingLayer = new LoadingLayer(true)
+                loadingLayer = new VerboseLoadingLayer(true)
                 {
                     RelativeSizeAxes = Axes.Both
                 }
             };
+
+            // score container is being added separately so that flow container can properly assign order IDs
+            layout.Insert(2, new OsuScrollContainer(Direction.Vertical)
+            {
+                RelativeSizeAxes = Axes.Both,
+                Child = scores = new FillFlowContainer
+                {
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y,
+                    Direction = FillDirection.Vertical
+                }
+            });
         }
 
         private void calculateProfile()
@@ -130,14 +130,25 @@ namespace PerformanceCalculatorGUI.Screens
 
             Task.Run(async () =>
             {
-                Logger.Log("Getting user data...");
+                Schedule(() => loadingLayer.Text.Value = "Getting user data...");
+
                 var player = await apiManager.GetJsonFromApi<APIUser>($"users/{usernameTextBox.Current.Value}/{ruleset.Value.ShortName}");
+
+                user.Value = player;
+
+                if (userPanel != null)
+                    layout.Remove(userPanel);
+
+                Schedule(() => layout.Insert(1, userPanel = new UserListPanel(user.Value)
+                {
+                    RelativeSizeAxes = Axes.X
+                }));
 
                 var plays = new List<ExtendedScore>();
 
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                Logger.Log($"Calculating {player.Username} top scores...");
+                Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
 
                 var apiScores = await apiManager.GetJsonFromApi<List<APIScore>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
 
@@ -146,6 +157,8 @@ namespace PerformanceCalculatorGUI.Screens
                     await Task.Run(() =>
                     {
                         var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString());
+
+                        Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
 
                         var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
                         Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
@@ -177,7 +190,7 @@ namespace PerformanceCalculatorGUI.Screens
                         var extendedScore = new ExtendedScore(score, livePp);
                         plays.Add(extendedScore);
 
-                        ScheduleAfterChildren(() => scores.Add(new ExtendedProfileScore(extendedScore)));
+                        Schedule(() => scores.Add(new ExtendedProfileScore(extendedScore)));
                     });
                 }
 
@@ -195,11 +208,10 @@ namespace PerformanceCalculatorGUI.Screens
                 var playcountBonusPP = (totalLivePP - nonBonusLivePP);
                 totalLocalPP += playcountBonusPP;
 
-                user.Value = player;
                 user.Value.Statistics.PP = totalLocalPP;
             }).ContinueWith(t =>
             {
-                ScheduleAfterChildren(() =>
+                Schedule(() =>
                 {
                     loadingLayer.Hide();
                     calculationButton.State.Value = ButtonState.Done;
