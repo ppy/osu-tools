@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 using Newtonsoft.Json;
+using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -264,6 +265,9 @@ namespace PerformanceCalculatorGUI.Screens
                 appliedMods.Value = Array.Empty<Mod>();
                 calculateDifficulty();
             });
+
+            if (RuntimeInfo.IsDesktop)
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(calculateDifficulty);
         }
 
         public override void Hide()
