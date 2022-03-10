@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -111,7 +112,7 @@ namespace PerformanceCalculatorGUI.Components
                 Child = new Container
                 {
                     Size = new Vector2(600, 400),
-                    Child = new OsuFileSelector(currentFile.Value?.DirectoryName, handledExtensions)
+                    Child = new OsuFileSelector(currentFile.Value?.DirectoryName ?? Assembly.GetEntryAssembly()?.Location, handledExtensions)
                     {
                         RelativeSizeAxes = Axes.Both,
                         CurrentFile = { BindTarget = currentFile }
