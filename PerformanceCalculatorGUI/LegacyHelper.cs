@@ -21,23 +21,14 @@ namespace PerformanceCalculatorGUI
     {
         public static Ruleset GetRulesetFromLegacyID(int id)
         {
-            switch (id)
+            return id switch
             {
-                default:
-                    throw new ArgumentException("Invalid ruleset ID provided.");
-
-                case 0:
-                    return new OsuRuleset();
-
-                case 1:
-                    return new TaikoRuleset();
-
-                case 2:
-                    return new CatchRuleset();
-
-                case 3:
-                    return new ManiaRuleset();
-            }
+                0 => new OsuRuleset(),
+                1 => new TaikoRuleset(),
+                2 => new CatchRuleset(),
+                3 => new ManiaRuleset(),
+                _ => throw new ArgumentException("Invalid ruleset ID provided.")
+            };
         }
 
         public static int AdjustManiaScore(int score, IReadOnlyList<Mod> mods)
@@ -58,23 +49,14 @@ namespace PerformanceCalculatorGUI
 
         public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
-            switch (ruleset.OnlineID)
+            return ruleset.OnlineID switch
             {
-                default:
-                    throw new ArgumentException("Invalid ruleset ID provided.");
-
-                case 0:
-                    return generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood);
-
-                case 1:
-                    return generateTaikoHitResults(accuracy, beatmap, countMiss, countGood);
-
-                case 2:
-                    return generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood);
-
-                case 3:
-                    return generateManiaHitResults(beatmap);
-            }
+                0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
+                1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
+                2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
+                3 => generateManiaHitResults(beatmap),
+                _ => throw new ArgumentException("Invalid ruleset ID provided.")
+            };
         }
 
         private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
@@ -186,6 +168,46 @@ namespace PerformanceCalculatorGUI
                 { HitResult.Meh, 0 },
                 { HitResult.Miss, 0 }
             };
+        }
+
+        public static double GetAccuracyForRuleset(RulesetInfo ruleset, Dictionary<HitResult, int> statistics)
+        {
+            return ruleset.OnlineID switch
+            {
+                0 => getOsuAccuracy(statistics),
+                1 => getTaikoAccuracy(statistics),
+                2 => getCatchAccuracy(statistics),
+                _ => 0.0
+            };
+        }
+
+        private static double getOsuAccuracy(Dictionary<HitResult, int> statistics)
+        {
+            var countGreat = statistics[HitResult.Great];
+            var countGood = statistics[HitResult.Ok];
+            var countMeh = statistics[HitResult.Meh];
+            var countMiss = statistics[HitResult.Miss];
+            var total = countGreat + countGood + countMeh + countMiss;
+
+            return (double)((6 * countGreat) + (2 * countGood) + countMeh) / (6 * total);
+        }
+
+        private static double getTaikoAccuracy(Dictionary<HitResult, int> statistics)
+        {
+            var countGreat = statistics[HitResult.Great];
+            var countGood = statistics[HitResult.Ok];
+            var countMiss = statistics[HitResult.Miss];
+            var total = countGreat + countGood + countMiss;
+
+            return (double)((2 * countGreat) + countGood) / (2 * total);
+        }
+
+        private static double getCatchAccuracy(Dictionary<HitResult, int> statistics)
+        {
+            double hits = statistics[HitResult.Great] + statistics[HitResult.LargeTickHit] + statistics[HitResult.SmallTickHit];
+            double total = hits + statistics[HitResult.Miss] + statistics[HitResult.SmallTickMiss];
+
+            return hits / total;
         }
     }
 }

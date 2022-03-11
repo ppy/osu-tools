@@ -36,10 +36,15 @@ namespace PerformanceCalculatorGUI.Screens
         private UserModSelectOverlay userModsSelectOverlay;
 
         private LabelledTextBox beatmapTextBox;
-        private LabelledFractionalNumberBox accuracyTextBox;
         private LimitedLabelledNumberBox missesTextBox;
         private LimitedLabelledNumberBox comboTextBox;
         private LimitedLabelledNumberBox scoreTextBox;
+
+        private GridContainer accuracyContainer;
+        private LabelledFractionalNumberBox accuracyTextBox;
+        private LimitedLabelledNumberBox goodsTextBox;
+        private LimitedLabelledNumberBox mehsTextBox;
+        private SwitchButton fullScoreDataSwitch;
 
         private DifficultyAttributes difficultyAttributes;
         private FillFlowContainer difficultyAttributesContainer;
@@ -128,15 +133,55 @@ namespace PerformanceCalculatorGUI.Screens
                                         Height = 20,
                                         Text = "Score params"
                                     },
-                                    accuracyTextBox = new LabelledFractionalNumberBox
+                                    accuracyContainer = new GridContainer
                                     {
                                         RelativeSizeAxes = Axes.X,
-                                        Anchor = Anchor.TopLeft,
-                                        Label = "Accuracy",
-                                        PlaceholderText = "100",
-                                        MaxValue = 100.0,
-                                        MinValue = 0.0,
-                                        Value = { Value = 100.0 }
+                                        AutoSizeAxes = Axes.Y,
+                                        ColumnDimensions = new[]
+                                        {
+                                            new Dimension(),
+                                            new Dimension(GridSizeMode.Absolute),
+                                            new Dimension(GridSizeMode.Absolute),
+                                            new Dimension(GridSizeMode.AutoSize)
+                                        },
+                                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                        Content = new[]
+                                        {
+                                            new Drawable[]
+                                            {
+                                                accuracyTextBox = new LabelledFractionalNumberBox
+                                                {
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Anchor = Anchor.TopLeft,
+                                                    Label = "Accuracy",
+                                                    PlaceholderText = "100",
+                                                    MaxValue = 100.0,
+                                                    MinValue = 0.0,
+                                                    Value = { Value = 100.0 }
+                                                },
+                                                goodsTextBox = new LimitedLabelledNumberBox
+                                                {
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Anchor = Anchor.TopLeft,
+                                                    Label = "Goods",
+                                                    PlaceholderText = "0",
+                                                    MinValue = 0
+                                                },
+                                                mehsTextBox = new LimitedLabelledNumberBox
+                                                {
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Anchor = Anchor.TopLeft,
+                                                    Label = "Mehs",
+                                                    PlaceholderText = "0",
+                                                    MinValue = 0
+                                                },
+                                                fullScoreDataSwitch = new SwitchButton
+                                                {
+                                                    Width = 80,
+                                                    Height = 40
+                                                }
+                                            }
+                                        }
                                     },
                                     missesTextBox = new LimitedLabelledNumberBox
                                     {
@@ -253,9 +298,13 @@ namespace PerformanceCalculatorGUI.Screens
             beatmapTextBox.Current.BindValueChanged(beatmapChanged);
 
             accuracyTextBox.Value.BindValueChanged(_ => calculatePerformance());
+            goodsTextBox.Value.BindValueChanged(_ => calculatePerformance());
+            mehsTextBox.Value.BindValueChanged(_ => calculatePerformance());
             missesTextBox.Value.BindValueChanged(_ => calculatePerformance());
             comboTextBox.Value.BindValueChanged(_ => calculatePerformance());
             scoreTextBox.Value.BindValueChanged(_ => calculatePerformance());
+
+            fullScoreDataSwitch.Current.BindValueChanged(val => updateAccuracyParams(val.NewValue));
 
             appliedMods.BindValueChanged(modsChanged);
             modDisplay.Current.BindTo(appliedMods);
@@ -263,6 +312,7 @@ namespace PerformanceCalculatorGUI.Screens
             ruleset.BindValueChanged(_ =>
             {
                 appliedMods.Value = Array.Empty<Mod>();
+                updateAccuracyParams(fullScoreDataSwitch.Current.Value);
                 calculateDifficulty();
             });
 
@@ -334,7 +384,6 @@ namespace PerformanceCalculatorGUI.Screens
                 new LabelledTextBox
                 {
                     ReadOnly = true,
-                    Origin = Anchor.TopLeft,
                     Label = x.Key.Humanize(),
                     Text = FormattableString.Invariant($"{x.Value:N2}")
                 }
@@ -348,15 +397,23 @@ namespace PerformanceCalculatorGUI.Screens
             if (working == null || difficultyAttributes == null)
                 return;
 
-            var accuracy = accuracyTextBox.Value.Value / 100.0;
+            int? countGood = null, countMeh = null;
+
+            if (fullScoreDataSwitch.Current.Value)
+            {
+                countGood = goodsTextBox.Value.Value;
+                countMeh = mehsTextBox.Value.Value;
+            }
 
             var score = LegacyHelper.AdjustManiaScore(scoreTextBox.Value.Value, appliedMods.Value);
 
+            var statistics = LegacyHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value), missesTextBox.Value.Value, countMeh, countGood);
+
             var performanceCalculator = ruleset.Value.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
             {
-                Accuracy = accuracy,
+                Accuracy = LegacyHelper.GetAccuracyForRuleset(ruleset.Value, statistics),
                 MaxCombo = comboTextBox.Value.Value,
-                Statistics = LegacyHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracy, working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value), missesTextBox.Value.Value, null, null),
+                Statistics = statistics,
                 Mods = appliedMods.Value.ToArray(),
                 TotalScore = score,
                 Ruleset = ruleset.Value
@@ -369,7 +426,6 @@ namespace PerformanceCalculatorGUI.Screens
                 new LabelledTextBox
                 {
                     ReadOnly = true,
-                    Origin = Anchor.TopLeft,
                     Label = x.Key.Humanize(),
                     Text = FormattableString.Invariant($"{x.Value:N2}")
                 }
@@ -378,7 +434,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void populateScoreParams()
         {
-            accuracyTextBox.Hide();
+            accuracyContainer.Hide();
             comboTextBox.Hide();
             missesTextBox.Hide();
             scoreTextBox.Hide();
@@ -387,28 +443,77 @@ namespace PerformanceCalculatorGUI.Screens
 
             if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
             {
-                accuracyTextBox.Text = string.Empty;
-                accuracyTextBox.Show();
-            }
+                updateAccuracyParams(fullScoreDataSwitch.Current.Value);
+                accuracyContainer.Show();
 
-            if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
-            {
                 comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
                 comboTextBox.MaxValue = comboTextBox.Value.Value = difficultyAttributes.MaxCombo;
                 comboTextBox.Show();
-            }
 
-            if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
-            {
                 missesTextBox.MaxValue = difficultyAttributes.MaxCombo;
                 missesTextBox.Text = string.Empty;
                 missesTextBox.Show();
             }
-
-            if (ruleset.Value.ShortName == "mania")
+            else if (ruleset.Value.ShortName == "mania")
             {
                 scoreTextBox.Text = string.Empty;
                 scoreTextBox.Show();
+            }
+        }
+
+        private void updateAccuracyParams(bool useFullScoreData)
+        {
+            goodsTextBox.Text = string.Empty;
+            mehsTextBox.Text = string.Empty;
+            accuracyTextBox.Text = string.Empty;
+
+            if (useFullScoreData)
+            {
+                goodsTextBox.Label = ruleset.Value.ShortName switch
+                {
+                    "osu" => "100s",
+                    "taiko" => "Goods",
+                    "fruits" => "Droplets",
+                    _ => ""
+                };
+
+                mehsTextBox.Label = ruleset.Value.ShortName switch
+                {
+                    "osu" => "50s",
+                    "fruits" => "Tiny Droplets",
+                    _ => ""
+                };
+
+                accuracyContainer.ColumnDimensions = ruleset.Value.ShortName switch
+                {
+                    "osu" or "fruits" =>
+                        new[]
+                        {
+                            new Dimension(GridSizeMode.Absolute),
+                            new Dimension(),
+                            new Dimension(),
+                            new Dimension(GridSizeMode.AutoSize)
+                        },
+                    "taiko" =>
+                        new[]
+                        {
+                            new Dimension(GridSizeMode.Absolute),
+                            new Dimension(),
+                            new Dimension(GridSizeMode.Absolute),
+                            new Dimension(GridSizeMode.AutoSize)
+                        },
+                    _ => Array.Empty<Dimension>()
+                };
+            }
+            else
+            {
+                accuracyContainer.ColumnDimensions = new[]
+                {
+                    new Dimension(),
+                    new Dimension(GridSizeMode.Absolute),
+                    new Dimension(GridSizeMode.Absolute),
+                    new Dimension(GridSizeMode.AutoSize)
+                };
             }
         }
     }
