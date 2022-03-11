@@ -8,6 +8,7 @@ using Humanizer;
 using Newtonsoft.Json;
 using osu.Framework;
 using osu.Framework.Allocation;
+using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -25,7 +26,9 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Utils;
+using osuTK;
 using PerformanceCalculatorGUI.Components;
+using PerformanceCalculatorGUI.Screens.ObjectInspection;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -54,6 +57,11 @@ namespace PerformanceCalculatorGUI.Screens
         private OsuSpriteText beatmapTitle;
 
         private ModDisplay modDisplay;
+
+        private ObjectInspector objectInspector;
+
+        [Resolved]
+        private AudioManager audio { get; set; }
 
         [Resolved]
         private Bindable<IReadOnlyList<Mod>> appliedMods { get; set; }
@@ -243,6 +251,7 @@ namespace PerformanceCalculatorGUI.Screens
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical,
+                                Spacing = new Vector2(0, 5f),
                                 Children = new Drawable[]
                                 {
                                     new OsuSpriteText
@@ -272,7 +281,27 @@ namespace PerformanceCalculatorGUI.Screens
                                         RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.TopLeft,
                                         AutoSizeAxes = Axes.Y
-                                    }
+                                    },
+                                    new OsuButton()
+                                    {
+                                        Width = 200,
+                                        Text = "Inspect Object Difficulty Data",
+                                        Action = () =>
+                                        {
+                                            AddInternal(new Container
+                                            {
+                                                Name = "Object inspector overlay",
+                                                RelativeSizeAxes = Axes.Both,
+                                                Anchor = Anchor.Centre,
+                                                Origin = Anchor.Centre,
+                                                Child = objectInspector = new ObjectInspector(working)
+                                                {
+                                                    RelativeSizeAxes = Axes.Both,
+                                                },
+                                            });
+                                            objectInspector.Show();
+                                        }
+                                    },
                                 }
                             }
                         }
@@ -322,6 +351,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         public override void Hide()
         {
+            objectInspector?.Hide();
             userModsSelectOverlay.Hide();
             beatmapTextBox.Current.Value = string.Empty;
             base.Hide();
@@ -355,7 +385,7 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            working = ProcessorWorkingBeatmap.FromFileOrId(filePath.NewValue);
+            working = ProcessorWorkingBeatmap.FromFileOrId(filePath.NewValue, audio);
 
             if (!working.BeatmapInfo.Ruleset.Equals(ruleset.Value))
             {

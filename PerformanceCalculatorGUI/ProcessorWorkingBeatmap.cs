@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using osu.Framework.Audio;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.IO.Network;
@@ -26,13 +27,14 @@ namespace PerformanceCalculatorGUI
         /// </summary>
         /// <param name="file">The .osu file.</param>
         /// <param name="beatmapId">An optional beatmap ID (for cases where .osu file doesn't have one).</param>
-        public ProcessorWorkingBeatmap(string file, int? beatmapId = null)
-            : this(readFromFile(file), beatmapId)
+        /// <param name="audioManager"></param>
+        public ProcessorWorkingBeatmap(string file, int? beatmapId = null, AudioManager audioManager = null)
+            : this(readFromFile(file), beatmapId, audioManager)
         {
         }
 
-        private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null)
-            : base(beatmap.BeatmapInfo, null)
+        private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null, AudioManager audioManager = null)
+            : base(beatmap.BeatmapInfo, audioManager)
         {
             this.beatmap = beatmap;
 
@@ -49,14 +51,14 @@ namespace PerformanceCalculatorGUI
                 return Decoder.GetDecoder<Beatmap>(reader).Decode(reader);
         }
 
-        public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId)
+        public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId, AudioManager audioManager = null)
         {
             if (fileOrId.EndsWith(".osu"))
             {
                 if (!File.Exists(fileOrId))
                     throw new ArgumentException($"Beatmap file {fileOrId} does not exist.");
 
-                return new ProcessorWorkingBeatmap(fileOrId);
+                return new ProcessorWorkingBeatmap(fileOrId, null, audioManager);
             }
 
             if (!int.TryParse(fileOrId, out var beatmapId))
@@ -70,7 +72,7 @@ namespace PerformanceCalculatorGUI
                 new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
             }
 
-            return new ProcessorWorkingBeatmap(cachePath, beatmapId);
+            return new ProcessorWorkingBeatmap(cachePath, beatmapId, audioManager);
         }
 
         protected override IBeatmap GetBeatmap() => beatmap;
