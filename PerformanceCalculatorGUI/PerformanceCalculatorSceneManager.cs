@@ -52,76 +52,80 @@ namespace PerformanceCalculatorGUI
                 new PopoverContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Child = new FillFlowContainer
+                    Child = new GridContainer
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Direction = FillDirection.Vertical,
-                        Children = new Drawable[]
+                        ColumnDimensions = new[] { new Dimension() },
+                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize), new Dimension() },
+                        Content = new[]
                         {
-                            new Container
+                            new Drawable[]
                             {
-                                RelativeSizeAxes = Axes.X,
-                                Height = CONTROL_AREA_HEIGHT,
-                                Children = new Drawable[]
+                                new Container
                                 {
-                                    new Box
+                                    RelativeSizeAxes = Axes.X,
+                                    Height = CONTROL_AREA_HEIGHT,
+                                    Children = new Drawable[]
                                     {
-                                        Colour = OsuColour.Gray(0.1f),
-                                        RelativeSizeAxes = Axes.Both,
-                                    },
-                                    new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Horizontal,
-                                        Spacing = new Vector2(5),
-                                        Padding = new MarginPadding(5),
-                                        AutoSizeAxes = Axes.X,
-                                        Children = new Drawable[]
+                                        new Box
                                         {
-                                            new OsuButton
+                                            Colour = OsuColour.Gray(0.1f),
+                                            RelativeSizeAxes = Axes.Both,
+                                        },
+                                        new FillFlowContainer
+                                        {
+                                            RelativeSizeAxes = Axes.Y,
+                                            Direction = FillDirection.Horizontal,
+                                            Spacing = new Vector2(5),
+                                            Padding = new MarginPadding(5),
+                                            AutoSizeAxes = Axes.X,
+                                            Children = new Drawable[]
                                             {
-                                                Text = "simulate",
-                                                Height = SCREEN_SWITCH_HEIGHT,
-                                                Width = SCREEN_SWITCH_WIDTH,
-                                                Action = () => trySettingScreen(typeof(SimulateScreen))
-                                            },
-                                            new OsuButton
-                                            {
-                                                Text = "profile",
-                                                Height = SCREEN_SWITCH_HEIGHT,
-                                                Width = SCREEN_SWITCH_WIDTH,
-                                                Action = () => trySettingScreen(typeof(ProfileScreen))
-                                            },
-                                            new OsuButton
-                                            {
-                                                Text = "leaderboard",
-                                                Height = SCREEN_SWITCH_HEIGHT,
-                                                Width = SCREEN_SWITCH_WIDTH,
-                                                Action = () => trySettingScreen(typeof(LeaderboardScreen))
+                                                new OsuButton
+                                                {
+                                                    Text = "simulate",
+                                                    Height = SCREEN_SWITCH_HEIGHT,
+                                                    Width = SCREEN_SWITCH_WIDTH,
+                                                    Action = () => trySettingScreen(typeof(SimulateScreen))
+                                                },
+                                                new OsuButton
+                                                {
+                                                    Text = "profile",
+                                                    Height = SCREEN_SWITCH_HEIGHT,
+                                                    Width = SCREEN_SWITCH_WIDTH,
+                                                    Action = () => trySettingScreen(typeof(ProfileScreen))
+                                                },
+                                                new OsuButton
+                                                {
+                                                    Text = "leaderboard",
+                                                    Height = SCREEN_SWITCH_HEIGHT,
+                                                    Width = SCREEN_SWITCH_WIDTH,
+                                                    Action = () => trySettingScreen(typeof(LeaderboardScreen))
+                                                }
                                             }
-                                        }
-                                    },
-                                    new FillFlowContainer
-                                    {
-                                        Anchor = Anchor.TopRight,
-                                        Origin = Anchor.TopRight,
-                                        Direction = FillDirection.Horizontal,
-                                        RelativeSizeAxes = Axes.Y,
-                                        AutoSizeAxes = Axes.X,
-                                        Spacing = new Vector2(5),
-                                        Children = new Drawable[]
+                                        },
+                                        new FillFlowContainer
                                         {
-                                            rulesetSelector = new ToolbarRulesetSelector(),
-                                            new APIConfigButton()
-                                        }
+                                            Anchor = Anchor.TopRight,
+                                            Origin = Anchor.TopRight,
+                                            Direction = FillDirection.Horizontal,
+                                            RelativeSizeAxes = Axes.Y,
+                                            AutoSizeAxes = Axes.X,
+                                            Spacing = new Vector2(5),
+                                            Children = new Drawable[]
+                                            {
+                                                rulesetSelector = new ToolbarRulesetSelector(),
+                                                new APIConfigButton()
+                                            }
+                                        },
                                     },
-                                },
+                                }
                             },
-                            new Container
+                            new Drawable[]
                             {
-                                RelativeSizeAxes = Axes.Both,
-                                Child = screens = new Container
+                                screens = new Container
                                 {
+                                    Depth = 1,
                                     RelativeSizeAxes = Axes.Both,
                                     Children = new Drawable[]
                                     {
@@ -131,7 +135,7 @@ namespace PerformanceCalculatorGUI
                                     }
                                 }
                             }
-                        }
+                        } 
                     }
                 }
             };
