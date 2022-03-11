@@ -9,7 +9,7 @@ using osu.Game.Graphics.UserInterfaceV2;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class LabelledFractionalNumberBox : LabelledTextBox
+    internal class LimitedLabelledFractionalNumberBox : LabelledTextBox
     {
         internal class FractionalNumberBox : OsuTextBox
         {

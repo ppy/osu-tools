@@ -44,7 +44,7 @@ namespace PerformanceCalculatorGUI.Screens
         private LimitedLabelledNumberBox scoreTextBox;
 
         private GridContainer accuracyContainer;
-        private LabelledFractionalNumberBox accuracyTextBox;
+        private LimitedLabelledFractionalNumberBox accuracyTextBox;
         private LimitedLabelledNumberBox goodsTextBox;
         private LimitedLabelledNumberBox mehsTextBox;
         private SwitchButton fullScoreDataSwitch;
@@ -157,7 +157,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         {
                                             new Drawable[]
                                             {
-                                                accuracyTextBox = new LabelledFractionalNumberBox
+                                                accuracyTextBox = new LimitedLabelledFractionalNumberBox
                                                 {
                                                     RelativeSizeAxes = Axes.X,
                                                     Anchor = Anchor.TopLeft,
