@@ -18,7 +18,7 @@ DEPENDENCIES="./osu/osu.Game.Rulesets.Catch/osu.Game.Rulesets.Catch.csproj
 
 dotnet sln $SLN add $DEPENDENCIES
 
-for CSPROJ in PROJECTS
+for CSPROJ in $PROJECTS
 do
     dotnet remove $CSPROJ package ppy.osu.Game
     dotnet remove $CSPROJ package ppy.osu.Game.Rulesets.Osu
