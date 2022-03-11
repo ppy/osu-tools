@@ -135,7 +135,7 @@ namespace PerformanceCalculatorGUI
                                     }
                                 }
                             }
-                        } 
+                        }
                     }
                 }
             };
