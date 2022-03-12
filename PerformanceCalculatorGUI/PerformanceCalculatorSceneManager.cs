@@ -17,7 +17,7 @@ using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Rulesets;
 using osuTK;
-using PerformanceCalculatorGUI.API;
+using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Screens;
 
 namespace PerformanceCalculatorGUI
@@ -115,7 +115,7 @@ namespace PerformanceCalculatorGUI
                                             Children = new Drawable[]
                                             {
                                                 rulesetSelector = new ToolbarRulesetSelector(),
-                                                new APIConfigButton()
+                                                new SettingsButton()
                                             }
                                         },
                                     },

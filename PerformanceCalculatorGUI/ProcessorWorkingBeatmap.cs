@@ -11,7 +11,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
 using osu.Game.Skinning;
-using PerformanceCalculatorGUI.API;
 
 namespace PerformanceCalculatorGUI
 {

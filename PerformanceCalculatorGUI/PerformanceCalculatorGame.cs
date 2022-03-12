@@ -9,7 +9,7 @@ using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Osu;
-using PerformanceCalculatorGUI.API;
+using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI
 {
@@ -29,7 +29,7 @@ namespace PerformanceCalculatorGUI
 
             frameworkConfig.GetBindable<double>(FrameworkSetting.VolumeUniversal).Value = 0.1;
 
-            var apiConfig = new APIConfigManager(Storage);
+            var apiConfig = new SettingsManager(Storage);
             dependencies.CacheAs(apiConfig);
             dependencies.CacheAs(new APIManager(apiConfig));
 

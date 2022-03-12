@@ -28,6 +28,7 @@ using osu.Game.Screens.Play.HUD;
 using osu.Game.Utils;
 using osuTK;
 using PerformanceCalculatorGUI.Components;
+using PerformanceCalculatorGUI.Configuration;
 using PerformanceCalculatorGUI.Screens.ObjectInspection;
 
 namespace PerformanceCalculatorGUI.Screens
@@ -80,7 +81,7 @@ namespace PerformanceCalculatorGUI.Screens
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(SettingsManager configManager)
         {
             InternalChildren = new Drawable[]
             {
@@ -89,7 +90,7 @@ namespace PerformanceCalculatorGUI.Screens
                     Name = "File selection",
                     RelativeSizeAxes = Axes.X,
                     Height = file_selection_container_height,
-                    Child = beatmapTextBox = new FileChooserLabelledTextBox(".osu")
+                    Child = beatmapTextBox = new FileChooserLabelledTextBox(configManager.GetBindable<string>(Settings.DefaultPath), ".osu")
                     {
                         Label = "Beatmap",
                         FixedLabelWidth = 160f,

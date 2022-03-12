@@ -28,17 +28,19 @@ namespace PerformanceCalculatorGUI.Components
     /// </summary>
     internal class FileChooserLabelledTextBox : LabelledTextBox, ICanAcceptFiles, IHasPopover
     {
+        private readonly Bindable<string> initialPath;
         private readonly string[] handledExtensions;
 
         public IEnumerable<string> HandledExtensions => handledExtensions;
 
-        private readonly Bindable<FileInfo> currentFile = new Bindable<FileInfo>();
+        private readonly Bindable<FileInfo> currentFile = new();
 
         [Resolved]
         private OsuGameBase game { get; set; }
 
-        public FileChooserLabelledTextBox(params string[] handledExtensions)
+        public FileChooserLabelledTextBox(Bindable<string> initialPath, params string[] handledExtensions)
         {
+            this.initialPath = initialPath;
             this.handledExtensions = handledExtensions;
         }
 
@@ -103,16 +105,16 @@ namespace PerformanceCalculatorGUI.Components
             }
         }
 
-        public Popover GetPopover() => new FileChooserPopover(handledExtensions, currentFile);
+        public Popover GetPopover() => new FileChooserPopover(handledExtensions, currentFile, initialPath);
 
         private class FileChooserPopover : OsuPopover
         {
-            public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo> currentFile)
+            public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo> currentFile, Bindable<string> initialPath = null)
             {
                 Child = new Container
                 {
                     Size = new Vector2(600, 400),
-                    Child = new OsuFileSelector(currentFile.Value?.DirectoryName ?? Assembly.GetEntryAssembly()?.Location, handledExtensions)
+                    Child = new OsuFileSelector(currentFile.Value?.DirectoryName ?? initialPath?.Value ?? Assembly.GetEntryAssembly()?.Location, handledExtensions)
                     {
                         RelativeSizeAxes = Axes.Both,
                         CurrentFile = { BindTarget = currentFile }

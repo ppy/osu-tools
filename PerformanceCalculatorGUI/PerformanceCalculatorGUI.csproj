@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\osu\osu.Game.Rulesets.Catch\osu.Game.Rulesets.Catch.csproj" />
+    <ProjectReference Include="..\osu\osu.Game.Rulesets.Mania\osu.Game.Rulesets.Mania.csproj" />
+    <ProjectReference Include="..\osu\osu.Game.Rulesets.Osu\osu.Game.Rulesets.Osu.csproj" />
+    <ProjectReference Include="..\osu\osu.Game.Rulesets.Taiko\osu.Game.Rulesets.Taiko.csproj" />
+    <ProjectReference Include="..\osu\osu.Game\osu.Game.csproj" />
+  </ItemGroup>
   <Import Project="..\osu.Tools.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="ppy.osu.Game" Version="2022.205.0" />
-		<PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2022.205.0" />
-		<PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2022.205.0" />
-		<PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2022.205.0" />
-		<PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2022.205.0" />
-	</ItemGroup>
 </Project>

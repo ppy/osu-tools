@@ -11,20 +11,20 @@ using osu.Game.Input.Bindings;
 using osu.Game.Overlays.Toolbar;
 using osuTK;
 
-namespace PerformanceCalculatorGUI.API
+namespace PerformanceCalculatorGUI.Components
 {
-    internal class APIConfigButton : ToolbarButton, IHasPopover
+    internal class SettingsButton : ToolbarButton, IHasPopover
     {
-        public APIConfigButton()
+        public SettingsButton()
         {
             Width *= 1.4f;
             Hotkey = GlobalAction.ToggleSettings;
-            TooltipText = "API Settings";
+            TooltipText = "Settings";
 
             SetIcon(new IconPill(FontAwesome.Solid.Cog) { IconSize = new Vector2(80) });
         }
 
-        public Popover GetPopover() => new APIConfigPopover();
+        public Popover GetPopover() => new SettingsPopover();
 
         protected override bool OnClick(ClickEvent e)
         {
