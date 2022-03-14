@@ -18,7 +18,6 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
-using osu.Game.Skinning;
 using osuTK;
 using osuTK.Input;
 
@@ -57,7 +56,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         }
 
         [BackgroundDependencyLoader]
-        private void load(SkinManager skinManager)
+        private void load()
         {
             var rulesetInstance = ruleset.Value.CreateInstance();
             var modifiedMods = mods.Value.Append(rulesetInstance.GetAutoplayMod()).ToList();
@@ -67,15 +66,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             clock = new EditorClock(playableBeatmap, beatDivisor) { IsCoupled = false };
             clock.ChangeSource(processorBeatmap.Track);
-
             dependencies.CacheAs(clock);
 
-            skinManager.CurrentSkinInfo.Value = skinManager.DefaultLegacySkin.SkinInfo;
-
-            var editorBeatmap = new EditorBeatmap(playableBeatmap, skinManager.DefaultLegacySkin);
+            var editorBeatmap = new EditorBeatmap(playableBeatmap);
             dependencies.CacheAs(editorBeatmap);
 
-            dependencies.CacheAs(typeof(WorkingBeatmap), processorBeatmap);
             beatmap.Value = processorBeatmap;
 
             AddInternal(new Container
@@ -169,6 +164,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Text = "This ruleset is not supported yet!"
                 }
             });
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            clock.ProcessFrame();
         }
 
         protected override bool OnKeyDown(KeyDownEvent e)
