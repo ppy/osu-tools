@@ -81,7 +81,7 @@ namespace PerformanceCalculatorGUI
                                             {
                                                 new OsuButton
                                                 {
-                                                    Text = "simulate",
+                                                    Text = "beatmap",
                                                     Height = SCREEN_SWITCH_HEIGHT,
                                                     Width = SCREEN_SWITCH_WIDTH,
                                                     Action = () => setScreen(new SimulateScreen())
