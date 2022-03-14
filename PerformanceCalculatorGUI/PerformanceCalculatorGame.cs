@@ -6,6 +6,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
+using osu.Framework.Platform;
 using osu.Game;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Overlays;
@@ -51,6 +52,13 @@ namespace PerformanceCalculatorGUI
                 },
                 dialogOverlay
             });
+        }
+
+        public override void SetHost(GameHost host)
+        {
+            base.SetHost(host);
+
+            host.Window.CursorState |= CursorState.Hidden;
         }
 
         protected override void LoadComplete()
