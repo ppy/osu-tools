@@ -10,15 +10,15 @@ PROJECTS=(
 
 SLN="osu.Tools.sln"
 
-DEPENDENCIES="./osu/osu.Game.Rulesets.Catch/osu.Game.Rulesets.Catch.csproj
-    ./osu/osu.Game.Rulesets.Mania/osu.Game.Rulesets.Mania.csproj
-    ./osu/osu.Game.Rulesets.Osu/osu.Game.Rulesets.Osu.csproj
-    ./osu/osu.Game.Rulesets.Taiko/osu.Game.Rulesets.Taiko.csproj
-    ./osu/osu.Game/osu.Game.csproj"
+DEPENDENCIES="../osu/osu.Game.Rulesets.Catch/osu.Game.Rulesets.Catch.csproj
+    ../osu/osu.Game.Rulesets.Mania/osu.Game.Rulesets.Mania.csproj
+    ../osu/osu.Game.Rulesets.Osu/osu.Game.Rulesets.Osu.csproj
+    ../osu/osu.Game.Rulesets.Taiko/osu.Game.Rulesets.Taiko.csproj
+    ../osu/osu.Game/osu.Game.csproj"
 
 dotnet sln $SLN add $DEPENDENCIES
 
-for CSPROJ in PROJECTS
+for CSPROJ in "${PROJECTS[@]}"
 do
     dotnet remove $CSPROJ package ppy.osu.Game
     dotnet remove $CSPROJ package ppy.osu.Game.Rulesets.Osu
