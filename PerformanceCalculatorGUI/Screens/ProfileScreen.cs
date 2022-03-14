@@ -117,6 +117,8 @@ namespace PerformanceCalculatorGUI.Screens
                     Direction = FillDirection.Vertical
                 }
             });
+
+            usernameTextBox.OnCommit += (_, _) => { calculateProfile(); };
         }
 
         private void calculateProfile()
