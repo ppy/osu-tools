@@ -194,7 +194,7 @@ namespace PerformanceCalculatorGUI.Screens
                 }
 
                 var localOrdered = plays.Select(x => x.PP).OrderByDescending(x => x).ToList();
-                var liveOrdered = plays.Select(x => x.PP).OrderByDescending(x => x).ToList();
+                var liveOrdered = plays.Select(x => x.LivePP).OrderByDescending(x => x).ToList();
 
                 int index = 0;
                 decimal totalLocalPP = (decimal)localOrdered.Sum(play => Math.Pow(0.95, index++) * play);
