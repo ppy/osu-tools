@@ -17,7 +17,7 @@ using osu.Game.Rulesets.Taiko.Objects;
 
 namespace PerformanceCalculatorGUI
 {
-    public static class LegacyHelper
+    public static class RulesetHelper
     {
         public static Ruleset GetRulesetFromLegacyID(int id)
         {

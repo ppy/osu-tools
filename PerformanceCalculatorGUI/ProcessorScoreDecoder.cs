@@ -27,7 +27,7 @@ namespace PerformanceCalculatorGUI
             return score;
         }
 
-        protected override Ruleset GetRuleset(int rulesetId) => LegacyHelper.GetRulesetFromLegacyID(rulesetId);
+        protected override Ruleset GetRuleset(int rulesetId) => RulesetHelper.GetRulesetFromLegacyID(rulesetId);
 
         protected override WorkingBeatmap GetBeatmap(string md5Hash) => beatmap;
     }
