@@ -60,6 +60,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 this.difficultyHitObjects = difficultyHitObjects;
                 HitPolicy = new AnyOrderHitPolicy();
                 AddInternal(objectRenderer = new OsuObjectInspectorRenderer { RelativeSizeAxes = Axes.Both });
+                DisplayJudgements.Value = false;
             }
 
             protected override void OnHitObjectAdded(HitObject hitObject)

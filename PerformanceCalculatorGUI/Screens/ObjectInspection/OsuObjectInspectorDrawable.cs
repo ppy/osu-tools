@@ -11,7 +11,6 @@ using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Pooling;
 using osu.Game.Rulesets.Osu.Edit;
 using osu.Game.Rulesets.Osu.Objects;
-using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -50,7 +49,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             var panel = new Container
             {
-                Position = Vector2.Lerp(hitObject.StackedEndPosition, hitObject.StackedPosition, 0.5f),
+                Position = hitObject.StackedPosition,
                 Origin = Anchor.Centre,
                 Anchor = Anchor.Centre,
                 AutoSizeAxes = Axes.Both,
@@ -72,7 +71,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             };
 
-            textFlow.AddParagraph($"Position: {entry.HitObject.StackedPosition}", text => text.Font = OsuFont.GetFont(size: 10));
+            textFlow.AddParagraph($"Position: {entry.HitObject.StackedPosition}", text => text.Font = OsuFont.GetFont(size: 8));
 
             if (entry.DifficultyHitObject is not null)
             {
@@ -85,6 +84,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     textFlow.AddParagraph($"Travel Time: {entry.DifficultyHitObject.TravelTime:N3}", text => text.Font = OsuFont.GetFont(size: 10));
                     textFlow.AddParagraph($"Travel Distance: {entry.DifficultyHitObject.TravelDistance:N3}", text => text.Font = OsuFont.GetFont(size: 10));
+                    textFlow.AddParagraph($"Minimum Jump Distance: {entry.DifficultyHitObject.MinimumJumpDistance:N3}", text => text.Font = OsuFont.GetFont(size: 10));
+                    textFlow.AddParagraph($"Minimum Jump Time: {entry.DifficultyHitObject.MinimumJumpTime:N3}", text => text.Font = OsuFont.GetFont(size: 10));
                 }
             }
 
@@ -93,6 +94,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             using (panel.BeginAbsoluteSequence(startTime))
             {
                 panel.FadeIn(hitObject.TimeFadeIn);
+
+                if (entry.HitObject is Slider)
+                {
+                    panel.MoveTo(hitObject.StackedEndPosition, visibleTime);
+                }
+
                 panel.Delay(visibleTime).FadeOut(DrawableOsuEditorRuleset.EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
             }
 
