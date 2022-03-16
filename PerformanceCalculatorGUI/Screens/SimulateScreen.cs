@@ -39,7 +39,11 @@ namespace PerformanceCalculatorGUI.Screens
 
         private UserModSelectOverlay userModsSelectOverlay;
 
-        private LabelledTextBox beatmapTextBox;
+        private GridContainer beatmapImportContainer;
+        private LabelledTextBox beatmapFileTextBox;
+        private LabelledTextBox beatmapIdTextBox;
+        private SwitchButton beatmapImportTypeSwitch;
+
         private LimitedLabelledNumberBox missesTextBox;
         private LimitedLabelledNumberBox comboTextBox;
         private LimitedLabelledNumberBox scoreTextBox;
@@ -94,15 +98,39 @@ namespace PerformanceCalculatorGUI.Screens
                     {
                         new Drawable[]
                         {
-                            new Container
+                            beatmapImportContainer = new GridContainer
                             {
-                                Name = "File selection",
-                                RelativeSizeAxes = Axes.Both,
-                                Child = beatmapTextBox = new FileChooserLabelledTextBox(configManager.GetBindable<string>(Settings.DefaultPath), ".osu")
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                ColumnDimensions = new[]
                                 {
-                                    Label = "Beatmap",
-                                    FixedLabelWidth = 160f,
-                                    PlaceholderText = "Click to select a beatmap file"
+                                    new Dimension(),
+                                    new Dimension(GridSizeMode.Absolute),
+                                    new Dimension(GridSizeMode.AutoSize)
+                                },
+                                RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        beatmapFileTextBox = new FileChooserLabelledTextBox(configManager.GetBindable<string>(Settings.DefaultPath), ".osu")
+                                        {
+                                            Label = "Beatmap File",
+                                            FixedLabelWidth = 120f,
+                                            PlaceholderText = "Click to select a beatmap file"
+                                        },
+                                        beatmapIdTextBox = new LabelledNumberBox
+                                        {
+                                            Label = "Beatmap ID",
+                                            FixedLabelWidth = 120f,
+                                            PlaceholderText = "Enter beatmap ID"
+                                        },
+                                        beatmapImportTypeSwitch = new SwitchButton
+                                        {
+                                            Width = 80,
+                                            Height = 40
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -341,7 +369,30 @@ namespace PerformanceCalculatorGUI.Screens
             beatmapDataContainer.Hide();
             userModsSelectOverlay.Hide();
 
-            beatmapTextBox.Current.BindValueChanged(beatmapChanged);
+            beatmapFileTextBox.Current.BindValueChanged(filePath => { changeBeatmap(filePath.NewValue); });
+            beatmapIdTextBox.OnCommit += (_, _) => { changeBeatmap(beatmapIdTextBox.Current.Value); };
+
+            beatmapImportTypeSwitch.Current.BindValueChanged(val =>
+            {
+                if (val.NewValue)
+                {
+                    beatmapImportContainer.ColumnDimensions = new[]
+                    {
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(),
+                        new Dimension(GridSizeMode.AutoSize)
+                    };
+                }
+                else
+                {
+                    beatmapImportContainer.ColumnDimensions = new[]
+                    {
+                        new Dimension(),
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.AutoSize)
+                    };
+                }
+            });
 
             accuracyTextBox.Value.BindValueChanged(_ => calculatePerformance());
             goodsTextBox.Value.BindValueChanged(_ => calculatePerformance());
@@ -391,9 +442,9 @@ namespace PerformanceCalculatorGUI.Screens
             calculateDifficulty();
         }
 
-        private void beatmapChanged(ValueChangedEvent<string> filePath)
+        private void changeBeatmap(string beatmap)
         {
-            if (string.IsNullOrEmpty(filePath.NewValue))
+            if (string.IsNullOrEmpty(beatmap))
             {
                 working = null;
                 beatmapTitle.Text = "No beatmap loaded!";
@@ -402,7 +453,7 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            working = ProcessorWorkingBeatmap.FromFileOrId(filePath.NewValue, audio);
+            working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, audio);
 
             if (!working.BeatmapInfo.Ruleset.Equals(ruleset.Value))
             {
