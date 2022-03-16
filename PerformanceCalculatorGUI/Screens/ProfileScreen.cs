@@ -136,13 +136,16 @@ namespace PerformanceCalculatorGUI.Screens
 
                 user.Value = player;
 
-                if (userPanel != null)
-                    layout.Remove(userPanel);
-
-                Schedule(() => layout.Insert(1, userPanel = new UserPPListPanel(user.Value)
+                Schedule(() =>
                 {
-                    RelativeSizeAxes = Axes.X
-                }));
+                    if (userPanel != null)
+                        layout.Remove(userPanel);
+
+                    layout.Insert(1, userPanel = new UserPPListPanel(user.Value)
+                    {
+                        RelativeSizeAxes = Axes.X
+                    });
+                });
 
                 var plays = new List<ExtendedScore>();
 
