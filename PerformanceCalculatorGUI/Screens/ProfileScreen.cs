@@ -9,7 +9,6 @@ using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterfaceV2;
@@ -33,15 +32,16 @@ namespace PerformanceCalculatorGUI.Screens
         private StatefulButton calculationButton;
         private VerboseLoadingLayer loadingLayer;
 
+        private GridContainer layout;
+
         private FillFlowContainer scores;
 
         private LabelledTextBox usernameTextBox;
 
-        private FillFlowContainer layout;
-
+        private Container userPanelContainer;
         private UserPPListPanel userPanel;
 
-        private readonly Bindable<APIUser> user = new Bindable<APIUser>();
+        private readonly Bindable<APIUser> user = new();
 
         [Resolved]
         private APIManager apiManager { get; set; }
@@ -50,6 +50,8 @@ namespace PerformanceCalculatorGUI.Screens
         private Bindable<RulesetInfo> ruleset { get; set; }
 
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
+
+        private const float username_container_height = 40;
 
         public ProfileScreen()
         {
@@ -61,43 +63,68 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
-                layout = new FillFlowContainer
+                layout = new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Direction = FillDirection.Vertical,
-                    Children = new Drawable[]
+                    ColumnDimensions = new[] { new Dimension() },
+                    RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, username_container_height), new Dimension(GridSizeMode.Absolute), new Dimension() },
+                    Content = new[]
                     {
-                        new GridContainer
+                        new Drawable[]
                         {
-                            Name = "Settings",
-                            Height = 40,
-                            RelativeSizeAxes = Axes.X,
-                            ColumnDimensions = new[]
+                            new GridContainer
                             {
-                                new Dimension(),
-                                new Dimension(GridSizeMode.AutoSize)
-                            },
-                            RowDimensions = new[]
-                            {
-                                new Dimension(GridSizeMode.AutoSize)
-                            },
-                            Content = new[]
-                            {
-                                new Drawable[]
+                                Name = "Settings",
+                                Height = username_container_height,
+                                RelativeSizeAxes = Axes.X,
+                                ColumnDimensions = new[]
                                 {
-                                    usernameTextBox = new LabelledTextBox()
+                                    new Dimension(),
+                                    new Dimension(GridSizeMode.AutoSize)
+                                },
+                                RowDimensions = new[]
+                                {
+                                    new Dimension(GridSizeMode.AutoSize)
+                                },
+                                Content = new[]
+                                {
+                                    new Drawable[]
                                     {
-                                        RelativeSizeAxes = Axes.X,
-                                        Anchor = Anchor.TopLeft,
-                                        Label = "Username",
-                                        PlaceholderText = "peppy"
-                                    },
-                                    calculationButton = new StatefulButton("Start calculation")
-                                    {
-                                        Width = 150,
-                                        Height = 40,
-                                        Action = () => { calculateProfile(usernameTextBox.Current.Value); }
+                                        usernameTextBox = new LabelledTextBox
+                                        {
+                                            RelativeSizeAxes = Axes.X,
+                                            Anchor = Anchor.TopLeft,
+                                            Label = "Username",
+                                            PlaceholderText = "peppy"
+                                        },
+                                        calculationButton = new StatefulButton("Start calculation")
+                                        {
+                                            Width = 150,
+                                            Height = username_container_height,
+                                            Action = () => { calculateProfile(usernameTextBox.Current.Value); }
+                                        }
                                     }
+                                }
+                            },
+                        },
+                        new Drawable[]
+                        {
+                            userPanelContainer = new Container
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y
+                            }
+                        },
+                        new Drawable[]
+                        {
+                            new OsuScrollContainer(Direction.Vertical)
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Child = scores = new FillFlowContainer
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    AutoSizeAxes = Axes.Y,
+                                    Direction = FillDirection.Vertical
                                 }
                             }
                         },
@@ -108,18 +135,6 @@ namespace PerformanceCalculatorGUI.Screens
                     RelativeSizeAxes = Axes.Both
                 }
             };
-
-            // score container is being added separately so that flow container can properly assign order IDs
-            layout.Insert(2, new OsuScrollContainer(Direction.Vertical)
-            {
-                RelativeSizeAxes = Axes.Both,
-                Child = scores = new FillFlowContainer
-                {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y,
-                    Direction = FillDirection.Vertical
-                }
-            });
 
             usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
 
@@ -151,12 +166,14 @@ namespace PerformanceCalculatorGUI.Screens
                 Schedule(() =>
                 {
                     if (userPanel != null)
-                        layout.Remove(userPanel);
+                        userPanelContainer.Remove(userPanel);
 
-                    layout.Insert(1, userPanel = new UserPPListPanel(user.Value)
+                    userPanelContainer.Add(userPanel = new UserPPListPanel(user.Value)
                     {
                         RelativeSizeAxes = Axes.X
                     });
+
+                    layout.RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, username_container_height), new Dimension(GridSizeMode.AutoSize), new Dimension() };
                 });
 
                 var plays = new List<ExtendedScore>();
