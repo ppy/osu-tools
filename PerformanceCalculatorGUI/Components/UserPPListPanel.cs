@@ -8,6 +8,7 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Extensions.Color4Extensions;
 using osuTK.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API.Requests.Responses;
 using osuTK;
@@ -15,13 +16,21 @@ using osu.Game.Users;
 
 namespace PerformanceCalculatorGUI.Components
 {
+    public struct UserPPListPanelData
+    {
+        public decimal LivePP { get; set; }
+        public decimal LocalPP { get; set; }
+        public decimal PlaycountPP { get; set; }
+    }
+
     public class UserPPListPanel : UserListPanel
     {
         private OsuSpriteText liveLabel;
         private OsuSpriteText localLabel;
+        private OsuSpriteText differenceLabel;
+        private OsuSpriteText playcountLabel;
 
-        public Bindable<decimal> livePp = new Bindable<decimal>();
-        public Bindable<decimal> localPp = new Bindable<decimal>();
+        public Bindable<UserPPListPanelData> Data = new();
 
         public UserPPListPanel(APIUser user)
             : base(user)
@@ -39,8 +48,13 @@ namespace PerformanceCalculatorGUI.Components
             Background.Anchor = Anchor.CentreRight;
             Background.Colour = ColourInfo.GradientHorizontal(Color4.White.Opacity(1), Color4.White.Opacity(0.3f));
 
-            livePp.ValueChanged += val => { liveLabel.Text = $"live pp: {val.NewValue:N1}"; };
-            localPp.ValueChanged += val => { localLabel.Text = $"local pp: {val.NewValue:N1}"; };
+            Data.ValueChanged += val =>
+            {
+                liveLabel.Text = $"live pp: {val.NewValue.LivePP:N1}";
+                localLabel.Text = $"local pp: {val.NewValue.LocalPP:N1}";
+                differenceLabel.Text = $"{val.NewValue.LocalPP - val.NewValue.LivePP:+0.0;-0.0;-}";
+                playcountLabel.Text = $"{val.NewValue.PlaycountPP:N1} from playcount";
+            };
         }
 
         protected override void LoadComplete()
@@ -92,9 +106,33 @@ namespace PerformanceCalculatorGUI.Components
                                 Colour = Colours.BlueLighter,
                                 Anchor = Anchor.CentreLeft,
                                 Origin = Anchor.CentreLeft
+                            },
+                            new FillFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Y,
+                                Direction = FillDirection.Vertical,
+                                Origin = Anchor.CentreLeft,
+                                Anchor = Anchor.CentreLeft,
+                                Children = new[]
+                                {
+                                    differenceLabel = new OsuSpriteText
+                                    {
+                                        Colour = Colours.GrayA,
+                                        Font = OsuFont.GetFont(size: 10),
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft
+                                    },
+                                    playcountLabel = new OsuSpriteText
+                                    {
+                                        Colour = Colours.GrayA,
+                                        Font = OsuFont.GetFont(size: 10),
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft
+                                    }
+                                }
                             }
                         }
-                    },
+                    }
                 }
             };
 

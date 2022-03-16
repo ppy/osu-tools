@@ -247,8 +247,12 @@ namespace PerformanceCalculatorGUI.Screens
 
                 Schedule(() =>
                 {
-                    userPanel.livePp.Value = totalLivePP;
-                    userPanel.localPp.Value = totalLocalPP;
+                    userPanel.Data.Value = new UserPPListPanelData
+                    {
+                        LivePP = totalLivePP,
+                        LocalPP = totalLocalPP,
+                        PlaycountPP = playcountBonusPP
+                    };
                 });
             }).ContinueWith(t =>
             {
