@@ -37,11 +37,10 @@ namespace PerformanceCalculatorGUI.Screens
         private FillFlowContainer scores;
 
         private LabelledTextBox usernameTextBox;
-
         private Container userPanelContainer;
         private UserPPListPanel userPanel;
 
-        private readonly Bindable<APIUser> user = new();
+        private string currentUser;
 
         [Resolved]
         private APIManager apiManager { get; set; }
@@ -139,7 +138,7 @@ namespace PerformanceCalculatorGUI.Screens
             usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(user.Value.Username); });
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(currentUser); });
         }
 
         private void calculateProfile(string username)
@@ -161,14 +160,14 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
 
-                user.Value = player;
+                currentUser = player.Username;
 
                 Schedule(() =>
                 {
                     if (userPanel != null)
                         userPanelContainer.Remove(userPanel);
 
-                    userPanelContainer.Add(userPanel = new UserPPListPanel(user.Value)
+                    userPanelContainer.Add(userPanel = new UserPPListPanel(player)
                     {
                         RelativeSizeAxes = Axes.X
                     });
