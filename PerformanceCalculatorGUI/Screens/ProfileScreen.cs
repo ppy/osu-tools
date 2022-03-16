@@ -185,55 +185,61 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (var score in apiScores)
                 {
-                    await Task.Run(() =>
+                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString());
+
+                    Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
+
+                    var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
+                    Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
+
+                    var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
                     {
-                        var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString());
+                        TotalScore = score.TotalScore,
+                        MaxCombo = score.MaxCombo,
+                        Mods = mods,
+                        Statistics = new Dictionary<HitResult, int>()
+                    };
 
-                        Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
+                    scoreInfo.SetCount300(score.Statistics["count_300"]);
+                    scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
+                    scoreInfo.SetCount100(score.Statistics["count_100"]);
+                    scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
+                    scoreInfo.SetCount50(score.Statistics["count_50"]);
+                    scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
 
-                        var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
-                        Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
+                    var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
-                        var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
-                        {
-                            TotalScore = score.TotalScore,
-                            MaxCombo = score.MaxCombo,
-                            Mods = mods,
-                            Statistics = new Dictionary<HitResult, int>()
-                        };
+                    var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                    var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
+                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator(difficultyAttributes, parsedScore.ScoreInfo);
 
-                        scoreInfo.SetCount300(score.Statistics["count_300"]);
-                        scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
-                        scoreInfo.SetCount100(score.Statistics["count_100"]);
-                        scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
-                        scoreInfo.SetCount50(score.Statistics["count_50"]);
-                        scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
+                    var livePp = score.PP ?? 0.0;
+                    score.PP = performanceCalculator?.Calculate().Total ?? 0.0;
 
-                        var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+                    var extendedScore = new ExtendedScore(score, livePp);
+                    plays.Add(extendedScore);
 
-                        var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                        var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
-                        var performanceCalculator = rulesetInstance.CreatePerformanceCalculator(difficultyAttributes, parsedScore.ScoreInfo);
-
-                        var livePp = score.PP ?? 0.0;
-                        score.PP = performanceCalculator?.Calculate().Total ?? 0.0;
-
-                        var extendedScore = new ExtendedScore(score, livePp);
-                        plays.Add(extendedScore);
-
-                        Schedule(() => scores.Add(new ExtendedProfileScore(extendedScore)));
-                    });
+                    Schedule(() => scores.Add(new ExtendedProfileScore(extendedScore)));
                 }
 
-                var localOrdered = plays.Select(x => x.PP).OrderByDescending(x => x).ToList();
-                var liveOrdered = plays.Select(x => x.LivePP).OrderByDescending(x => x).ToList();
+                var localOrdered = plays.OrderByDescending(x => x.PP).ToList();
+                var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
+
+                Schedule(() =>
+                {
+                    foreach (var play in plays)
+                    {
+                        play.PositionChange.Value = liveOrdered.IndexOf(play) - localOrdered.IndexOf(play);
+                        scores.SetLayoutPosition(scores[liveOrdered.IndexOf(play)], localOrdered.IndexOf(play));
+                    }
+                });
 
                 int index = 0;
-                decimal totalLocalPP = (decimal)localOrdered.Sum(play => Math.Pow(0.95, index++) * play);
+                decimal totalLocalPP = (decimal)localOrdered.Select(x=> x.PP).Sum(play => Math.Pow(0.95, index++) * play);
                 decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 
                 index = 0;
-                decimal nonBonusLivePP = (decimal)liveOrdered.Sum(play => Math.Pow(0.95, index++) * play);
+                decimal nonBonusLivePP = (decimal)liveOrdered.Select(x => x.LivePP).Sum(play => Math.Pow(0.95, index++) * play);
 
                 //todo: implement properly. this is pretty damn wrong.
                 var playcountBonusPP = (totalLivePP - nonBonusLivePP);

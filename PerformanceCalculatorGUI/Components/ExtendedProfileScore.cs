@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics;
@@ -14,6 +16,8 @@ namespace PerformanceCalculatorGUI.Components
     public class ExtendedScore : APIScore
     {
         public double LivePP { get; }
+
+        public Bindable<int> PositionChange { get; } = new();
 
         public ExtendedScore(APIScore score, double livePP)
         {
@@ -39,10 +43,32 @@ namespace PerformanceCalculatorGUI.Components
     {
         protected readonly ExtendedScore ExtendedScore;
 
+        private OsuSpriteText positionChangeText;
+
         public ExtendedProfileScore(ExtendedScore score)
             : base(score)
         {
             ExtendedScore = score;
+        }
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            AddInternal(new Container
+            {
+                RelativeSizeAxes = Axes.Y,
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+                Width = 25,
+                Child = positionChangeText = new OsuSpriteText
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Text = ExtendedScore.PositionChange.Value.ToString()
+                }
+            });
+
+            ExtendedScore.PositionChange.BindValueChanged(v => { positionChangeText.Text = $"{v.NewValue:+0;-0;-}"; });
         }
 
         protected override Drawable CreateRightContent() => new FillFlowContainer
