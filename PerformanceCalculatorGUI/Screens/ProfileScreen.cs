@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterfaceV2;
@@ -18,6 +20,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
+using osuTK.Graphics;
 using PerformanceCalculatorGUI.Components;
 
 namespace PerformanceCalculatorGUI.Screens
@@ -93,7 +96,7 @@ namespace PerformanceCalculatorGUI.Screens
                                     {
                                         Width = 150,
                                         Height = 40,
-                                        Action = calculateProfile
+                                        Action = () => { calculateProfile(usernameTextBox.Current.Value); }
                                     }
                                 }
                             }
@@ -118,11 +121,20 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             });
 
-            usernameTextBox.OnCommit += (_, _) => { calculateProfile(); };
+            usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
+
+            if (RuntimeInfo.IsDesktop)
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(user.Value.Username); });
         }
 
-        private void calculateProfile()
+        private void calculateProfile(string username)
         {
+            if (string.IsNullOrEmpty(username))
+            {
+                usernameTextBox.FlashColour(Color4.Red, 1);
+                return;
+            }
+
             loadingLayer.Show();
             calculationButton.State.Value = ButtonState.Loading;
 
@@ -132,7 +144,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting user data...");
 
-                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{usernameTextBox.Current.Value}/{ruleset.Value.ShortName}");
+                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
 
                 user.Value = player;
 
