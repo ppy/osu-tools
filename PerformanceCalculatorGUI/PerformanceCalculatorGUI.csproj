@@ -6,10 +6,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-	  <PackageReference Include="ppy.osu.Game" Version="2022.306.0" />
-	  <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2022.306.0" />
-	  <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2022.306.0" />
-	  <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2022.306.0" />
-	  <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2022.306.0" />
+	  <PackageReference Include="ppy.osu.Game" Version="2022.319.0" />
+	  <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2022.319.0" />
+	  <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2022.319.0" />
+	  <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2022.319.0" />
+	  <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2022.319.0" />
   </ItemGroup>
 </Project>

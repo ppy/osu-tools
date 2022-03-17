@@ -505,10 +505,12 @@ namespace PerformanceCalculatorGUI.Screens
             }
 
             var score = RulesetHelper.AdjustManiaScore(scoreTextBox.Value.Value, appliedMods.Value);
+            var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
 
-            var statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value), missesTextBox.Value.Value, countMeh, countGood);
+            var statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood);
+            var performanceCalculator = ruleset.Value.CreateInstance().CreatePerformanceCalculator();
 
-            var performanceCalculator = ruleset.Value.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, new ScoreInfo
+            var ppAttributes = performanceCalculator?.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.Value)
             {
                 Accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics),
                 MaxCombo = comboTextBox.Value.Value,
@@ -516,9 +518,7 @@ namespace PerformanceCalculatorGUI.Screens
                 Mods = appliedMods.Value.ToArray(),
                 TotalScore = score,
                 Ruleset = ruleset.Value
-            });
-
-            var ppAttributes = performanceCalculator?.Calculate();
+            }, difficultyAttributes);
 
             var perfAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
             performanceAttributesContainer.Children = perfAttributeValues.Select(x =>

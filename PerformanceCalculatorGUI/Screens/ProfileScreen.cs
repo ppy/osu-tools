@@ -211,10 +211,10 @@ namespace PerformanceCalculatorGUI.Screens
 
                     var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
                     var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
-                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator(difficultyAttributes, parsedScore.ScoreInfo);
+                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
                     var livePp = score.PP ?? 0.0;
-                    score.PP = performanceCalculator?.Calculate().Total ?? 0.0;
+                    score.PP = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes).Total ?? 0.0;
 
                     var extendedScore = new ExtendedScore(score, livePp);
                     plays.Add(extendedScore);
