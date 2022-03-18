@@ -336,6 +336,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                             RelativeSizeAxes = Axes.Both,
                                                             Anchor = Anchor.Centre,
                                                             Origin = Anchor.Centre,
+                                                            Padding = new MarginPadding(30),
                                                             Child = objectInspector = new ObjectInspector(working)
                                                             {
                                                                 RelativeSizeAxes = Axes.Both,
