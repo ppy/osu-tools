@@ -172,6 +172,18 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             clock.ProcessFrame();
         }
 
+        protected override void PopIn()
+        {
+            base.PopIn();
+            this.FadeIn();
+        }
+
+        protected override void PopOut()
+        {
+            base.PopOut();
+            this.FadeOut();
+        }
+
         protected override bool OnKeyDown(KeyDownEvent e)
         {
             if (e.Key == Key.Space)
