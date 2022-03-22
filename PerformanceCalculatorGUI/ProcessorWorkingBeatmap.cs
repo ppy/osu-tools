@@ -69,6 +69,13 @@ namespace PerformanceCalculatorGUI
             {
                 Console.WriteLine($"Downloading {beatmapId}.osu...");
                 new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
+
+                // FileWebRequest will always create an empty file if the beatmap doesn't exist, clean it up
+                if (new System.IO.FileInfo(cachePath).Length == 0)
+                    File.Delete(cachePath);
+
+                if (!File.Exists(cachePath))
+                    throw new ArgumentException($"Beatmap {beatmapId} does not exist.");
             }
 
             return new ProcessorWorkingBeatmap(cachePath, beatmapId, audioManager);

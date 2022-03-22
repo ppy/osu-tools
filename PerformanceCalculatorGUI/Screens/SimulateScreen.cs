@@ -58,6 +58,9 @@ namespace PerformanceCalculatorGUI.Screens
         private FillFlowContainer difficultyAttributesContainer;
         private FillFlowContainer performanceAttributesContainer;
 
+        private PerformanceCalculator performanceCalculator;
+        private DifficultyCalculator difficultyCalculator;
+
         private FillFlowContainer beatmapDataContainer;
         private OsuSpriteText beatmapTitle;
 
@@ -443,18 +446,33 @@ namespace PerformanceCalculatorGUI.Screens
             calculateDifficulty();
         }
 
+        private void resetBeatmap(string reason)
+        {
+            working = null;
+            beatmapTitle.Text = reason;
+            appliedMods.Value = Array.Empty<Mod>();
+        }
+
         private void changeBeatmap(string beatmap)
         {
+            beatmapDataContainer.Hide();
+
             if (string.IsNullOrEmpty(beatmap))
             {
-                working = null;
-                beatmapTitle.Text = "No beatmap loaded!";
-                beatmapDataContainer.Hide();
-                appliedMods.Value = Array.Empty<Mod>();
+                resetBeatmap("Empty beatmap path!");
                 return;
             }
 
-            working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, audio);
+            try
+            {
+                working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, audio);
+            }
+            catch (Exception e)
+            {
+                // TODO: better error display
+                resetBeatmap(e.Message);
+                return;
+            }
 
             if (!working.BeatmapInfo.Ruleset.Equals(ruleset.Value))
             {
@@ -463,6 +481,10 @@ namespace PerformanceCalculatorGUI.Screens
             }
 
             beatmapTitle.Text = $"[{ruleset.Value.Name}] {working.BeatmapInfo.GetDisplayTitle()}";
+
+            var rulesetInstance = ruleset.Value.CreateInstance();
+            difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+            performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
             calculateDifficulty();
 
@@ -474,19 +496,28 @@ namespace PerformanceCalculatorGUI.Screens
             if (working == null)
                 return;
 
-            difficultyAttributes = ruleset.Value.CreateInstance().CreateDifficultyCalculator(working).Calculate(appliedMods.Value);
+            try
+            {
+                difficultyAttributes = difficultyCalculator.Calculate(appliedMods.Value);
 
-            populateScoreParams();
+                populateScoreParams();
 
-            var diffAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(difficultyAttributes)) ?? new Dictionary<string, object>();
-            difficultyAttributesContainer.Children = diffAttributeValues.Select(x =>
-                new LabelledTextBox
-                {
-                    ReadOnly = true,
-                    Label = x.Key.Humanize(),
-                    Text = FormattableString.Invariant($"{x.Value:N2}")
-                }
-            ).ToArray();
+                var diffAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(difficultyAttributes)) ?? new Dictionary<string, object>();
+                difficultyAttributesContainer.Children = diffAttributeValues.Select(x =>
+                    new LabelledTextBox
+                    {
+                        ReadOnly = true,
+                        Label = x.Key.Humanize(),
+                        Text = FormattableString.Invariant($"{x.Value:N2}")
+                    }
+                ).ToArray();
+            }
+            catch (Exception e)
+            {
+                // TODO: better error display
+                resetBeatmap(e.Message);
+                return;
+            }
 
             calculatePerformance();
         }
@@ -505,30 +536,38 @@ namespace PerformanceCalculatorGUI.Screens
             }
 
             var score = RulesetHelper.AdjustManiaScore(scoreTextBox.Value.Value, appliedMods.Value);
-            var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
 
-            var statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood);
-            var performanceCalculator = ruleset.Value.CreateInstance().CreatePerformanceCalculator();
-
-            var ppAttributes = performanceCalculator?.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.Value)
+            try
             {
-                Accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics),
-                MaxCombo = comboTextBox.Value.Value,
-                Statistics = statistics,
-                Mods = appliedMods.Value.ToArray(),
-                TotalScore = score,
-                Ruleset = ruleset.Value
-            }, difficultyAttributes);
+                var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
 
-            var perfAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
-            performanceAttributesContainer.Children = perfAttributeValues.Select(x =>
-                new LabelledTextBox
+                var statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood);
+
+                var ppAttributes = performanceCalculator?.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.Value)
                 {
-                    ReadOnly = true,
-                    Label = x.Key.Humanize(),
-                    Text = FormattableString.Invariant($"{x.Value:N2}")
-                }
-            ).ToArray();
+                    Accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics),
+                    MaxCombo = comboTextBox.Value.Value,
+                    Statistics = statistics,
+                    Mods = appliedMods.Value.ToArray(),
+                    TotalScore = score,
+                    Ruleset = ruleset.Value
+                }, difficultyAttributes);
+
+                var perfAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
+                performanceAttributesContainer.Children = perfAttributeValues.Select(x =>
+                    new LabelledTextBox
+                    {
+                        ReadOnly = true,
+                        Label = x.Key.Humanize(),
+                        Text = FormattableString.Invariant($"{x.Value:N2}")
+                    }
+                ).ToArray();
+            }
+            catch (Exception e)
+            {
+                // TODO: better error display
+                resetBeatmap(e.Message);
+            }
         }
 
         private void populateScoreParams()
