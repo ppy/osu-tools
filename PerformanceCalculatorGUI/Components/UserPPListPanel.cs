@@ -8,6 +8,7 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Extensions.Color4Extensions;
 using osuTK.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Platform;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API.Requests.Responses;
@@ -41,7 +42,7 @@ namespace PerformanceCalculatorGUI.Components
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(GameHost host)
         {
             Background.Width = 0.5f;
             Background.Origin = Anchor.CentreRight;
@@ -55,6 +56,8 @@ namespace PerformanceCalculatorGUI.Components
                 differenceLabel.Text = $"{val.NewValue.LocalPP - val.NewValue.LivePP:+0.0;-0.0;-}";
                 playcountLabel.Text = $"{val.NewValue.PlaycountPP:N1} from playcount";
             };
+
+            Action = () => { host.OpenUrlExternally($"https://osu.ppy.sh/u/{User.Id}"); };
         }
 
         protected override void LoadComplete()
