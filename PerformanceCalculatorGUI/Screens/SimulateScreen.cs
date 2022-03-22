@@ -326,7 +326,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Anchor = Anchor.TopLeft,
                                                     AutoSizeAxes = Axes.Y
                                                 },
-                                                new OsuButton()
+                                                new OsuButton
                                                 {
                                                     Anchor = Anchor.TopCentre,
                                                     Origin = Anchor.TopCentre,
@@ -334,21 +334,19 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Text = "Inspect Object Difficulty Data",
                                                     Action = () =>
                                                     {
-                                                        AddInternal(new Container
+                                                        if (objectInspector is not null)
+                                                            RemoveInternal(objectInspector);
+
+                                                        AddInternal(objectInspector = new ObjectInspector(working)
                                                         {
-                                                            Name = "Object inspector overlay",
                                                             RelativeSizeAxes = Axes.Both,
                                                             Anchor = Anchor.Centre,
                                                             Origin = Anchor.Centre,
-                                                            Padding = new MarginPadding(30),
-                                                            Child = objectInspector = new ObjectInspector(working)
-                                                            {
-                                                                RelativeSizeAxes = Axes.Both,
-                                                            },
+                                                            Size = new Vector2(0.95f)
                                                         });
                                                         objectInspector.Show();
                                                     }
-                                                },
+                                                }
                                             }
                                         }
                                     }
