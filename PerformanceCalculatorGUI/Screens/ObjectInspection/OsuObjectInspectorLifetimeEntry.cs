@@ -22,7 +22,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             HitObject = hitObject;
             DifficultyHitObject = difficultyHitObject;
-            LifetimeStart = HitObject.StartTime - HitObject.TimeFadeIn;
+            LifetimeStart = HitObject.StartTime - HitObject.TimePreempt;
         }
 
         private bool wasBound;
@@ -61,7 +61,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 return;
             }
 
-            LifetimeStart = HitObject.StartTime - HitObject.TimeFadeIn;
+            LifetimeStart = HitObject.StartTime - HitObject.TimePreempt;
             LifetimeEnd = HitObject.GetEndTime() + DrawableOsuEditorRuleset.EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION;
 
             Invalidated?.Invoke();

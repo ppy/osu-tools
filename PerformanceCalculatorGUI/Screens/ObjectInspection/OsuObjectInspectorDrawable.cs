@@ -42,7 +42,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             if (entry == null) return;
 
             var hitObject = entry.HitObject;
-            double startTime = hitObject.StartTime - hitObject.TimeFadeIn;
+            double startTime = hitObject.StartTime - hitObject.TimePreempt;
+            double movementTime = hitObject.GetEndTime() - hitObject.StartTime;
             double visibleTime = hitObject.GetEndTime() - startTime;
 
             OsuTextFlowContainer textFlow;
@@ -55,12 +56,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 AutoSizeAxes = Axes.Both,
                 Masking = true,
                 CornerRadius = 5f,
+                Alpha = 0,
                 Children = new Drawable[]
                 {
                     new Box
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Alpha = 0.9f,
+                        Alpha = 0.95f,
                         Colour = OsuColour.Gray(0.1f)
                     },
                     textFlow = new OsuTextFlowContainer
@@ -93,11 +95,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             using (panel.BeginAbsoluteSequence(startTime))
             {
-                panel.FadeIn(hitObject.TimeFadeIn);
+                panel.FadeIn(hitObject.TimePreempt);
 
                 if (entry.HitObject is Slider)
                 {
-                    panel.MoveTo(hitObject.StackedEndPosition, visibleTime);
+                    panel.Delay(hitObject.TimePreempt).MoveTo(hitObject.StackedEndPosition, movementTime);
                 }
 
                 panel.Delay(visibleTime).FadeOut(DrawableOsuEditorRuleset.EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
