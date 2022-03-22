@@ -122,11 +122,12 @@ namespace PerformanceCalculatorGUI.Screens
                                             FixedLabelWidth = 120f,
                                             PlaceholderText = "Click to select a beatmap file"
                                         },
-                                        beatmapIdTextBox = new LabelledNumberBox
+                                        beatmapIdTextBox = new LimitedLabelledNumberBox
                                         {
                                             Label = "Beatmap ID",
                                             FixedLabelWidth = 120f,
-                                            PlaceholderText = "Enter beatmap ID"
+                                            PlaceholderText = "Enter beatmap ID",
+                                            CommitOnFocusLoss = false
                                         },
                                         beatmapImportTypeSwitch = new SwitchButton
                                         {

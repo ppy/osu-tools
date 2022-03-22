@@ -89,12 +89,13 @@ namespace PerformanceCalculatorGUI.Screens
                                 {
                                     new Drawable[]
                                     {
-                                        usernameTextBox = new LabelledTextBox
+                                        usernameTextBox = new ExtendedLabelledTextBox
                                         {
                                             RelativeSizeAxes = Axes.X,
                                             Anchor = Anchor.TopLeft,
                                             Label = "Username",
-                                            PlaceholderText = "peppy"
+                                            PlaceholderText = "peppy",
+                                            CommitOnFocusLoss = false
                                         },
                                         calculationButton = new StatefulButton("Start calculation")
                                         {

@@ -73,5 +73,11 @@ namespace PerformanceCalculatorGUI.Components
         }
 
         public Bindable<int> Value => ((LimitedNumberBox)Component).Value;
+
+        public bool CommitOnFocusLoss
+        {
+            get => Component.CommitOnFocusLost;
+            set => Component.CommitOnFocusLost = value;
+        }
     }
 }
