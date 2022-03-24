@@ -6,6 +6,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Overlays;
 
 namespace PerformanceCalculatorGUI.Components
 {
@@ -18,6 +19,9 @@ namespace PerformanceCalculatorGUI.Components
 
     internal class StatefulButton : OsuButton
     {
+        [Resolved]
+        private OverlayColourProvider colourProvider { get; set; }
+
         [Resolved]
         private OsuColour colours { get; set; }
 
@@ -33,6 +37,7 @@ namespace PerformanceCalculatorGUI.Components
         [BackgroundDependencyLoader]
         private void load()
         {
+            Background.Colour = colourProvider.Background1;
             State.BindValueChanged(updateState, true);
         }
 
@@ -41,7 +46,7 @@ namespace PerformanceCalculatorGUI.Components
             switch (state.NewValue)
             {
                 case ButtonState.Initial:
-                    Background.FadeColour(colours.Blue, 500, Easing.InOutExpo);
+                    Background.FadeColour(colourProvider.Background1, 500, Easing.InOutExpo);
                     Text = initialText;
                     break;
 

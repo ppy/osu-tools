@@ -28,8 +28,9 @@ namespace PerformanceCalculatorGUI
 
         public const float CONTROL_AREA_HEIGHT = 50;
 
-        public const float SCREEN_SWITCH_HEIGHT = 40;
+        public const float SCREEN_SWITCH_HEIGHT = 35;
         public const float SCREEN_SWITCH_WIDTH = 100;
+        public const float SCREEN_SWITCH_PADDING = (CONTROL_AREA_HEIGHT - SCREEN_SWITCH_HEIGHT) / 2.0f;
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
@@ -43,7 +44,7 @@ namespace PerformanceCalculatorGUI
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OsuColour colours)
         {
             InternalChildren = new Drawable[]
             {
@@ -74,8 +75,8 @@ namespace PerformanceCalculatorGUI
                                         {
                                             RelativeSizeAxes = Axes.Y,
                                             Direction = FillDirection.Horizontal,
-                                            Spacing = new Vector2(5),
-                                            Padding = new MarginPadding(5),
+                                            Spacing = new Vector2(SCREEN_SWITCH_PADDING),
+                                            Padding = new MarginPadding(SCREEN_SWITCH_PADDING),
                                             AutoSizeAxes = Axes.X,
                                             Children = new Drawable[]
                                             {
@@ -84,6 +85,7 @@ namespace PerformanceCalculatorGUI
                                                     Text = "beatmap",
                                                     Height = SCREEN_SWITCH_HEIGHT,
                                                     Width = SCREEN_SWITCH_WIDTH,
+                                                    BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new SimulateScreen())
                                                 },
                                                 new OsuButton
@@ -91,6 +93,7 @@ namespace PerformanceCalculatorGUI
                                                     Text = "profile",
                                                     Height = SCREEN_SWITCH_HEIGHT,
                                                     Width = SCREEN_SWITCH_WIDTH,
+                                                    BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new ProfileScreen())
                                                 },
                                                 new OsuButton
@@ -98,6 +101,7 @@ namespace PerformanceCalculatorGUI
                                                     Text = "leaderboard",
                                                     Height = SCREEN_SWITCH_HEIGHT,
                                                     Width = SCREEN_SWITCH_WIDTH,
+                                                    BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new LeaderboardScreen())
                                                 }
                                             }

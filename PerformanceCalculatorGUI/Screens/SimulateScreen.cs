@@ -19,6 +19,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Overlays;
 using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
@@ -76,6 +77,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        [Cached]
+        private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
 
         public override bool ShouldShowConfirmationDialogOnSwitch => working != null;
 
@@ -276,6 +280,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                             Width = 100,
                                                             Margin = new MarginPadding(5.0f),
                                                             Action = () => { userModsSelectOverlay.Show(); },
+                                                            BackgroundColour = colourProvider.Background1,
                                                             Text = "Mods"
                                                         },
                                                         modDisplay = new ModDisplay()
@@ -330,7 +335,8 @@ namespace PerformanceCalculatorGUI.Screens
                                                 {
                                                     Anchor = Anchor.TopCentre,
                                                     Origin = Anchor.TopCentre,
-                                                    Width = 200,
+                                                    Width = 250,
+                                                    BackgroundColour = colourProvider.Background1,
                                                     Text = "Inspect Object Difficulty Data",
                                                     Action = () =>
                                                     {
