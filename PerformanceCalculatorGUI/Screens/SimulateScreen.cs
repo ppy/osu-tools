@@ -12,9 +12,13 @@ using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
@@ -69,6 +73,8 @@ namespace PerformanceCalculatorGUI.Screens
 
         private ObjectInspector objectInspector;
 
+        private BufferedContainer background;
+
         [Resolved]
         private AudioManager audio { get; set; }
 
@@ -77,6 +83,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        [Resolved]
+        private LargeTextureStore textures { get; set; }
 
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
@@ -491,6 +500,45 @@ namespace PerformanceCalculatorGUI.Screens
             difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
             performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
+            if (background is not null)
+            {
+                RemoveInternal(background);
+            }
+
+            if (working.BeatmapInfo?.BeatmapSet?.OnlineID is not null)
+            {
+                LoadComponentAsync(background = new BufferedContainer
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Depth = 99,
+                    BlurSigma = new Vector2(6),
+                    Alpha = 0,
+                    Children = new Drawable[]
+                    {
+                        new Sprite
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Texture = textures.Get($"https://assets.ppy.sh/beatmaps/{working.BeatmapInfo.BeatmapSet.OnlineID}/covers/cover.jpg"),
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            FillMode = FillMode.Fill
+                        },
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = OsuColour.Gray(0),
+                            Alpha = 0.85f
+                        },
+                    }
+                }).ContinueWith(_ =>
+                {
+                    Schedule(() =>
+                    {
+                        AddInternal(background);
+                    });
+                });
+            }
+
             calculateDifficulty();
 
             beatmapDataContainer.Show();
@@ -498,7 +546,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void calculateDifficulty()
         {
-            if (working == null)
+            if (working == null || difficultyCalculator == null)
                 return;
 
             try
