@@ -53,8 +53,9 @@ namespace PerformanceCalculatorGUI.Components
 
     public class ExtendedProfileScore : CompositeDrawable
     {
-        private const int height = 40;
+        private const int height = 45;
         private const int performance_width = 100;
+        private const int rank_difference_width = 40;
 
         private const float performance_background_shear = 0.45f;
 
@@ -85,8 +86,24 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     new Container
                     {
+                        Name = "Rank difference",
+                        RelativeSizeAxes = Axes.Y,
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Width = rank_difference_width,
+                        Child = positionChangeText = new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Colour = colourProvider.Light1,
+                            Text = Score.PositionChange.Value.ToString()
+                        }
+                    },
+                    new Container
+                    {
+                        Name = "Score info",
                         RelativeSizeAxes = Axes.Both,
-                        Padding = new MarginPadding { Left = 20, Right = performance_width },
+                        Padding = new MarginPadding { Left = rank_difference_width, Right = performance_width },
                         Children = new Drawable[]
                         {
                             new FillFlowContainer
@@ -110,10 +127,16 @@ namespace PerformanceCalculatorGUI.Components
                                         Origin = Anchor.CentreLeft,
                                         AutoSizeAxes = Axes.Both,
                                         Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(0, 2),
+                                        Spacing = new Vector2(0, 0.5f),
                                         Children = new Drawable[]
                                         {
                                             new ScoreBeatmapMetadataContainer(Score.Beatmap),
+                                            new OsuSpriteText
+                                            {
+                                                Text = $"{Score.MaxCombo}x {{{Score.Statistics["count_300"]} / {Score.Statistics["count_100"]} / {Score.Statistics["count_50"]} / {Score.Statistics["count_miss"]}}}",
+                                                Font = OsuFont.GetFont(size: 10, weight: FontWeight.Regular),
+                                                Colour = colourProvider.Light2
+                                            },
                                             new FillFlowContainer
                                             {
                                                 AutoSizeAxes = Axes.Both,
@@ -233,6 +256,7 @@ namespace PerformanceCalculatorGUI.Components
                     },
                     new Container
                     {
+                        Name = "Performance",
                         RelativeSizeAxes = Axes.Y,
                         Width = performance_width,
                         Anchor = Anchor.CentreRight,
@@ -261,6 +285,14 @@ namespace PerformanceCalculatorGUI.Components
                                 Shear = new Vector2(performance_background_shear, 0),
                                 EdgeSmoothness = new Vector2(2, 0),
                             },
+                            new OsuSpriteText
+                            {
+                                Anchor = Anchor.CentreLeft,
+                                Origin = Anchor.CentreLeft,
+                                Font = OsuFont.GetFont(size: 13, weight: FontWeight.Bold),
+                                Text = $"{Score.PP - Score.LivePP:+0;-0;-}",
+                                Colour = colourProvider.Light1
+                            },
                             new Container
                             {
                                 RelativeSizeAxes = Axes.Both,
@@ -270,69 +302,40 @@ namespace PerformanceCalculatorGUI.Components
                                     Left = 30,
                                     Right = 20
                                 },
-                                Child = createDrawablePerformance().With(d =>
+
+                                Child = new FillFlowContainer
                                 {
-                                    d.Anchor = Anchor.Centre;
-                                    d.Origin = Anchor.Centre;
-                                })
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    AutoSizeAxes = Axes.Both,
+                                    Direction = FillDirection.Horizontal,
+                                    Children = new[]
+                                    {
+                                        new OsuSpriteText
+                                        {
+                                            Anchor = Anchor.BottomLeft,
+                                            Origin = Anchor.BottomLeft,
+                                            Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                                            Text = $"{Score.PP:0}",
+                                            Colour = colourProvider.Highlight1
+                                        },
+                                        new OsuSpriteText
+                                        {
+                                            Anchor = Anchor.BottomLeft,
+                                            Origin = Anchor.BottomLeft,
+                                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
+                                            Text = "pp",
+                                            Colour = colourProvider.Light3
+                                        }
+                                    }
+                                }
                             }
-                        }
-                    },
-                    new Container
-                    {
-                        RelativeSizeAxes = Axes.Y,
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                        Width = 25,
-                        Child = positionChangeText = new OsuSpriteText
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            Text = Score.PositionChange.Value.ToString()
                         }
                     }
                 }
             });
 
             Score.PositionChange.BindValueChanged(v => { positionChangeText.Text = $"{v.NewValue:+0;-0;-}"; });
-        }
-
-        private Drawable createDrawablePerformance()
-        {
-            if (Score.PP.HasValue)
-            {
-                return new FillFlowContainer
-                {
-                    AutoSizeAxes = Axes.Both,
-                    Direction = FillDirection.Horizontal,
-                    Children = new[]
-                    {
-                        new OsuSpriteText
-                        {
-                            Anchor = Anchor.BottomLeft,
-                            Origin = Anchor.BottomLeft,
-                            Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                            Text = $"{Score.PP:0}",
-                            Colour = colourProvider.Highlight1
-                        },
-                        new OsuSpriteText
-                        {
-                            Anchor = Anchor.BottomLeft,
-                            Origin = Anchor.BottomLeft,
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                            Text = "pp",
-                            Colour = colourProvider.Light3
-                        }
-                    }
-                };
-            }
-
-            return new OsuSpriteText
-            {
-                Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                Text = "-",
-                Colour = colourProvider.Highlight1
-            };
         }
 
         private class ScoreBeatmapMetadataContainer : OsuHoverContainer
