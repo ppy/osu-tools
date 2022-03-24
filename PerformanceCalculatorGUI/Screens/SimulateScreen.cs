@@ -185,10 +185,11 @@ namespace PerformanceCalculatorGUI.Screens
                                         Width = 0.5f,
                                         Child = new FillFlowContainer
                                         {
-                                            Padding = new MarginPadding(10.0f),
+                                            Padding = new MarginPadding(15.0f),
                                             RelativeSizeAxes = Axes.X,
                                             AutoSizeAxes = Axes.Y,
                                             Direction = FillDirection.Vertical,
+                                            Spacing = new Vector2(0, 2f),
                                             Children = new Drawable[]
                                             {
                                                 new OsuSpriteText
@@ -305,7 +306,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         Width = 0.5f,
                                         Child = new FillFlowContainer
                                         {
-                                            Padding = new MarginPadding(10.0f),
+                                            Padding = new MarginPadding(15.0f),
                                             RelativeSizeAxes = Axes.X,
                                             AutoSizeAxes = Axes.Y,
                                             Direction = FillDirection.Vertical,
@@ -324,7 +325,8 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Direction = FillDirection.Vertical,
                                                     RelativeSizeAxes = Axes.X,
                                                     Anchor = Anchor.TopLeft,
-                                                    AutoSizeAxes = Axes.Y
+                                                    AutoSizeAxes = Axes.Y,
+                                                    Spacing = new Vector2(0, 2f)
                                                 },
                                                 new OsuSpriteText
                                                 {
@@ -338,7 +340,8 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Direction = FillDirection.Vertical,
                                                     RelativeSizeAxes = Axes.X,
                                                     Anchor = Anchor.TopLeft,
-                                                    AutoSizeAxes = Axes.Y
+                                                    AutoSizeAxes = Axes.Y,
+                                                    Spacing = new Vector2(0, 2f)
                                                 },
                                                 new OsuButton
                                                 {
@@ -426,6 +429,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             ruleset.BindValueChanged(_ =>
             {
+                createCalculators();
                 appliedMods.Value = Array.Empty<Mod>();
                 updateAccuracyParams(fullScoreDataSwitch.Current.Value);
                 calculateDifficulty();
@@ -465,6 +469,12 @@ namespace PerformanceCalculatorGUI.Screens
             working = null;
             beatmapTitle.Text = reason;
             appliedMods.Value = Array.Empty<Mod>();
+            beatmapDataContainer.Hide();
+
+            if (background is not null)
+            {
+                RemoveInternal(background);
+            }
         }
 
         private void changeBeatmap(string beatmap)
@@ -496,9 +506,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             beatmapTitle.Text = $"[{ruleset.Value.Name}] {working.BeatmapInfo.GetDisplayTitle()}";
 
-            var rulesetInstance = ruleset.Value.CreateInstance();
-            difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-            performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+            createCalculators();
 
             if (background is not null)
             {
@@ -512,7 +520,6 @@ namespace PerformanceCalculatorGUI.Screens
                     RelativeSizeAxes = Axes.Both,
                     Depth = 99,
                     BlurSigma = new Vector2(6),
-                    Alpha = 0,
                     Children = new Drawable[]
                     {
                         new Sprite
@@ -542,6 +549,13 @@ namespace PerformanceCalculatorGUI.Screens
             calculateDifficulty();
 
             beatmapDataContainer.Show();
+        }
+
+        private void createCalculators()
+        {
+            var rulesetInstance = ruleset.Value.CreateInstance();
+            difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+            performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
         }
 
         private void calculateDifficulty()
