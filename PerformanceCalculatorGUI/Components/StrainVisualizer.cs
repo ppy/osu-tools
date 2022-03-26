@@ -32,7 +32,7 @@ namespace PerformanceCalculatorGUI.Components
 
         public StrainVisualizer(Skill[] skills)
         {
-            this.skills = skills;
+            this.skills = skills.Where(x => x is StrainSkill).ToArray();
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
         }
@@ -40,6 +40,10 @@ namespace PerformanceCalculatorGUI.Components
         [BackgroundDependencyLoader]
         private void load(OsuColour colours, OverlayColourProvider colourProvider)
         {
+            // dont bother if there's nothing to draw
+            if (skills.Length == 0)
+                return;
+
             ColourInfo[] skillColours =
             {
                 colours.Blue,
