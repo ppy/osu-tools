@@ -10,6 +10,11 @@ namespace PerformanceCalculatorGUI.Components
     {
         private const float animation_duration = 100;
 
+        public ExtendedUserModSelectOverlay()
+        {
+            Height = 1;
+        }
+
         protected override void PopIn()
         {
             Schedule(() => GetContainingInputManager().TriggerFocusContention(this));

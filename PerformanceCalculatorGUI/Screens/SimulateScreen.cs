@@ -298,6 +298,21 @@ namespace PerformanceCalculatorGUI.Screens
                                                         },
                                                         modDisplay = new ModDisplay()
                                                     }
+                                                },
+                                                new ScalingContainer(ScalingMode.Everything)
+                                                {
+                                                    Name = "Mod selection overlay",
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Height = 400,
+                                                    Child = userModsSelectOverlay = new ExtendedUserModSelectOverlay
+                                                    {
+                                                        RelativeSizeAxes = Axes.Both,
+                                                        //AutoSizeAxes = Axes.Y,
+                                                        Anchor = Anchor.TopLeft,
+                                                        Origin = Anchor.TopLeft,
+                                                        IsValidMod = (mod) => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
+                                                        SelectedMods = { BindTarget = appliedMods }
+                                                    }
                                                 }
                                             }
                                         }
@@ -388,18 +403,6 @@ namespace PerformanceCalculatorGUI.Screens
                             }
                         }
                     }
-                },
-                new Container
-                {
-                    Name = "Mod selection overlay",
-                    RelativeSizeAxes = Axes.Both,
-                    Child = userModsSelectOverlay = new ExtendedUserModSelectOverlay
-                    {
-                        Anchor = Anchor.BottomLeft,
-                        Origin = Anchor.BottomLeft,
-                        IsValidMod = (mod) => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
-                        SelectedMods = { BindTarget = appliedMods }
-                    },
                 }
             };
 
