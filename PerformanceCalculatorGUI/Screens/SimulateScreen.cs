@@ -377,7 +377,7 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     Name = "Mod selection overlay",
                     RelativeSizeAxes = Axes.Both,
-                    Child = userModsSelectOverlay = new UserModSelectOverlay
+                    Child = userModsSelectOverlay = new ExtendedUserModSelectOverlay
                     {
                         Anchor = Anchor.BottomLeft,
                         Origin = Anchor.BottomLeft,

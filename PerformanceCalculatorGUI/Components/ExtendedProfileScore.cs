@@ -204,7 +204,7 @@ namespace PerformanceCalculatorGUI.Components
                                                                 },
                                                                 new OsuSpriteText
                                                                 {
-                                                                    Text = $"{Score.MaxCombo}x {{{Score.Statistics["count_300"]} / {Score.Statistics["count_100"]} / {Score.Statistics["count_50"]} / {Score.Statistics["count_miss"]}}}",
+                                                                    Text = $"{Score.MaxCombo}x {{ {Score.Statistics["count_300"]} / {Score.Statistics["count_100"]} / {Score.Statistics["count_50"]} / {Score.Statistics["count_miss"]} }}",
                                                                     Font = OsuFont.GetFont(size: 10, weight: FontWeight.Regular),
                                                                     Colour = colourProvider.Light2,
                                                                     Anchor = Anchor.TopCentre,
