@@ -104,8 +104,8 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     Alpha = graphAlpha,
                     RelativeSizeAxes = Axes.Both,
-                    Values = strains[i],
                     MaxValue = strainMaxValue,
+                    Values = strains[i],
                     Colour = skillColours[i]
                 };
 
