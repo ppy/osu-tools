@@ -150,14 +150,14 @@ namespace PerformanceCalculatorGUI.Components
                             RelativeSizeAxes = Axes.Both,
                             Colour = colourProvider.Background5
                         },
-                        new OsuCheckbox
+                        new ExtendedOsuCheckbox
                         {
                             Padding = new MarginPadding(10),
                             RelativeSizeAxes = Axes.None,
                             Width = 200,
                             Current = { BindTarget = graphToggleBindable, Default = true, Value = true },
                             LabelText = skills[i].GetType().Name,
-                            Colour = skillColours[i]
+                            TextColour = skillColours[i]
                         }
                     }
                 });
