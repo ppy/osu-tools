@@ -8,17 +8,31 @@ using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
+using PerformanceCalculatorGUI.Components;
 
 namespace PerformanceCalculatorGUI
 {
     public static class RulesetHelper
     {
+        public static DifficultyCalculator GetExtendedDifficultyCalculator(RulesetInfo ruleset, IWorkingBeatmap working)
+        {
+            return ruleset.OnlineID switch
+            {
+                0 => new ExtendedOsuDifficultyCalculator(ruleset, working),
+                1 => new ExtendedTaikoDifficultyCalculator(ruleset, working),
+                2 => new ExtendedCatchDifficultyCalculator(ruleset, working),
+                3 => new ExtendedManiaDifficultyCalculator(ruleset, working),
+                _ => ruleset.CreateInstance().CreateDifficultyCalculator(working)
+            };
+        }
+
         public static Ruleset GetRulesetFromLegacyID(int id)
         {
             return id switch

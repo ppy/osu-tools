@@ -71,6 +71,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         private ModDisplay modDisplay;
 
+        private StrainVisualizer strainVisualizer;
+        private Container strainVisualizerContainer;
+
         private ObjectInspector objectInspector;
 
         private BufferedContainer background;
@@ -343,6 +346,19 @@ namespace PerformanceCalculatorGUI.Screens
                                                     AutoSizeAxes = Axes.Y,
                                                     Spacing = new Vector2(0, 2f)
                                                 },
+                                                new OsuSpriteText
+                                                {
+                                                    Margin = new MarginPadding(10.0f),
+                                                    Origin = Anchor.TopLeft,
+                                                    Height = 20,
+                                                    Text = "Strain graph"
+                                                },
+                                                strainVisualizerContainer = new Container
+                                                {
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Anchor = Anchor.TopLeft,
+                                                    AutoSizeAxes = Axes.Y
+                                                },
                                                 new OsuButton
                                                 {
                                                     Anchor = Anchor.TopCentre,
@@ -498,6 +514,9 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
+            if (working is null)
+                return;
+
             if (!working.BeatmapInfo.Ruleset.Equals(ruleset.Value))
             {
                 ruleset.Value = working.BeatmapInfo.Ruleset;
@@ -553,8 +572,11 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void createCalculators()
         {
+            if (working is null)
+                return;
+
             var rulesetInstance = ruleset.Value.CreateInstance();
-            difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+            difficultyCalculator = RulesetHelper.GetExtendedDifficultyCalculator(ruleset.Value, working);
             performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
         }
 
@@ -585,6 +607,12 @@ namespace PerformanceCalculatorGUI.Screens
                 resetBeatmap(e.Message);
                 return;
             }
+
+            if (strainVisualizer is not null)
+                strainVisualizerContainer.Remove(strainVisualizer);
+
+            if (difficultyCalculator is IExtendedDifficultyCalculator extendedDifficultyCalculator)
+                strainVisualizerContainer.Add(strainVisualizer = new StrainVisualizer(extendedDifficultyCalculator.GetSkills()));
 
             calculatePerformance();
         }

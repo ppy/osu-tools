@@ -14,7 +14,7 @@ namespace PerformanceCalculatorGUI.Components
         {
             Schedule(() => GetContainingInputManager().TriggerFocusContention(this));
 
-            Waves.Show(); // we have to show waves once 
+            Waves.Show(); // we have to show waves once
             this.FadeIn(animation_duration);
         }
 
