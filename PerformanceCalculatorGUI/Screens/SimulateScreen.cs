@@ -574,7 +574,7 @@ namespace PerformanceCalculatorGUI.Screens
                     new LabelledTextBox
                     {
                         ReadOnly = true,
-                        Label = x.Key.Humanize(),
+                        Label = x.Key.Humanize().ToLowerInvariant(),
                         Text = FormattableString.Invariant($"{x.Value:N2}")
                     }
                 ).ToArray();
@@ -625,7 +625,7 @@ namespace PerformanceCalculatorGUI.Screens
                     new LabelledTextBox
                     {
                         ReadOnly = true,
-                        Label = x.Key.Humanize(),
+                        Label = x.Key.Humanize().ToLowerInvariant(),
                         Text = FormattableString.Invariant($"{x.Value:N2}")
                     }
                 ).ToArray();
