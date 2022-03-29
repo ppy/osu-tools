@@ -9,9 +9,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Graphics.Containers;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
@@ -20,9 +18,9 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
+using osu.Game.Users;
 using osuTK;
 using PerformanceCalculatorGUI.Components;
-using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -32,6 +30,7 @@ namespace PerformanceCalculatorGUI.Screens
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Green);
 
         private LimitedLabelledNumberBox playerAmountTextBox;
+        private LimitedLabelledNumberBox pageTextBox;
         private StatefulButton calculationButton;
         private VerboseLoadingLayer loadingLayer;
 
@@ -74,6 +73,7 @@ namespace PerformanceCalculatorGUI.Screens
                                 ColumnDimensions = new[]
                                 {
                                     new Dimension(),
+                                    new Dimension(),
                                     new Dimension(GridSizeMode.AutoSize)
                                 },
                                 RowDimensions = new[]
@@ -94,6 +94,15 @@ namespace PerformanceCalculatorGUI.Screens
                                             MaxValue = 50,
                                             CommitOnFocusLoss = false
                                         },
+                                        pageTextBox = new LimitedLabelledNumberBox
+                                        {
+                                            RelativeSizeAxes = Axes.X,
+                                            Anchor = Anchor.TopLeft,
+                                            Label = "Page",
+                                            PlaceholderText = "1",
+                                            MinValue = 1,
+                                            CommitOnFocusLoss = false
+                                        },
                                         calculationButton = new StatefulButton("Start calculation")
                                         {
                                             Width = 150,
@@ -106,13 +115,17 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                         new Drawable[]
                         {
-                            leaderboardContainer = new FillFlowContainer
+                            new OsuScrollContainer
                             {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Direction = FillDirection.Vertical,
-                                Spacing = new Vector2(10),
-                                Padding = new MarginPadding(20)
+                                RelativeSizeAxes = Axes.Both,
+                                Child = leaderboardContainer = new FillFlowContainer
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    AutoSizeAxes = Axes.Y,
+                                    Direction = FillDirection.Vertical,
+                                    Spacing = new Vector2(5),
+                                    Padding = new MarginPadding(15)
+                                }
                             }
                         },
                     }
@@ -135,10 +148,9 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={0 /*TODO*/}");
+                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}");
 
                 var calculatedPlayers = new List<(string, decimal, decimal)>();
-                var rulesetInstance = ruleset.Value.CreateInstance();
 
                 for (int i = 0; i < playerAmountTextBox.Value.Value; i++)
                 {
@@ -146,80 +158,16 @@ namespace PerformanceCalculatorGUI.Screens
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {player.User.Username} top scores...");
 
-                    var plays = new List<ExtendedScore>();
+                    var playerData = await calculatePlayer(player);
 
-                    var apiScores = await apiManager.GetJsonFromApi<List<APIScore>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
-
-                    Parallel.ForEach(apiScores, score =>
-                    {
-                        try
-                        {
-                            var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString());
-
-                            var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
-                            Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
-
-                            var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
-                            {
-                                TotalScore = score.TotalScore,
-                                MaxCombo = score.MaxCombo,
-                                Mods = mods,
-                                Statistics = new Dictionary<HitResult, int>()
-                            };
-
-                            scoreInfo.SetCount300(score.Statistics["count_300"]);
-                            scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
-                            scoreInfo.SetCount100(score.Statistics["count_100"]);
-                            scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
-                            scoreInfo.SetCount50(score.Statistics["count_50"]);
-                            scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
-
-                            var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
-
-                            var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                            var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
-                            var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
-
-                            var livePp = score.PP ?? 0.0;
-                            var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
-                            score.PP = perfAttributes?.Total ?? 0.0;
-
-                            var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
-                            plays.Add(extendedScore);
-                        }
-                        catch (Exception e)
-                        {
-                            // dont bother for now
-                        }
-                    });
-
-                    var localOrdered = plays.OrderByDescending(x => x.PP).ToList();
-                    var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
-
-                    int index = 0;
-                    decimal totalLocalPP = (decimal)localOrdered.Select(x => x.PP).Sum(play => Math.Pow(0.95, index++) * play);
-                    decimal totalLivePP = player.PP ?? (decimal)0.0;
-
-                    index = 0;
-                    decimal nonBonusLivePP = (decimal)liveOrdered.Select(x => x.LivePP).Sum(play => Math.Pow(0.95, index++) * play);
-
-                    //todo: implement properly. this is pretty damn wrong.
-                    var playcountBonusPP = (totalLivePP - nonBonusLivePP);
-                    totalLocalPP += playcountBonusPP;
-
-                    calculatedPlayers.Add((player.User.Username, totalLocalPP, player.PP ?? 0));
+                    calculatedPlayers.Add((player.User.Username, playerData.LocalPP, playerData.LivePP));
 
                     Schedule(() =>
                     {
                         var playerPanel = new UserPPListPanel(player.User);
                         leaderboardContainer.Add(playerPanel);
 
-                        playerPanel.Data.Value = new UserPPListPanelData
-                        {
-                            LivePP = totalLivePP,
-                            LocalPP = totalLocalPP,
-                            PlaycountPP = playcountBonusPP
-                        };
+                        playerPanel.Data.Value = playerData;
                     });
                 }
 
@@ -241,6 +189,79 @@ namespace PerformanceCalculatorGUI.Screens
                     calculationButton.State.Value = ButtonState.Done;
                 });
             });
+        }
+
+        private async Task<UserPPListPanelData> calculatePlayer(UserStatistics player)
+        {
+            var plays = new List<ExtendedScore>();
+
+            var apiScores = await apiManager.GetJsonFromApi<List<APIScore>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+
+            var rulesetInstance = ruleset.Value.CreateInstance();
+
+            Parallel.ForEach(apiScores, score =>
+            {
+                try
+                {
+                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString());
+
+                    var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
+                    Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
+
+                    var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
+                    {
+                        TotalScore = score.TotalScore,
+                        MaxCombo = score.MaxCombo,
+                        Mods = mods,
+                        Statistics = new Dictionary<HitResult, int>()
+                    };
+
+                    scoreInfo.SetCount300(score.Statistics["count_300"]);
+                    scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
+                    scoreInfo.SetCount100(score.Statistics["count_100"]);
+                    scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
+                    scoreInfo.SetCount50(score.Statistics["count_50"]);
+                    scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
+
+                    var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+
+                    var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                    var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
+                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+
+                    var livePp = score.PP ?? 0.0;
+                    var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                    score.PP = perfAttributes?.Total ?? 0.0;
+
+                    var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                    plays.Add(extendedScore);
+                }
+                catch (Exception e)
+                {
+                    // dont bother for now
+                }
+            });
+
+            var localOrdered = plays.OrderByDescending(x => x.PP).ToList();
+            var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
+
+            int index = 0;
+            decimal totalLocalPP = (decimal)localOrdered.Select(x => x.PP).Sum(play => Math.Pow(0.95, index++) * play);
+            decimal totalLivePP = player.PP ?? (decimal)0.0;
+
+            index = 0;
+            decimal nonBonusLivePP = (decimal)liveOrdered.Select(x => x.LivePP).Sum(play => Math.Pow(0.95, index++) * play);
+
+            //todo: implement properly. this is pretty damn wrong.
+            var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+            totalLocalPP += playcountBonusPP;
+
+            return new UserPPListPanelData
+            {
+                LivePP = totalLivePP,
+                LocalPP = totalLocalPP,
+                PlaycountPP = playcountBonusPP
+            };
         }
     }
 }
