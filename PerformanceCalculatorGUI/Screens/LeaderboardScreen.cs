@@ -36,7 +36,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private FillFlowContainer leaderboardContainer;
 
-        public override bool ShouldShowConfirmationDialogOnSwitch => false;
+        public override bool ShouldShowConfirmationDialogOnSwitch => true;
 
         [Resolved]
         private APIManager apiManager { get; set; }
@@ -92,6 +92,7 @@ namespace PerformanceCalculatorGUI.Screens
                                             PlaceholderText = "10",
                                             MinValue = 1,
                                             MaxValue = 50,
+                                            Value = { Value = 10 },
                                             CommitOnFocusLoss = false
                                         },
                                         pageTextBox = new LimitedLabelledNumberBox
@@ -101,6 +102,7 @@ namespace PerformanceCalculatorGUI.Screens
                                             Label = "Page",
                                             PlaceholderText = "1",
                                             MinValue = 1,
+                                            Value = { Value = 1 },
                                             CommitOnFocusLoss = false
                                         },
                                         calculationButton = new StatefulButton("Start calculation")
