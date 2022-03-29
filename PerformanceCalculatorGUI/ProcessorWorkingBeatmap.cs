@@ -50,7 +50,7 @@ namespace PerformanceCalculatorGUI
                 return Decoder.GetDecoder<Beatmap>(reader).Decode(reader);
         }
 
-        public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId, AudioManager audioManager = null)
+        public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId, AudioManager audioManager = null, string cachePath = "cache")
         {
             if (fileOrId.EndsWith(".osu"))
             {
@@ -63,7 +63,7 @@ namespace PerformanceCalculatorGUI
             if (!int.TryParse(fileOrId, out var beatmapId))
                 throw new ArgumentException("Could not parse provided beatmap ID.");
 
-            string cachePath = Path.Combine("cache", $"{beatmapId}.osu");
+            cachePath = Path.Combine(cachePath, $"{beatmapId}.osu");
 
             if (!File.Exists(cachePath))
             {

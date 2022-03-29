@@ -21,6 +21,7 @@ using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 using osuTK.Graphics;
 using PerformanceCalculatorGUI.Components;
+using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -47,6 +48,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        [Resolved]
+        private SettingsManager configManager { get; set; }
 
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
 
@@ -186,7 +190,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (var score in apiScores)
                 {
-                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString());
+                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
 

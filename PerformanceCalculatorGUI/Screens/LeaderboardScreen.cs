@@ -21,6 +21,7 @@ using osu.Game.Scoring.Legacy;
 using osu.Game.Users;
 using osuTK;
 using PerformanceCalculatorGUI.Components;
+using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -43,6 +44,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        [Resolved]
+        private SettingsManager configManager { get; set; }
 
         private const int settings_height = 40;
 
@@ -205,7 +209,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 try
                 {
-                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString());
+                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
                     var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
                     Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();

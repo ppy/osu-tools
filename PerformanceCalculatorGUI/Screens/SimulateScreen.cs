@@ -90,6 +90,9 @@ namespace PerformanceCalculatorGUI.Screens
         [Resolved]
         private LargeTextureStore textures { get; set; }
 
+        [Resolved]
+        private SettingsManager configManager { get; set; }
+
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
 
@@ -104,7 +107,7 @@ namespace PerformanceCalculatorGUI.Screens
         }
 
         [BackgroundDependencyLoader]
-        private void load(SettingsManager configManager)
+        private void load()
         {
             InternalChildren = new Drawable[]
             {
@@ -508,7 +511,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             try
             {
-                working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, audio);
+                working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, audio, configManager.GetBindable<string>(Settings.CachePath).Value);
             }
             catch (Exception e)
             {
