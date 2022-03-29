@@ -215,9 +215,10 @@ namespace PerformanceCalculatorGUI.Screens
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
                     var livePp = score.PP ?? 0.0;
-                    score.PP = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes).Total ?? 0.0;
+                    var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                    score.PP = perfAttributes?.Total ?? 0.0;
 
-                    var extendedScore = new ExtendedScore(score, livePp);
+                    var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
                     plays.Add(extendedScore);
 
                     Schedule(() => scores.Add(new ExtendedProfileScore(extendedScore)));

@@ -594,8 +594,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 populateScoreParams();
 
-                var diffAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(difficultyAttributes)) ?? new Dictionary<string, object>();
-                difficultyAttributesContainer.Children = diffAttributeValues.Select(x =>
+                difficultyAttributesContainer.Children = AttributeConversion.ToDictionary(difficultyAttributes).Select(x =>
                     new LabelledTextBox
                     {
                         ReadOnly = true,
@@ -651,8 +650,7 @@ namespace PerformanceCalculatorGUI.Screens
                     Ruleset = ruleset.Value
                 }, difficultyAttributes);
 
-                var perfAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
-                performanceAttributesContainer.Children = perfAttributeValues.Select(x =>
+                performanceAttributesContainer.Children = AttributeConversion.ToDictionary(ppAttributes).Select(x =>
                     new LabelledTextBox
                     {
                         ReadOnly = true,

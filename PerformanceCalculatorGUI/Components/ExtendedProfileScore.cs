@@ -3,22 +3,26 @@
 
 using System;
 using System.Linq;
+using Newtonsoft.Json;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Leaderboards;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Profile.Sections;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.UI;
 using osu.Game.Utils;
 using osuTK;
@@ -31,8 +35,11 @@ namespace PerformanceCalculatorGUI.Components
 
         public Bindable<int> PositionChange { get; } = new();
 
-        public ExtendedScore(APIScore score, double livePP)
+        public PerformanceAttributes PerformanceAttributes { get; }
+
+        public ExtendedScore(APIScore score, double livePP, PerformanceAttributes attributes)
         {
+            PerformanceAttributes = attributes;
             LivePP = livePP;
 
             TotalScore = score.TotalScore;
@@ -56,6 +63,7 @@ namespace PerformanceCalculatorGUI.Components
         private const int height = 40;
         private const int performance_width = 100;
         private const int rank_difference_width = 35;
+        private const int small_text_font_size = 11;
 
         private const float performance_background_shear = 0.45f;
 
@@ -205,7 +213,7 @@ namespace PerformanceCalculatorGUI.Components
                                                                 new OsuSpriteText
                                                                 {
                                                                     Text = $"{Score.MaxCombo}x {{ {Score.Statistics["count_300"]} / {Score.Statistics["count_100"]} / {Score.Statistics["count_50"]} / {Score.Statistics["count_miss"]} }}",
-                                                                    Font = OsuFont.GetFont(size: 10, weight: FontWeight.Regular),
+                                                                    Font = OsuFont.GetFont(size: small_text_font_size, weight: FontWeight.Regular),
                                                                     Colour = colourProvider.Light2,
                                                                     Anchor = Anchor.TopCentre,
                                                                     Origin = Anchor.TopCentre
@@ -227,12 +235,12 @@ namespace PerformanceCalculatorGUI.Components
                                                                     Child = new OsuSpriteText
                                                                     {
                                                                         Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                                                        Text = $"{Score.LivePP:0}pp",
+                                                                        Text = $"{Score.LivePP:0}pp"
                                                                     },
                                                                 },
                                                                 new OsuSpriteText
                                                                 {
-                                                                    Font = OsuFont.GetFont(size: 10),
+                                                                    Font = OsuFont.GetFont(size: small_text_font_size),
                                                                     Text = "live"
                                                                 }
                                                             }
@@ -308,17 +316,18 @@ namespace PerformanceCalculatorGUI.Components
                                 Direction = FillDirection.Vertical,
                                 Children = new Drawable[]
                                 {
-                                    new OsuSpriteText
+                                    new ExtendedOsuSpriteText
                                     {
                                         Font = OsuFont.GetFont(weight: FontWeight.Bold),
                                         Text = $"{Score.PP:0}pp",
                                         Colour = colourProvider.Highlight1,
                                         Anchor = Anchor.TopCentre,
-                                        Origin = Anchor.TopCentre
+                                        Origin = Anchor.TopCentre,
+                                        TooltipContent = $"{AttributeConversion.ToReadableString(Score.PerformanceAttributes)}"
                                     },
                                     new OsuSpriteText
                                     {
-                                        Font = OsuFont.GetFont(size: 10),
+                                        Font = OsuFont.GetFont(size: small_text_font_size),
                                         Text = $"{Score.PP - Score.LivePP:+0.0;-0.0;-}",
                                         Colour = colourProvider.Light1,
                                         Anchor = Anchor.TopCentre,
