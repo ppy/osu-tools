@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
-using Newtonsoft.Json;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -64,7 +63,9 @@ namespace PerformanceCalculatorGUI.Screens
         private FillFlowContainer performanceAttributesContainer;
 
         private PerformanceCalculator performanceCalculator;
-        private DifficultyCalculator difficultyCalculator;
+
+        [Cached]
+        private Bindable<DifficultyCalculator> difficultyCalculator = new();
 
         private FillFlowContainer beatmapDataContainer;
         private OsuSpriteText beatmapTitle;
@@ -582,18 +583,18 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
 
             var rulesetInstance = ruleset.Value.CreateInstance();
-            difficultyCalculator = RulesetHelper.GetExtendedDifficultyCalculator(ruleset.Value, working);
+            difficultyCalculator.Value = RulesetHelper.GetExtendedDifficultyCalculator(ruleset.Value, working);
             performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
         }
 
         private void calculateDifficulty()
         {
-            if (working == null || difficultyCalculator == null)
+            if (working == null || difficultyCalculator.Value == null)
                 return;
 
             try
             {
-                difficultyAttributes = difficultyCalculator.Calculate(appliedMods.Value);
+                difficultyAttributes = difficultyCalculator.Value.Calculate(appliedMods.Value);
 
                 populateScoreParams();
 
@@ -616,7 +617,7 @@ namespace PerformanceCalculatorGUI.Screens
             if (strainVisualizer is not null)
                 strainVisualizerContainer.Remove(strainVisualizer);
 
-            if (difficultyCalculator is IExtendedDifficultyCalculator extendedDifficultyCalculator)
+            if (difficultyCalculator.Value is IExtendedDifficultyCalculator extendedDifficultyCalculator)
                 strainVisualizerContainer.Add(strainVisualizer = new StrainVisualizer(extendedDifficultyCalculator.GetSkills()));
 
             calculatePerformance();

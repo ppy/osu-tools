@@ -22,31 +22,17 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public class OsuObjectInspectorRuleset : DrawableOsuRuleset
     {
-        private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
+        private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
-        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods)
+        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
         {
-            difficultyHitObjects = CreateDifficultyHitObjects(beatmap).ToList();
+            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
         }
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
         public override PlayfieldAdjustmentContainer CreatePlayfieldAdjustmentContainer() => new OsuPlayfieldAdjustmentContainer { Size = Vector2.One };
-
-        protected IEnumerable<OsuDifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap)
-        {
-            // The first jump is formed by the first two hitobjects of the map.
-            // If the map has less than two OsuHitObjects, the enumerator will not return anything.
-            for (int i = 1; i < beatmap.HitObjects.Count; i++)
-            {
-                var lastLast = i > 1 ? beatmap.HitObjects[i - 2] : null;
-                var last = beatmap.HitObjects[i - 1];
-                var current = beatmap.HitObjects[i];
-
-                yield return new OsuDifficultyHitObject(current, lastLast, last, 1.0);
-            }
-        }
 
         private class OsuObjectInspectorPlayfield : OsuPlayfield
         {

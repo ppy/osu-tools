@@ -13,12 +13,13 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
-using osuTK;
 using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -42,13 +43,18 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
 
+        [Resolved]
+        private Bindable<DifficultyCalculator> difficultyCalculator { get; set; }
+
         private readonly ProcessorWorkingBeatmap processorBeatmap;
         private EditorClock clock;
-        private Container playfieldContainer;
+        private Container layout;
 
         protected override bool BlockNonPositionalInput => true;
 
         protected override bool DimMainContent => false;
+
+        private const int bottom_bar_height = 50;
 
         public ObjectInspector(ProcessorWorkingBeatmap working)
         {
@@ -73,7 +79,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             beatmap.Value = processorBeatmap;
 
-            AddInternal(new Container
+            AddInternal(layout = new Container
             {
                 Origin = Anchor.Centre,
                 Anchor = Anchor.Centre,
@@ -88,21 +94,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         Alpha = 0.95f,
                         RelativeSizeAxes = Axes.Both
                     },
-                    playfieldContainer = new PlayfieldAdjustmentContainer
-                    {
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        Size = new Vector2(0.8f),
-                        RelativeSizeAxes = Axes.Both,
-                        Children = new Drawable[]
-                        {
-                            new PlayfieldBorder
-                            {
-                                RelativeSizeAxes = Axes.Both,
-                                PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
-                            },
-                        }
-                    },
                     new Container
                     {
                         Name = "Bottom bar",
@@ -110,7 +101,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         Origin = Anchor.BottomLeft,
                         RelativeSizeAxes = Axes.X,
                         Padding = new MarginPadding(5f),
-                        Height = 50,
+                        Height = bottom_bar_height,
                         Child = new GridContainer
                         {
                             RelativeSizeAxes = Axes.Both,
@@ -148,21 +139,41 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             });
 
-            playfieldContainer.Add(ruleset.Value.ShortName switch
+            layout.Add(ruleset.Value.ShortName switch
             {
-                "osu" => new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods)
+                "osu" => new OsuPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Clock = clock,
-                    ProcessCustomClock = false
+                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
+                    Children = new Drawable[]
+                    {
+                        new PlayfieldBorder
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
+                        },
+                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator, processorBeatmap.Track.Rate)
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Clock = clock,
+                            ProcessCustomClock = false
+                        }
+                    }
                 },
-                _ => new OsuSpriteText
+                _ => new Container
                 {
-                    Origin = Anchor.Centre,
-                    Anchor = Anchor.Centre,
-                    Text = "This ruleset is not supported yet!"
+                    RelativeSizeAxes = Axes.Both,
+                    Child = new OsuSpriteText
+                    {
+                        Origin = Anchor.Centre,
+                        Anchor = Anchor.Centre,
+                        Text = "This ruleset is not supported yet!"
+                    }
                 }
             });
+
+            ruleset.BindValueChanged(_ => PopOut());
+            beatmap.BindValueChanged(_ => PopOut());
         }
 
         protected override void Update()

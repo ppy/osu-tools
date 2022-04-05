@@ -15,7 +15,6 @@ using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
-using PerformanceCalculatorGUI.Components;
 
 namespace PerformanceCalculatorGUI
 {
