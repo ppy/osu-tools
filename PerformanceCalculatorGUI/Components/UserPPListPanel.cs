@@ -98,17 +98,30 @@ namespace PerformanceCalculatorGUI.Components
                                 username.Anchor = Anchor.CentreLeft;
                                 username.Origin = Anchor.CentreLeft;
                             }),
+                        }
+                    },
+                    new FillFlowContainer
+                    {
+                        Anchor = Anchor.CentreRight,
+                        Origin = Anchor.CentreRight,
+                        AutoSizeAxes = Axes.Both,
+                        Direction = FillDirection.Horizontal,
+                        Padding = new MarginPadding { Right = 10 },
+                        Children = new Drawable[]
+                        {
                             liveLabel = new OsuSpriteText
                             {
                                 Colour = Colours.RedLighter,
                                 Anchor = Anchor.CentreLeft,
-                                Origin = Anchor.CentreLeft
+                                Origin = Anchor.CentreLeft,
+                                Width = 115
                             },
                             localLabel = new OsuSpriteText
                             {
                                 Colour = Colours.BlueLighter,
                                 Anchor = Anchor.CentreLeft,
-                                Origin = Anchor.CentreLeft
+                                Origin = Anchor.CentreLeft,
+                                Width = 120
                             },
                             new FillFlowContainer
                             {
@@ -116,6 +129,7 @@ namespace PerformanceCalculatorGUI.Components
                                 Direction = FillDirection.Vertical,
                                 Origin = Anchor.CentreLeft,
                                 Anchor = Anchor.CentreLeft,
+                                Width = 100,
                                 Children = new[]
                                 {
                                     differenceLabel = new OsuSpriteText
