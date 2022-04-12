@@ -47,9 +47,9 @@ namespace PerformanceCalculator.Performance
                     mods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, mods);
 
                 var difficultyAttributes = difficultyCalculator.Calculate(mods);
-                var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
+                var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
 
-                var ppAttributes = performanceCalculator?.Calculate();
+                var ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes);
 
                 Console.WriteLine(f);
                 writeAttribute("Player", score.ScoreInfo.User.Username);

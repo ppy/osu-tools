@@ -82,9 +82,9 @@ namespace PerformanceCalculator.Leaderboard
 
                     var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
                     var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
-                    var performanceCalculator = ruleset.CreatePerformanceCalculator(difficultyAttributes, score.ScoreInfo);
+                    var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
-                    plays.Add((performanceCalculator?.Calculate().Total ?? 0, play.pp));
+                    plays.Add((performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes).Total ?? 0, play.pp));
                 }
 
                 var localOrdered = plays.Select(x => x.Item1).OrderByDescending(x => x).ToList();
