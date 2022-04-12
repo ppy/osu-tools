@@ -28,6 +28,7 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play.HUD;
@@ -378,7 +379,8 @@ namespace PerformanceCalculatorGUI.Screens
                                                 {
                                                     RelativeSizeAxes = Axes.X,
                                                     Anchor = Anchor.TopLeft,
-                                                    AutoSizeAxes = Axes.Y
+                                                    AutoSizeAxes = Axes.Y,
+                                                    Child = strainVisualizer = new StrainVisualizer()
                                                 },
                                                 new OsuButton
                                                 {
@@ -618,11 +620,10 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            if (strainVisualizer is not null)
-                strainVisualizerContainer.Remove(strainVisualizer);
-
             if (difficultyCalculator.Value is IExtendedDifficultyCalculator extendedDifficultyCalculator)
-                strainVisualizerContainer.Add(strainVisualizer = new StrainVisualizer(extendedDifficultyCalculator.GetSkills()));
+                strainVisualizer.Skills.Value = extendedDifficultyCalculator.GetSkills();
+            else
+                strainVisualizer.Skills.Value = Array.Empty<Skill>();
 
             calculatePerformance();
         }
