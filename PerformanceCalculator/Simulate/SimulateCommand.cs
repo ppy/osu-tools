@@ -60,14 +60,14 @@ namespace PerformanceCalculator.Simulate
         public bool OutputJson { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-l|--lazer", Description = "Excludes the classic mod to compute lazer-first scores.")]
-        public bool Lazer { get; }
+        [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
+        public bool NoClassicMod { get; }
 
         public override void Execute()
         {
             var ruleset = Ruleset;
 
-            var mods = Lazer ? GetMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset));
+            var mods = NoClassicMod ? GetMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset));
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 

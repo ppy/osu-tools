@@ -43,8 +43,8 @@ namespace PerformanceCalculator.Difficulty
         public bool OutputJson { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-l|--lazer", Description = "Excludes the classic mod to compute lazer-first scores.")]
-        public bool Lazer { get; }
+        [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
+        public bool NoClassicMod { get; }
 
         public override void Execute()
         {
@@ -130,7 +130,7 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.Ruleset.OnlineID);
-            var mods = Lazer ? getMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, getMods(ruleset));
+            var mods = NoClassicMod ? getMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, getMods(ruleset));
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
 
             return new Result
