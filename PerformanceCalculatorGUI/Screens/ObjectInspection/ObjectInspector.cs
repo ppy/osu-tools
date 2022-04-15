@@ -13,9 +13,11 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
+using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
@@ -153,6 +155,31 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
                         new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator, processorBeatmap.Track.Rate)
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Clock = clock,
+                            ProcessCustomClock = false
+                        }
+                    }
+                },
+                "taiko" => new TaikoPlayfieldAdjustmentContainer
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
+                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator, processorBeatmap.Track.Rate)
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Clock = clock,
+                        ProcessCustomClock = false
+                    }
+                },
+                "fruits" => new CatchPlayfieldAdjustmentContainer
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Y = 100,
+                    Children = new Drawable[]
+                    {
+                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator, processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
