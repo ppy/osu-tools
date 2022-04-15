@@ -16,7 +16,6 @@ using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
-using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -30,9 +29,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
         }
 
-        protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
+        public override bool PropagatePositionalInputSubTree => false;
 
-        public override PlayfieldAdjustmentContainer CreatePlayfieldAdjustmentContainer() => new OsuPlayfieldAdjustmentContainer { Size = Vector2.One };
+        public override bool PropagateNonPositionalInputSubTree => false;
+
+        protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
         private class OsuObjectInspectorPlayfield : OsuPlayfield
         {
