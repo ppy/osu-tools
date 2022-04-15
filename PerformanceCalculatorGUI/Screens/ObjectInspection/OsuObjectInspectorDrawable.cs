@@ -3,12 +3,8 @@
 
 using System;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Performance;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Utils;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Containers;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Pooling;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
@@ -49,52 +45,30 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             double movementTime = hitObject.GetEndTime() - hitObject.StartTime;
             double visibleTime = hitObject.GetEndTime() - startTime;
 
-            OsuTextFlowContainer textFlow;
-
-            var panel = new Container
+            ObjectInspectionPanel panel;
+            AddInternal(panel = new ObjectInspectionPanel
             {
                 Position = hitObject.StackedPosition,
-                Origin = Anchor.Centre,
-                Anchor = Anchor.Centre,
-                AutoSizeAxes = Axes.Both,
-                Masking = true,
-                CornerRadius = 5f,
-                Alpha = 0,
-                Children = new Drawable[]
-                {
-                    new Box
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Alpha = 0.95f,
-                        Colour = OsuColour.Gray(0.1f)
-                    },
-                    textFlow = new OsuTextFlowContainer
-                    {
-                        Padding = new MarginPadding(5f),
-                        AutoSizeAxes = Axes.Both,
-                    }
-                }
-            };
+                Alpha = 0
+            });
 
-            textFlow.AddParagraph($"Position: {entry.HitObject.StackedPosition}", text => text.Font = OsuFont.GetFont(size: 8));
+            panel.AddParagraph($"Position: {entry.HitObject.StackedPosition}", 8);
 
             if (entry.DifficultyHitObject is not null)
             {
-                textFlow.AddParagraph($"Strain Time: {entry.DifficultyHitObject.StrainTime:N3}", text => text.Font = OsuFont.GetFont(size: 10));
+                panel.AddParagraph($"Strain Time: {entry.DifficultyHitObject.StrainTime:N3}");
 
                 if (entry.DifficultyHitObject.Angle is not null)
-                    textFlow.AddParagraph($"Angle: {MathUtils.RadiansToDegrees(entry.DifficultyHitObject.Angle.Value):N3}", text => text.Font = OsuFont.GetFont(size: 10));
+                    panel.AddParagraph($"Angle: {MathUtils.RadiansToDegrees(entry.DifficultyHitObject.Angle.Value):N3}");
 
                 if (entry.HitObject is Slider)
                 {
-                    textFlow.AddParagraph($"Travel Time: {entry.DifficultyHitObject.TravelTime:N3}", text => text.Font = OsuFont.GetFont(size: 10));
-                    textFlow.AddParagraph($"Travel Distance: {entry.DifficultyHitObject.TravelDistance:N3}", text => text.Font = OsuFont.GetFont(size: 10));
-                    textFlow.AddParagraph($"Minimum Jump Distance: {entry.DifficultyHitObject.MinimumJumpDistance:N3}", text => text.Font = OsuFont.GetFont(size: 10));
-                    textFlow.AddParagraph($"Minimum Jump Time: {entry.DifficultyHitObject.MinimumJumpTime:N3}", text => text.Font = OsuFont.GetFont(size: 10));
+                    panel.AddParagraph($"Travel Time: {entry.DifficultyHitObject.TravelTime:N3}");
+                    panel.AddParagraph($"Travel Distance: {entry.DifficultyHitObject.TravelDistance:N3}");
+                    panel.AddParagraph($"Minimum Jump Distance: {entry.DifficultyHitObject.MinimumJumpDistance:N3}");
+                    panel.AddParagraph($"Minimum Jump Time: {entry.DifficultyHitObject.MinimumJumpTime:N3}");
                 }
             }
-
-            AddInternal(panel);
 
             using (panel.BeginAbsoluteSequence(startTime))
             {
