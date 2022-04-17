@@ -88,7 +88,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
     internal class OsuObjectInspectorLifetimeEntry : LifetimeEntry
     {
-        public event Action? Invalidated;
+        public event Action Invalidated;
         public readonly OsuHitObject HitObject;
         public readonly OsuDifficultyHitObject DifficultyHitObject;
 

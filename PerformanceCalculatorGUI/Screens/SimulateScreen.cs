@@ -690,6 +690,7 @@ namespace PerformanceCalculatorGUI.Screens
                 accuracyContainer.Show();
 
                 comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
+                comboTextBox.Text = string.Empty;
                 comboTextBox.MaxValue = comboTextBox.Value.Value = difficultyAttributes.MaxCombo;
                 comboTextBox.Show();
 
