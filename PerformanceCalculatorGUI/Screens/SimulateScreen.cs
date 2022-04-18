@@ -76,11 +76,12 @@ namespace PerformanceCalculatorGUI.Screens
         private ModDisplay modDisplay;
 
         private StrainVisualizer strainVisualizer;
-        private Container strainVisualizerContainer;
 
         private ObjectInspector objectInspector;
 
         private BufferedContainer background;
+
+        private ScheduledDelegate debouncedPerformanceUpdate;
 
         [Resolved]
         private AudioManager audio { get; set; }
@@ -375,7 +376,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Height = 20,
                                                     Text = "Strain graph"
                                                 },
-                                                strainVisualizerContainer = new Container
+                                                new Container
                                                 {
                                                     RelativeSizeAxes = Axes.X,
                                                     Anchor = Anchor.TopLeft,
@@ -444,12 +445,12 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             });
 
-            accuracyTextBox.Value.BindValueChanged(_ => calculatePerformance());
-            goodsTextBox.Value.BindValueChanged(_ => calculatePerformance());
-            mehsTextBox.Value.BindValueChanged(_ => calculatePerformance());
-            missesTextBox.Value.BindValueChanged(_ => calculatePerformance());
-            comboTextBox.Value.BindValueChanged(_ => calculatePerformance());
-            scoreTextBox.Value.BindValueChanged(_ => calculatePerformance());
+            accuracyTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            goodsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            mehsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            missesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            comboTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            scoreTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
 
             fullScoreDataSwitch.Current.BindValueChanged(val => updateAccuracyParams(val.NewValue));
 
@@ -458,10 +459,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             ruleset.BindValueChanged(_ =>
             {
-                createCalculators();
-                appliedMods.Value = Array.Empty<Mod>();
-                updateAccuracyParams(fullScoreDataSwitch.Current.Value);
-                calculateDifficulty();
+                resetCalculations();
             });
 
             if (RuntimeInfo.IsDesktop)
@@ -471,8 +469,11 @@ namespace PerformanceCalculatorGUI.Screens
         protected override void Dispose(bool isDisposing)
         {
             modSettingChangeTracker?.Dispose();
+
+            appliedMods.UnbindAll();
             appliedMods.Value = Array.Empty<Mod>();
 
+            difficultyCalculator.UnbindAll();
             base.Dispose(isDisposing);
         }
 
@@ -483,6 +484,9 @@ namespace PerformanceCalculatorGUI.Screens
         {
             modSettingChangeTracker?.Dispose();
 
+            if (working is null)
+                return;
+
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += m =>
             {
@@ -491,13 +495,15 @@ namespace PerformanceCalculatorGUI.Screens
             };
 
             calculateDifficulty();
+            updateCombo(false);
+            calculatePerformance();
         }
 
         private void resetBeatmap(string reason)
         {
             working = null;
             beatmapTitle.Text = reason;
-            appliedMods.Value = Array.Empty<Mod>();
+            resetMods();
             beatmapDataContainer.Hide();
 
             if (background is not null)
@@ -533,52 +539,15 @@ namespace PerformanceCalculatorGUI.Screens
             if (!working.BeatmapInfo.Ruleset.Equals(ruleset.Value))
             {
                 ruleset.Value = working.BeatmapInfo.Ruleset;
-                appliedMods.Value = Array.Empty<Mod>();
+            }
+            else
+            {
+                resetCalculations();
             }
 
             beatmapTitle.Text = $"[{ruleset.Value.Name}] {working.BeatmapInfo.GetDisplayTitle()}";
 
-            createCalculators();
-
-            if (background is not null)
-            {
-                RemoveInternal(background);
-            }
-
-            if (working.BeatmapInfo?.BeatmapSet?.OnlineID is not null)
-            {
-                LoadComponentAsync(background = new BufferedContainer
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Depth = 99,
-                    BlurSigma = new Vector2(6),
-                    Children = new Drawable[]
-                    {
-                        new Sprite
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Texture = textures.Get($"https://assets.ppy.sh/beatmaps/{working.BeatmapInfo.BeatmapSet.OnlineID}/covers/cover.jpg"),
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            FillMode = FillMode.Fill
-                        },
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = OsuColour.Gray(0),
-                            Alpha = 0.85f
-                        },
-                    }
-                }).ContinueWith(_ =>
-                {
-                    Schedule(() =>
-                    {
-                        AddInternal(background);
-                    });
-                });
-            }
-
-            calculateDifficulty();
+            loadBackground();
 
             beatmapDataContainer.Show();
         }
@@ -601,9 +570,6 @@ namespace PerformanceCalculatorGUI.Screens
             try
             {
                 difficultyAttributes = difficultyCalculator.Value.Calculate(appliedMods.Value);
-
-                populateScoreParams();
-
                 difficultyAttributesContainer.Children = AttributeConversion.ToDictionary(difficultyAttributes).Select(x =>
                     new LabelledTextBox
                     {
@@ -624,8 +590,12 @@ namespace PerformanceCalculatorGUI.Screens
                 strainVisualizer.Skills.Value = extendedDifficultyCalculator.GetSkills();
             else
                 strainVisualizer.Skills.Value = Array.Empty<Skill>();
+        }
 
-            calculatePerformance();
+        private void debouncedCalculatePerformance()
+        {
+            debouncedPerformanceUpdate?.Cancel();
+            debouncedPerformanceUpdate = Scheduler.AddDelayed(calculatePerformance, 20);
         }
 
         private void calculatePerformance()
@@ -689,13 +659,8 @@ namespace PerformanceCalculatorGUI.Screens
                 updateAccuracyParams(fullScoreDataSwitch.Current.Value);
                 accuracyContainer.Show();
 
-                comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
-                comboTextBox.Text = string.Empty;
-                comboTextBox.MaxValue = comboTextBox.Value.Value = difficultyAttributes.MaxCombo;
+                updateCombo(true);
                 comboTextBox.Show();
-
-                missesTextBox.MaxValue = difficultyAttributes.MaxCombo;
-                missesTextBox.Text = string.Empty;
                 missesTextBox.Show();
             }
             else if (ruleset.Value.ShortName == "mania")
@@ -770,6 +735,90 @@ namespace PerformanceCalculatorGUI.Screens
             // It can only be triggered by a couple of input events and there's no way to invalidate it from the outside
             // See: https://github.com/ppy/osu-framework/blob/fd5615732033c5ea650aa5cabc8595883a2b63f5/osu.Framework/Graphics/UserInterface/TextBox.cs#L528
             textbox.TriggerEvent(new FocusEvent(new InputState()));
+        }
+
+        private void resetMods()
+        {
+            // This is temporary solution to the UX problem that people would usually want to calculate classic scores, but classic and lazer scores have different max combo
+            // We append classic mod automatically so that it is immediately obvious what's going on and makes max combo same as live
+            /*var classicMod = ruleset.Value.CreateInstance().CreateAllMods().SingleOrDefault(m => m is ModClassic);
+
+            if (classicMod != null)
+            {
+                appliedMods.Value = new[] { classicMod };
+                return;
+            }*/
+
+            appliedMods.Value = Array.Empty<Mod>();
+        }
+
+        private void resetCalculations()
+        {
+            createCalculators();
+            resetMods();
+            calculateDifficulty();
+            calculatePerformance();
+            populateScoreParams();
+        }
+
+        private void updateCombo(bool reset)
+        {
+            missesTextBox.MaxValue = difficultyAttributes.MaxCombo;
+
+            comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
+            comboTextBox.MaxValue = difficultyAttributes.MaxCombo;
+
+            if (comboTextBox.Value.Value > difficultyAttributes.MaxCombo ||
+                missesTextBox.Value.Value > difficultyAttributes.MaxCombo)
+                reset = true;
+
+            if (reset)
+            {
+                comboTextBox.Text = string.Empty;
+                comboTextBox.Value.Value = difficultyAttributes.MaxCombo;
+                missesTextBox.Text = string.Empty;
+            }
+        }
+
+        private void loadBackground()
+        {
+            if (background is not null)
+            {
+                RemoveInternal(background);
+            }
+
+            if (working.BeatmapInfo?.BeatmapSet?.OnlineID is not null)
+            {
+                LoadComponentAsync(background = new BufferedContainer
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Depth = 99,
+                    BlurSigma = new Vector2(6),
+                    Children = new Drawable[]
+                    {
+                        new Sprite
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Texture = textures.Get($"https://assets.ppy.sh/beatmaps/{working.BeatmapInfo.BeatmapSet.OnlineID}/covers/cover.jpg"),
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            FillMode = FillMode.Fill
+                        },
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = OsuColour.Gray(0),
+                            Alpha = 0.85f
+                        },
+                    }
+                }).ContinueWith(_ =>
+                {
+                    Schedule(() =>
+                    {
+                        AddInternal(background);
+                    });
+                });
+            }
         }
     }
 }

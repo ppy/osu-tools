@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -10,6 +11,7 @@ using osu.Framework.Platform;
 using osu.Game;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Overlays;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using PerformanceCalculatorGUI.Configuration;
 
@@ -19,6 +21,11 @@ namespace PerformanceCalculatorGUI
     {
         private Bindable<WindowMode> windowMode;
         private DependencyContainer dependencies;
+
+        // This overwrites OsuGameBase's SelectedMods to make sure it can't tweak mods when we don't want it to
+        [Cached]
+        [Cached(typeof(IBindable<IReadOnlyList<Mod>>))]
+        private readonly Bindable<IReadOnlyList<Mod>> mods = new(Array.Empty<Mod>());
 
         [Resolved]
         private FrameworkConfigManager frameworkConfig { get; set; }
