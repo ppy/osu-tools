@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -37,7 +38,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         private FillFlowContainer leaderboardContainer;
 
-        public override bool ShouldShowConfirmationDialogOnSwitch => true;
+        private readonly CancellationTokenSource calculationCancellatonToken = new();
+
+        public override bool ShouldShowConfirmationDialogOnSwitch => leaderboardContainer.Count > 0;
 
         [Resolved]
         private APIManager apiManager { get; set; }
@@ -143,12 +146,22 @@ namespace PerformanceCalculatorGUI.Screens
             };
         }
 
+        protected override void Dispose(bool isDisposing)
+        {
+            calculationCancellatonToken.Cancel();
+            calculationCancellatonToken.Dispose();
+
+            base.Dispose(isDisposing);
+        }
+
         private void calculate()
         {
             loadingLayer.Show();
             calculationButton.State.Value = ButtonState.Loading;
 
             leaderboardContainer.Clear();
+
+            var token = calculationCancellatonToken.Token;
 
             Task.Run(async () =>
             {
@@ -160,11 +173,14 @@ namespace PerformanceCalculatorGUI.Screens
 
                 for (int i = 0; i < playerAmountTextBox.Value.Value; i++)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     var player = leaderboard.Users[i];
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {player.User.Username} top scores...");
 
-                    var playerData = await calculatePlayer(player);
+                    var playerData = await calculatePlayer(player, token);
 
                     calculatedPlayers.Add((player.User.Username, playerData.LocalPP, playerData.LivePP));
 
@@ -187,66 +203,73 @@ namespace PerformanceCalculatorGUI.Screens
                         leaderboardContainer.SetLayoutPosition(leaderboardContainer[liveOrderedPlayers.IndexOf(calculatedPlayer)], localOrderedPlayers.IndexOf(calculatedPlayer));
                     }
                 });
-            }).ContinueWith(t =>
+            }, token).ContinueWith(t =>
             {
                 Schedule(() =>
                 {
                     loadingLayer.Hide();
                     calculationButton.State.Value = ButtonState.Done;
                 });
-            });
+            }, token);
         }
 
-        private async Task<UserPPListPanelData> calculatePlayer(UserStatistics player)
+        private async Task<UserPPListPanelData> calculatePlayer(UserStatistics player, CancellationToken token)
         {
+            if (token.IsCancellationRequested)
+                return new UserPPListPanelData();
+
             var plays = new List<ExtendedScore>();
 
             var apiScores = await apiManager.GetJsonFromApi<List<APIScore>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
 
             var rulesetInstance = ruleset.Value.CreateInstance();
 
-            Parallel.ForEach(apiScores, score =>
+            try
             {
-                try
+                Parallel.ForEach(apiScores, new ParallelOptions { CancellationToken = token }, score =>
                 {
-                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
-
-                    var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
-                    Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
-
-                    var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
+                    try
                     {
-                        TotalScore = score.TotalScore,
-                        MaxCombo = score.MaxCombo,
-                        Mods = mods,
-                        Statistics = new Dictionary<HitResult, int>()
-                    };
+                        var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
-                    scoreInfo.SetCount300(score.Statistics["count_300"]);
-                    scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
-                    scoreInfo.SetCount100(score.Statistics["count_100"]);
-                    scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
-                    scoreInfo.SetCount50(score.Statistics["count_50"]);
-                    scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
+                        var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
+                        Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
 
-                    var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+                        var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
+                        {
+                            TotalScore = score.TotalScore,
+                            MaxCombo = score.MaxCombo,
+                            Mods = mods,
+                            Statistics = new Dictionary<HitResult, int>()
+                        };
 
-                    var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                    var difficultyAttributes = difficultyCalculator.Calculate(RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods));
-                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+                        scoreInfo.SetCount300(score.Statistics["count_300"]);
+                        scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
+                        scoreInfo.SetCount100(score.Statistics["count_100"]);
+                        scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
+                        scoreInfo.SetCount50(score.Statistics["count_50"]);
+                        scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
 
-                    var livePp = score.PP ?? 0.0;
-                    var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
-                    score.PP = perfAttributes?.Total ?? 0.0;
+                        var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
-                    var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
-                    plays.Add(extendedScore);
-                }
-                catch (Exception)
-                {
-                    // dont bother for now
-                }
-            });
+                        var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                        var difficultyAttributes = difficultyCalculator.Calculate(RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods));
+                        var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+
+                        var livePp = score.PP ?? 0.0;
+                        var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                        score.PP = perfAttributes?.Total ?? 0.0;
+
+                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                        plays.Add(extendedScore);
+                    }
+                    catch (Exception)
+                    {
+                        // dont bother for now
+                    }
+                });
+            }
+            catch (OperationCanceledException) { }
 
             var localOrdered = plays.OrderByDescending(x => x.PP).ToList();
             var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();

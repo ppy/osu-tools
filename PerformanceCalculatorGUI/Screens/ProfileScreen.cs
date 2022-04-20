@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework;
 using osu.Framework.Allocation;
@@ -42,6 +43,8 @@ namespace PerformanceCalculatorGUI.Screens
         private UserPPListPanel userPanel;
 
         private string currentUser;
+
+        private readonly CancellationTokenSource calculationCancellatonToken = new();
 
         [Resolved]
         private APIManager apiManager { get; set; }
@@ -159,6 +162,8 @@ namespace PerformanceCalculatorGUI.Screens
 
             scores.Clear();
 
+            var token = calculationCancellatonToken.Token;
+
             Task.Run(async () =>
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting user data...");
@@ -180,6 +185,9 @@ namespace PerformanceCalculatorGUI.Screens
                     layout.RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, username_container_height), new Dimension(GridSizeMode.AutoSize), new Dimension() };
                 });
 
+                if (token.IsCancellationRequested)
+                    return;
+
                 var plays = new List<ExtendedScore>();
 
                 var rulesetInstance = ruleset.Value.CreateInstance();
@@ -190,6 +198,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (var score in apiScores)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
@@ -228,6 +239,9 @@ namespace PerformanceCalculatorGUI.Screens
                     Schedule(() => scores.Add(new ExtendedProfileScore(extendedScore)));
                 }
 
+                if (token.IsCancellationRequested)
+                    return;
+
                 var localOrdered = plays.OrderByDescending(x => x.PP).ToList();
                 var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
 
@@ -260,14 +274,22 @@ namespace PerformanceCalculatorGUI.Screens
                         PlaycountPP = playcountBonusPP
                     };
                 });
-            }).ContinueWith(t =>
+            }, token).ContinueWith(t =>
             {
                 Schedule(() =>
                 {
                     loadingLayer.Hide();
                     calculationButton.State.Value = ButtonState.Done;
                 });
-            });
+            }, token);
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            calculationCancellatonToken.Cancel();
+            calculationCancellatonToken.Dispose();
+
+            base.Dispose(isDisposing);
         }
     }
 }
