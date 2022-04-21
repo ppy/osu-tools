@@ -8,7 +8,9 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
+using osu.Game.Configuration;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
@@ -125,10 +127,13 @@ namespace PerformanceCalculatorGUI
                             },
                             new Drawable[]
                             {
-                                screenStack = new ScreenStack
+                                new ScalingContainer(ScalingMode.Everything)
                                 {
-                                    Depth = 1,
-                                    RelativeSizeAxes = Axes.Both
+                                    Child = screenStack = new ScreenStack
+                                    {
+                                        Depth = 1,
+                                        RelativeSizeAxes = Axes.Both
+                                    }
                                 }
                             }
                         } 

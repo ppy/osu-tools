@@ -7,11 +7,13 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.Chat;
+using osu.Game.Overlays.Settings;
 using osuTK;
 using PerformanceCalculatorGUI.Configuration;
 
@@ -27,17 +29,19 @@ namespace PerformanceCalculatorGUI.Components
         private Bindable<string> clientSecretBindable;
         private Bindable<string> pathBindable;
         private Bindable<string> cacheBindable;
+        private Bindable<float> scaleBindable;
 
         private const string api_key_link = "https://osu.ppy.sh/home/account/edit#new-oauth-application";
 
         [BackgroundDependencyLoader]
-        private void load(SettingsManager configManager)
+        private void load(SettingsManager configManager, OsuConfigManager osuConfig)
         {
             this.configManager = configManager;
             clientIdBindable = configManager.GetBindable<string>(Settings.ClientId);
             clientSecretBindable = configManager.GetBindable<string>(Settings.ClientSecret);
             pathBindable = configManager.GetBindable<string>(Settings.DefaultPath);
             cacheBindable = configManager.GetBindable<string>(Settings.CachePath);
+            scaleBindable = osuConfig.GetBindable<float>(OsuSetting.UIScale);
 
             Add(new Container
             {
@@ -91,6 +95,22 @@ namespace PerformanceCalculatorGUI.Components
                                 RelativeSizeAxes = Axes.X,
                                 Label = "Beatmap cache path",
                                 Current = { BindTarget = cacheBindable }
+                            },
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                Size = new Vector2(0.8f, 3f),
+                                Colour = OsuColour.Gray(0.5f)
+                            },
+                            new LabelledSliderBar<float>
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                Label = "UI Scale",
+                                Current = { BindTarget = scaleBindable }
                             },
                             new OsuButton
                             {
