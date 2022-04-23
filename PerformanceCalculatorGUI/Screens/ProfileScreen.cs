@@ -45,7 +45,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private string currentUser;
 
-        private readonly CancellationTokenSource calculationCancellatonToken = new();
+        private CancellationTokenSource calculationCancellatonToken;
 
         [Resolved]
         private NotificationDisplay notificationDisplay { get; set; }
@@ -166,6 +166,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             scores.Clear();
 
+            calculationCancellatonToken = new CancellationTokenSource();
             var token = calculationCancellatonToken.Token;
 
             Task.Run(async () =>
@@ -294,10 +295,11 @@ namespace PerformanceCalculatorGUI.Screens
 
         protected override void Dispose(bool isDisposing)
         {
-            calculationCancellatonToken.Cancel();
-            calculationCancellatonToken.Dispose();
-
             base.Dispose(isDisposing);
+
+            calculationCancellatonToken?.Cancel();
+            calculationCancellatonToken?.Dispose();
+            calculationCancellatonToken = null;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private FillFlowContainer leaderboardContainer;
 
-        private readonly CancellationTokenSource calculationCancellatonToken = new();
+        private CancellationTokenSource calculationCancellatonToken;
 
         public override bool ShouldShowConfirmationDialogOnSwitch => leaderboardContainer.Count > 0;
 
@@ -152,10 +152,11 @@ namespace PerformanceCalculatorGUI.Screens
 
         protected override void Dispose(bool isDisposing)
         {
-            calculationCancellatonToken.Cancel();
-            calculationCancellatonToken.Dispose();
-
             base.Dispose(isDisposing);
+
+            calculationCancellatonToken?.Cancel();
+            calculationCancellatonToken?.Dispose();
+            calculationCancellatonToken = null;
         }
 
         private void calculate()
@@ -165,6 +166,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             leaderboardContainer.Clear();
 
+            calculationCancellatonToken = new CancellationTokenSource();
             var token = calculationCancellatonToken.Token;
 
             Task.Run(async () =>
