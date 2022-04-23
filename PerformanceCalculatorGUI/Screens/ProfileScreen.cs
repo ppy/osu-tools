@@ -11,6 +11,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
@@ -45,6 +46,9 @@ namespace PerformanceCalculatorGUI.Screens
         private string currentUser;
 
         private readonly CancellationTokenSource calculationCancellatonToken = new();
+
+        [Resolved]
+        private NotificationDisplay notificationDisplay { get; set; }
 
         [Resolved]
         private APIManager apiManager { get; set; }
@@ -275,6 +279,10 @@ namespace PerformanceCalculatorGUI.Screens
                     };
                 });
             }, token).ContinueWith(t =>
+            {
+                Logger.Log(t.Exception?.ToString(), level: LogLevel.Error);
+                notificationDisplay.Display(new Notification(t.Exception?.Flatten().Message));
+            }, TaskContinuationOptions.OnlyOnFaulted).ContinueWith(t =>
             {
                 Schedule(() =>
                 {

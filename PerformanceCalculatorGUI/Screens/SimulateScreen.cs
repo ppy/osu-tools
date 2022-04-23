@@ -16,6 +16,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
 using osu.Framework.Input.States;
+using osu.Framework.Logging;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
@@ -82,6 +83,9 @@ namespace PerformanceCalculatorGUI.Screens
         private BufferedContainer background;
 
         private ScheduledDelegate debouncedPerformanceUpdate;
+
+        [Resolved]
+        private NotificationDisplay notificationDisplay { get; set; }
 
         [Resolved]
         private AudioManager audio { get; set; }
@@ -499,10 +503,10 @@ namespace PerformanceCalculatorGUI.Screens
             calculatePerformance();
         }
 
-        private void resetBeatmap(string reason)
+        private void resetBeatmap()
         {
             working = null;
-            beatmapTitle.Text = reason;
+            beatmapTitle.Text = string.Empty;
             resetMods();
             beatmapDataContainer.Hide();
 
@@ -518,7 +522,8 @@ namespace PerformanceCalculatorGUI.Screens
 
             if (string.IsNullOrEmpty(beatmap))
             {
-                resetBeatmap("Empty beatmap path!");
+                showError("Empty beatmap path!");
+                resetBeatmap();
                 return;
             }
 
@@ -528,8 +533,8 @@ namespace PerformanceCalculatorGUI.Screens
             }
             catch (Exception e)
             {
-                // TODO: better error display
-                resetBeatmap(e.Message);
+                showError(e);
+                resetBeatmap();
                 return;
             }
 
@@ -581,8 +586,8 @@ namespace PerformanceCalculatorGUI.Screens
             }
             catch (Exception e)
             {
-                // TODO: better error display
-                resetBeatmap(e.Message);
+                showError(e);
+                resetBeatmap();
                 return;
             }
 
@@ -640,8 +645,8 @@ namespace PerformanceCalculatorGUI.Screens
             }
             catch (Exception e)
             {
-                // TODO: better error display
-                resetBeatmap(e.Message);
+                showError(e);
+                resetBeatmap();
             }
         }
 
@@ -825,6 +830,22 @@ namespace PerformanceCalculatorGUI.Screens
                     });
                 });
             }
+        }
+
+        private void showError(Exception e)
+        {
+            Logger.Log(e.ToString(), level: LogLevel.Error);
+
+            var message = e is AggregateException aggregateException ? aggregateException.Flatten().Message : e.Message;
+            showError(message, false);
+        }
+
+        private void showError(string message, bool log = true)
+        {
+            if (log)
+                Logger.Log(message, level: LogLevel.Error);
+
+            notificationDisplay.Display(new Notification(message));
         }
     }
 }

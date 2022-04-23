@@ -10,6 +10,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
@@ -41,6 +42,9 @@ namespace PerformanceCalculatorGUI.Screens
         private readonly CancellationTokenSource calculationCancellatonToken = new();
 
         public override bool ShouldShowConfirmationDialogOnSwitch => leaderboardContainer.Count > 0;
+
+        [Resolved]
+        private NotificationDisplay notificationDisplay { get; set; }
 
         [Resolved]
         private APIManager apiManager { get; set; }
@@ -205,6 +209,10 @@ namespace PerformanceCalculatorGUI.Screens
                 });
             }, token).ContinueWith(t =>
             {
+                Logger.Log(t.Exception?.ToString(), level: LogLevel.Error);
+                notificationDisplay.Display(new Notification(t.Exception?.Flatten().Message));
+            }, TaskContinuationOptions.OnlyOnFaulted).ContinueWith(t =>
+            {
                 Schedule(() =>
                 {
                     loadingLayer.Hide();
@@ -263,9 +271,12 @@ namespace PerformanceCalculatorGUI.Screens
                         var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
                         plays.Add(extendedScore);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        // dont bother for now
+                        Logger.Log(e.ToString(), level: LogLevel.Error);
+                        notificationDisplay.Display(new Notification(e.Message));
+
+                        // should probably stop calculating??
                     }
                 });
             }
