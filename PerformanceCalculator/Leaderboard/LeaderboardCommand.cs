@@ -81,7 +81,7 @@ namespace PerformanceCalculator.Leaderboard
                     var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                     var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
-                    var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
+                    var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
                     var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
                     plays.Add((performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes).Total ?? 0, play.pp));

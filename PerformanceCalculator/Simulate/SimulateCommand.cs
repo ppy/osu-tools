@@ -59,11 +59,15 @@ namespace PerformanceCalculator.Simulate
         [Option(Template = "-j|--json", Description = "Output results as JSON.")]
         public bool OutputJson { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
+        public bool NoClassicMod { get; }
+
         public override void Execute()
         {
             var ruleset = Ruleset;
 
-            var mods = GetMods(ruleset).ToArray();
+            var mods = NoClassicMod ? GetMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset));
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
@@ -74,7 +78,7 @@ namespace PerformanceCalculator.Simulate
             var accuracy = GetAccuracy(statistics);
 
             var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
-            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.TrimNonDifficultyAdjustmentMods(ruleset, mods).ToArray());
+            var difficultyAttributes = difficultyCalculator.Calculate(mods);
             var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
             var ppAttributes = performanceCalculator?.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
@@ -156,13 +160,13 @@ namespace PerformanceCalculator.Simulate
             document.Children.Add(new Separator());
         }
 
-        protected List<Mod> GetMods(Ruleset ruleset)
+        protected Mod[] GetMods(Ruleset ruleset)
         {
-            var mods = new List<Mod>();
             if (Mods == null)
-                return mods;
+                return Array.Empty<Mod>();
 
             var availableMods = ruleset.CreateAllMods().ToList();
+            var mods = new List<Mod>();
 
             foreach (var modString in Mods)
             {
@@ -173,7 +177,7 @@ namespace PerformanceCalculator.Simulate
                 mods.Add(newMod);
             }
 
-            return mods;
+            return mods.ToArray();
         }
 
         protected abstract int GetMaxCombo(IBeatmap beatmap);
