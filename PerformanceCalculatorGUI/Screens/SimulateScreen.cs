@@ -31,6 +31,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Utils;
@@ -622,11 +623,19 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
 
-                var statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood);
+                var accuracy = accuracyTextBox.Value.Value / 100.0;
+                Dictionary<HitResult, int> statistics = null;
+
+                if (ruleset.Value.OnlineID != -1)
+                {
+                    // official rulesets can generate more precise hits from accuracy
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood);
+                    accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
+                }
 
                 var ppAttributes = performanceCalculator?.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.Value)
                 {
-                    Accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics),
+                    Accuracy = accuracy,
                     MaxCombo = comboTextBox.Value.Value,
                     Statistics = statistics,
                     Mods = appliedMods.Value.ToArray(),
@@ -657,8 +666,6 @@ namespace PerformanceCalculatorGUI.Screens
             missesTextBox.Hide();
             scoreTextBox.Hide();
 
-            // TODO: other rulesets?
-
             if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
             {
                 updateAccuracyParams(fullScoreDataSwitch.Current.Value);
@@ -673,13 +680,31 @@ namespace PerformanceCalculatorGUI.Screens
                 scoreTextBox.Text = string.Empty;
                 scoreTextBox.Show();
             }
+            else
+            {
+                // show everything if it's something non-official
+                updateAccuracyParams(false);
+                accuracyContainer.Show();
+
+                updateCombo(true);
+                comboTextBox.Show();
+                missesTextBox.Show();
+
+                scoreTextBox.Text = string.Empty;
+                scoreTextBox.Show();
+            }
         }
 
         private void updateAccuracyParams(bool useFullScoreData)
         {
             goodsTextBox.Text = string.Empty;
+            goodsTextBox.Value.Value = 0;
+
             mehsTextBox.Text = string.Empty;
+            mehsTextBox.Value.Value = 0;
+
             accuracyTextBox.Text = string.Empty;
+            accuracyTextBox.Value.Value = 100;
 
             if (useFullScoreData)
             {
@@ -716,7 +741,13 @@ namespace PerformanceCalculatorGUI.Screens
                             new Dimension(GridSizeMode.Absolute),
                             new Dimension(GridSizeMode.AutoSize)
                         },
-                    _ => Array.Empty<Dimension>()
+                    _ => new[]
+                    {
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.AutoSize)
+                    }
                 };
 
                 fixupTextBox(goodsTextBox);
@@ -731,6 +762,8 @@ namespace PerformanceCalculatorGUI.Screens
                     new Dimension(GridSizeMode.Absolute),
                     new Dimension(GridSizeMode.AutoSize)
                 };
+
+                fixupTextBox(accuracyTextBox);
             }
         }
 
