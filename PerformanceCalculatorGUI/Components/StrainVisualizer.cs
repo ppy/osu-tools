@@ -66,13 +66,17 @@ namespace PerformanceCalculatorGUI.Components
             {
                 graphsContainer.AddRange(new Drawable[]
                 {
-                    new BarGraph
+                    new BufferedContainer(cachedFrameBuffer: true)
                     {
-                        Alpha = graphAlpha,
                         RelativeSizeAxes = Axes.Both,
-                        MaxValue = strainMaxValue,
-                        Values = strains[i],
-                        Colour = skillColours[i]
+                        Alpha = graphAlpha,
+                        Colour = skillColours[i],
+                        Child = new BarGraph
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            MaxValue = strainMaxValue,
+                            Values = strains[i]
+                        }
                     }
                 });
             }
