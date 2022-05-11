@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
@@ -10,6 +11,7 @@ using osu.Framework.IO.Network;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
+using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Skinning;
 
 namespace PerformanceCalculatorGUI
@@ -20,6 +22,7 @@ namespace PerformanceCalculatorGUI
     public class ProcessorWorkingBeatmap : WorkingBeatmap
     {
         private readonly Beatmap beatmap;
+        private readonly AudioManager audioManager;
 
         /// <summary>
         /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a .osu file.
@@ -30,12 +33,14 @@ namespace PerformanceCalculatorGUI
         public ProcessorWorkingBeatmap(string file, int? beatmapId = null, AudioManager audioManager = null)
             : this(readFromFile(file), beatmapId, audioManager)
         {
+            this.audioManager = audioManager;
         }
 
         private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null, AudioManager audioManager = null)
             : base(beatmap.BeatmapInfo, audioManager)
         {
             this.beatmap = beatmap;
+            this.audioManager = audioManager;
 
             beatmap.BeatmapInfo.Ruleset = RulesetHelper.GetRulesetFromLegacyID(beatmap.BeatmapInfo.Ruleset.OnlineID).RulesetInfo;
 
@@ -81,9 +86,34 @@ namespace PerformanceCalculatorGUI
             return new ProcessorWorkingBeatmap(cachePath, beatmapId, audioManager);
         }
 
+        protected override Track GetBeatmapTrack()
+        {
+            const double excess_length = 1000;
+
+            var lastObject = Beatmap?.HitObjects.LastOrDefault();
+
+            double length;
+
+            switch (lastObject)
+            {
+                case null:
+                    length = 1000;
+                    break;
+
+                case IHasDuration endTime:
+                    length = endTime.EndTime + excess_length;
+                    break;
+
+                default:
+                    length = lastObject.StartTime + excess_length;
+                    break;
+            }
+
+            return audioManager.Tracks.GetVirtual(length);
+        }
+
         protected override IBeatmap GetBeatmap() => beatmap;
         protected override Texture GetBackground() => null;
-        protected override Track GetBeatmapTrack() => null;
         protected override ISkin GetSkin() => null;
         public override Stream GetStream(string storagePath) => null;
     }
