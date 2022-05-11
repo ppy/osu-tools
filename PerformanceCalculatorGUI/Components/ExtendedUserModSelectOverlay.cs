@@ -2,35 +2,26 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
+using osu.Game.Overlays;
 using osu.Game.Overlays.Mods;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class ExtendedUserModSelectOverlay : UserModSelectOverlay
+    internal class ExtendedUserModSelectOverlay : UserModSelectScreen
     {
-        private const float animation_duration = 100;
+        protected override bool ShowTotalMultiplier => false;
 
         public ExtendedUserModSelectOverlay()
+            : base(OverlayColourScheme.Blue)
         {
-            Height = 1;
         }
 
         protected override void PopIn()
         {
-            Schedule(() => GetContainingInputManager().TriggerFocusContention(this));
+            Header.Hide();
+            MainAreaContent.Padding = new MarginPadding { Bottom = 64 };
 
-            Waves.Show(); // we have to show waves once
-            this.FadeIn(animation_duration);
-        }
-
-        protected override void PopOut()
-        {
-            if (!HasFocus)
-                return;
-
-            GetContainingInputManager().ChangeFocus(null);
-
-            this.FadeOut(animation_duration);
+            base.PopIn();
         }
     }
 }

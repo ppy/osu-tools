@@ -26,7 +26,6 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
-using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Difficulty.Skills;
@@ -46,7 +45,7 @@ namespace PerformanceCalculatorGUI.Screens
     {
         private ProcessorWorkingBeatmap working;
 
-        private UserModSelectOverlay userModsSelectOverlay;
+        private ExtendedUserModSelectOverlay userModsSelectOverlay;
 
         private GridContainer beatmapImportContainer;
         private LabelledTextBox beatmapFileTextBox;
@@ -316,7 +315,9 @@ namespace PerformanceCalculatorGUI.Screens
                                                 {
                                                     Name = "Mod selection overlay",
                                                     RelativeSizeAxes = Axes.X,
-                                                    Height = 400,
+                                                    Height = 300,
+                                                    Width = 0.75f,
+                                                    Scale = new Vector2(1.5f),
                                                     Child = userModsSelectOverlay = new ExtendedUserModSelectOverlay
                                                     {
                                                         RelativeSizeAxes = Axes.Both,
@@ -496,7 +497,11 @@ namespace PerformanceCalculatorGUI.Screens
             modSettingChangeTracker.SettingChanged += m =>
             {
                 debouncedStatisticsUpdate?.Cancel();
-                debouncedStatisticsUpdate = Scheduler.AddDelayed(calculateDifficulty, 100);
+                debouncedStatisticsUpdate = Scheduler.AddDelayed(() =>
+                {
+                    calculateDifficulty();
+                    calculatePerformance();
+                }, 100);
             };
 
             calculateDifficulty();
