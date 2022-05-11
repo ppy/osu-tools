@@ -83,7 +83,16 @@ namespace PerformanceCalculatorGUI
                     throw new ArgumentException($"Beatmap {beatmapId} does not exist.");
             }
 
-            return new ProcessorWorkingBeatmap(cachePath, beatmapId, audioManager);
+            try
+            {
+                return new ProcessorWorkingBeatmap(readFromFile(cachePath), beatmapId, audioManager);
+            }
+            catch (Exception)
+            {
+                // remove maps that failed to import - its safer to try redownloading it later than keeping a broken map
+                File.Delete(cachePath);
+                throw;
+            }
         }
 
         protected override Track GetBeatmapTrack()
