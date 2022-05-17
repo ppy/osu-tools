@@ -21,6 +21,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public class OsuObjectInspectorRuleset : DrawableOsuRuleset
     {
+        public const int HIT_OBJECT_FADE_OUT_EXTENSION = 600;
+
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
@@ -77,7 +79,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     using (circle.BeginAbsoluteSequence(circle.HitStateUpdateTime))
                     {
                         circle.ApproachCircle
-                              .FadeOutFromOne(DrawableOsuEditorRuleset.EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION * 4)
+                              .FadeOutFromOne(HIT_OBJECT_FADE_OUT_EXTENSION * 4)
                               .Expire();
 
                         circle.ApproachCircle.ScaleTo(1.1f, 300, Easing.OutQuint);
@@ -117,7 +119,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         hitObject.RemoveTransform(existing);
 
                         using (hitObject.BeginAbsoluteSequence(hitObject.HitStateUpdateTime))
-                            hitObject.FadeOut(DrawableOsuEditorRuleset.EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
+                            hitObject.FadeOut(HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
                         break;
                 }
             }

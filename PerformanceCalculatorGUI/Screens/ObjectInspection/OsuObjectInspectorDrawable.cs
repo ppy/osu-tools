@@ -79,7 +79,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     panel.Delay(hitObject.TimePreempt).MoveTo(hitObject.StackedEndPosition, movementTime);
                 }
 
-                panel.Delay(visibleTime).FadeOut(DrawableOsuEditorRuleset.EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
+                panel.Delay(visibleTime).FadeOut(OsuObjectInspectorRuleset.HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
             }
 
             entry.LifetimeEnd = panel.LifetimeEnd;
@@ -132,7 +132,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
 
             LifetimeStart = HitObject.StartTime - HitObject.TimePreempt;
-            LifetimeEnd = HitObject.GetEndTime() + DrawableOsuEditorRuleset.EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION;
+            LifetimeEnd = HitObject.GetEndTime() + OsuObjectInspectorRuleset.HIT_OBJECT_FADE_OUT_EXTENSION;
 
             Invalidated?.Invoke();
         }

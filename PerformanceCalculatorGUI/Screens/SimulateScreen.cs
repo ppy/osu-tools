@@ -469,7 +469,13 @@ namespace PerformanceCalculatorGUI.Screens
             });
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(calculateDifficulty);
+            {
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() =>
+                {
+                    calculateDifficulty();
+                    calculatePerformance();
+                });
+            }
         }
 
         protected override void Dispose(bool isDisposing)
