@@ -815,6 +815,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void updateCombo(bool reset)
         {
+            if (difficultyAttributes is null)
+                return;
+
             missesTextBox.MaxValue = difficultyAttributes.MaxCombo;
 
             comboTextBox.PlaceholderText = difficultyAttributes.MaxCombo.ToString();
