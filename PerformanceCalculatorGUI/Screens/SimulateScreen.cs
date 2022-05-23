@@ -604,7 +604,13 @@ namespace PerformanceCalculatorGUI.Screens
             }
 
             if (difficultyCalculator.Value is IExtendedDifficultyCalculator extendedDifficultyCalculator)
+            {
+                // StrainSkill always skips the first object
+                if (working.Beatmap?.HitObjects?.Count > 1)
+                    strainVisualizer.TimeUntilFirstStrain.Value = (int)working.Beatmap.HitObjects[1].StartTime;
+
                 strainVisualizer.Skills.Value = extendedDifficultyCalculator.GetSkills();
+            }
             else
                 strainVisualizer.Skills.Value = Array.Empty<Skill>();
         }

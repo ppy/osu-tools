@@ -9,7 +9,9 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
@@ -20,11 +22,61 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
+    public class StrainBar : Bar, IHasTooltip
+    {
+        public StrainBar(string tooltip)
+        {
+            TooltipText = tooltip;
+        }
+
+        public LocalisableString TooltipText { get; }
+    }
+
+    public class StrainBarGraph : FillFlowContainer<StrainBar>
+    {
+        /// <summary>
+        /// Manually sets the max value, if null <see cref="Enumerable.Max(IEnumerable{float})"/> is instead used
+        /// </summary>
+        public float? MaxValue { get; set; }
+
+        /// <summary>
+        /// A list of floats that defines the length of each <see cref="Bar"/>
+        /// </summary>
+        public IEnumerable<(float val, string tooltip)> Values
+        {
+            set
+            {
+                Clear();
+
+                foreach (var (val, tooltip) in value)
+                {
+                    float length = MaxValue ?? value.Max(x => x.val);
+                    if (length != 0)
+                        length = val / length;
+
+                    float size = value.Count();
+                    if (size != 0)
+                        size = 1.0f / size;
+
+                    Add(new StrainBar(tooltip)
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Size = new Vector2(size, 1),
+                        Length = length,
+                        Direction = BarDirection.BottomToTop
+                    });
+                }
+            }
+        }
+    }
+
     internal class StrainVisualizer : Container
     {
         public readonly Bindable<Skill[]> Skills = new();
 
         private readonly List<Bindable<bool>> graphToggles = new();
+
+        public readonly Bindable<int> TimeUntilFirstStrain = new();
 
         private ZoomableScrollContainer graphsContainer;
         private FillFlowContainer legendContainer;
@@ -56,11 +108,26 @@ namespace PerformanceCalculatorGUI.Components
 
             var graphAlpha = Math.Min(1.5f / skills.Length, 0.9f);
 
-            List<float[]> strains = new List<float[]>();
-            foreach (var skill in skills)
-                strains.Add(((StrainSkill)skill).GetCurrentStrainPeaks().Select(x => (float)x).ToArray());
+            List<(float val, string tooltip)[]> strainLists = new();
 
-            var strainMaxValue = strains.Max(x => x.Max());
+            foreach (var skill in skills)
+            {
+                var strains = ((StrainSkill)skill).GetCurrentStrainPeaks().ToArray();
+
+                var skillStrainList = new List<(float val, string tooltip)>();
+
+                for (int i = 0; i < strains.Length; i++)
+                {
+                    var strain = strains[i];
+                    var strainTime = TimeSpan.FromMilliseconds(TimeUntilFirstStrain.Value + i * 400); // 400 is strain length in StrainSkill
+                    var tooltipText = $"~{strainTime:mm\\:ss\\.ff}";
+                    skillStrainList.Add(((float)strain, tooltipText));
+                }
+
+                strainLists.Add(skillStrainList.ToArray());
+            }
+
+            var strainMaxValue = strainLists.Max(x => x.Max(x => x.val));
 
             for (int i = 0; i < skills.Length; i++)
             {
@@ -71,11 +138,11 @@ namespace PerformanceCalculatorGUI.Components
                         RelativeSizeAxes = Axes.Both,
                         Alpha = graphAlpha,
                         Colour = skillColours[i],
-                        Child = new BarGraph
+                        Child = new StrainBarGraph
                         {
                             RelativeSizeAxes = Axes.Both,
                             MaxValue = strainMaxValue,
-                            Values = strains[i]
+                            Values = strainLists[i]
                         }
                     }
                 });
