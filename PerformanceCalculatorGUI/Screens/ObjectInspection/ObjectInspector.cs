@@ -12,6 +12,7 @@ using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
@@ -64,7 +65,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OverlayColourProvider colourProvider)
         {
             var rulesetInstance = ruleset.Value.CreateInstance();
             var modifiedMods = mods.Value.Append(rulesetInstance.GetAutoplayMod()).ToList();
@@ -102,38 +103,32 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         Anchor = Anchor.BottomLeft,
                         Origin = Anchor.BottomLeft,
                         RelativeSizeAxes = Axes.X,
-                        Padding = new MarginPadding(5f),
                         Height = bottom_bar_height,
-                        Child = new GridContainer
+                        Children = new Drawable[]
                         {
-                            RelativeSizeAxes = Axes.Both,
-                            ColumnDimensions = new[]
+                            new Box
                             {
-                                new Dimension(GridSizeMode.Absolute, 200),
-                                new Dimension(),
-                                new Dimension(GridSizeMode.Absolute, 200)
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = colourProvider.Background4,
                             },
-                            Content = new[]
+                            new GridContainer
                             {
-                                new Drawable[]
+                                RelativeSizeAxes = Axes.Both,
+                                ColumnDimensions = new[]
                                 {
-                                    new Container
-                                    {
-                                        RelativeSizeAxes = Axes.Both,
-                                        Padding = new MarginPadding { Right = 10 },
-                                        Child = new TimeInfoContainer { RelativeSizeAxes = Axes.Both },
-                                    },
-                                    new SummaryTimeline
-                                    {
-                                        RelativeSizeAxes = Axes.Both,
-                                    },
-                                    new Container
-                                    {
-                                        RelativeSizeAxes = Axes.Both,
-                                        Padding = new MarginPadding { Left = 10 },
-                                        Child = new PlaybackControl { RelativeSizeAxes = Axes.Both },
-                                    }
+                                    new Dimension(GridSizeMode.Absolute, 170),
+                                    new Dimension(),
+                                    new Dimension(GridSizeMode.Absolute, 220)
                                 },
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        new TimeInfoContainer { RelativeSizeAxes = Axes.Both },
+                                        new SummaryTimeline { RelativeSizeAxes = Axes.Both,},
+                                        new PlaybackControl { RelativeSizeAxes = Axes.Both },
+                                    },
+                                }
                             }
                         }
                     },
