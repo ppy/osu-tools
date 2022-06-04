@@ -31,7 +31,7 @@ namespace PerformanceCalculatorGUI
         public const float CONTROL_AREA_HEIGHT = 50;
 
         public const float SCREEN_SWITCH_HEIGHT = 35;
-        public const float SCREEN_SWITCH_WIDTH = 100;
+        public const float SCREEN_SWITCH_WIDTH = 150;
         public const float SCREEN_SWITCH_PADDING = (CONTROL_AREA_HEIGHT - SCREEN_SWITCH_HEIGHT) / 2.0f;
 
         [Resolved]
@@ -100,12 +100,20 @@ namespace PerformanceCalculatorGUI
                                                 },
                                                 new OsuButton
                                                 {
-                                                    Text = "leaderboard",
+                                                    Text = "player leaderboard",
                                                     Height = SCREEN_SWITCH_HEIGHT,
                                                     Width = SCREEN_SWITCH_WIDTH,
                                                     BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new LeaderboardScreen())
-                                                }
+                                                },
+                                                new OsuButton
+                                                {
+                                                    Text = "beatmap leaderboard",
+                                                    Height = SCREEN_SWITCH_HEIGHT,
+                                                    Width = SCREEN_SWITCH_WIDTH,
+                                                    BackgroundColour = colours.Gray5,
+                                                    Action = () => setScreen(new BeatmapLeaderboardScreen())
+                                                },
                                             }
                                         },
                                         new FillFlowContainer
