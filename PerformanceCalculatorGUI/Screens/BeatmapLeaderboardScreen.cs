@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,6 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Logging;
-using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
@@ -45,7 +46,7 @@ namespace PerformanceCalculatorGUI.Screens
         private CancellationTokenSource calculationCancellatonToken;
 
         [Cached]
-        private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Orange);
+        private OverlayColourProvider colourProvider = new(OverlayColourScheme.Orange);
 
         [Resolved]
         private NotificationDisplay notificationDisplay { get; set; }
@@ -148,6 +149,7 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
+            ruleset.BindValueChanged(_ => { calculate(); });
             beatmapIdTextBox.OnCommit += (_, _) => { calculate(); };
 
             if (RuntimeInfo.IsDesktop)
