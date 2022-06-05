@@ -6,6 +6,7 @@ using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Game.Beatmaps.Drawables.Cards;
 using osu.Game.Input.Bindings;
 using osu.Game.Overlays.Toolbar;
@@ -13,6 +14,16 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
+    public class SettingsIconPill : IconPill
+    {
+        public SettingsIconPill()
+            : base(FontAwesome.Solid.Cog)
+        {
+        }
+
+        public override LocalisableString TooltipText => "Settings";
+    }
+
     internal class SettingsButton : ToolbarButton, IHasPopover
     {
         public SettingsButton()
@@ -21,7 +32,7 @@ namespace PerformanceCalculatorGUI.Components
             Hotkey = GlobalAction.ToggleSettings;
             TooltipText = "Settings";
 
-            SetIcon(new IconPill(FontAwesome.Solid.Cog) { IconSize = new Vector2(80) });
+            SetIcon(new SettingsIconPill { IconSize = new Vector2(80) });
         }
 
         public Popover GetPopover() => new SettingsPopover();
