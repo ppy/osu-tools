@@ -161,6 +161,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void calculate()
         {
+            calculationCancellatonToken?.Cancel();
+            calculationCancellatonToken?.Dispose();
+
             loadingLayer.Show();
             calculationButton.State.Value = ButtonState.Loading;
 
