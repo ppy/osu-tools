@@ -380,7 +380,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Margin = new MarginPadding(10.0f),
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
-                                                    Text = "Strain graph"
+                                                    Text = "Strain graph (alt+scroll to zoom)"
                                                 },
                                                 new Container
                                                 {

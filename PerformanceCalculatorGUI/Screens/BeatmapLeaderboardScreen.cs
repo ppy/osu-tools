@@ -315,14 +315,12 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     var mod = allowedMods[rng.Next(0, allowedMods.Length)];
 
-                    if (appliedMods.SelectMany(x => x.IncompatibleMods).Any(c => c == mod.GetType() || c.IsInstanceOfType(mod)))
+                    if (appliedMods.SelectMany(x => x.IncompatibleMods).Any(c => c == mod.GetType() || c.IsInstanceOfType(mod)) ||
+                        appliedMods.Any(c => c.GetType() == mod.GetType()))
                     {
                         m--;
                         continue;
                     }
-
-                    if (appliedMods.Any(c => c.GetType() == mod.GetType()))
-                        continue;
 
                     appliedMods.Add(mod);
                 }
