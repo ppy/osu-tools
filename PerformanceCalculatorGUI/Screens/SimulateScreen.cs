@@ -694,6 +694,11 @@ namespace PerformanceCalculatorGUI.Screens
             }
             else if (ruleset.Value.ShortName == "mania")
             {
+                updateAccuracyParams(fullScoreDataSwitch.Current.Value);
+                accuracyContainer.Show();
+
+                missesTextBox.Show();
+
                 scoreTextBox.Text = string.Empty;
                 scoreTextBox.Show();
             }

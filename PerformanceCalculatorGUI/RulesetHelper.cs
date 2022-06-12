@@ -110,7 +110,7 @@ namespace PerformanceCalculatorGUI
                 0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
                 1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
                 2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
-                3 => generateManiaHitResults(beatmap),
+                3 => generateManiaHitResults(accuracy, beatmap, countMiss),
                 _ => throw new ArgumentException("Invalid ruleset ID provided.")
             };
         }
@@ -210,19 +210,32 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        private static Dictionary<HitResult, int> generateManiaHitResults(IBeatmap beatmap)
+        private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, int countMiss)
         {
-            var totalHits = beatmap.HitObjects.Count;
+            var totalResultCount = beatmap.HitObjects.Count;
 
-            // Only total number of hits is considered currently, so specifics don't matter
+            // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
+            var targetTotal = (int)Math.Round(accuracy * totalResultCount * 6);
+
+            // Start by assuming every non miss is a meh
+            // This is how much increase is needed by greats and goods
+            var delta = targetTotal - (totalResultCount - countMiss);
+
+            // Each great increases total by 5 (great-meh=5)
+            int countGreat = delta / 5;
+            // Each good increases total by 1 (good-meh=1). Covers remaining difference.
+            int countGood = delta % 5;
+            // Mehs are left over. Could be negative if impossible value of amountMiss chosen
+            int countMeh = totalResultCount - countGreat - countGood - countMiss;
+
             return new Dictionary<HitResult, int>
             {
-                { HitResult.Perfect, totalHits },
+                { HitResult.Perfect, countGreat },
                 { HitResult.Great, 0 },
+                { HitResult.Good, countGood },
                 { HitResult.Ok, 0 },
-                { HitResult.Good, 0 },
-                { HitResult.Meh, 0 },
-                { HitResult.Miss, 0 }
+                { HitResult.Meh, countMeh },
+                { HitResult.Miss, countMiss }
             };
         }
 
@@ -233,6 +246,7 @@ namespace PerformanceCalculatorGUI
                 0 => getOsuAccuracy(statistics),
                 1 => getTaikoAccuracy(statistics),
                 2 => getCatchAccuracy(statistics),
+                3 => getManiaAccuracy(statistics),
                 _ => 0.0
             };
         }
@@ -264,6 +278,21 @@ namespace PerformanceCalculatorGUI
             double total = hits + statistics[HitResult.Miss] + statistics[HitResult.SmallTickMiss];
 
             return hits / total;
+        }
+
+        private static double getManiaAccuracy(Dictionary<HitResult, int> statistics)
+        {
+            var countPerfect = statistics[HitResult.Perfect];
+            var countGreat = statistics[HitResult.Great];
+            var countGood = statistics[HitResult.Good];
+            var countOk = statistics[HitResult.Ok];
+            var countMeh = statistics[HitResult.Meh];
+            var countMiss = statistics[HitResult.Miss];
+            var total = countPerfect + countGreat + countGood + countOk + countMeh + countMiss;
+
+            return (double)
+                   ((6 * (countPerfect + countGreat)) + (4 * countGood) + (2 * countOk) + countMeh) /
+                   (6 * total);
         }
 
         private class EmptyWorkingBeatmap : WorkingBeatmap
