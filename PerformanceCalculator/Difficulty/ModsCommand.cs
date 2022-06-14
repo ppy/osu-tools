@@ -54,7 +54,7 @@ namespace PerformanceCalculator.Difficulty
             {
                 foreach (var mod in allMods)
                 {
-                    if (incompatibleTypes.Any(t => mod.GetType().IsSubclassOf(t)))
+                    if (incompatibleTypes.Any(t => t.IsInstanceOfType(mod)))
                         yield return mod.Acronym;
                 }
             }
