@@ -7,6 +7,7 @@ using osu.Framework.Graphics.Performance;
 using osu.Framework.Utils;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Pooling;
+using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Edit;
 using osu.Game.Rulesets.Osu.Objects;
@@ -57,6 +58,10 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             if (entry.DifficultyHitObject is not null)
             {
                 panel.AddParagraph($"Strain Time: {entry.DifficultyHitObject.StrainTime:N3}");
+                panel.AddParagraph($"Aim Difficulty: {AimEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, true):N3}");
+                panel.AddParagraph($"Speed Difficulty: {SpeedEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, 20):N3}"); // OD10, not possible to get difficulty stats from here?
+                panel.AddParagraph($"Rhythm Difficulty: {RhythmEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, 20):N3}");
+                panel.AddParagraph($"Flashlight Difficulty: {FlashlightEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, false):N3}");
 
                 if (entry.DifficultyHitObject.Angle is not null)
                     panel.AddParagraph($"Angle: {MathUtils.RadiansToDegrees(entry.DifficultyHitObject.Angle.Value):N3}");
