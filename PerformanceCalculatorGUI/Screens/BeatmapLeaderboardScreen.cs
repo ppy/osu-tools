@@ -24,7 +24,6 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
-using osu.Game.Scoring.Legacy;
 using osu.Game.Users;
 using osu.Game.Utils;
 using osuTK;
@@ -72,6 +71,8 @@ namespace PerformanceCalculatorGUI.Screens
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
 
         private const int settings_height = 40;
+        private const int generate_score_amount = 50;
+        private const int generate_score_max_mod_amount = 4;
 
         public BeatmapLeaderboardScreen()
         {
@@ -173,7 +174,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmapIdTextBox.Current.Value}/scores?scope=global&mode={ruleset.Value.ShortName}");
 
-                var plays = new List<APIScore>();
+                var plays = new List<SoloScoreInfo>();
 
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
@@ -196,28 +197,13 @@ namespace PerformanceCalculatorGUI.Screens
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {score.User.Username}");
 
-                    var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
-                    Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
-
-                    var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
-                    {
-                        TotalScore = score.TotalScore,
-                        MaxCombo = score.MaxCombo,
-                        Mods = mods,
-                        Statistics = new Dictionary<HitResult, int>()
-                    };
-
-                    scoreInfo.SetCount300(score.Statistics["count_300"]);
-                    scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
-                    scoreInfo.SetCount100(score.Statistics["count_100"]);
-                    scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
-                    scoreInfo.SetCount50(score.Statistics["count_50"]);
-                    scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
+                    var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
 
                     var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                     var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
 
+                    Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
                     if (!random)
                         mods = RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods);
 
@@ -230,7 +216,7 @@ namespace PerformanceCalculatorGUI.Screens
                     plays.Add(score);
                 }
 
-                var sortedScores = await scoreManager.OrderByTotalScoreAsync(plays.Select(x => x.CreateScoreInfo(rulesets, working.BeatmapInfo)).ToArray(), token);
+                var sortedScores = await scoreManager.OrderByTotalScoreAsync(plays.Select(x => x.ToScoreInfo(rulesets, working.BeatmapInfo)).ToArray(), token);
 
                 Schedule(() =>
                 {
@@ -292,9 +278,9 @@ namespace PerformanceCalculatorGUI.Screens
             }
         }
 
-        private List<APIScore> generateRandomScores(ProcessorWorkingBeatmap working)
+        private List<SoloScoreInfo> generateRandomScores(ProcessorWorkingBeatmap working)
         {
-            var scores = new List<APIScore>();
+            var scores = new List<SoloScoreInfo>();
 
             var rng = new Random();
 
@@ -307,11 +293,11 @@ namespace PerformanceCalculatorGUI.Screens
 
             var difficultyAttributes = diffCalculator.Calculate();
 
-            for (var i = 0; i < 50; i++)
+            for (var i = 0; i < generate_score_amount; i++)
             {
                 var appliedMods = new List<Mod>();
 
-                for (var m = 0; m < rng.Next(0, 4); m++)
+                for (var m = 0; m < rng.Next(0, generate_score_max_mod_amount); m++)
                 {
                     var mod = allowedMods[rng.Next(0, allowedMods.Length)];
 
@@ -365,21 +351,19 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var score = scoreProcessor.ComputeFinalLegacyScore(ScoringMode.Standardised, scoreInfo, difficultyAttributes.MaxCombo);
 
-                scores.Add(new APIScore
+                scores.Add(new SoloScoreInfo
                 {
                     Rank = scoreInfo.Rank,
                     Accuracy = scoreInfo.Accuracy,
                     TotalScore = (int)score,
                     MaxCombo = scoreInfo.MaxCombo,
-                    Mods = appliedMods.Select(x => new APIMod(x)),
-                    Statistics = new Dictionary<string, int>
+                    Mods = appliedMods.Select(x => new APIMod(x)).ToArray(),
+                    Statistics = new Dictionary<HitResult, int>
                     {
-                        { "count_300", count300 },
-                        { "count_geki", rng.Next(0, count300) },
-                        { "count_100", count100 },
-                        { "count_katu", rng.Next(0, count100) },
-                        { "count_50", count50 },
-                        { "count_miss", countMiss }
+                        { HitResult.Great, count300 },
+                        { HitResult.Ok, count100 },
+                        { HitResult.Meh, count50 },
+                        { HitResult.Miss, countMiss }
                     },
                     User = new APIUser
                     {

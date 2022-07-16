@@ -41,7 +41,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public void AddParagraph(string text, int fontSize = 10)
         {
-            textFlow.AddParagraph(text, p => p.Font = OsuFont.GetFont(size: fontSize));
+            textFlow.AddParagraph(text, p => p.Font = OsuFont.GetFont(size: fontSize-3));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 using osu.Framework.Bindables;
@@ -20,6 +21,9 @@ namespace PerformanceCalculatorGUI
 
         private OAuthToken token;
 
+        // WARN: keep in sync with /osu.Game/Online/API/APIAccess.cs APIVersion
+        private const int api_version = 20220705;
+
         public APIManager(SettingsManager configManager)
         {
             clientIdBindable = configManager.GetBindable<string>(Settings.ClientId);
@@ -32,7 +36,7 @@ namespace PerformanceCalculatorGUI
                 await getAccessToken();
 
             using var req = new JsonWebRequest<T>($"{ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
-
+            req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
             req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {token.AccessToken}");
             await req.PerformAsync();
 

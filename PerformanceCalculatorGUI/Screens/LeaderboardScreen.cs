@@ -17,9 +17,6 @@ using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Scoring;
-using osu.Game.Scoring;
-using osu.Game.Scoring.Legacy;
 using osu.Game.Users;
 using osuTK;
 using PerformanceCalculatorGUI.Components;
@@ -51,6 +48,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        [Resolved]
+        private RulesetStore rulesets { get; set; }
 
         [Resolved]
         private SettingsManager configManager { get; set; }
@@ -233,7 +233,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var plays = new List<ExtendedScore>();
 
-            var apiScores = await apiManager.GetJsonFromApi<List<APIScore>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+            var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
 
             var rulesetInstance = ruleset.Value.CreateInstance();
 
@@ -243,25 +243,11 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     try
                     {
-                        var working = ProcessorWorkingBeatmap.FromFileOrId(score.Beatmap?.OnlineID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+                        var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
-                        var modsAcronyms = score.Mods.Select(x => x.ToString()).ToArray();
-                        Mod[] mods = rulesetInstance.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
+                        Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
 
-                        var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
-                        {
-                            TotalScore = score.TotalScore,
-                            MaxCombo = score.MaxCombo,
-                            Mods = mods,
-                            Statistics = new Dictionary<HitResult, int>()
-                        };
-
-                        scoreInfo.SetCount300(score.Statistics["count_300"]);
-                        scoreInfo.SetCountGeki(score.Statistics["count_geki"]);
-                        scoreInfo.SetCount100(score.Statistics["count_100"]);
-                        scoreInfo.SetCountKatu(score.Statistics["count_katu"]);
-                        scoreInfo.SetCount50(score.Statistics["count_50"]);
-                        scoreInfo.SetCountMiss(score.Statistics["count_miss"]);
+                        var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
 
                         var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
@@ -273,7 +259,7 @@ namespace PerformanceCalculatorGUI.Screens
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
                         score.PP = perfAttributes?.Total ?? 0.0;
 
-                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes, working);
                         plays.Add(extendedScore);
                     }
                     catch (Exception e)

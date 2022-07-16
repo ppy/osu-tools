@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using osu.Framework.Allocation;
@@ -23,6 +24,7 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Profile.Sections;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
 using osu.Game.Utils;
 using osuTK;
@@ -37,7 +39,7 @@ namespace PerformanceCalculatorGUI.Components
 
         public PerformanceAttributes PerformanceAttributes { get; }
 
-        public ExtendedScore(APIScore score, double livePP, PerformanceAttributes attributes)
+        public ExtendedScore(SoloScoreInfo score, double livePP, PerformanceAttributes attributes, WorkingBeatmap beatmap)
         {
             PerformanceAttributes = attributes;
             LivePP = livePP;
@@ -47,11 +49,26 @@ namespace PerformanceCalculatorGUI.Components
             User = score.User;
             OnlineID = score.OnlineID;
             HasReplay = score.HasReplay;
-            Date = score.Date;
-            Beatmap = score.Beatmap;
+            Date = score.EndedAt ?? DateTimeOffset.MinValue;
+            Beatmap = new APIBeatmap
+            {
+                OnlineID = beatmap.BeatmapInfo.OnlineID,
+                DifficultyName = beatmap.BeatmapInfo.DifficultyName,
+                BeatmapSet = new APIBeatmapSet
+                {
+                    Title = beatmap.Metadata.Title,
+                    Artist = beatmap.Metadata.Artist,
+                }
+            };
             Accuracy = score.Accuracy;
             PP = score.PP;
-            Statistics = score.Statistics;
+            Statistics = new Dictionary<string, int>
+            {
+                { "count_300", score.Statistics.GetValueOrDefault(HitResult.Great) },
+                { "count_100", score.Statistics.GetValueOrDefault(HitResult.Ok) },
+                { "count_50", score.Statistics.GetValueOrDefault(HitResult.Meh) },
+                { "count_miss", score.Statistics.GetValueOrDefault(HitResult.Miss) },
+            };
             RulesetID = score.RulesetID;
             Mods = score.Mods;
             Rank = score.Rank;
