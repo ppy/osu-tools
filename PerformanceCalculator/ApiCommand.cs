@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Net.Http;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
@@ -23,16 +24,19 @@ namespace PerformanceCalculator
 
         private string apiAccessToken;
 
+        // WARN: keep in sync with /osu.Game/Online/API/APIAccess.cs APIVersion
+        private const int api_version = 20220705;
+
         public override void OnExecute(CommandLineApplication app, IConsole console)
         {
             getAccessToken();
             base.OnExecute(app, console);
         }
 
-        protected dynamic GetJsonFromApi(string request)
+        protected T GetJsonFromApi<T>(string request)
         {
-            using var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
-
+            using var req = new JsonWebRequest<T>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
+            req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
             req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {apiAccessToken}");
             req.Perform();
 

@@ -10,11 +10,9 @@ using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Scoring;
-using osu.Game.Scoring.Legacy;
 
 namespace PerformanceCalculator.Profile
 {
@@ -44,32 +42,17 @@ namespace PerformanceCalculator.Profile
             var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
 
             Console.WriteLine("Getting user data...");
-            dynamic userData = GetJsonFromApi($"users/{ProfileName}/{rulesetApiName}");
+            var userData = GetJsonFromApi<APIUser>($"users/{ProfileName}/{ruleset.ShortName}");
 
             Console.WriteLine("Getting user top scores...");
 
-            foreach (var play in GetJsonFromApi($"users/{userData.id}/scores/best?mode={rulesetApiName}&limit=100"))
+            foreach (var play in GetJsonFromApi<List<SoloScoreInfo>>($"users/{userData.Id}/scores/best?mode={rulesetApiName}&limit=100"))
             {
-                var working = ProcessorWorkingBeatmap.FromFileOrId((string)play.beatmap.id);
+                var working = ProcessorWorkingBeatmap.FromFileOrId(play.BeatmapID.ToString());
 
-                var modsAcronyms = ((JArray)play.mods).Select(x => x.ToString()).ToArray();
-                Mod[] mods = ruleset.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
+                Mod[] mods = play.Mods.Select(x => x.ToMod(ruleset)).ToArray();
 
-                var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.RulesetInfo)
-                {
-                    TotalScore = play.score,
-                    MaxCombo = play.max_combo,
-                    Mods = mods,
-                    Statistics = new Dictionary<HitResult, int>()
-                };
-
-                scoreInfo.SetCount300((int)play.statistics.count_300);
-                scoreInfo.SetCountGeki((int)play.statistics.count_geki);
-                scoreInfo.SetCount100((int)play.statistics.count_100);
-                scoreInfo.SetCountKatu((int)play.statistics.count_katu);
-                scoreInfo.SetCount50((int)play.statistics.count_50);
-                scoreInfo.SetCountMiss((int)play.statistics.count_miss);
-
+                var scoreInfo = play.ToScoreInfo(mods);
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                 var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
@@ -81,11 +64,11 @@ namespace PerformanceCalculator.Profile
                 {
                     Beatmap = working.BeatmapInfo,
                     LocalPP = ppAttributes?.Total ?? 0,
-                    LivePP = play.pp,
+                    LivePP = play.PP ?? 0.0,
                     Mods = scoreInfo.Mods.Select(m => m.Acronym).ToArray(),
-                    MissCount = play.statistics.count_miss,
+                    MissCount = play.Statistics.GetValueOrDefault(HitResult.Miss),
                     Accuracy = scoreInfo.Accuracy * 100,
-                    Combo = play.max_combo,
+                    Combo = play.MaxCombo,
                     MaxCombo = difficultyAttributes.MaxCombo
                 };
 
@@ -97,7 +80,7 @@ namespace PerformanceCalculator.Profile
 
             int index = 0;
             double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
-            double totalLivePP = userData.statistics.pp;
+            double totalLivePP = (double)userData.Statistics.PP.Value;
 
             index = 0;
             double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);
@@ -111,7 +94,7 @@ namespace PerformanceCalculator.Profile
             {
                 var json = JsonConvert.SerializeObject(new
                 {
-                    Username = userData.username,
+                    Username = userData.Username,
                     LivePp = totalLivePP,
                     LocalPp = totalLocalPP,
                     PlaycountPp = playcountBonusPP,
@@ -137,7 +120,7 @@ namespace PerformanceCalculator.Profile
             else
             {
                 OutputDocument(new Document(
-                    new Span($"User:     {userData.username}"), "\n",
+                    new Span($"User:     {userData.Username}"), "\n",
                     new Span($"Live PP:  {totalLivePP:F1} (including {playcountBonusPP:F1}pp from playcount)"), "\n",
                     new Span($"Local PP: {totalLocalPP:F1} ({totalDiffPP:+0.0;-0.0;-})"), "\n",
                     new Grid
