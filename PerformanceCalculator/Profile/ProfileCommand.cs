@@ -80,7 +80,7 @@ namespace PerformanceCalculator.Profile
 
             int index = 0;
             double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
-            double totalLivePP = (double)userData.Statistics.PP.Value;
+            double totalLivePP = (double)(userData.Statistics.PP ?? 0);
 
             index = 0;
             double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);

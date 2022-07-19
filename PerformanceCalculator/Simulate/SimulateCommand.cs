@@ -186,7 +186,7 @@ namespace PerformanceCalculator.Simulate
 
         protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 
-        protected string FormatDocumentLine(string name, string value) => $"{name.PadRight(20)}: {value}\n";
+        protected string FormatDocumentLine(string name, string value) => $"{name,-20}: {value}\n";
 
         private class Result
         {

@@ -65,6 +65,6 @@ namespace PerformanceCalculator.Performance
             }
         }
 
-        private void writeAttribute(string name, string value) => Console.WriteLine($"{name.PadRight(15)}: {value}");
+        private void writeAttribute(string name, string value) => Console.WriteLine($"{name,-15}: {value}");
     }
 }

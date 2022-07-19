@@ -76,7 +76,7 @@ namespace PerformanceCalculator.Leaderboard
 
                 int index = 0;
                 double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play);
-                double totalLivePP = (double)player.PP.Value;
+                double totalLivePP = (double)(player.PP ?? 0);
 
                 index = 0;
                 double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play);
