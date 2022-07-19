@@ -69,8 +69,8 @@ namespace PerformanceCalculator.Difficulty
 
                     Debug.Assert(bindable != null);
 
-                    object underlyingValue = bindable.GetUnderlyingSettingValue();
-                    Type netType = underlyingValue.GetType();
+                    object? underlyingValue = (object?)bindable.GetUnderlyingSettingValue();
+                    var netType = underlyingValue?.GetType() ?? bindable.GetType().GetInterface("IBindable`1")?.GenericTypeArguments.FirstOrDefault();
 
                     yield return new
                     {
