@@ -9,13 +9,13 @@
       ]
     },
     "jetbrains.resharper.globaltools": {
-      "version": "2021.1.3",
+      "version": "2022.1.2",
       "commands": [
         "jb"
       ]
     },
     "nvika": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "commands": [
         "nvika"
       ]

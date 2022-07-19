@@ -50,7 +50,7 @@ namespace PerformanceCalculator
 
         public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId)
         {
-            if (fileOrId.EndsWith(".osu"))
+            if (fileOrId.EndsWith(".osu", StringComparison.Ordinal))
             {
                 if (!File.Exists(fileOrId))
                     throw new ArgumentException($"Beatmap file {fileOrId} does not exist.");

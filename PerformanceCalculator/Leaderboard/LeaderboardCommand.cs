@@ -9,11 +9,9 @@ using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using osu.Game.Online.API.Requests;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Scoring;
-using osu.Game.Scoring;
-using osu.Game.Scoring.Legacy;
 
 namespace PerformanceCalculator.Leaderboard
 {
@@ -41,42 +39,28 @@ namespace PerformanceCalculator.Leaderboard
         public override void Execute()
         {
             var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
-            var leaderboard = GetJsonFromApi($"rankings/{rulesetApiName}/performance?cursor[page]={LeaderboardPage - 1}");
+            var leaderboard = GetJsonFromApi<GetTopUsersResponse>($"rankings/{rulesetApiName}/performance?cursor[page]={LeaderboardPage - 1}");
 
             var calculatedPlayers = new List<LeaderboardPlayerInfo>();
 
-            foreach (var player in leaderboard.ranking)
+            foreach (var player in leaderboard.Users)
             {
                 if (calculatedPlayers.Count >= Limit)
                     break;
 
-                var plays = new List<(double, double)>(); // (local, live)
+                var plays = new List<(double local, double live)>();
 
                 var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? 0);
 
-                Console.WriteLine($"Calculating {player.user.username} top scores...");
+                Console.WriteLine($"Calculating {player.User.Username} top scores...");
 
-                foreach (var play in GetJsonFromApi($"users/{player.user.id}/scores/best?mode={rulesetApiName}&limit=100"))
+                foreach (var play in GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.Id}/scores/best?mode={rulesetApiName}&limit=100"))
                 {
-                    var working = ProcessorWorkingBeatmap.FromFileOrId((string)play.beatmap.id);
+                    var working = ProcessorWorkingBeatmap.FromFileOrId(play.BeatmapID.ToString());
 
-                    var modsAcronyms = ((JArray)play.mods).Select(x => x.ToString()).ToArray();
-                    Mod[] mods = ruleset.CreateAllMods().Where(m => modsAcronyms.Contains(m.Acronym)).ToArray();
+                    Mod[] mods = play.Mods.Select(x => x.ToMod(ruleset)).ToArray();
 
-                    var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.RulesetInfo)
-                    {
-                        TotalScore = play.score,
-                        MaxCombo = play.max_combo,
-                        Mods = mods,
-                        Statistics = new Dictionary<HitResult, int>()
-                    };
-
-                    scoreInfo.SetCount300((int)play.statistics.count_300);
-                    scoreInfo.SetCountGeki((int)play.statistics.count_geki);
-                    scoreInfo.SetCount100((int)play.statistics.count_100);
-                    scoreInfo.SetCountKatu((int)play.statistics.count_katu);
-                    scoreInfo.SetCount50((int)play.statistics.count_50);
-                    scoreInfo.SetCountMiss((int)play.statistics.count_miss);
+                    var scoreInfo = play.ToScoreInfo(mods);
 
                     var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
@@ -84,7 +68,7 @@ namespace PerformanceCalculator.Leaderboard
                     var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, scoreInfo.Mods).ToArray());
                     var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
-                    plays.Add((performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes).Total ?? 0, play.pp));
+                    plays.Add((performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes).Total ?? 0, play.PP ?? 0.0));
                 }
 
                 var localOrdered = plays.Select(x => x.Item1).OrderByDescending(x => x).ToList();
@@ -92,7 +76,7 @@ namespace PerformanceCalculator.Leaderboard
 
                 int index = 0;
                 double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play);
-                double totalLivePP = player.pp;
+                double totalLivePP = (double)(player.PP ?? 0);
 
                 index = 0;
                 double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play);
@@ -105,7 +89,7 @@ namespace PerformanceCalculator.Leaderboard
                 {
                     LivePP = totalLivePP,
                     LocalPP = totalLocalPP,
-                    Username = player.user.username
+                    Username = player.User.Username
                 });
             }
 
