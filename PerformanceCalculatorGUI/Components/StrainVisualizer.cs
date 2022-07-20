@@ -19,6 +19,7 @@ using osu.Game.Overlays;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Screens.Edit.Compose.Components.Timeline;
 using osuTK;
+using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {

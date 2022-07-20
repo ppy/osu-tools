@@ -3,7 +3,7 @@
 
 using osu.Game.Graphics.UserInterfaceV2;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
     internal class ExtendedLabelledTextBox : LabelledTextBox
     {

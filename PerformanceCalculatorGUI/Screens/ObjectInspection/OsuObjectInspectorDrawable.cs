@@ -9,7 +9,6 @@ using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Pooling;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Osu.Edit;
 using osu.Game.Rulesets.Osu.Objects;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection

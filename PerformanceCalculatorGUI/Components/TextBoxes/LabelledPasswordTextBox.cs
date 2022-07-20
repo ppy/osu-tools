@@ -3,7 +3,7 @@
 
 using osu.Game.Graphics.UserInterface;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
     internal class LabelledPasswordTextBox : ExtendedLabelledTextBox
     {

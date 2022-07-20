@@ -13,8 +13,8 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.Chat;
-using osu.Game.Overlays.Settings;
 using osuTK;
+using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Components

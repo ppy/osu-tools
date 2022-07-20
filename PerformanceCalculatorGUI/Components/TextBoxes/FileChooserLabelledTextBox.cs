@@ -21,7 +21,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osuTK;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
     /// <summary>
     /// A labelled textbox which reveals an inline file chooser when clicked.

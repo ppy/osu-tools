@@ -20,6 +20,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osuTK.Graphics;
 using PerformanceCalculatorGUI.Components;
+using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens

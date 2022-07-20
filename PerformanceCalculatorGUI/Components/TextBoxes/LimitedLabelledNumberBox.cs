@@ -1,21 +1,16 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Globalization;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterfaceV2;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
-    internal class LimitedLabelledFractionalNumberBox : ExtendedLabelledTextBox
+    internal class LimitedLabelledNumberBox : LabelledNumberBox
     {
-        internal class FractionalNumberBox : OsuTextBox
+        internal class LimitedNumberBox : OsuNumberBox
         {
-            protected override bool AllowIme => false;
-
-            protected override bool CanAddCharacter(char character) => character.IsAsciiDigit() || character == CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
-
             protected override void OnUserTextAdded(string added)
             {
                 base.OnUserTextAdded(added);
@@ -27,9 +22,9 @@ namespace PerformanceCalculatorGUI.Components
                     textToParse = PlaceholderText.ToString();
                 }
 
-                if (double.TryParse(textToParse, out double parsed))
+                if (int.TryParse(textToParse, out int parsed))
                 {
-                    if (parsed >= MinValue && parsed <= MaxValue)
+                    if (parsed >= (MinValue ?? int.MinValue) && parsed <= (MaxValue ?? int.MaxValue))
                     {
                         Value.Value = parsed;
                         return;
@@ -49,7 +44,7 @@ namespace PerformanceCalculatorGUI.Components
                     textToParse = PlaceholderText.ToString();
                 }
 
-                if (double.TryParse(textToParse, out double parsed))
+                if (int.TryParse(textToParse, out int parsed))
                 {
                     Value.Value = parsed;
                     return;
@@ -58,25 +53,36 @@ namespace PerformanceCalculatorGUI.Components
                 Value.Value = default;
             }
 
-            public double MaxValue { get; set; }
+            public int? MaxValue { get; set; }
 
-            public double MinValue { get; set; }
+            public int? MinValue { get; set; }
 
-            public Bindable<double> Value { get; } = new Bindable<double>();
+            public Bindable<int> Value { get; } = new Bindable<int>();
         }
 
-        protected override OsuTextBox CreateTextBox() => new FractionalNumberBox();
+        protected override OsuTextBox CreateTextBox() => new LimitedNumberBox();
 
-        public double MaxValue
+        public int? MaxValue
         {
-            set => ((FractionalNumberBox)Component).MaxValue = value;
+            set => ((LimitedNumberBox)Component).MaxValue = value;
         }
 
-        public double MinValue
+        public int? MinValue
         {
-            set => ((FractionalNumberBox)Component).MinValue = value;
+            set => ((LimitedNumberBox)Component).MinValue = value;
         }
 
-        public Bindable<double> Value => ((FractionalNumberBox)Component).Value;
+        public Bindable<int> Value => ((LimitedNumberBox)Component).Value;
+
+        public bool CommitOnFocusLoss
+        {
+            get => Component.CommitOnFocusLost;
+            set => Component.CommitOnFocusLost = value;
+        }
+
+        public LimitedLabelledNumberBox()
+        {
+            CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS;
+        }
     }
 }
