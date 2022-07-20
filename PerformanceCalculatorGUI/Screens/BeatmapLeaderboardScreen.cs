@@ -12,7 +12,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
@@ -26,7 +25,6 @@ using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Users;
 using osu.Game.Utils;
-using osuTK;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Configuration;
 
@@ -38,9 +36,13 @@ namespace PerformanceCalculatorGUI.Screens
         private StatefulButton calculationButton;
         private VerboseLoadingLayer loadingLayer;
 
+        private GridContainer layout;
+        private OsuScrollContainer scrollContainer;
         private ScoreTable scoreTable;
 
-        private BufferedContainer background;
+        private Box background;
+        private Container beatmapPanelContainer;
+        private BeatmapCard beatmapPanel;
 
         private CancellationTokenSource calculationCancellatonToken;
 
@@ -84,11 +86,11 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
-                new GridContainer
+                layout = new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
                     ColumnDimensions = new[] { new Dimension() },
-                    RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, 40), new Dimension() },
+                    RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, 40), new Dimension(GridSizeMode.Absolute), new Dimension() },
                     Content = new[]
                     {
                         new Drawable[]
@@ -132,13 +134,29 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                         new Drawable[]
                         {
-                            new OsuScrollContainer
+                            beatmapPanelContainer = new Container
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y
+                            }
+                        },
+                        new Drawable[]
+                        {
+                            scrollContainer = new OsuScrollContainer
                             {
                                 RelativeSizeAxes = Axes.Both,
-                                Child = scoreTable = new ScoreTable
+                                Children = new Drawable[]
                                 {
-                                    Anchor = Anchor.TopCentre,
-                                    Origin = Anchor.TopCentre,
+                                    new Box
+                                    {
+                                        RelativeSizeAxes = Axes.Both,
+                                        Colour = colourProvider.Background5
+                                    },
+                                    scoreTable = new ScoreTable
+                                    {
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                    }
                                 }
                             }
                         }
@@ -180,7 +198,15 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var working = ProcessorWorkingBeatmap.FromFileOrId(beatmapIdTextBox.Current.Value, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
-                Schedule(() => loadBackground(working.BeatmapInfo?.BeatmapSet?.OnlineID.ToString()));
+                Schedule(() =>
+                {
+                    if (beatmapPanel != null)
+                        beatmapPanelContainer.Remove(beatmapPanel);
+
+                    beatmapPanelContainer.Add(beatmapPanel = new BeatmapCard(working));
+
+                    layout.RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, 40), new Dimension(GridSizeMode.AutoSize), new Dimension() };
+                });
 
                 var random = false;
 
@@ -235,47 +261,6 @@ namespace PerformanceCalculatorGUI.Screens
                     calculationButton.State.Value = ButtonState.Done;
                 });
             }, token);
-        }
-
-        private void loadBackground(string beatmapId)
-        {
-            if (background is not null)
-            {
-                RemoveInternal(background);
-            }
-
-            if (!string.IsNullOrEmpty(beatmapId))
-            {
-                LoadComponentAsync(background = new BufferedContainer
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Depth = 99,
-                    BlurSigma = new Vector2(6),
-                    Children = new Drawable[]
-                    {
-                        new Sprite
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Texture = textures.Get($"https://assets.ppy.sh/beatmaps/{beatmapId}/covers/cover.jpg"),
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            FillMode = FillMode.Fill
-                        },
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = colourProvider.Background6,
-                            Alpha = 0.9f
-                        },
-                    }
-                }).ContinueWith(_ =>
-                {
-                    Schedule(() =>
-                    {
-                        AddInternal(background);
-                    });
-                });
-            }
         }
 
         private List<SoloScoreInfo> generateRandomScores(ProcessorWorkingBeatmap working)
