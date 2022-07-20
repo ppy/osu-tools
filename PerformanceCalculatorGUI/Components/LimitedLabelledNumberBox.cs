@@ -79,5 +79,10 @@ namespace PerformanceCalculatorGUI.Components
             get => Component.CommitOnFocusLost;
             set => Component.CommitOnFocusLost = value;
         }
+
+        public LimitedLabelledNumberBox()
+        {
+            CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS;
+        }
     }
 }

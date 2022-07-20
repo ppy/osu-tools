@@ -2,11 +2,10 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Graphics.UserInterfaceV2;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class LabelledPasswordTextBox : LabelledTextBox
+    internal class LabelledPasswordTextBox : ExtendedLabelledTextBox
     {
         protected override OsuTextBox CreateTextBox() => new OsuPasswordTextBox();
     }

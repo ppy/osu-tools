@@ -26,7 +26,7 @@ namespace PerformanceCalculatorGUI.Components
     /// <summary>
     /// A labelled textbox which reveals an inline file chooser when clicked.
     /// </summary>
-    internal class FileChooserLabelledTextBox : LabelledTextBox, ICanAcceptFiles, IHasPopover
+    internal class FileChooserLabelledTextBox : ExtendedLabelledTextBox, ICanAcceptFiles, IHasPopover
     {
         private readonly Bindable<string> initialPath;
         private readonly string[] handledExtensions;

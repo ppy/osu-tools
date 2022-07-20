@@ -5,11 +5,10 @@ using System.Globalization;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Graphics.UserInterfaceV2;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class LimitedLabelledFractionalNumberBox : LabelledTextBox
+    internal class LimitedLabelledFractionalNumberBox : ExtendedLabelledTextBox
     {
         internal class FractionalNumberBox : OsuTextBox
         {

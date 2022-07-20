@@ -236,7 +236,7 @@ namespace PerformanceCalculatorGUI.Components
                 RelativeSizeAxes = Axes.X,
                 AutoSizeAxes = Axes.Y,
                 Masking = true,
-                CornerRadius = 15,
+                CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS,
                 Children = new Drawable[]
                 {
                     new Box

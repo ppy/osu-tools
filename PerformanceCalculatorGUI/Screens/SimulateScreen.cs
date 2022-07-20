@@ -303,7 +303,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                         new OsuButton
                                                         {
                                                             Width = 100,
-                                                            Margin = new MarginPadding(5.0f),
+                                                            Margin = new MarginPadding { Top = 4.0f, Right = 5.0f },
                                                             Action = () => { userModsSelectOverlay.Show(); },
                                                             BackgroundColour = colourProvider.Background1,
                                                             Text = "Mods"
@@ -588,7 +588,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 difficultyAttributes = difficultyCalculator.Value.Calculate(appliedMods.Value);
                 difficultyAttributesContainer.Children = AttributeConversion.ToDictionary(difficultyAttributes).Select(x =>
-                    new LabelledTextBox
+                    new ExtendedLabelledTextBox
                     {
                         ReadOnly = true,
                         Label = x.Key.Humanize().ToLowerInvariant(),
@@ -661,7 +661,7 @@ namespace PerformanceCalculatorGUI.Screens
                 }, difficultyAttributes);
 
                 performanceAttributesContainer.Children = AttributeConversion.ToDictionary(ppAttributes).Select(x =>
-                    new LabelledTextBox
+                    new ExtendedLabelledTextBox
                     {
                         ReadOnly = true,
                         Label = x.Key.Humanize().ToLowerInvariant(),

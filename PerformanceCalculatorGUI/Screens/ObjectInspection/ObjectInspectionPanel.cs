@@ -5,6 +5,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using PerformanceCalculatorGUI.Components;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -21,7 +22,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 Anchor = Anchor.Centre,
                 AutoSizeAxes = Axes.Both,
                 Masking = true,
-                CornerRadius = 5,
+                CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS,
                 Children = new Drawable[]
                 {
                     new Box
