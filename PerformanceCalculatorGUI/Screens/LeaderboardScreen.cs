@@ -129,8 +129,7 @@ namespace PerformanceCalculatorGUI.Screens
                         {
                             leaderboardContainer = new OsuScrollContainer
                             {
-                                RelativeSizeAxes = Axes.Both,
-                                Padding = new MarginPadding(10)
+                                RelativeSizeAxes = Axes.Both
                             }
                         },
                     }
@@ -212,10 +211,10 @@ namespace PerformanceCalculatorGUI.Screens
             }, token);
         }
 
-        private async Task<UserPPListPanelData> calculatePlayer(UserStatistics player, CancellationToken token)
+        private async Task<UserCardData> calculatePlayer(UserStatistics player, CancellationToken token)
         {
             if (token.IsCancellationRequested)
-                return new UserPPListPanelData();
+                return new UserCardData();
 
             var plays = new List<ExtendedScore>();
 
@@ -273,7 +272,7 @@ namespace PerformanceCalculatorGUI.Screens
             var playcountBonusPP = (totalLivePP - nonBonusLivePP);
             totalLocalPP += playcountBonusPP;
 
-            return new UserPPListPanelData
+            return new UserCardData
             {
                 LivePP = totalLivePP,
                 LocalPP = totalLocalPP

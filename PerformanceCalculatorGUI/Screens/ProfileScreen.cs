@@ -38,7 +38,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private LabelledTextBox usernameTextBox;
         private Container userPanelContainer;
-        private UserPPListPanel userPanel;
+        private UserCard userPanel;
 
         private string currentUser;
 
@@ -185,7 +185,7 @@ namespace PerformanceCalculatorGUI.Screens
                     if (userPanel != null)
                         userPanelContainer.Remove(userPanel);
 
-                    userPanelContainer.Add(userPanel = new UserPPListPanel(player)
+                    userPanelContainer.Add(userPanel = new UserCard(player)
                     {
                         RelativeSizeAxes = Axes.X
                     });
@@ -261,7 +261,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 Schedule(() =>
                 {
-                    userPanel.Data.Value = new UserPPListPanelData
+                    userPanel.Data.Value = new UserCardData
                     {
                         LivePP = totalLivePP,
                         LocalPP = totalLocalPP,

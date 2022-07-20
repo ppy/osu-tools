@@ -17,28 +17,28 @@ using osu.Game.Users;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    public struct UserPPListPanelData
+    public struct UserCardData
     {
         public decimal LivePP { get; set; }
         public decimal LocalPP { get; set; }
         public decimal PlaycountPP { get; set; }
     }
 
-    public class UserPPListPanel : UserListPanel
+    public class UserCard : UserListPanel
     {
         private OsuSpriteText liveLabel;
         private OsuSpriteText localLabel;
         private OsuSpriteText differenceLabel;
         private OsuSpriteText playcountLabel;
 
-        public Bindable<UserPPListPanelData> Data = new();
+        public Bindable<UserCardData> Data = new();
 
-        public UserPPListPanel(APIUser user)
+        public UserCard(APIUser user)
             : base(user)
         {
             RelativeSizeAxes = Axes.X;
             Height = 40;
-            CornerRadius = 6;
+            CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS;
         }
 
         [BackgroundDependencyLoader]
@@ -47,7 +47,7 @@ namespace PerformanceCalculatorGUI.Components
             Background.Width = 0.5f;
             Background.Origin = Anchor.CentreRight;
             Background.Anchor = Anchor.CentreRight;
-            Background.Colour = ColourInfo.GradientHorizontal(Color4.White.Opacity(1), Color4.White.Opacity(0.3f));
+            Background.Colour = ColourInfo.GradientHorizontal(Color4.White.Opacity(1), Color4.White.Opacity(0.5f));
 
             Data.ValueChanged += val =>
             {
