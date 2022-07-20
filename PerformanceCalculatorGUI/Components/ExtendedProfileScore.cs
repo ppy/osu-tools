@@ -46,7 +46,7 @@ namespace PerformanceCalculatorGUI.Components
             User = score.User;
             OnlineID = score.OnlineID;
             HasReplay = score.HasReplay;
-            Date = score.EndedAt ?? DateTimeOffset.MinValue;
+            Date = score.EndedAt;
             Beatmap = new APIBeatmap
             {
                 OnlineID = beatmap.BeatmapInfo.OnlineID,

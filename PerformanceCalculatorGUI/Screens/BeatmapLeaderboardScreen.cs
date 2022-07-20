@@ -368,7 +368,7 @@ namespace PerformanceCalculatorGUI.Screens
                     User = new APIUser
                     {
                         Username = $"dummy {i}",
-                        Country = new Country()
+                        CountryCode = CountryCode.Unknown
                     }
                 });
             }
