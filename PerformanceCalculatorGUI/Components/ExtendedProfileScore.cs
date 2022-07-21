@@ -9,6 +9,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
@@ -25,6 +26,7 @@ using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
 using osu.Game.Utils;
 using osuTK;
+using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {
@@ -32,6 +34,7 @@ namespace PerformanceCalculatorGUI.Components
     {
         public double LivePP { get; }
 
+        public Bindable<int> Position { get; } = new();
         public Bindable<int> PositionChange { get; } = new();
 
         public PerformanceAttributes PerformanceAttributes { get; }
@@ -72,6 +75,29 @@ namespace PerformanceCalculatorGUI.Components
         }
     }
 
+    public class ExtendedProfileItemContainer : ProfileItemContainer
+    {
+        public Action OnHoverAction { get; set; }
+        public Action OnUnhoverAction { get; set; }
+
+        public ExtendedProfileItemContainer()
+        {
+            CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS;
+        }
+
+        protected override bool OnHover(HoverEvent e)
+        {
+            OnHoverAction?.Invoke();
+            return base.OnHover(e);
+        }
+
+        protected override void OnHoverLost(HoverLostEvent e)
+        {
+            OnUnhoverAction?.Invoke();
+            base.OnHoverLost(e);
+        }
+    }
+
     public class ExtendedProfileScore : CompositeDrawable
     {
         private const int height = 40;
@@ -102,8 +128,16 @@ namespace PerformanceCalculatorGUI.Components
         [BackgroundDependencyLoader]
         private void load(RulesetStore rulesets)
         {
-            AddInternal(new ProfileItemContainer
+            AddInternal(new ExtendedProfileItemContainer
             {
+                OnHoverAction = () =>
+                {
+                    positionChangeText.Text = $"#{Score.Position.Value}";
+                },
+                OnUnhoverAction = () =>
+                {
+                    positionChangeText.Text = $"{Score.PositionChange.Value:+0;-0;-}";
+                },
                 Children = new Drawable[]
                 {
                     new Container

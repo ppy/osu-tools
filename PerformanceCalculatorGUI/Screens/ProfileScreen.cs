@@ -244,6 +244,7 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     foreach (var play in plays)
                     {
+                        play.Position.Value = localOrdered.IndexOf(play) + 1;
                         play.PositionChange.Value = liveOrdered.IndexOf(play) - localOrdered.IndexOf(play);
                         scores.SetLayoutPosition(scores[liveOrdered.IndexOf(play)], localOrdered.IndexOf(play));
                     }

@@ -12,7 +12,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Textures;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API;
@@ -62,9 +61,6 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Resolved]
         private SettingsManager configManager { get; set; }
-
-        [Resolved]
-        private LargeTextureStore textures { get; set; }
 
         [Resolved]
         private ScoreManager scoreManager { get; set; }
@@ -220,7 +216,7 @@ namespace PerformanceCalculatorGUI.Screens
                     if (token.IsCancellationRequested)
                         return;
 
-                    Schedule(() => loadingLayer.Text.Value = $"Calculating {score.User.Username}");
+                    Schedule(() => loadingLayer.Text.Value = $"Calculating {score.User?.Username}");
 
                     var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
 
