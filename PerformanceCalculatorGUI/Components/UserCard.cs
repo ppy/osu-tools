@@ -52,8 +52,8 @@ namespace PerformanceCalculatorGUI.Components
 
             Data.ValueChanged += val =>
             {
-                liveLabel.Text = $"live pp: {val.NewValue.LivePP:N1}";
-                localLabel.Text = $"local pp: {val.NewValue.LocalPP:N1}";
+                liveLabel.Text = $"Live: {val.NewValue.LivePP:N1} pp";
+                localLabel.Text = $"New: {val.NewValue.LocalPP:N1} pp";
                 differenceLabel.Text = $"{val.NewValue.LocalPP - val.NewValue.LivePP:+0.0;-0.0;-}";
                 playcountLabel.Text = $"{val.NewValue.PlaycountPP:N1} from playcount";
             };
@@ -108,21 +108,31 @@ namespace PerformanceCalculatorGUI.Components
                         AutoSizeAxes = Axes.Both,
                         Direction = FillDirection.Horizontal,
                         Padding = new MarginPadding { Right = 10 },
+                        Spacing = new Vector2(20.0f),
                         Children = new Drawable[]
                         {
-                            liveLabel = new OsuSpriteText
+                            new FillFlowContainer
                             {
-                                Colour = Colours.RedLighter,
-                                Anchor = Anchor.CentreLeft,
+                                AutoSizeAxes = Axes.Both,
+                                Direction = FillDirection.Vertical,
                                 Origin = Anchor.CentreLeft,
-                                Width = 115
-                            },
-                            localLabel = new OsuSpriteText
-                            {
-                                Colour = Colours.BlueLighter,
                                 Anchor = Anchor.CentreLeft,
-                                Origin = Anchor.CentreLeft,
-                                Width = 120
+                                Children = new[]
+                                {
+                                    localLabel = new OsuSpriteText
+                                    {
+                                        Colour = Colours.RedLighter,
+                                        Anchor = Anchor.CentreRight,
+                                        Origin = Anchor.CentreRight,
+                                        Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                                    },
+                                    liveLabel = new OsuSpriteText
+                                    {
+                                        Anchor = Anchor.CentreRight,
+                                        Origin = Anchor.CentreRight,
+                                        Font = OsuFont.GetFont(size: 14)
+                                    }
+                                }
                             },
                             new FillFlowContainer
                             {
