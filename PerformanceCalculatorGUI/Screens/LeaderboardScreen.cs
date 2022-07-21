@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
@@ -250,10 +251,14 @@ namespace PerformanceCalculatorGUI.Screens
                     }
                     catch (Exception e)
                     {
+                        if (e is WebException)
+                        {
+                            // web exception usually means we hit rate limiting in which case we wanna bail immediately
+                            throw;
+                        }
+
                         Logger.Log(e.ToString(), level: LogLevel.Error);
                         notificationDisplay.Display(new Notification(e.Message));
-
-                        // should probably stop calculating??
                     }
                 });
             }
