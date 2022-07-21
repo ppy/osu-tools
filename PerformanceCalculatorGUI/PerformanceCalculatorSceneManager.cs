@@ -3,20 +3,24 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Screens;
+using osu.Game.Beatmaps.Drawables.Cards;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Rulesets;
 using osuTK;
+using osuTK.Graphics;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Screens;
 
@@ -28,11 +32,9 @@ namespace PerformanceCalculatorGUI
 
         private ToolbarRulesetSelector rulesetSelector;
 
-        public const float CONTROL_AREA_HEIGHT = 50;
+        private Box hoverGradientBox;
 
-        public const float SCREEN_SWITCH_HEIGHT = 35;
-        public const float SCREEN_SWITCH_WIDTH = 150;
-        public const float SCREEN_SWITCH_PADDING = (CONTROL_AREA_HEIGHT - SCREEN_SWITCH_HEIGHT) / 2.0f;
+        public const float CONTROL_AREA_HEIGHT = 45;
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
@@ -62,10 +64,19 @@ namespace PerformanceCalculatorGUI
                         {
                             new Drawable[]
                             {
-                                new Container
+                                new HoverHandlingContainer
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     Height = CONTROL_AREA_HEIGHT,
+                                    Hovered = e =>
+                                    {
+                                        hoverGradientBox.FadeIn(100);
+                                        return false;
+                                    },
+                                    Unhovered = e =>
+                                    {
+                                        hoverGradientBox.FadeOut(100);
+                                    },
                                     Children = new Drawable[]
                                     {
                                         new Box
@@ -77,41 +88,23 @@ namespace PerformanceCalculatorGUI
                                         {
                                             RelativeSizeAxes = Axes.Y,
                                             Direction = FillDirection.Horizontal,
-                                            Spacing = new Vector2(SCREEN_SWITCH_PADDING),
-                                            Padding = new MarginPadding(SCREEN_SWITCH_PADDING),
                                             AutoSizeAxes = Axes.X,
                                             Children = new Drawable[]
                                             {
-                                                new OsuButton
+                                                new ScreenSelectionButton("Beatmap", FontAwesome.Solid.Music)
                                                 {
-                                                    Text = "beatmap",
-                                                    Height = SCREEN_SWITCH_HEIGHT,
-                                                    Width = SCREEN_SWITCH_WIDTH,
-                                                    BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new SimulateScreen())
                                                 },
-                                                new OsuButton
+                                                new ScreenSelectionButton("Profile", FontAwesome.Solid.User)
                                                 {
-                                                    Text = "profile",
-                                                    Height = SCREEN_SWITCH_HEIGHT,
-                                                    Width = SCREEN_SWITCH_WIDTH,
-                                                    BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new ProfileScreen())
                                                 },
-                                                new OsuButton
+                                                new ScreenSelectionButton("Player Leaderboard", FontAwesome.Solid.List)
                                                 {
-                                                    Text = "player leaderboard",
-                                                    Height = SCREEN_SWITCH_HEIGHT,
-                                                    Width = SCREEN_SWITCH_WIDTH,
-                                                    BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new LeaderboardScreen())
                                                 },
-                                                new OsuButton
+                                                new ScreenSelectionButton("Beatmap Leaderboard", FontAwesome.Solid.ListAlt)
                                                 {
-                                                    Text = "beatmap leaderboard",
-                                                    Height = SCREEN_SWITCH_HEIGHT,
-                                                    Width = SCREEN_SWITCH_WIDTH,
-                                                    BackgroundColour = colours.Gray5,
                                                     Action = () => setScreen(new BeatmapLeaderboardScreen())
                                                 },
                                             }
@@ -137,11 +130,21 @@ namespace PerformanceCalculatorGUI
                             {
                                 new ScalingContainer(ScalingMode.Everything)
                                 {
-                                    Child = screenStack = new ScreenStack
+                                    Depth = 1,
+                                    Children = new Drawable[]
                                     {
-                                        Depth = 1,
-                                        RelativeSizeAxes = Axes.Both
-                                    }
+                                        screenStack = new ScreenStack
+                                        {
+                                            RelativeSizeAxes = Axes.Both
+                                        },
+                                        hoverGradientBox = new Box
+                                        {
+                                            Colour = ColourInfo.GradientVertical(Color4.Black.Opacity(1.0f), Color4.Black.Opacity(1)),
+                                            RelativeSizeAxes = Axes.X,
+                                            Height = 100,
+                                            Alpha = 0
+                                        }
+                                    } 
                                 }
                             }
                         } 
