@@ -38,10 +38,8 @@ namespace PerformanceCalculatorGUI.Screens
         private VerboseLoadingLayer loadingLayer;
 
         private GridContainer layout;
-        private OsuScrollContainer scrollContainer;
         private ScoreTable scoreTable;
 
-        private Box background;
         private Container beatmapPanelContainer;
         private BeatmapCard beatmapPanel;
 
@@ -143,7 +141,7 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                         new Drawable[]
                         {
-                            scrollContainer = new OsuScrollContainer
+                            new OsuScrollContainer
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Children = new Drawable[]
