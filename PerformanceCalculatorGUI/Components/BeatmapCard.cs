@@ -74,8 +74,7 @@ namespace PerformanceCalculatorGUI.Components
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     Font = OsuFont.GetFont(size: 16, weight: FontWeight.Bold),
-                    Shadow = false,
-                    Text = beatmap.Metadata.GetDisplayTitle(),
+                    Text = $"[{beatmap.BeatmapInfo.Ruleset.Name}] {beatmap.Metadata.GetDisplayTitle()} [{beatmap.BeatmapInfo.DifficultyName}]",
                     Margin = new MarginPadding(10)
                 }
             });
