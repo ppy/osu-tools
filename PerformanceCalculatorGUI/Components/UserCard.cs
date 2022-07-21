@@ -14,6 +14,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API.Requests.Responses;
 using osuTK;
 using osu.Game.Users;
+using osu.Game.Users.Drawables;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
@@ -83,12 +84,14 @@ namespace PerformanceCalculatorGUI.Components
                         Spacing = new Vector2(10, 0),
                         Children = new Drawable[]
                         {
-                            CreateAvatar().With(avatar =>
+                            new UpdateableAvatar(User, false)
                             {
-                                avatar.Anchor = Anchor.CentreLeft;
-                                avatar.Origin = Anchor.CentreLeft;
-                                avatar.Size = new Vector2(40);
-                            }),
+                                Masking = true,
+                                Anchor = Anchor.CentreLeft,
+                                Origin = Anchor.CentreLeft,
+                                CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS,
+                                Size = new Vector2(40)
+                            },
                             CreateFlag().With(flag =>
                             {
                                 flag.Anchor = Anchor.CentreLeft;
