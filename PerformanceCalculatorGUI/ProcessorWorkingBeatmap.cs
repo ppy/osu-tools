@@ -4,15 +4,16 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
-using osu.Framework.IO.Network;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Skinning;
+using FileWebRequest = osu.Framework.IO.Network.FileWebRequest;
 
 namespace PerformanceCalculatorGUI
 {
@@ -73,7 +74,19 @@ namespace PerformanceCalculatorGUI
             if (!File.Exists(cachePath))
             {
                 Console.WriteLine($"Downloading {beatmapId}.osu...");
-                new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
+
+                try
+                {
+                    new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
+                }
+                catch (WebException)
+                {
+                    // FileWebRequest will sometimes create a file regardless of status
+                    if (File.Exists(cachePath))
+                        File.Delete(cachePath);
+
+                    throw;
+                }
 
                 // FileWebRequest will always create an empty file if the beatmap doesn't exist, clean it up
                 if (new System.IO.FileInfo(cachePath).Length == 0)
