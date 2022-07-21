@@ -4,6 +4,7 @@
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Cursor;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Input.Bindings;
@@ -22,7 +23,7 @@ namespace PerformanceCalculatorGUI.Components
             Hotkey = GlobalAction.ToggleSettings;
             TooltipMain = "Settings";
 
-            SetIcon(new ScreenSelectionButtonIcon { IconSize = new Vector2(70) });
+            SetIcon(new ScreenSelectionButtonIcon(FontAwesome.Solid.Cog) { IconSize = new Vector2(70) });
         }
 
         public Popover GetPopover() => new SettingsPopover();
