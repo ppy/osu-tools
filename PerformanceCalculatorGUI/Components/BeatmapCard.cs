@@ -32,7 +32,8 @@ namespace PerformanceCalculatorGUI.Components
         [Resolved]
         private LargeTextureStore textures { get; set; }
 
-        public BeatmapCard(ProcessorWorkingBeatmap beatmap) : base(HoverSampleSet.Button)
+        public BeatmapCard(ProcessorWorkingBeatmap beatmap)
+            : base(HoverSampleSet.Button)
         {
             this.beatmap = beatmap;
             RelativeSizeAxes = Axes.X;

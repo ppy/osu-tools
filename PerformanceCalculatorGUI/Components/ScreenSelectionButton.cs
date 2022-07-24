@@ -17,7 +17,7 @@ namespace PerformanceCalculatorGUI.Components
         {
         }
 
-        public override LocalisableString TooltipText { get; }
+        public override LocalisableString TooltipText => string.Empty;
     }
 
     internal class ScreenSelectionButton : ToolbarButton

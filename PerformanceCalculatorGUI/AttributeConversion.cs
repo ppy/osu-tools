@@ -29,7 +29,7 @@ namespace PerformanceCalculatorGUI
         {
             var dictionary = ToDictionary(attributes);
 
-            return string.Join("\n", dictionary.Select(x=> $"{x.Key}: {x.Value:N2}"));
+            return string.Join("\n", dictionary.Select(x => $"{x.Key}: {x.Value:N2}"));
         }
     }
 }

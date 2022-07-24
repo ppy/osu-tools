@@ -144,10 +144,10 @@ namespace PerformanceCalculatorGUI
                                             Height = 100,
                                             Alpha = 0
                                         }
-                                    } 
+                                    }
                                 }
                             }
-                        } 
+                        }
                     }
                 }
             };

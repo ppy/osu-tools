@@ -322,10 +322,9 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Child = userModsSelectOverlay = new ExtendedUserModSelectOverlay
                                                     {
                                                         RelativeSizeAxes = Axes.Both,
-                                                        //AutoSizeAxes = Axes.Y,
                                                         Anchor = Anchor.TopLeft,
                                                         Origin = Anchor.TopLeft,
-                                                        IsValidMod = (mod) => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
+                                                        IsValidMod = mod => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
                                                         SelectedMods = { BindTarget = appliedMods }
                                                     }
                                                 }

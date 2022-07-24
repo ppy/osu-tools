@@ -125,7 +125,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                                     new Drawable[]
                                     {
                                         new TimeInfoContainer { RelativeSizeAxes = Axes.Both },
-                                        new SummaryTimeline { RelativeSizeAxes = Axes.Both,},
+                                        new SummaryTimeline { RelativeSizeAxes = Axes.Both },
                                         new PlaybackControl { RelativeSizeAxes = Axes.Both },
                                     },
                                 }
@@ -161,7 +161,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     RelativeSizeAxes = Axes.Both,
                     Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
-                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator, processorBeatmap.Track.Rate)
+                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
+                        processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
                         Clock = clock,

@@ -128,7 +128,7 @@ namespace PerformanceCalculatorGUI.Components
                 strainLists.Add(skillStrainList.ToArray());
             }
 
-            var strainMaxValue = strainLists.Max(x => x.Max(x => x.val));
+            var strainMaxValue = strainLists.Max(list => list.Max(x => x.val));
 
             for (int i = 0; i < skills.Length; i++)
             {

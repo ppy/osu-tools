@@ -25,7 +25,8 @@ namespace PerformanceCalculatorGUI
     {
         private Skill[] skills;
 
-        public ExtendedOsuDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap) : base(ruleset, beatmap)
+        public ExtendedOsuDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
+            : base(ruleset, beatmap)
         {
         }
 
@@ -43,7 +44,8 @@ namespace PerformanceCalculatorGUI
     {
         private Skill[] skills;
 
-        public ExtendedTaikoDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap) : base(ruleset, beatmap)
+        public ExtendedTaikoDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
+            : base(ruleset, beatmap)
         {
         }
 
@@ -61,7 +63,8 @@ namespace PerformanceCalculatorGUI
     {
         private Skill[] skills;
 
-        public ExtendedCatchDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap) : base(ruleset, beatmap)
+        public ExtendedCatchDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
+            : base(ruleset, beatmap)
         {
         }
 
@@ -79,7 +82,8 @@ namespace PerformanceCalculatorGUI
     {
         private Skill[] skills;
 
-        public ExtendedManiaDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap) : base(ruleset, beatmap)
+        public ExtendedManiaDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
+            : base(ruleset, beatmap)
         {
         }
 
