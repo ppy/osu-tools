@@ -15,12 +15,6 @@ using osu.Game.Rulesets.Taiko.Difficulty;
 
 namespace PerformanceCalculatorGUI
 {
-    public interface IExtendedDifficultyCalculator
-    {
-        Skill[] GetSkills();
-        DifficultyHitObject[] GetDifficultyHitObjects(IBeatmap beatmap, double clockRate);
-    }
-
     public class ExtendedOsuDifficultyCalculator : OsuDifficultyCalculator, IExtendedDifficultyCalculator
     {
         private Skill[] skills;

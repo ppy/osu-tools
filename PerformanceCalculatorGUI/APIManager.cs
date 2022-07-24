@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -33,7 +34,10 @@ namespace PerformanceCalculatorGUI
         public async Task<T> GetJsonFromApi<T>(string request)
         {
             if (token == null)
+            {
                 await getAccessToken();
+                Debug.Assert(token != null);
+            }
 
             using var req = new JsonWebRequest<T>($"{ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
             req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));

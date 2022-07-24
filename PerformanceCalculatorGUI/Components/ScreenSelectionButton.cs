@@ -2,24 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.Localisation;
-using osu.Game.Beatmaps.Drawables.Cards;
 using osu.Game.Input.Bindings;
 using osu.Game.Overlays.Toolbar;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    public class ScreenSelectionButtonIcon : IconPill
-    {
-        public ScreenSelectionButtonIcon(IconUsage? icon = null)
-            : base(icon ?? FontAwesome.Solid.List)
-        {
-        }
-
-        public override LocalisableString TooltipText => string.Empty;
-    }
-
     internal class ScreenSelectionButton : ToolbarButton
     {
         public ScreenSelectionButton(string title, IconUsage? icon = null, GlobalAction? hotkey = null)
