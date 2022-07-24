@@ -12,9 +12,10 @@ Tools for [osu!](https://osu.ppy.sh).
 # Getting Started
 
 ## I just want to run it
-- Clone the repository including submodules (`git clone --recurse-submodules https://github.com/ppy/osu-tools`)
+- Clone the repository (`git clone https://github.com/ppy/osu-tools`)
 - Navigate to each tool's directory and follow the instructions listed in the tool's README.
     - [PerformanceCalculator](https://github.com/ppy/osu-tools/blob/master/PerformanceCalculator/README.md) - A tool for calculating the difficulty of beatmaps and the performance of replays.
+    - [PerformanceCalculatorGUI](https://github.com/ppy/osu-tools/blob/master/PerformanceCalculatorGUI/README.md) - A GUI tool for calculating the difficulty of beatmaps, changes in profile scores and leaderboards.
 
 ## I want to make changes
 Most relevant code is in the main [ppy/osu](htts://github.com/ppy/osu) repository. To make any meaningful changes you will likely need to edit that as well.
