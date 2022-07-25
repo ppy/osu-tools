@@ -12,7 +12,7 @@ namespace PerformanceCalculatorGUI
         [STAThread]
         public static void Main(string[] args)
         {
-            using DesktopGameHost host = Host.GetSuitableDesktopHost("PerformanceCalculatorGUI", new HostOptions
+            using DesktopGameHost host = Host.GetSuitableDesktopHost("PerformanceCalculator", new HostOptions
             {
                 PortableInstallation = true,
                 BypassCompositor = false

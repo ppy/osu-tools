@@ -33,11 +33,7 @@ namespace PerformanceCalculator
 
         public async Task<T> GetJsonFromApi<T>(string request)
         {
-            if (token == null)
-            {
-                await getAccessToken();
-                Debug.Assert(token != null);
-            }
+            await Login();
 
             using var req = new JsonWebRequest<T>($"{ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
             req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
@@ -45,6 +41,28 @@ namespace PerformanceCalculator
             await req.PerformAsync();
 
             return req.ResponseObject;
+        }
+
+        /// <summary>
+        /// Logs in to the API.
+        /// </summary>
+        /// <returns>Whether the login was successful.</returns>
+        public async Task<bool> Login()
+        {
+            try
+            {
+                if (token == null)
+                {
+                    await getAccessToken();
+                    Debug.Assert(token != null);
+                }
+
+                return token != null;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private async Task getAccessToken()
