@@ -12,4 +12,7 @@
 	  <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2022.719.0" />
 	  <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2022.719.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PerformanceCalculator\PerformanceCalculator.csproj" />
+  </ItemGroup>
 </Project>

@@ -67,10 +67,10 @@ namespace PerformanceCalculatorGUI.Screens
         private FillFlowContainer difficultyAttributesContainer;
         private FillFlowContainer performanceAttributesContainer;
 
-        private PerformanceCalculator performanceCalculator;
+        private osu.Game.Rulesets.Difficulty.PerformanceCalculator performanceCalculator;
 
         [Cached]
-        private Bindable<DifficultyCalculator> difficultyCalculator = new();
+        private Bindable<DifficultyCalculator> difficultyCalculator = new Bindable<DifficultyCalculator>();
 
         private FillFlowContainer beatmapDataContainer;
         private OsuSpriteText beatmapTitle;
