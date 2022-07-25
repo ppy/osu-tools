@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using osu.Framework.Audio.Track;
-using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Objects;
@@ -14,7 +11,6 @@ using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko.Objects;
-using osu.Game.Skinning;
 
 namespace PerformanceCalculatorGUI
 {
@@ -238,24 +234,6 @@ namespace PerformanceCalculatorGUI
             return (double)
                    ((6 * (countPerfect + countGreat)) + (4 * countGood) + (2 * countOk) + countMeh) /
                    (6 * total);
-        }
-
-        private class EmptyWorkingBeatmap : WorkingBeatmap
-        {
-            public EmptyWorkingBeatmap()
-                : base(new BeatmapInfo(), null)
-            {
-            }
-
-            protected override IBeatmap GetBeatmap() => throw new NotImplementedException();
-
-            protected override Texture GetBackground() => throw new NotImplementedException();
-
-            protected override Track GetBeatmapTrack() => throw new NotImplementedException();
-
-            protected override ISkin GetSkin() => throw new NotImplementedException();
-
-            public override Stream GetStream(string storagePath) => throw new NotImplementedException();
         }
     }
 }
