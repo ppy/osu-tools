@@ -25,9 +25,9 @@ using osu.Game.Scoring;
 using osu.Game.Users;
 using osu.Game.Utils;
 using PerformanceCalculator;
+using PerformanceCalculator.Configuration;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
-using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {

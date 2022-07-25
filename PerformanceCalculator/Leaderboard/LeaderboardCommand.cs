@@ -16,7 +16,7 @@ using osu.Game.Rulesets.Mods;
 namespace PerformanceCalculator.Leaderboard
 {
     [Command(Name = "leaderboard", Description = "Computes the performance (pp) for every player in a part of the leaderboard.")]
-    public class LeaderboardCommand : ApiCommand
+    public class LeaderboardCommand : APICommand
     {
         [UsedImplicitly]
         [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "The ruleset to compute the leaderboard for.\n"
@@ -39,7 +39,7 @@ namespace PerformanceCalculator.Leaderboard
         public override void Execute()
         {
             var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
-            var leaderboard = GetJsonFromApi<GetTopUsersResponse>($"rankings/{rulesetApiName}/performance?cursor[page]={LeaderboardPage - 1}");
+            var leaderboard = API.GetJsonFromApi<GetTopUsersResponse>($"rankings/{rulesetApiName}/performance?cursor[page]={LeaderboardPage - 1}").Result;
 
             var calculatedPlayers = new List<LeaderboardPlayerInfo>();
 
@@ -54,7 +54,7 @@ namespace PerformanceCalculator.Leaderboard
 
                 Console.WriteLine($"Calculating {player.User.Username} top scores...");
 
-                foreach (var play in GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.Id}/scores/best?mode={rulesetApiName}&limit=100"))
+                foreach (var play in API.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.Id}/scores/best?mode={rulesetApiName}&limit=100").Result)
                 {
                     var working = ProcessorWorkingBeatmap.FromFileOrId(play.BeatmapID.ToString());
 

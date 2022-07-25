@@ -17,7 +17,7 @@ using osu.Game.Rulesets.Scoring;
 namespace PerformanceCalculator.Profile
 {
     [Command(Name = "profile", Description = "Computes the total performance (pp) of a profile.")]
-    public class ProfileCommand : ApiCommand
+    public class ProfileCommand : APICommand
     {
         [UsedImplicitly]
         [Required]
@@ -42,11 +42,11 @@ namespace PerformanceCalculator.Profile
             var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
 
             Console.WriteLine("Getting user data...");
-            var userData = GetJsonFromApi<APIUser>($"users/{ProfileName}/{ruleset.ShortName}");
+            var userData = API.GetJsonFromApi<APIUser>($"users/{ProfileName}/{ruleset.ShortName}").Result;
 
             Console.WriteLine("Getting user top scores...");
 
-            foreach (var play in GetJsonFromApi<List<SoloScoreInfo>>($"users/{userData.Id}/scores/best?mode={rulesetApiName}&limit=100"))
+            foreach (var play in API.GetJsonFromApi<List<SoloScoreInfo>>($"users/{userData.Id}/scores/best?mode={rulesetApiName}&limit=100").Result)
             {
                 var working = ProcessorWorkingBeatmap.FromFileOrId(play.BeatmapID.ToString());
 

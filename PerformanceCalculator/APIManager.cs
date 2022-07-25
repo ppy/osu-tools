@@ -9,11 +9,11 @@ using osu.Framework.Bindables;
 using osu.Framework.IO.Network;
 using osu.Game.Online;
 using osu.Game.Online.API;
-using PerformanceCalculatorGUI.Configuration;
+using PerformanceCalculator.Configuration;
 
-namespace PerformanceCalculatorGUI
+namespace PerformanceCalculator
 {
-    internal class APIManager
+    public class APIManager
     {
         public static readonly EndpointConfiguration ENDPOINT_CONFIGURATION = new ProductionEndpointConfiguration();
 

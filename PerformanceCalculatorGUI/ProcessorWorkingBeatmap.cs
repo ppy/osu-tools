@@ -13,6 +13,7 @@ using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Skinning;
+using PerformanceCalculator;
 using FileWebRequest = osu.Framework.IO.Network.FileWebRequest;
 
 namespace PerformanceCalculatorGUI

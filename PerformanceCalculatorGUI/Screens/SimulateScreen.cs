@@ -35,9 +35,9 @@ using osu.Game.Scoring;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Utils;
 using osuTK;
+using PerformanceCalculator.Configuration;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
-using PerformanceCalculatorGUI.Configuration;
 using PerformanceCalculatorGUI.Screens.ObjectInspection;
 
 namespace PerformanceCalculatorGUI.Screens

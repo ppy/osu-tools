@@ -6,7 +6,7 @@ using System.Reflection;
 using osu.Framework.Configuration;
 using osu.Framework.Platform;
 
-namespace PerformanceCalculatorGUI.Configuration
+namespace PerformanceCalculator.Configuration
 {
     public enum Settings
     {
