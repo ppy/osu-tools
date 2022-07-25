@@ -227,7 +227,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                     Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
                     if (!random)
-                        mods = RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods);
+                        mods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods);
 
                     var difficultyAttributes = difficultyCalculator.Calculate(mods);
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();

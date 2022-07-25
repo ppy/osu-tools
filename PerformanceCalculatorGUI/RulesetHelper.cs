@@ -9,60 +9,17 @@ using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Difficulty;
-using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Skinning;
-using osu.Game.Utils;
 
 namespace PerformanceCalculatorGUI
 {
     public static class RulesetHelper
     {
-        /// <summary>
-        /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
-        /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
-        /// </summary>
-        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
-        {
-            var beatmap = new EmptyWorkingBeatmap
-            {
-                BeatmapInfo =
-                {
-                    Ruleset = ruleset.RulesetInfo,
-                    Difficulty = new BeatmapDifficulty()
-                }
-            };
-
-            var allMods = ruleset.CreateAllMods().ToArray();
-
-            var allowedMods = ModUtils.FlattenMods(
-                                          ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
-                                      .Select(m => m.GetType())
-                                      .Distinct()
-                                      .ToHashSet();
-
-            // Special case to allow either DT or NC.
-            if (mods.Any(m => m is ModDoubleTime))
-                allowedMods.Add(allMods.Single(m => m is ModNightcore).GetType());
-
-            var result = new List<Mod>();
-
-            var classicMod = allMods.SingleOrDefault(m => m is ModClassic);
-            if (classicMod != null)
-                result.Add(classicMod);
-
-            result.AddRange(mods.Where(m => allowedMods.Contains(m.GetType())));
-
-            return result.ToArray();
-        }
-
         public static DifficultyCalculator GetExtendedDifficultyCalculator(RulesetInfo ruleset, IWorkingBeatmap working)
         {
             return ruleset.OnlineID switch
@@ -72,18 +29,6 @@ namespace PerformanceCalculatorGUI
                 2 => new ExtendedCatchDifficultyCalculator(ruleset, working),
                 3 => new ExtendedManiaDifficultyCalculator(ruleset, working),
                 _ => ruleset.CreateInstance().CreateDifficultyCalculator(working)
-            };
-        }
-
-        public static Ruleset GetRulesetFromLegacyID(int id)
-        {
-            return id switch
-            {
-                0 => new OsuRuleset(),
-                1 => new TaikoRuleset(),
-                2 => new CatchRuleset(),
-                3 => new ManiaRuleset(),
-                _ => throw new ArgumentException("Invalid ruleset ID provided.")
             };
         }
 
