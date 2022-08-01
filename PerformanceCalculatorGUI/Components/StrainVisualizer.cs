@@ -255,7 +255,7 @@ namespace PerformanceCalculatorGUI.Components
                         Spacing = new Vector2(5),
                         Children = new Drawable[]
                         {
-                            graphsContainer = new ZoomableScrollContainer
+                            graphsContainer = new ZoomableScrollContainer(1, 100, 1)
                             {
                                 Height = 150,
                                 RelativeSizeAxes = Axes.X

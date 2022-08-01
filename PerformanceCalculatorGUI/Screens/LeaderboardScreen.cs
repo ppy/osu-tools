@@ -246,7 +246,7 @@ namespace PerformanceCalculatorGUI.Screens
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
                         score.PP = perfAttributes?.Total ?? 0.0;
 
-                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes, working);
+                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
                         plays.Add(extendedScore);
                     }
                     catch (Exception e)
@@ -264,11 +264,11 @@ namespace PerformanceCalculatorGUI.Screens
             }
             catch (OperationCanceledException) { }
 
-            var localOrdered = plays.OrderByDescending(x => x.PP).ToList();
+            var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
             var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
 
             int index = 0;
-            decimal totalLocalPP = (decimal)(localOrdered.Select(x => x.PP).Sum(play => Math.Pow(0.95, index++) * play) ?? 0.0);
+            decimal totalLocalPP = (decimal)(localOrdered.Select(x => x.SoloScore.PP).Sum(play => Math.Pow(0.95, index++) * play) ?? 0.0);
             decimal totalLivePP = player.PP ?? (decimal)0.0;
 
             index = 0;
