@@ -30,8 +30,9 @@ using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    public class ExtendedScore : APIScore
+    public class ExtendedScore
     {
+        public SoloScoreInfo SoloScore { get; }
         public double LivePP { get; }
 
         public Bindable<int> Position { get; } = new();
@@ -39,39 +40,11 @@ namespace PerformanceCalculatorGUI.Components
 
         public PerformanceAttributes PerformanceAttributes { get; }
 
-        public ExtendedScore(SoloScoreInfo score, double livePP, PerformanceAttributes attributes, WorkingBeatmap beatmap)
+        public ExtendedScore(SoloScoreInfo score, double livePP, PerformanceAttributes attributes)
         {
+            SoloScore = score;
             PerformanceAttributes = attributes;
             LivePP = livePP;
-
-            TotalScore = score.TotalScore;
-            MaxCombo = score.MaxCombo;
-            User = score.User;
-            OnlineID = score.OnlineID;
-            HasReplay = score.HasReplay;
-            Date = score.EndedAt;
-            Beatmap = new APIBeatmap
-            {
-                OnlineID = beatmap.BeatmapInfo.OnlineID,
-                DifficultyName = beatmap.BeatmapInfo.DifficultyName,
-                BeatmapSet = new APIBeatmapSet
-                {
-                    Title = beatmap.Metadata.Title,
-                    Artist = beatmap.Metadata.Artist,
-                }
-            };
-            Accuracy = score.Accuracy;
-            PP = score.PP;
-            Statistics = new Dictionary<string, int>
-            {
-                { "count_300", score.Statistics.GetValueOrDefault(HitResult.Great) },
-                { "count_100", score.Statistics.GetValueOrDefault(HitResult.Ok) },
-                { "count_50", score.Statistics.GetValueOrDefault(HitResult.Meh) },
-                { "count_miss", score.Statistics.GetValueOrDefault(HitResult.Miss) },
-            };
-            RulesetID = score.RulesetID;
-            Mods = score.Mods;
-            Rank = score.Rank;
         }
     }
 
@@ -171,7 +144,7 @@ namespace PerformanceCalculatorGUI.Components
                                 Spacing = new Vector2(10, 0),
                                 Children = new Drawable[]
                                 {
-                                    new UpdateableRank(Score.Rank)
+                                    new UpdateableRank(Score.SoloScore.Rank)
                                     {
                                         Anchor = Anchor.CentreLeft,
                                         Origin = Anchor.CentreLeft,
@@ -186,7 +159,7 @@ namespace PerformanceCalculatorGUI.Components
                                         Spacing = new Vector2(0, 0.5f),
                                         Children = new Drawable[]
                                         {
-                                            new ScoreBeatmapMetadataContainer(Score.Beatmap),
+                                            new ScoreBeatmapMetadataContainer(Score.SoloScore.Beatmap),
                                             new FillFlowContainer
                                             {
                                                 AutoSizeAxes = Axes.Both,
@@ -196,11 +169,11 @@ namespace PerformanceCalculatorGUI.Components
                                                 {
                                                     new OsuSpriteText
                                                     {
-                                                        Text = $"{Score.Beatmap?.DifficultyName}",
+                                                        Text = $"{Score.SoloScore.Beatmap?.DifficultyName}",
                                                         Font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular),
                                                         Colour = colours.Yellow
                                                     },
-                                                    new DrawableDate(Score.Date, 12)
+                                                    new DrawableDate(Score.SoloScore.EndedAt, 12)
                                                     {
                                                         Colour = colourProvider.Foreground1
                                                     }
@@ -252,7 +225,7 @@ namespace PerformanceCalculatorGUI.Components
                                                             {
                                                                 new OsuSpriteText
                                                                 {
-                                                                    Text = Score.Accuracy.FormatAccuracy(),
+                                                                    Text = Score.SoloScore.Accuracy.FormatAccuracy(),
                                                                     Font = OsuFont.GetFont(weight: FontWeight.Bold, italics: true),
                                                                     Colour = colours.Yellow,
                                                                     Anchor = Anchor.TopCentre,
@@ -260,7 +233,7 @@ namespace PerformanceCalculatorGUI.Components
                                                                 },
                                                                 new OsuSpriteText
                                                                 {
-                                                                    Text = $"{Score.MaxCombo}x {{ {Score.Statistics["count_300"]} / {Score.Statistics["count_100"]} / {Score.Statistics["count_50"]} / {Score.Statistics["count_miss"]} }}",
+                                                                    Text = $"{Score.SoloScore.MaxCombo}x {{ {formatStatistics(Score.SoloScore.Statistics)} }}",
                                                                     Font = OsuFont.GetFont(size: small_text_font_size, weight: FontWeight.Regular),
                                                                     Colour = colourProvider.Light2,
                                                                     Anchor = Anchor.TopCentre,
@@ -305,9 +278,9 @@ namespace PerformanceCalculatorGUI.Components
                                         Origin = Anchor.CentreRight,
                                         Direction = FillDirection.Horizontal,
                                         Spacing = new Vector2(2),
-                                        Children = Score.Mods.Select(mod =>
+                                        Children = Score.SoloScore.Mods.Select(mod =>
                                         {
-                                            var ruleset = rulesets.GetRuleset(Score.RulesetID) ?? throw new InvalidOperationException();
+                                            var ruleset = rulesets.GetRuleset(Score.SoloScore.RulesetID) ?? throw new InvalidOperationException();
 
                                             return new ModIcon(ruleset.CreateInstance().CreateModFromAcronym(mod.Acronym))
                                             {
@@ -367,7 +340,7 @@ namespace PerformanceCalculatorGUI.Components
                                     new ExtendedOsuSpriteText
                                     {
                                         Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                        Text = $"{Score.PP:0}pp",
+                                        Text = $"{Score.SoloScore.PP:0}pp",
                                         Colour = colourProvider.Highlight1,
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre,
@@ -376,7 +349,7 @@ namespace PerformanceCalculatorGUI.Components
                                     new OsuSpriteText
                                     {
                                         Font = OsuFont.GetFont(size: small_text_font_size),
-                                        Text = $"{Score.PP - Score.LivePP:+0.0;-0.0;-}",
+                                        Text = $"{Score.SoloScore.PP - Score.LivePP:+0.0;-0.0;-}",
                                         Colour = colourProvider.Light1,
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre
@@ -389,6 +362,13 @@ namespace PerformanceCalculatorGUI.Components
             });
 
             Score.PositionChange.BindValueChanged(v => { positionChangeText.Text = $"{v.NewValue:+0;-0;-}"; });
+        }
+
+        private static string formatStatistics(Dictionary<HitResult, int> statistics)
+        {
+            // TODO: ruleset-specific display
+            return
+                $"{statistics.GetValueOrDefault(HitResult.Great)} / {statistics.GetValueOrDefault(HitResult.Ok)} / {statistics.GetValueOrDefault(HitResult.Meh)} / {statistics.GetValueOrDefault(HitResult.Miss)}";
         }
 
         private class ScoreBeatmapMetadataContainer : OsuHoverContainer
