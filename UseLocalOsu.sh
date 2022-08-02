@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Run this script to use a local copy of osu rather than fetching it from nuget.
 # It expects the osu directory to be at the same level as the osu-tools directory
