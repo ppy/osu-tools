@@ -18,7 +18,6 @@ using osu.Framework.Input.Events;
 using osu.Framework.Input.States;
 using osu.Framework.Logging;
 using osu.Framework.Threading;
-using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -73,7 +72,7 @@ namespace PerformanceCalculatorGUI.Screens
         private Bindable<DifficultyCalculator> difficultyCalculator = new();
 
         private FillFlowContainer beatmapDataContainer;
-        private OsuSpriteText beatmapTitle;
+        private Container beatmapTitle;
 
         private ModDisplay modDisplay;
 
@@ -109,7 +108,7 @@ namespace PerformanceCalculatorGUI.Screens
         public override bool ShouldShowConfirmationDialogOnSwitch => working != null;
 
         private const int file_selection_container_height = 40;
-        private const int map_title_container_height = 20;
+        private const int map_title_container_height = 40;
 
         public SimulateScreen()
         {
@@ -148,20 +147,20 @@ namespace PerformanceCalculatorGUI.Screens
                                         beatmapFileTextBox = new FileChooserLabelledTextBox(configManager.GetBindable<string>(Settings.DefaultPath), ".osu")
                                         {
                                             Label = "Beatmap File",
-                                            FixedLabelWidth = 120f,
+                                            FixedLabelWidth = 100f,
                                             PlaceholderText = "Click to select a beatmap file"
                                         },
                                         beatmapIdTextBox = new LimitedLabelledNumberBox
                                         {
                                             Label = "Beatmap ID",
-                                            FixedLabelWidth = 120f,
+                                            FixedLabelWidth = 100f,
                                             PlaceholderText = "Enter beatmap ID",
                                             CommitOnFocusLoss = false
                                         },
                                         beatmapImportTypeSwitch = new SwitchButton
                                         {
                                             Width = 80,
-                                            Height = 40
+                                            Height = file_selection_container_height
                                         }
                                     }
                                 }
@@ -169,20 +168,10 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                         new Drawable[]
                         {
-                            new Container
+                            beatmapTitle = new Container
                             {
                                 Name = "Beatmap title",
-                                RelativeSizeAxes = Axes.Both,
-                                Children = new Drawable[]
-                                {
-                                    beatmapTitle = new OsuSpriteText
-                                    {
-                                        Anchor = Anchor.Centre,
-                                        Origin = Anchor.Centre,
-                                        Height = map_title_container_height,
-                                        Text = "No beatmap loaded!"
-                                    },
-                                }
+                                RelativeSizeAxes = Axes.Both
                             }
                         },
                         new Drawable[]
@@ -201,7 +190,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         Width = 0.5f,
                                         Child = new FillFlowContainer
                                         {
-                                            Padding = new MarginPadding(15.0f),
+                                            Padding = new MarginPadding { Left = 10f, Right = 15.0f, Vertical = 5f },
                                             RelativeSizeAxes = Axes.X,
                                             AutoSizeAxes = Axes.Y,
                                             Direction = FillDirection.Vertical,
@@ -210,7 +199,7 @@ namespace PerformanceCalculatorGUI.Screens
                                             {
                                                 new OsuSpriteText
                                                 {
-                                                    Margin = new MarginPadding(10.0f),
+                                                    Margin = new MarginPadding { Left = 10f, Top = 5f, Bottom = 10.0f },
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
                                                     Text = "Score params"
@@ -338,7 +327,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         Width = 0.5f,
                                         Child = new FillFlowContainer
                                         {
-                                            Padding = new MarginPadding(15.0f),
+                                            Padding = new MarginPadding { Left = 10f, Right = 15.0f, Vertical = 5f },
                                             RelativeSizeAxes = Axes.X,
                                             AutoSizeAxes = Axes.Y,
                                             Direction = FillDirection.Vertical,
@@ -347,7 +336,7 @@ namespace PerformanceCalculatorGUI.Screens
                                             {
                                                 new OsuSpriteText
                                                 {
-                                                    Margin = new MarginPadding(10.0f),
+                                                    Margin = new MarginPadding { Left = 10f, Top = 5f, Bottom = 10.0f },
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
                                                     Text = "Difficulty Attributes"
@@ -518,7 +507,7 @@ namespace PerformanceCalculatorGUI.Screens
         private void resetBeatmap()
         {
             working = null;
-            beatmapTitle.Text = string.Empty;
+            beatmapTitle.Clear();
             resetMods();
             beatmapDataContainer.Hide();
 
@@ -562,7 +551,7 @@ namespace PerformanceCalculatorGUI.Screens
                 resetCalculations();
             }
 
-            beatmapTitle.Text = $"[{ruleset.Value.Name}] {working.BeatmapInfo.GetDisplayTitle()}";
+            beatmapTitle.Add(new BeatmapCard(working));
 
             loadBackground();
 
