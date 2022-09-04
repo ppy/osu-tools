@@ -184,7 +184,7 @@ namespace PerformanceCalculatorGUI.Screens
                 Schedule(() =>
                 {
                     if (userPanel != null)
-                        userPanelContainer.Remove(userPanel);
+                        userPanelContainer.Remove(userPanel, true);
 
                     userPanelContainer.Add(userPanel = new UserCard(player)
                     {

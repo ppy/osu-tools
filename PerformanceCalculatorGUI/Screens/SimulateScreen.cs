@@ -388,7 +388,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Action = () =>
                                                     {
                                                         if (objectInspector is not null)
-                                                            RemoveInternal(objectInspector);
+                                                            RemoveInternal(objectInspector, true);
 
                                                         AddInternal(objectInspector = new ObjectInspector(working)
                                                         {
@@ -513,7 +513,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             if (background is not null)
             {
-                RemoveInternal(background);
+                RemoveInternal(background, true);
             }
         }
 
@@ -842,7 +842,7 @@ namespace PerformanceCalculatorGUI.Screens
         {
             if (background is not null)
             {
-                RemoveInternal(background);
+                RemoveInternal(background, true);
             }
 
             if (working.BeatmapInfo?.BeatmapSet?.OnlineID is not null)
