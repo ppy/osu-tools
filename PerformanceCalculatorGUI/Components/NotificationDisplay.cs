@@ -38,7 +38,7 @@ namespace PerformanceCalculatorGUI.Components
             notification.FadeIn(1500, Easing.OutQuint)
                         .Delay(5000)
                         .FadeOut(1500, Easing.OutQuint)
-                        .Finally(_ => content.Remove(notification));
+                        .Finally(_ => content.Remove(notification, true));
         });
     }
 }

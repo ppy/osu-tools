@@ -73,7 +73,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             var playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
             processorBeatmap.LoadTrack();
 
-            clock = new EditorClock(playableBeatmap, beatDivisor) { IsCoupled = false };
+            clock = new EditorClock(playableBeatmap, beatDivisor);
             clock.ChangeSource(processorBeatmap.Track);
             dependencies.CacheAs(clock);
 
