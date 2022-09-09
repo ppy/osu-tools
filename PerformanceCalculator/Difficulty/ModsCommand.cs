@@ -40,7 +40,7 @@ namespace PerformanceCalculator.Difficulty
             {
                 mod.Acronym,
                 mod.Name,
-                mod.Description,
+                Description = mod.Description.ToString(),
                 Type = mod.Type.ToString(),
                 Settings = getSettingsDefinitions(mod),
                 IncompatibleMods = getAllImplementations(mod.IncompatibleMods),
