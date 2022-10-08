@@ -58,7 +58,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 panel.AddParagraph($"Strain Time: {entry.DifficultyHitObject.StrainTime:N3}");
                 panel.AddParagraph($"Aim Difficulty: {AimEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, true):N3}");
-                panel.AddParagraph($"Speed Difficulty: {SpeedEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject):N3}"); // OD10, not possible to get difficulty stats from here?
+                panel.AddParagraph($"Speed Difficulty: {SpeedEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject):N3}");
                 panel.AddParagraph($"Rhythm Difficulty: {RhythmEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject):N3}");
                 panel.AddParagraph($"Flashlight Difficulty: {FlashlightEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, false):N3}");
 
