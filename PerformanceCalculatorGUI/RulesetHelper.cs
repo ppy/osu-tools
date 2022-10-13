@@ -103,14 +103,14 @@ namespace PerformanceCalculatorGUI
             return (int)Math.Round(1000000 * scoreMultiplier);
         }
 
-        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {
             return ruleset.OnlineID switch
             {
                 0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
                 1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
                 2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
-                3 => generateManiaHitResults(accuracy, beatmap, countMiss),
+                3 => generateManiaHitResults(accuracy, beatmap, countMiss, countMeh, countOk, countGood, countGreat),
                 _ => throw new ArgumentException("Invalid ruleset ID provided.")
             };
         }
@@ -210,31 +210,48 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, int countMiss)
+        private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {
-            var totalResultCount = beatmap.HitObjects.Count;
+            var totalHits = beatmap.HitObjects.Count;
 
-            // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
-            var targetTotal = (int)Math.Round(accuracy * totalResultCount * 6);
+            countMiss = Math.Clamp(countMiss, 0, totalHits);
 
-            // Start by assuming every non miss is a meh
-            // This is how much increase is needed by greats and goods
-            var delta = targetTotal - (totalResultCount - countMiss);
+            if (countMeh == null)
+            {
+                // Populate score with mehs to make this approximation more precise.
+                // This value can be negative on impossible misscount.
+                //
+                // total = ((1/6) * meh + (1/3) * ok + (2/3) * good + great + perfect) / acc
+                // total = miss + meh + ok + good + great + perfect
+                // 
+                // miss + (5/6) * meh + (2/3) * ok + (1/3) * good = total - acc * total
+                // meh = 1.2 * (total - acc * total) - 1.2 * miss - 0.8 * ok - 0.4 * good
+                countMeh = (int)Math.Round(1.2 * (totalHits - totalHits * accuracy) - 1.2 * countMiss - 0.8 * (countOk ?? 0) - 0.4 * (countGood ?? 0));
+            }
 
-            // Each great increases total by 5 (great-meh=5)
-            int countGreat = delta / 5;
-            // Each good increases total by 1 (good-meh=1). Covers remaining difference.
-            int countGood = delta % 5;
-            // Mehs are left over. Could be negative if impossible value of amountMiss chosen
-            int countMeh = totalResultCount - countGreat - countGood - countMiss;
+            // We need to clamp for all values because performance calculator's custom accuracy formula is not invariant to negative counts.
+            int currentCounts = countMiss;
+
+            countMeh = Math.Clamp(countMeh ?? 0, 0, totalHits - currentCounts);
+            currentCounts += countMeh ?? 0;
+
+            countOk = Math.Clamp(countOk ?? 0, 0, totalHits - currentCounts);
+            currentCounts += countOk ?? 0;
+
+            countGood = Math.Clamp(countGood ?? 0, 0, totalHits - currentCounts);
+            currentCounts += countGood ?? 0;
+
+            countGreat = Math.Clamp(countGreat ?? 0, 0, totalHits - currentCounts);
+
+            int countPerfect = totalHits - (countGreat ?? 0) - (countGood ?? 0) - (countOk ?? 0) - (countMeh ?? 0) - countMiss;
 
             return new Dictionary<HitResult, int>
             {
-                { HitResult.Perfect, countGreat },
-                { HitResult.Great, 0 },
-                { HitResult.Good, countGood },
-                { HitResult.Ok, 0 },
-                { HitResult.Meh, countMeh },
+                { HitResult.Perfect, countPerfect },
+                { HitResult.Great, countGreat ?? 0 },
+                { HitResult.Ok, countOk ?? 0 },
+                { HitResult.Good, countGood ?? 0 },
+                { HitResult.Meh, countMeh ?? 0 },
                 { HitResult.Miss, countMiss }
             };
         }
