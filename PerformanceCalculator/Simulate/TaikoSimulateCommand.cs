@@ -48,11 +48,9 @@ namespace PerformanceCalculator.Simulate
 
         protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<Hit>().Count();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {
             var totalResultCount = GetMaxCombo(beatmap);
-
-            int countGreat;
 
             if (countGood != null)
             {
@@ -69,8 +67,8 @@ namespace PerformanceCalculator.Simulate
 
             return new Dictionary<HitResult, int>
             {
-                { HitResult.Great, countGreat },
-                { HitResult.Ok, (int)countGood },
+                { HitResult.Great, countGreat ?? 0 },
+                { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, 0 },
                 { HitResult.Miss, countMiss }
             };

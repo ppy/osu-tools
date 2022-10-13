@@ -53,7 +53,7 @@ namespace PerformanceCalculator.Simulate
         protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.Count(h => h is Fruit)
                                                                 + beatmap.HitObjects.OfType<JuiceStream>().SelectMany(j => j.NestedHitObjects).Count(h => !(h is TinyDroplet));
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {
             var maxCombo = GetMaxCombo(beatmap);
             int maxTinyDroplets = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count());
