@@ -729,16 +729,27 @@ namespace PerformanceCalculatorGUI.Screens
             }
         }
 
-        private void updateAccuracyParams(bool useFullScoreData)
+        private void resetTextBoxes()
         {
+            greatsTextBox.Text = string.Empty;
+            greatsTextBox.Value.Value = 0;
+
             goodsTextBox.Text = string.Empty;
             goodsTextBox.Value.Value = 0;
+
+            oksTextBox.Text = string.Empty;
+            oksTextBox.Value.Value = 0;
 
             mehsTextBox.Text = string.Empty;
             mehsTextBox.Value.Value = 0;
 
             accuracyTextBox.Text = string.Empty;
             accuracyTextBox.Value.Value = 100;
+        }
+
+        private void updateAccuracyParams(bool useFullScoreData)
+        {
+            resetTextBoxes();
 
             if (useFullScoreData)
             {
