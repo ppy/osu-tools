@@ -77,7 +77,7 @@ namespace PerformanceCalculator.Simulate
 
             return new Dictionary<HitResult, int>
             {
-                { HitResult.Great, countGreat ?? 0 },
+                { HitResult.Great, (int)countGreat },
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
                 { HitResult.Miss, countMiss }

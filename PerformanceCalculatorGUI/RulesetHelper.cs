@@ -229,7 +229,7 @@ namespace PerformanceCalculatorGUI
             // We need to clamp for all values because performance calculator's custom accuracy formula is not invariant to negative counts.
             int currentCounts = countMiss;
 
-            countMeh = Math.Clamp(countMeh ?? 0, 0, totalHits - currentCounts);
+            countMeh = Math.Clamp((int)countMeh, 0, totalHits - currentCounts);
             currentCounts += (int)countMeh;
 
             countOk = Math.Clamp(countOk ?? 0, 0, totalHits - currentCounts);
@@ -245,10 +245,10 @@ namespace PerformanceCalculatorGUI
             return new Dictionary<HitResult, int>
             {
                 { HitResult.Perfect, countPerfect },
-                { HitResult.Great, countGreat ?? 0 },
-                { HitResult.Ok, countOk ?? 0 },
-                { HitResult.Good, countGood ?? 0 },
-                { HitResult.Meh, countMeh ?? 0 },
+                { HitResult.Great, (int)countGreat },
+                { HitResult.Ok, (int)countOk },
+                { HitResult.Good, (int)countGood },
+                { HitResult.Meh, (int)countMeh },
                 { HitResult.Miss, countMiss }
             };
         }
