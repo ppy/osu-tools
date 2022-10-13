@@ -3,13 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mania;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator.Simulate
@@ -57,34 +55,31 @@ namespace PerformanceCalculator.Simulate
 
             countMiss = Math.Clamp(countMiss, 0, totalHits);
 
-            if (countMeh == null)
-            {
-                // Populate score with mehs to make this approximation more precise.
-                // This value can be negative on impossible misscount.
-                //
-                // total = ((1/6) * meh + (1/3) * ok + (2/3) * good + great + perfect) / acc
-                // total = miss + meh + ok + good + great + perfect
-                //
-                // miss + (5/6) * meh + (2/3) * ok + (1/3) * good = total - acc * total
-                // meh = 1.2 * (total - acc * total) - 1.2 * miss - 0.8 * ok - 0.4 * good
-                countMeh = (int)Math.Round((1.2 * (totalHits - totalHits * accuracy)) - (1.2 * countMiss) - (0.8 * (countOk ?? 0)) - (0.4 * (countGood ?? 0)));
-            }
+            // Populate score with mehs to make this approximation more precise.
+            // This value can be negative on impossible misscount.
+            //
+            // total = ((1/6) * meh + (1/3) * ok + (2/3) * good + great + perfect) / acc
+            // total = miss + meh + ok + good + great + perfect
+            //
+            // miss + (5/6) * meh + (2/3) * ok + (1/3) * good = total - acc * total
+            // meh = 1.2 * (total - acc * total) - 1.2 * miss - 0.8 * ok - 0.4 * good
+            countMeh ??= (int)Math.Round((1.2 * (totalHits - totalHits * accuracy)) - (1.2 * countMiss) - (0.8 * (countOk ?? 0)) - (0.4 * (countGood ?? 0)));
 
             // We need to clamp for all values because performance calculator's custom accuracy formula is not invariant to negative counts.
             int currentCounts = countMiss;
 
             countMeh = Math.Clamp(countMeh ?? 0, 0, totalHits - currentCounts);
-            currentCounts += countMeh ?? 0;
+            currentCounts += (int)countMeh;
 
             countOk = Math.Clamp(countOk ?? 0, 0, totalHits - currentCounts);
-            currentCounts += countOk ?? 0;
+            currentCounts += (int)countOk;
 
             countGood = Math.Clamp(countGood ?? 0, 0, totalHits - currentCounts);
-            currentCounts += countGood ?? 0;
+            currentCounts += (int)countGood;
 
             countGreat = Math.Clamp(countGreat ?? 0, 0, totalHits - currentCounts);
 
-            int countPerfect = totalHits - (countGreat ?? 0) - (countGood ?? 0) - (countOk ?? 0) - (countMeh ?? 0) - countMiss;
+            int countPerfect = totalHits - (int)countGreat - (int)countGood - (int)countOk - (int)countMeh - countMiss;
 
             return new Dictionary<HitResult, int>
             {
