@@ -223,10 +223,10 @@ namespace PerformanceCalculatorGUI
                 //
                 // total = ((1/6) * meh + (1/3) * ok + (2/3) * good + great + perfect) / acc
                 // total = miss + meh + ok + good + great + perfect
-                // 
+                //
                 // miss + (5/6) * meh + (2/3) * ok + (1/3) * good = total - acc * total
                 // meh = 1.2 * (total - acc * total) - 1.2 * miss - 0.8 * ok - 0.4 * good
-                countMeh = (int)Math.Round(1.2 * (totalHits - totalHits * accuracy) - 1.2 * countMiss - 0.8 * (countOk ?? 0) - 0.4 * (countGood ?? 0));
+                countMeh = (int)Math.Round((1.2 * (totalHits - totalHits * accuracy)) - (1.2 * countMiss) - (0.8 * (countOk ?? 0)) - (0.4 * (countGood ?? 0)));
             }
 
             // We need to clamp for all values because performance calculator's custom accuracy formula is not invariant to negative counts.
