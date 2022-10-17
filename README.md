@@ -6,6 +6,14 @@
 
 Tools for [osu!](https://osu.ppy.sh).
 
+# Current Versions
+
+The `master` branch of this (and other) repositories track ongoing developments, and may be newer than what is used for the live osu! systems. If looking to use the correct version for matching live values, the correct versions are:
+
+| `osu-tools` | `osu` |
+| -- | -- |
+| [2022.1017.0](https://github.com/ppy/osu-tools/releases/tag/2022.1017.0) | [2022.927.0](https://github.com/ppy/osu/releases/tag/2022.927.0) ([nuget](https://www.nuget.org/packages/ppy.osu.Game/2022.927.0)) |
+
 # Requirements
 
 - A desktop platform with the [.NET 6.0 SDK](https://dotnet.microsoft.com/download) installed.
