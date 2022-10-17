@@ -6,6 +6,10 @@
 
 Tools for [osu!](https://osu.ppy.sh).
 
+# Current Versions
+
+This is part of a group of projects which are used in live deployments where the deployed version is critical to producing correct results. The `master` branch tracks ongoing developments. If looking to use the correct version for matching live values, please [consult this wiki page](https://github.com/ppy/osu-infrastructure/wiki/Star-Rating-and-Performance-Points) for the latest information.
+
 # Requirements
 
 - A desktop platform with the [.NET 6.0 SDK](https://dotnet.microsoft.com/download) installed.
