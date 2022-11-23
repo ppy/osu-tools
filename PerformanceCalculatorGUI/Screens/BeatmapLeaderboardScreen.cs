@@ -269,7 +269,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var allowedMods = ModUtils.FlattenMods(diffCalculator.CreateDifficultyAdjustmentModCombinations())
                                       .Distinct()
-                                      .Where(x=> x.GetType() != typeof(ModNoMod))
+                                      .Where(x => x.GetType() != typeof(ModNoMod))
                                       .ToArray();
 
             var difficultyAttributes = diffCalculator.Calculate();
