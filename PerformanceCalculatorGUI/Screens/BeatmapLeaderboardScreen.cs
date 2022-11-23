@@ -269,6 +269,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var allowedMods = ModUtils.FlattenMods(diffCalculator.CreateDifficultyAdjustmentModCombinations())
                                       .Distinct()
+                                      .Where(x=> x.GetType() != typeof(ModNoMod))
                                       .ToArray();
 
             var difficultyAttributes = diffCalculator.Calculate();
@@ -293,9 +294,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                 appliedMods = appliedMods.ToList();
 
-                const double min_count300_ratio = 0.7; // ratio of the least amount of 300s out of all objects, i.e "there should be at least 700 300s out of 1000 objects"
-                const double min_count100_ratio = 0.85; // ratio of the least amount of 100s out of remaining unjudged objects, i.e "there should be at least 255 100s out of remaining 300 objects"
-                const double min_count50_ratio = 0.5; // ratio of the least amount of 50s out of remaining unjudged objects, i.e "there should be at least 22 50s out of remaining 45 objects"
+                const double min_count300_ratio = 0.8; // ratio of the least amount of 300s out of all objects, i.e "there should be at least 800 300s out of 1000 objects"
+                const double min_count100_ratio = 0.85; // ratio of the least amount of 100s out of remaining unjudged objects, i.e "there should be at least 170 100s out of remaining 200 objects"
+                const double min_count50_ratio = 0.5; // ratio of the least amount of 50s out of remaining unjudged objects, i.e "there should be at least 15 50s out of remaining 30 objects"
 
                 var unjudgedObjects = working.Beatmap.HitObjects.Count;
                 var count300 = rng.Next((int)(working.Beatmap.HitObjects.Count * min_count300_ratio), unjudgedObjects + 1);
@@ -313,38 +314,35 @@ namespace PerformanceCalculatorGUI.Screens
                 if (countMiss > 0)
                     combo = rng.Next((int)(0.5 * difficultyAttributes.MaxCombo) / countMiss, Math.Min(difficultyAttributes.MaxCombo, (int)(difficultyAttributes.MaxCombo / (0.1 * countMiss))));
 
-                var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value);
-
-                var scoreProcessor = new ScoreProcessor(rulesetInstance);
-                scoreProcessor.ApplyBeatmap(working.Beatmap);
-                scoreProcessor.Mode.Value = ScoringMode.Standardised;
-                scoreProcessor.Mods.Value = appliedMods;
-                scoreProcessor.Accuracy.Value = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, new Dictionary<HitResult, int>
+                var statistics = new Dictionary<HitResult, int>
                 {
                     { HitResult.Great, count300 },
                     { HitResult.Ok, count100 },
                     { HitResult.Meh, count50 },
                     { HitResult.Miss, countMiss }
-                });
-                scoreProcessor.Combo.Value = combo;
-                scoreProcessor.PopulateScore(scoreInfo);
+                };
 
-                var score = scoreProcessor.ComputeScore(ScoringMode.Standardised, scoreInfo);
+                var accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
+
+                var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
+                {
+                    Statistics = statistics,
+                    MaxCombo = combo,
+                    Accuracy = accuracy
+                };
+
+                var scoreProcessor = rulesetInstance.CreateScoreProcessor();
+                scoreProcessor.Mods.Value = appliedMods;
+                scoreProcessor.Accuracy.Value = accuracy;
 
                 scores.Add(new SoloScoreInfo
                 {
-                    Rank = scoreInfo.Rank,
-                    Accuracy = scoreInfo.Accuracy,
-                    TotalScore = (int)score,
-                    MaxCombo = scoreInfo.MaxCombo,
+                    Rank = scoreProcessor.Rank.Value,
+                    Accuracy = accuracy,
+                    TotalScore = (int)scoreProcessor.ComputeScore(ScoringMode.Standardised, scoreInfo),
+                    MaxCombo = combo,
                     Mods = appliedMods.Select(x => new APIMod(x)).ToArray(),
-                    Statistics = new Dictionary<HitResult, int>
-                    {
-                        { HitResult.Great, count300 },
-                        { HitResult.Ok, count100 },
-                        { HitResult.Meh, count50 },
-                        { HitResult.Miss, countMiss }
-                    },
+                    Statistics = statistics,
                     User = new APIUser
                     {
                         Username = $"dummy {i}",

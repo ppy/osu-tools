@@ -67,7 +67,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 d.ApplyCustomUpdateState += updateState;
             }
-
+            
             private void updateState(DrawableHitObject hitObject, ArmedState state)
             {
                 if (state == ArmedState.Idle)
@@ -83,19 +83,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
                         circle.ApproachCircle.ScaleTo(1.1f, 300, Easing.OutQuint);
                     }
-                }
-
-                if (hitObject is IHasMainCirclePiece mainPieceContainer)
-                {
-                    // clear any explode animation logic.
-                    // this is scheduled after children to ensure that the clear happens after invocations of ApplyCustomUpdateState on the circle piece's nested skinnables.
-                    ScheduleAfterChildren(() =>
-                    {
-                        if (hitObject.HitObject == null) return;
-
-                        mainPieceContainer.CirclePiece.ApplyTransformsAt(hitObject.StateUpdateTime, true);
-                        mainPieceContainer.CirclePiece.ClearTransformsAfter(hitObject.StateUpdateTime, true);
-                    });
                 }
 
                 if (hitObject is DrawableSliderRepeat repeat)
