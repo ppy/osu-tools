@@ -67,7 +67,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 d.ApplyCustomUpdateState += updateState;
             }
-            
+
             private void updateState(DrawableHitObject hitObject, ArmedState state)
             {
                 if (state == ArmedState.Idle)
