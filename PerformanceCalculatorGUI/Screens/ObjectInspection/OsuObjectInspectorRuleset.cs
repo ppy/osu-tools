@@ -12,7 +12,6 @@ using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
-using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
 
@@ -83,19 +82,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
                         circle.ApproachCircle.ScaleTo(1.1f, 300, Easing.OutQuint);
                     }
-                }
-
-                if (hitObject is IHasMainCirclePiece mainPieceContainer)
-                {
-                    // clear any explode animation logic.
-                    // this is scheduled after children to ensure that the clear happens after invocations of ApplyCustomUpdateState on the circle piece's nested skinnables.
-                    ScheduleAfterChildren(() =>
-                    {
-                        if (hitObject.HitObject == null) return;
-
-                        mainPieceContainer.CirclePiece.ApplyTransformsAt(hitObject.StateUpdateTime, true);
-                        mainPieceContainer.CirclePiece.ClearTransformsAfter(hitObject.StateUpdateTime, true);
-                    });
                 }
 
                 if (hitObject is DrawableSliderRepeat repeat)
