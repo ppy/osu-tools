@@ -13,7 +13,7 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class SettingsButton : ToolbarButton, IHasPopover
+    public partial class SettingsButton : ToolbarButton, IHasPopover
     {
         protected override Anchor TooltipAnchor => Anchor.TopRight;
 

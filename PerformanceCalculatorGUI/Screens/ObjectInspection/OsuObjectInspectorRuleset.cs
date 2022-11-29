@@ -17,7 +17,7 @@ using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public class OsuObjectInspectorRuleset : DrawableOsuRuleset
+    public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset
     {
         public const int HIT_OBJECT_FADE_OUT_EXTENSION = 600;
 
@@ -35,7 +35,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
-        private class OsuObjectInspectorPlayfield : OsuPlayfield
+        private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
             private readonly OsuObjectInspectorRenderer objectRenderer;
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;

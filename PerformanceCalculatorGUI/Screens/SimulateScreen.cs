@@ -22,7 +22,6 @@ using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
@@ -41,7 +40,7 @@ using PerformanceCalculatorGUI.Screens.ObjectInspection;
 
 namespace PerformanceCalculatorGUI.Screens
 {
-    public class SimulateScreen : PerformanceCalculatorScreen
+    public partial class SimulateScreen : PerformanceCalculatorScreen
     {
         private ProcessorWorkingBeatmap working;
 
@@ -290,7 +289,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     AutoSizeAxes = Axes.Y,
                                                     Children = new Drawable[]
                                                     {
-                                                        new OsuButton
+                                                        new RoundedButton
                                                         {
                                                             Width = 100,
                                                             Margin = new MarginPadding { Top = 4.0f, Right = 5.0f },
@@ -378,7 +377,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     AutoSizeAxes = Axes.Y,
                                                     Child = strainVisualizer = new StrainVisualizer()
                                                 },
-                                                new OsuButton
+                                                new RoundedButton
                                                 {
                                                     Anchor = Anchor.TopCentre,
                                                     Origin = Anchor.TopCentre,

@@ -30,7 +30,7 @@ using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {
-    internal class BeatmapLeaderboardScreen : PerformanceCalculatorScreen
+    public partial class BeatmapLeaderboardScreen : PerformanceCalculatorScreen
     {
         private LimitedLabelledNumberBox beatmapIdTextBox;
         private StatefulButton calculationButton;

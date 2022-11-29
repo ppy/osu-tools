@@ -23,7 +23,7 @@ using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    public class StrainBar : Bar, IHasTooltip
+    public partial class StrainBar : Bar, IHasTooltip
     {
         public StrainBar(string tooltip)
         {
@@ -33,7 +33,7 @@ namespace PerformanceCalculatorGUI.Components
         public LocalisableString TooltipText { get; }
     }
 
-    public class StrainBarGraph : FillFlowContainer<StrainBar>
+    public partial class StrainBarGraph : FillFlowContainer<StrainBar>
     {
         /// <summary>
         /// Manually sets the max value, if null <see cref="Enumerable.Max(IEnumerable{float})"/> is instead used
@@ -71,7 +71,7 @@ namespace PerformanceCalculatorGUI.Components
         }
     }
 
-    internal class StrainVisualizer : Container
+    public partial class StrainVisualizer : Container
     {
         public readonly Bindable<Skill[]> Skills = new();
 

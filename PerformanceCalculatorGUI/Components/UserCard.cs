@@ -26,7 +26,7 @@ namespace PerformanceCalculatorGUI.Components
         public decimal PlaycountPP { get; set; }
     }
 
-    public class UserCard : UserListPanel
+    public partial class UserCard : UserListPanel
     {
         private OsuSpriteText liveLabel;
         private OsuSpriteText localLabel;

@@ -10,7 +10,6 @@ using osu.Framework.Graphics.Shapes;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.Chat;
 using osuTK;
@@ -19,7 +18,7 @@ using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class SettingsPopover : OsuPopover
+    public partial class SettingsPopover : OsuPopover
     {
         private SettingsManager configManager;
 
@@ -112,7 +111,7 @@ namespace PerformanceCalculatorGUI.Components
                                 Label = "UI Scale",
                                 Current = { BindTarget = scaleBindable }
                             },
-                            new OsuButton
+                            new RoundedButton
                             {
                                 Anchor = Anchor.TopCentre,
                                 Origin = Anchor.TopCentre,

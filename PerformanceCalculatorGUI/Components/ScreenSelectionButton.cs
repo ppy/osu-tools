@@ -8,7 +8,7 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class ScreenSelectionButton : ToolbarButton
+    public partial class ScreenSelectionButton : ToolbarButton
     {
         public ScreenSelectionButton(string title, IconUsage? icon = null, GlobalAction? hotkey = null)
         {

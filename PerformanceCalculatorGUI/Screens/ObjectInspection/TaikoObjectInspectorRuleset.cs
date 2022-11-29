@@ -18,7 +18,7 @@ using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public class TaikoObjectInspectorRuleset : DrawableTaikoRuleset
+    public partial class TaikoObjectInspectorRuleset : DrawableTaikoRuleset
     {
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
 

@@ -23,7 +23,7 @@ namespace PerformanceCalculatorGUI.Components
         public decimal Difference;
     }
 
-    public class LeaderboardTable : RankingsTable<LeaderboardUser>
+    public partial class LeaderboardTable : RankingsTable<LeaderboardUser>
     {
         public LeaderboardTable(int page, IReadOnlyList<LeaderboardUser> rankings)
             : base(page, rankings)
@@ -89,7 +89,7 @@ namespace PerformanceCalculatorGUI.Components
             return username;
         }
 
-        private class DifferenceText : OsuSpriteText
+        private partial class DifferenceText : OsuSpriteText
         {
             private readonly decimal difference;
 

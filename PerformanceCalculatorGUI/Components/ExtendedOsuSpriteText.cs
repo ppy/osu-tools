@@ -11,7 +11,7 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class ExtendedOsuSpriteText : OsuSpriteText, IHasCustomTooltip<string>
+    public partial class ExtendedOsuSpriteText : OsuSpriteText, IHasCustomTooltip<string>
     {
         public override bool HandlePositionalInput => true;
 
@@ -20,7 +20,7 @@ namespace PerformanceCalculatorGUI.Components
         public ITooltip<string> GetCustomTooltip() => new MultilineTooltip();
     }
 
-    public class MultilineTooltip : VisibilityContainer, ITooltip<string>
+    public partial class MultilineTooltip : VisibilityContainer, ITooltip<string>
     {
         private readonly FillFlowContainer textContainer;
         private string currentData;

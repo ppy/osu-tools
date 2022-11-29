@@ -11,7 +11,7 @@ using osuTK.Graphics;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class Notification : Container
+    public partial class Notification : Container
     {
         public Notification(LocalisableString text)
         {

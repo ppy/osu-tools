@@ -11,7 +11,7 @@ using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    internal class ObjectInspectionPanel : Container
+    public partial class ObjectInspectionPanel : Container
     {
         private OsuTextFlowContainer textFlow;
 

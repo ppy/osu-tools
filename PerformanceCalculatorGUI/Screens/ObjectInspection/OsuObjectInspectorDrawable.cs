@@ -13,7 +13,7 @@ using osu.Game.Rulesets.Osu.Objects;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    internal class OsuObjectInspectorDrawable : PoolableDrawableWithLifetime<OsuObjectInspectorLifetimeEntry>
+    public partial class OsuObjectInspectorDrawable : PoolableDrawableWithLifetime<OsuObjectInspectorLifetimeEntry>
     {
         protected override void OnApply(OsuObjectInspectorLifetimeEntry entry)
         {
@@ -90,7 +90,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         }
     }
 
-    internal class OsuObjectInspectorLifetimeEntry : LifetimeEntry
+    public class OsuObjectInspectorLifetimeEntry : LifetimeEntry
     {
         public event Action Invalidated;
         public readonly OsuHitObject HitObject;

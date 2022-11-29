@@ -5,7 +5,7 @@ using osu.Game.Graphics.UserInterfaceV2;
 
 namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
-    internal class ExtendedLabelledTextBox : LabelledTextBox
+    public partial class ExtendedLabelledTextBox : LabelledTextBox
     {
         public new const float CORNER_RADIUS = 8;
 
