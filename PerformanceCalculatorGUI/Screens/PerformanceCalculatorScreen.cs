@@ -5,7 +5,7 @@ using osu.Framework.Screens;
 
 namespace PerformanceCalculatorGUI.Screens
 {
-    public abstract class PerformanceCalculatorScreen : Screen
+    public abstract partial class PerformanceCalculatorScreen : Screen
     {
         public abstract bool ShouldShowConfirmationDialogOnSwitch { get; }
     }

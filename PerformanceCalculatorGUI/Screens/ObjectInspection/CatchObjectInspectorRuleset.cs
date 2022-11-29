@@ -34,7 +34,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new CatchObjectInspectorPlayfield(Beatmap.Difficulty, difficultyHitObjects);
 
-        private class CatchObjectInspectorPlayfield : CatchEditorPlayfield
+        private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
         {
             private readonly IReadOnlyList<CatchDifficultyHitObject> difficultyHitObjects;
 
@@ -56,7 +56,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             }
 
-            private class CatchInspectorDrawableHitObject : DrawableCatchHitObject
+            private partial class CatchInspectorDrawableHitObject : DrawableCatchHitObject
             {
                 private readonly CatchDifficultyHitObject dho;
 

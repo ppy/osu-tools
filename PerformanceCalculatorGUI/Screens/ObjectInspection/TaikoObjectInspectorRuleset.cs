@@ -35,7 +35,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield(difficultyHitObjects);
 
-        private class TaikoObjectInspectorPlayfield : TaikoPlayfield
+        private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
             private readonly IReadOnlyList<TaikoDifficultyHitObject> difficultyHitObjects;
 
@@ -56,7 +56,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             }
 
-            private class TaikoInspectorDrawableHitObject : DrawableTaikoHitObject
+            private partial class TaikoInspectorDrawableHitObject : DrawableTaikoHitObject
             {
                 private readonly TaikoDifficultyHitObject dho;
 
