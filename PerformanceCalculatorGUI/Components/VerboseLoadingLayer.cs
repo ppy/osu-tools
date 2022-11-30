@@ -14,7 +14,7 @@ namespace PerformanceCalculatorGUI.Components
     /// <summary>
     /// A <see cref="LoadingLayer"/> with additional text displayed below the spinner.
     /// </summary>
-    internal class VerboseLoadingLayer : LoadingLayer
+    public partial class VerboseLoadingLayer : LoadingLayer
     {
         public Bindable<string> Text = new Bindable<string>();
 

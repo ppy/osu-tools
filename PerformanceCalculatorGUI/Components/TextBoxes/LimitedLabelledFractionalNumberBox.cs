@@ -8,9 +8,9 @@ using osu.Game.Graphics.UserInterface;
 
 namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
-    internal class LimitedLabelledFractionalNumberBox : ExtendedLabelledTextBox
+    public partial class LimitedLabelledFractionalNumberBox : ExtendedLabelledTextBox
     {
-        internal class FractionalNumberBox : OsuTextBox
+        private partial class FractionalNumberBox : OsuTextBox
         {
             protected override bool AllowIme => false;
 

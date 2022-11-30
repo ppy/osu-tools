@@ -7,9 +7,9 @@ using osu.Game.Graphics.UserInterfaceV2;
 
 namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
-    internal class LimitedLabelledNumberBox : LabelledNumberBox
+    public partial class LimitedLabelledNumberBox : LabelledNumberBox
     {
-        internal class LimitedNumberBox : OsuNumberBox
+        private partial class LimitedNumberBox : OsuNumberBox
         {
             protected override void OnUserTextAdded(string added)
             {

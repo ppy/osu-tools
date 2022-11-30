@@ -48,7 +48,7 @@ namespace PerformanceCalculatorGUI.Components
         }
     }
 
-    public class ExtendedProfileItemContainer : ProfileItemContainer
+    public partial class ExtendedProfileItemContainer : ProfileItemContainer
     {
         public Action OnHoverAction { get; set; }
         public Action OnUnhoverAction { get; set; }
@@ -71,7 +71,7 @@ namespace PerformanceCalculatorGUI.Components
         }
     }
 
-    public class ExtendedProfileScore : CompositeDrawable
+    public partial class ExtendedProfileScore : CompositeDrawable
     {
         private const int height = 40;
         private const int performance_width = 100;
@@ -371,7 +371,7 @@ namespace PerformanceCalculatorGUI.Components
                 $"{statistics.GetValueOrDefault(HitResult.Great)} / {statistics.GetValueOrDefault(HitResult.Ok)} / {statistics.GetValueOrDefault(HitResult.Meh)} / {statistics.GetValueOrDefault(HitResult.Miss)}";
         }
 
-        private class ScoreBeatmapMetadataContainer : OsuHoverContainer
+        private partial class ScoreBeatmapMetadataContainer : OsuHoverContainer
         {
             private readonly IBeatmapInfo beatmapInfo;
 

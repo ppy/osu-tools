@@ -25,7 +25,7 @@ using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {
-    internal class ProfileScreen : PerformanceCalculatorScreen
+    public partial class ProfileScreen : PerformanceCalculatorScreen
     {
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Plum);

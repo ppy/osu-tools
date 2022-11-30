@@ -5,7 +5,7 @@ using osu.Game.Graphics.UserInterface;
 
 namespace PerformanceCalculatorGUI.Components.TextBoxes
 {
-    internal class LabelledPasswordTextBox : ExtendedLabelledTextBox
+    public partial class LabelledPasswordTextBox : ExtendedLabelledTextBox
     {
         protected override OsuTextBox CreateTextBox() => new OsuPasswordTextBox();
     }

@@ -17,7 +17,7 @@ using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    internal class CatchObjectInspectorRuleset : DrawableCatchRuleset
+    public partial class CatchObjectInspectorRuleset : DrawableCatchRuleset
     {
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;
 
@@ -34,7 +34,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new CatchObjectInspectorPlayfield(Beatmap.Difficulty, difficultyHitObjects);
 
-        private class CatchObjectInspectorPlayfield : CatchEditorPlayfield
+        private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
         {
             private readonly IReadOnlyList<CatchDifficultyHitObject> difficultyHitObjects;
 
@@ -56,7 +56,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             }
 
-            private class CatchInspectorDrawableHitObject : DrawableCatchHitObject
+            private partial class CatchInspectorDrawableHitObject : DrawableCatchHitObject
             {
                 private readonly CatchDifficultyHitObject dho;
 

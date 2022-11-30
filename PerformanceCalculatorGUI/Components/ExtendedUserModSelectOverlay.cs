@@ -7,7 +7,7 @@ using osu.Game.Overlays.Mods;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class ExtendedUserModSelectOverlay : UserModSelectOverlay
+    public partial class ExtendedUserModSelectOverlay : UserModSelectOverlay
     {
         protected override bool ShowTotalMultiplier => false;
 

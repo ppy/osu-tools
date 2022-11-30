@@ -11,7 +11,7 @@ using osu.Game.Rulesets.Osu.Objects;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    internal class OsuObjectInspectorRenderer : PooledDrawableWithLifetimeContainer<OsuObjectInspectorLifetimeEntry, OsuObjectInspectorDrawable>
+    public partial class OsuObjectInspectorRenderer : PooledDrawableWithLifetimeContainer<OsuObjectInspectorLifetimeEntry, OsuObjectInspectorDrawable>
     {
         private DrawablePool<OsuObjectInspectorDrawable> pool;
 

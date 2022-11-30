@@ -5,7 +5,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Graphics;
-using osu.Game.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
 
 namespace PerformanceCalculatorGUI.Components
@@ -17,7 +17,7 @@ namespace PerformanceCalculatorGUI.Components
         Done
     }
 
-    internal class StatefulButton : OsuButton
+    public partial class StatefulButton : RoundedButton
     {
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; }

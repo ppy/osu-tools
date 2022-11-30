@@ -7,7 +7,7 @@ using osu.Game.Beatmaps.Drawables.Cards;
 
 namespace PerformanceCalculatorGUI.Components;
 
-public class ScreenSelectionButtonIcon : IconPill
+public partial class ScreenSelectionButtonIcon : IconPill
 {
     public ScreenSelectionButtonIcon(IconUsage? icon = null)
         : base(icon ?? FontAwesome.Solid.List)
