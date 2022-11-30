@@ -19,7 +19,7 @@ using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class BeatmapCard : OsuClickableContainer
+    public partial class BeatmapCard : OsuClickableContainer
     {
         private readonly ProcessorWorkingBeatmap beatmap;
 

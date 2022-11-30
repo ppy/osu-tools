@@ -25,7 +25,7 @@ using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {
-    internal class LeaderboardScreen : PerformanceCalculatorScreen
+    public partial class LeaderboardScreen : PerformanceCalculatorScreen
     {
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Green);

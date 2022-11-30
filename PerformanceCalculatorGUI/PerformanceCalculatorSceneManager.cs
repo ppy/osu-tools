@@ -26,7 +26,7 @@ using PerformanceCalculatorGUI.Screens;
 
 namespace PerformanceCalculatorGUI
 {
-    public class PerformanceCalculatorSceneManager : CompositeDrawable
+    public partial class PerformanceCalculatorSceneManager : CompositeDrawable
     {
         private ScreenStack screenStack;
 

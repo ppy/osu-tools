@@ -18,7 +18,7 @@ using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI
 {
-    public class PerformanceCalculatorGame : OsuGameBase
+    public partial class PerformanceCalculatorGame : OsuGameBase
     {
         private Bindable<WindowMode> windowMode;
         private DependencyContainer dependencies;

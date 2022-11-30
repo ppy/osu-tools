@@ -27,7 +27,7 @@ using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    internal class ObjectInspector : OsuFocusedOverlayContainer
+    public partial class ObjectInspector : OsuFocusedOverlayContainer
     {
         private DependencyContainer dependencies;
 

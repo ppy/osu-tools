@@ -7,7 +7,7 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class NotificationDisplay : Container
+    public partial class NotificationDisplay : Container
     {
         private readonly FillFlowContainer content;
 

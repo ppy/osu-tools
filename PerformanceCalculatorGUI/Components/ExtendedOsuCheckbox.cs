@@ -7,7 +7,7 @@ using osu.Game.Graphics.UserInterface;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    internal class ExtendedOsuCheckbox : OsuCheckbox
+    public partial class ExtendedOsuCheckbox : OsuCheckbox
     {
         public ColourInfo TextColour { get; set; }
 

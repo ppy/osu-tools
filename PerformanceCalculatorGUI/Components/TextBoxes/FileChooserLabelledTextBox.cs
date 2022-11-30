@@ -26,7 +26,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
     /// <summary>
     /// A labelled textbox which reveals an inline file chooser when clicked.
     /// </summary>
-    internal class FileChooserLabelledTextBox : ExtendedLabelledTextBox, ICanAcceptFiles, IHasPopover
+    public partial class FileChooserLabelledTextBox : ExtendedLabelledTextBox, ICanAcceptFiles, IHasPopover
     {
         private readonly Bindable<string> initialPath;
         private readonly string[] handledExtensions;
@@ -85,7 +85,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
             game.UnregisterImportHandler(this);
         }
 
-        internal class FileChooserOsuTextBox : OsuTextBox
+        private partial class FileChooserOsuTextBox : OsuTextBox
         {
             public Action OnFocused;
 
@@ -107,7 +107,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
 
         public Popover GetPopover() => new FileChooserPopover(handledExtensions, currentFile, initialPath);
 
-        private class FileChooserPopover : OsuPopover
+        private partial class FileChooserPopover : OsuPopover
         {
             public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo> currentFile, Bindable<string> initialPath = null)
                 : base(false)
