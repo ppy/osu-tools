@@ -110,11 +110,13 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
         private partial class FileChooserPopover : OsuPopover
         {
             public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo> currentFile, Bindable<string> initialPath = null)
+                : base(false)
             {
                 Child = new Container
                 {
-                    Size = new Vector2(600, 400),
-                    Child = new OsuFileSelector(currentFile.Value?.DirectoryName ?? initialPath?.Value ?? Assembly.GetEntryAssembly()?.Location, handledExtensions)
+                    Padding = new MarginPadding { Horizontal = 15, Bottom = 15 },
+                    Size = new Vector2(800, 600),
+                    Child = new ExtendedOsuFileSelector(currentFile.Value?.DirectoryName ?? initialPath?.Value ?? Assembly.GetEntryAssembly()?.Location, handledExtensions)
                     {
                         RelativeSizeAxes = Axes.Both,
                         CurrentFile = { BindTarget = currentFile }
