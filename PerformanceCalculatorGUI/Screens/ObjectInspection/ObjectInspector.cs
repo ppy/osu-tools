@@ -21,6 +21,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Difficulty.Skills;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
@@ -31,11 +32,14 @@ using osu.Game.Screens.Edit.Components.Timelines.Summary;
 using osu.Game.Screens.Menu;
 using osuTK.Graphics.ES31;
 using osuTK.Input;
+using osuTK;
 using SharpGen.Runtime.Win32;
+using osu.Game.Rulesets.Difficulty.Preprocessing;
+using FFmpeg.AutoGen;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class DebugValueList : Container{
+    public partial class DebugValueList : Container {
 
 
         protected Dictionary<string, Dictionary<string, object>> InternalDict;
@@ -49,7 +53,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colors) {
             RelativeSizeAxes = Axes.Y;
-            Width = 200;
+            Width = 215;
             Children = new Drawable[]{
                 bgBox = new Box
                 {
@@ -57,19 +61,24 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Alpha = 0.95f,
                     RelativeSizeAxes = Axes.Both
                 },
-                new BasicScrollContainer() {
-                    RelativeSizeAxes = Axes.Both,
+                new OsuScrollContainer() {
+                    RelativeSizeAxes = Axes.X,
+                    Height = 1000,
+                    ScrollbarAnchor = Anchor.TopLeft,
                     Child = flowContainer = new TextFlowContainer()
                     {
                         Masking = false,
-                        Margin = new MarginPadding { Left = 4 },
-                        RelativeSizeAxes = Axes.Both,
+                        Margin = new MarginPadding { Left = 15 },
+                        Size = new osuTK.Vector2(200,2000),
+                        Y = 2000,
+                        Origin = Anchor.BottomLeft
                     },
                 }
             };
         }
 
-        protected void UpdateValues()
+
+        public void UpdateValues()
         {
             flowContainer.Text = "";
             foreach (KeyValuePair<string,Dictionary<string,object>> GroupPair in InternalDict)
@@ -79,33 +88,35 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 Dictionary<string, object> groupDict = GroupPair.Value;
                 flowContainer.AddText($"- {GroupPair.Key}\n", t => {
                     t.Scale = new osuTK.Vector2(1.8f);
-                    t.Font = OsuFont.TorusAlternate;
+                    t.Font = OsuFont.Torus.With(weight: "Bold");
                     t.Colour = Colour4.Pink;
                     t.Shadow = true;
                 });
 
                 foreach (KeyValuePair<string, object> ValuePair in groupDict) {
-                    flowContainer.AddText($"  -> {ValuePair.Key} :\n", t => {
-                        t.Scale = new osuTK.Vector2(1.5f);
-                        t.Font = OsuFont.TorusAlternate;
-                        t.Colour = Colour4.LightPink;
+                    flowContainer.AddText($"   {ValuePair.Key} :\n", t => {
+                        t.Scale = new osuTK.Vector2(1.3f);
+                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold");
+                        t.Colour = Colour4.White;
                         t.Shadow = true;
                         t.Truncate = true;
                     });
-                    flowContainer.AddText($"      {ValuePair.Value}\n\n", t => {
-                        t.Scale = new osuTK.Vector2(1.5f);
-                        t.Font = OsuFont.TorusAlternate;
-                        t.Colour = Colour4.Pink;
+                    flowContainer.AddText($"     -> {ValuePair.Value}\n\n", t => {
+                        t.Scale = new osuTK.Vector2(1.3f);
+                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold");
+                        t.Colour = Colour4.White;
                         t.Shadow = true;
                     });
                 }
             }
-
         }
 
-        public void AddGroup(string name) {
+        public void AddGroup(string name, string[] overrides = null) {
+            overrides ??= new string[0];
+            foreach (string other in overrides) {
+                InternalDict.Remove(other);
+            }
             InternalDict[name] =  new Dictionary<string, object>();
-            UpdateValues();
         }
 
         public void SetValue(string group, string name, object value) {
@@ -121,9 +132,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 value = Math.Truncate(val2 * 1000) / 1000;
             }
+            if (value is Vector2 val3)
+            {
+                value = new Vector2((float)(Math.Truncate(val3.X * 100) / 100), (float)Math.Truncate(val3.Y * 100) / 100);
+            }
 
             InternalDict[group][name] = value;
-            UpdateValues();
         }
 
         public object GetValue(string group, string name)
@@ -188,8 +202,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             var editorBeatmap = new EditorBeatmap(playableBeatmap);
             dependencies.CacheAs(editorBeatmap);
 
-            // editorBeatmap.HitObjectUpdated += (() => { });
-
             beatmap.Value = processorBeatmap;
 
             AddInternal(layout = new Container
@@ -249,6 +261,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             });
             dependencies.CacheAs(values);
+            DrawableRuleset inspectorRuleset = null;
 
             layout.Add(ruleset.Value.ShortName switch
             {
@@ -263,7 +276,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             RelativeSizeAxes = Axes.Both,
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
-                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator, processorBeatmap.Track.Rate)
+                        inspectorRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator, processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -275,7 +288,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     RelativeSizeAxes = Axes.Both,
                     Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
-                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
+                    Child = inspectorRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                         processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
@@ -289,7 +302,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Y = 100,
                     Children = new Drawable[]
                     {
-                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator, processorBeatmap.Track.Rate)
+                        inspectorRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator, processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -331,6 +344,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             base.PopOut();
             this.FadeOut();
         }
+
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {

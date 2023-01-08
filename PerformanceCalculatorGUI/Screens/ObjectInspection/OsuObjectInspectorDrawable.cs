@@ -50,50 +50,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             double movementTime = hitObject.GetEndTime() - hitObject.StartTime;
             double visibleTime = hitObject.GetEndTime() - startTime;
 
-            ObjectInspectionPanel panel;
-            AddInternal(panel = new ObjectInspectionPanel
-            {
-                Position = hitObject.StackedPosition,
-                Alpha = 0
-            });
-
-            panel.AddParagraph($"Position: {entry.HitObject.StackedPosition}", 8);
 
             if (entry.DifficultyHitObject is not null)
             {
-                valueList.AddGroup("HitObject");
-                valueList.SetValue("HitObject", "Strain Time", entry.DifficultyHitObject.StrainTime);
-                valueList.SetValue("HitObject", "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, true));
-                valueList.SetValue("HitObject", "Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject));
-                valueList.SetValue("HitObject", "Rhythm Diff...", RhythmEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject));
-                valueList.SetValue("HitObject", "Flashlight Diff...", FlashlightEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, false));
-
-                if (entry.DifficultyHitObject.Angle is not null)
-                    valueList.SetValue("HitObject", "Angle", MathUtils.RadiansToDegrees(entry.DifficultyHitObject.Angle.Value));
-
-                if (entry.HitObject is Slider)
-                {
-                    valueList.SetValue("HitObject", "Travel Time", FlashlightEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, false));
-                    panel.AddParagraph($"Travel Time: {entry.DifficultyHitObject.TravelTime:N3}");
-                    panel.AddParagraph($"Travel Distance: {entry.DifficultyHitObject.TravelDistance:N3}");
-                    panel.AddParagraph($"Minimum Jump Distance: {entry.DifficultyHitObject.MinimumJumpDistance:N3}");
-                    panel.AddParagraph($"Minimum Jump Time: {entry.DifficultyHitObject.MinimumJumpTime:N3}");
-                }
+                
             }
-
-            using (panel.BeginAbsoluteSequence(startTime))
-            {
-                panel.FadeIn(hitObject.TimePreempt);
-
-                if (entry.HitObject is Slider)
-                {
-                    panel.Delay(hitObject.TimePreempt).MoveTo(hitObject.StackedEndPosition, movementTime);
-                }
-
-                panel.Delay(visibleTime).FadeOut(OsuObjectInspectorRuleset.HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
-            }
-
-            entry.LifetimeEnd = panel.LifetimeEnd;
         }
     }
 

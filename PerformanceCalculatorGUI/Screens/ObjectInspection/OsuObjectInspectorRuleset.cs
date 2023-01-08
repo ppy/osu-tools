@@ -15,34 +15,86 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
+using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
+using System;
+using osu.Game.Rulesets.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
+using SharpCompress.Common;
+using osu.Framework.Utils;
+using Remotion.Linq.Clauses.ResultOperators;
+using osu.Game.Rulesets.Taiko.Objects;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset
+    public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset, IDebugListUpdater
     {
         public const int HIT_OBJECT_FADE_OUT_EXTENSION = 600;
 
-
-        private readonly OsuDifficultyHitObject[] difficultyHitObjects;
+        public readonly OsuDifficultyHitObject[] DifficultyHitObjects;
 
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
         {
-            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
+            DifficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
         }
 
-        [BackgroundDependencyLoader]
-        private void load(DebugValueList debugValueList) {
-            debugValueList.AddGroup("Other");
+        [Resolved]
+        private DebugValueList debugValueList { get; set; }
 
+        private DifficultyHitObject lasthit;
+
+        protected override void Update()
+        {
+            base.Update();
+            var hitList = DifficultyHitObjects.Where(hit => { return hit.StartTime < Clock.CurrentTime; });
+            if (hitList.Count() > 0 && !(hitList.Last() == lasthit))
+            {
+                var drawHitList = Playfield.AllHitObjects.Where(hit => { return hit.HitObject.StartTime < Clock.CurrentTime; });
+                Console.WriteLine(Clock.CurrentTime);
+                lasthit = hitList.Last();
+                if (drawHitList.Count() > 0)
+                {
+                    drawHitList.Last().Colour = Colour4.Red;
+                }
+                UpdateDebugList(debugValueList, lasthit);
+            }
         }
 
         public override bool PropagatePositionalInputSubTree => false;
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
-        protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
+        protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(DifficultyHitObjects);
 
+        public void UpdateDebugList(DebugValueList valueList, DifficultyHitObject curDiffHit)
+        {
+            Console.WriteLine(curDiffHit.BaseObject.GetType());
+            OsuDifficultyHitObject osuDiffHit = (OsuDifficultyHitObject)curDiffHit;
+            OsuHitObject baseHit = (OsuHitObject)osuDiffHit.BaseObject;
+
+            string groupName = osuDiffHit.BaseObject.GetType().Name;
+            valueList.AddGroup(groupName,new string[] { "Slider", "HitCircle","Spinner" });
+            valueList.SetValue(groupName, "Position", baseHit.StackedPosition);
+            valueList.SetValue(groupName, "Strain Time", osuDiffHit.StrainTime);
+            valueList.SetValue(groupName, "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(osuDiffHit, true));
+            valueList.SetValue(groupName, "Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit));
+            valueList.SetValue(groupName, "Rhythm Diff", RhythmEvaluator.EvaluateDifficultyOf(osuDiffHit));
+            valueList.SetValue(groupName, "Flashlight Diff", FlashlightEvaluator.EvaluateDifficultyOf(osuDiffHit, false));
+
+            if (osuDiffHit.Angle is not null)
+                valueList.SetValue(groupName, "Angle", MathUtils.RadiansToDegrees(osuDiffHit.Angle.Value));
+
+            if (osuDiffHit.BaseObject is Slider)
+            {
+                valueList.SetValue(groupName, "FL Travel Time", FlashlightEvaluator.EvaluateDifficultyOf(osuDiffHit, false));
+                valueList.SetValue(groupName, "Travel Time", osuDiffHit.TravelTime);
+                valueList.SetValue(groupName, "Travel Distance", osuDiffHit.TravelDistance);
+                valueList.SetValue(groupName, "Min Jump Dist", osuDiffHit.MinimumJumpDistance);
+                valueList.SetValue(groupName, "Min Jump Time", osuDiffHit.MinimumJumpTime);
+            }
+            valueList.AddGroup("Test");
+            valueList.UpdateValues();
+        }
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
