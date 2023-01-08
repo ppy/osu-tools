@@ -1,8 +1,10 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -10,12 +12,15 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
@@ -23,10 +28,110 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
+using osu.Game.Screens.Menu;
+using osuTK.Graphics.ES31;
 using osuTK.Input;
+using SharpGen.Runtime.Win32;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
+    public partial class DebugValueList : Container{
+
+
+        protected Dictionary<string, Dictionary<string, object>> InternalDict;
+        private Box bgBox;
+        private TextFlowContainer flowContainer;
+
+        public DebugValueList() {
+            InternalDict = new Dictionary<string, Dictionary<string, object>>();
+        }
+
+        [BackgroundDependencyLoader]
+        private void load(OverlayColourProvider colors) {
+            RelativeSizeAxes = Axes.Y;
+            Width = 200;
+            Children = new Drawable[]{
+                bgBox = new Box
+                {
+                    Colour = colors.Background5,
+                    Alpha = 0.95f,
+                    RelativeSizeAxes = Axes.Both
+                },
+                new BasicScrollContainer() {
+                    RelativeSizeAxes = Axes.Both,
+                    Child = flowContainer = new TextFlowContainer()
+                    {
+                        Masking = false,
+                        Margin = new MarginPadding { Left = 4 },
+                        RelativeSizeAxes = Axes.Both,
+                    },
+                }
+            };
+        }
+
+        protected void UpdateValues()
+        {
+            flowContainer.Text = "";
+            foreach (KeyValuePair<string,Dictionary<string,object>> GroupPair in InternalDict)
+            {
+                // Big text
+                string groupName = GroupPair.Key;
+                Dictionary<string, object> groupDict = GroupPair.Value;
+                flowContainer.AddText($"- {GroupPair.Key}\n", t => {
+                    t.Scale = new osuTK.Vector2(1.8f);
+                    t.Font = OsuFont.TorusAlternate;
+                    t.Colour = Colour4.Pink;
+                    t.Shadow = true;
+                });
+
+                foreach (KeyValuePair<string, object> ValuePair in groupDict) {
+                    flowContainer.AddText($"  -> {ValuePair.Key} :\n", t => {
+                        t.Scale = new osuTK.Vector2(1.5f);
+                        t.Font = OsuFont.TorusAlternate;
+                        t.Colour = Colour4.LightPink;
+                        t.Shadow = true;
+                        t.Truncate = true;
+                    });
+                    flowContainer.AddText($"      {ValuePair.Value}\n\n", t => {
+                        t.Scale = new osuTK.Vector2(1.5f);
+                        t.Font = OsuFont.TorusAlternate;
+                        t.Colour = Colour4.Pink;
+                        t.Shadow = true;
+                    });
+                }
+            }
+
+        }
+
+        public void AddGroup(string name) {
+            InternalDict[name] =  new Dictionary<string, object>();
+            UpdateValues();
+        }
+
+        public void SetValue(string group, string name, object value) {
+            InternalDict.TryGetValue(group, out var exists);
+            if (exists == null) {
+                AddGroup(group);
+            }
+            if (value is double val)
+            {
+                value = Math.Truncate(val * 1000) / 1000;
+            }
+            if (value is float val2)
+            {
+                value = Math.Truncate(val2 * 1000) / 1000;
+            }
+
+            InternalDict[group][name] = value;
+            UpdateValues();
+        }
+
+        public object GetValue(string group, string name)
+        {
+            return InternalDict[group][name];
+        }
+    }
+
     public partial class ObjectInspector : OsuFocusedOverlayContainer
     {
         private DependencyContainer dependencies;
@@ -52,6 +157,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private readonly ProcessorWorkingBeatmap processorBeatmap;
         private EditorClock clock;
         private Container layout;
+
+        private DebugValueList values;
+        private Container DebugContainer;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -80,6 +188,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             var editorBeatmap = new EditorBeatmap(playableBeatmap);
             dependencies.CacheAs(editorBeatmap);
 
+            // editorBeatmap.HitObjectUpdated += (() => { });
+
             beatmap.Value = processorBeatmap;
 
             AddInternal(layout = new Container
@@ -96,6 +206,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         Colour = Colour4.Black,
                         Alpha = 0.95f,
                         RelativeSizeAxes = Axes.Both
+                    },
+                    values = new DebugValueList() {
+
                     },
                     new Container
                     {
@@ -135,6 +248,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     clock
                 }
             });
+            dependencies.CacheAs(values);
 
             layout.Add(ruleset.Value.ShortName switch
             {
@@ -197,6 +311,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             ruleset.BindValueChanged(_ => PopOut());
             beatmap.BindValueChanged(_ => PopOut());
+
         }
 
         protected override void Update()

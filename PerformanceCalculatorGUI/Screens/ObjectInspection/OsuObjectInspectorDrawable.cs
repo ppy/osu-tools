@@ -2,9 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Performance;
 using osu.Framework.Utils;
+using osu.Game.Rulesets;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Pooling;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
@@ -15,6 +18,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class OsuObjectInspectorDrawable : PoolableDrawableWithLifetime<OsuObjectInspectorLifetimeEntry>
     {
+        [Resolved]
+        private DebugValueList valueList { get; set; }
         protected override void OnApply(OsuObjectInspectorLifetimeEntry entry)
         {
             base.OnApply(entry);
@@ -56,17 +61,19 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (entry.DifficultyHitObject is not null)
             {
-                panel.AddParagraph($"Strain Time: {entry.DifficultyHitObject.StrainTime:N3}");
-                panel.AddParagraph($"Aim Difficulty: {AimEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, true):N3}");
-                panel.AddParagraph($"Speed Difficulty: {SpeedEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject):N3}");
-                panel.AddParagraph($"Rhythm Difficulty: {RhythmEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject):N3}");
-                panel.AddParagraph($"Flashlight Difficulty: {FlashlightEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, false):N3}");
+                valueList.AddGroup("HitObject");
+                valueList.SetValue("HitObject", "Strain Time", entry.DifficultyHitObject.StrainTime);
+                valueList.SetValue("HitObject", "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, true));
+                valueList.SetValue("HitObject", "Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject));
+                valueList.SetValue("HitObject", "Rhythm Diff...", RhythmEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject));
+                valueList.SetValue("HitObject", "Flashlight Diff...", FlashlightEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, false));
 
                 if (entry.DifficultyHitObject.Angle is not null)
-                    panel.AddParagraph($"Angle: {MathUtils.RadiansToDegrees(entry.DifficultyHitObject.Angle.Value):N3}");
+                    valueList.SetValue("HitObject", "Angle", MathUtils.RadiansToDegrees(entry.DifficultyHitObject.Angle.Value));
 
                 if (entry.HitObject is Slider)
                 {
+                    valueList.SetValue("HitObject", "Travel Time", FlashlightEvaluator.EvaluateDifficultyOf(entry.DifficultyHitObject, false));
                     panel.AddParagraph($"Travel Time: {entry.DifficultyHitObject.TravelTime:N3}");
                     panel.AddParagraph($"Travel Distance: {entry.DifficultyHitObject.TravelDistance:N3}");
                     panel.AddParagraph($"Minimum Jump Distance: {entry.DifficultyHitObject.MinimumJumpDistance:N3}");

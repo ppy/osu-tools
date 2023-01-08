@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Graphics;
+using osu.Framework.Allocation;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -21,6 +22,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     {
         public const int HIT_OBJECT_FADE_OUT_EXTENSION = 600;
 
+
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
@@ -29,11 +31,18 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
         }
 
+        [BackgroundDependencyLoader]
+        private void load(DebugValueList debugValueList) {
+            debugValueList.AddGroup("Other");
+
+        }
+
         public override bool PropagatePositionalInputSubTree => false;
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
+
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
@@ -61,7 +70,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 base.OnHitObjectRemoved(hitObject);
                 objectRenderer.RemoveDifficultyDataPanel((OsuHitObject)hitObject);
             }
-
             protected override void OnNewDrawableHitObject(DrawableHitObject d)
             {
                 d.ApplyCustomUpdateState += updateState;

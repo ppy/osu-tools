@@ -462,6 +462,17 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     calculateDifficulty();
                     calculatePerformance();
+                    if (objectInspector is not null)
+                        RemoveInternal(objectInspector, true);
+
+                    AddInternal(objectInspector = new ObjectInspector(working)
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Size = new Vector2(0.95f)
+                    });
+                    objectInspector.Show();
                 });
             }
         }
