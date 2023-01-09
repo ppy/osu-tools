@@ -3,50 +3,73 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
+using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class DebugValueList : Container {
+    // 2852853
+    public partial class DebugValueList : Container
+    {
 
 
         protected Dictionary<string, Dictionary<string, object>> InternalDict;
         private Box bgBox;
         private TextFlowContainer flowContainer;
+        private Container switchContainer;
 
-        public DebugValueList() {
+        public DebugValueList()
+        {
             InternalDict = new Dictionary<string, Dictionary<string, object>>();
         }
 
         [BackgroundDependencyLoader]
-        private void load(OverlayColourProvider colors) {
-            RelativeSizeAxes = Axes.Y;
+        private void load(OverlayColourProvider colors)
+        {
+            RelativeSizeAxes = Axes.Both;
             Width = 215;
             Children = new Drawable[]{
                 bgBox = new Box
                 {
                     Colour = colors.Background5,
                     Alpha = 0.95f,
-                    RelativeSizeAxes = Axes.Both
+                    RelativeSizeAxes = Axes.Y,
+                    Width = 215
                 },
                 new OsuScrollContainer() {
-                    RelativeSizeAxes = Axes.X,
-                    Height = 1000,
+                    Width = 215,
+                    Height = 670,
                     ScrollbarAnchor = Anchor.TopLeft,
                     Child = flowContainer = new TextFlowContainer()
                     {
                         Masking = false,
                         Margin = new MarginPadding { Left = 15 },
-                        Size = new osuTK.Vector2(200,2000),
-                        Y = 2000,
+                        Size = new Vector2(200,3500),
+                        Y = 3500,
                         Origin = Anchor.BottomLeft
+                    },
+                },
+                switchContainer = new Container {
+                    Size = new Vector2(215,3500),
+                    X  = -85 + -1446 * 214,
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.TopRight,
+                    Child = new Box
+                    {
+                        Colour = colors.Background5,
+                        Alpha = 0.95f,
+                        RelativeSizeAxes = Axes.Both
                     },
                 }
             };
@@ -55,29 +78,33 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public void UpdateValues()
         {
-            flowContainer.Text = "";
-            foreach (KeyValuePair<string,Dictionary<string,object>> GroupPair in InternalDict)
+            flowContainer.Text = "secret";
+            foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InternalDict)
             {
                 // Big text
                 string groupName = GroupPair.Key;
                 Dictionary<string, object> groupDict = GroupPair.Value;
-                flowContainer.AddText($"- {GroupPair.Key}\n", t => {
-                    t.Scale = new osuTK.Vector2(1.8f);
+                flowContainer.AddText($"- {GroupPair.Key}\n", t =>
+                {
+                    t.Scale = new Vector2(1.8f);
                     t.Font = OsuFont.Torus.With(weight: "Bold");
                     t.Colour = Colour4.Pink;
                     t.Shadow = true;
                 });
 
-                foreach (KeyValuePair<string, object> ValuePair in groupDict) {
-                    flowContainer.AddText($"   {ValuePair.Key} :\n", t => {
-                        t.Scale = new osuTK.Vector2(1.3f);
+                foreach (KeyValuePair<string, object> ValuePair in groupDict)
+                {
+                    flowContainer.AddText($"   {ValuePair.Key}:\n", t =>
+                    {
+                        t.Scale = new Vector2(1.3f);
                         t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold");
                         t.Colour = Colour4.White;
                         t.Shadow = true;
                         t.Truncate = true;
                     });
-                    flowContainer.AddText($"     -> {ValuePair.Value}\n\n", t => {
-                        t.Scale = new osuTK.Vector2(1.3f);
+                    flowContainer.AddText($"     -> {ValuePair.Value}\n\n", t =>
+                    {
+                        t.Scale = new Vector2(1.3f);
                         t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold");
                         t.Colour = Colour4.White;
                         t.Shadow = true;
@@ -86,17 +113,50 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
         }
 
-        public void AddGroup(string name, string[] overrides = null) {
-            overrides ??= new string[0];
-            foreach (string other in overrides) {
+        public void UpdateToggles()
+        {
+            switchContainer.Clear();
+            switchContainer.Add(new Box
+            {
+                Colour = Colour4.Pink,
+                Alpha = 0.95f,
+                RelativeSizeAxes = Axes.Both
+            });
+
+            for (int i = 1; i < InternalDict.Keys.Count; i++) {
+                string group = InternalDict.Keys.ElementAt(i);
+                switchContainer.Add(new SpriteText
+                {
+                    Name = group,
+                    Colour = Colour4.Red,
+                    Size = new Vector2(200, 50),
+                    Scale = new Vector2(1.8f),
+                    Font = OsuFont.Torus.With(weight: "Bold"),
+                    Shadow = true,
+                });
+            }
+
+        }
+        public void AddGroup(string name, string[] overrides = null)
+        {
+            overrides ??= Array.Empty<string>();
+            foreach (string other in overrides)
+            {
                 InternalDict.Remove(other);
             }
-            InternalDict[name] =  new Dictionary<string, object>();
+            InternalDict[name] = new Dictionary<string, object>();
+            UpdateToggles();
         }
 
-        public void SetValue(string group, string name, object value) {
+        public bool GroupExists(string name) {
+            return InternalDict.ContainsKey(name);
+        }
+
+        public void SetValue(string group, string name, object value)
+        {
             InternalDict.TryGetValue(group, out var exists);
-            if (exists == null) {
+            if (exists == null)
+            {
                 AddGroup(group);
             }
             if (value is double val)
@@ -118,6 +178,25 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public object GetValue(string group, string name)
         {
             return InternalDict[group][name];
+        }
+        public void AddTypeFields(string groupName, Type type)
+        {
+            var props = type.GetFields(BindingFlags.NonPublic | BindingFlags.Static);
+            if (props.Length > 0 && !GroupExists(groupName))
+            {
+                AddGroup(groupName);
+            }
+            foreach (FieldInfo property in props)
+            {
+
+                if (property.GetCustomAttribute(typeof(HiddenDebugValueAttribute)) != default)
+                    continue;
+                var propval = property.GetValue(null);
+                var propname = property.Name;
+                if (propname.Length > 19)
+                    propname = propname[..17] + "...";
+                SetValue(groupName, propname, propval);
+            }
         }
     }
 }

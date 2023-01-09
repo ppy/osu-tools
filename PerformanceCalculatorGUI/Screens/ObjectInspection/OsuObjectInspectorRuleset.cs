@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using osu.Framework.Graphics;
 using osu.Framework.Allocation;
 using osu.Game.Beatmaps;
@@ -23,12 +24,15 @@ using SharpCompress.Common;
 using osu.Framework.Utils;
 using Remotion.Linq.Clauses.ResultOperators;
 using osu.Game.Rulesets.Taiko.Objects;
+using osu.Game.Rulesets.Difficulty.Skills;
+using osu.Game.Skinning;
+using NUnit.Framework.Internal;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset, IDebugListUpdater
     {
-        public const int HIT_OBJECT_FADE_OUT_EXTENSION = 600;
+        public const int HIT_OBJECT_FADE_OUT_EXTENSION = 0;
 
         public readonly OsuDifficultyHitObject[] DifficultyHitObjects;
 
@@ -47,12 +51,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             base.Update();
             var hitList = DifficultyHitObjects.Where(hit => { return hit.StartTime < Clock.CurrentTime; });
-            if (hitList.Count() > 0 && !(hitList.Last() == lasthit))
+            if (hitList.Any() && !(hitList.Last() == lasthit))
             {
                 var drawHitList = Playfield.AllHitObjects.Where(hit => { return hit.HitObject.StartTime < Clock.CurrentTime; });
                 Console.WriteLine(Clock.CurrentTime);
                 lasthit = hitList.Last();
-                if (drawHitList.Count() > 0)
+                if (drawHitList.Any())
                 {
                     drawHitList.Last().Colour = Colour4.Red;
                 }
@@ -66,11 +70,23 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(DifficultyHitObjects);
 
+        protected void AddInitalGroups(DebugValueList valueList) {
+
+        }
+
         public void UpdateDebugList(DebugValueList valueList, DifficultyHitObject curDiffHit)
         {
             Console.WriteLine(curDiffHit.BaseObject.GetType());
             OsuDifficultyHitObject osuDiffHit = (OsuDifficultyHitObject)curDiffHit;
             OsuHitObject baseHit = (OsuHitObject)osuDiffHit.BaseObject;
+
+            // -- [[ Aim Evaluator Properties ]] -- \\
+            valueList.AddTypeFields("Aim Evaluator", typeof(AimEvaluator));
+            valueList.AddTypeFields("Flashlight Evaluator", typeof(FlashlightEvaluator));
+            valueList.AddTypeFields("Rhythm Evaluator", typeof(RhythmEvaluator));
+            valueList.AddTypeFields("Speed Evaluator", typeof(SpeedEvaluator));
+
+            // -- [[ HitObject Properties ]] -- \\
 
             string groupName = osuDiffHit.BaseObject.GetType().Name;
             valueList.AddGroup(groupName,new string[] { "Slider", "HitCircle","Spinner" });
@@ -92,8 +108,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 valueList.SetValue(groupName, "Min Jump Dist", osuDiffHit.MinimumJumpDistance);
                 valueList.SetValue(groupName, "Min Jump Time", osuDiffHit.MinimumJumpTime);
             }
-            valueList.AddGroup("Test");
+
+            // -- [[ ------- ] -- \\
             valueList.UpdateValues();
+
+        }
+
+        void IDebugListUpdater.AddInitalGroups(DebugValueList valueList)
+        {
+            throw new NotImplementedException();
         }
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield

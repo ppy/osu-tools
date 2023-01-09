@@ -41,20 +41,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private void refresh()
         {
             ClearInternal(false);
-
-            var entry = Entry;
-            if (entry == null) return;
-
-            var hitObject = entry.HitObject;
-            double startTime = hitObject.StartTime - hitObject.TimePreempt;
-            double movementTime = hitObject.GetEndTime() - hitObject.StartTime;
-            double visibleTime = hitObject.GetEndTime() - startTime;
-
-
-            if (entry.DifficultyHitObject is not null)
-            {
-                
-            }
         }
     }
 

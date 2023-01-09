@@ -36,7 +36,6 @@ using FFmpeg.AutoGen;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-
     public partial class ObjectInspector : OsuFocusedOverlayContainer
     {
         private DependencyContainer dependencies;
@@ -64,7 +63,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private Container layout;
 
         private DebugValueList values;
-        private Container DebugContainer;
 
         protected override bool BlockNonPositionalInput => true;
 
