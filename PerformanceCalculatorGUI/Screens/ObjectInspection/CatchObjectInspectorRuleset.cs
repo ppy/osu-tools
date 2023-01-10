@@ -19,7 +19,7 @@ using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class CatchObjectInspectorRuleset : DrawableCatchRuleset, IDebugListUpdater
+    public partial class CatchObjectInspectorRuleset : DrawableCatchRuleset
     {
 
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;

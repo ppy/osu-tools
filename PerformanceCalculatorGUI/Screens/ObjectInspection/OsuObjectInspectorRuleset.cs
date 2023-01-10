@@ -31,7 +31,7 @@ using osu.Game.Screens.Edit;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset, IDebugListUpdater
+    public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset
     {
         public const int HIT_OBJECT_FADE_OUT_EXTENSION = 0;
 
