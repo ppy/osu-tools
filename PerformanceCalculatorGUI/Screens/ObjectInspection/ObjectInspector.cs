@@ -9,6 +9,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
+using osu.Framework.Timing;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -16,6 +17,7 @@ using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
@@ -24,8 +26,6 @@ using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
 using osuTK.Input;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
-using osu.Framework.Timing;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -102,7 +102,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         Alpha = 0.95f,
                         RelativeSizeAxes = Axes.Both
                     },
-
                 }
             });
 
@@ -249,7 +248,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             ruleset.BindValueChanged(_ => PopOut());
             beatmap.BindValueChanged(_ => PopOut());
-
         }
 
         public static DifficultyHitObject GetCurrentHit(Playfield field, DifficultyHitObject[] difficultyHitObjects, DifficultyHitObject lasthit, IFrameBasedClock clock)
@@ -281,7 +279,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             this.FadeOut();
         }
 
-
         protected override bool OnKeyDown(KeyDownEvent e)
         {
             if (e.Key == Key.Space)
@@ -291,7 +288,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 else
                     clock.Start();
             }
-
 
             var amt = 0.25;
             amt = e.ControlPressed ? amt * 2 : amt;

@@ -1,24 +1,24 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using osu.Framework.Graphics;
 using osu.Framework.Allocation;
+using osu.Framework.Graphics;
+using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
+using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
-using System;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
-using osu.Framework.Utils;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -38,7 +38,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
         }
-
 
         protected override void Update()
         {
@@ -91,7 +90,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
 
             valueList.UpdateValues();
-
         }
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
