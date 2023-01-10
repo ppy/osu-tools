@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using osu.Framework.Allocation;
-using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -14,7 +12,6 @@ using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -122,7 +119,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 RelativeSizeAxes = Axes.Both
             });
 
-            for (int i = 1; i < InternalDict.Keys.Count; i++) {
+            for (int i = 1; i < InternalDict.Keys.Count; i++)
+            {
                 string group = InternalDict.Keys.ElementAt(i);
                 switchContainer.Add(new SpriteText
                 {
@@ -147,7 +145,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             UpdateToggles();
         }
 
-        public bool GroupExists(string name) {
+        public bool GroupExists(string name)
+        {
             return InternalDict.ContainsKey(name);
         }
 

@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using osu.Framework.Graphics;
 using osu.Framework.Allocation;
 using osu.Game.Beatmaps;
@@ -16,18 +15,10 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
-using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using System;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
-using SharpCompress.Common;
 using osu.Framework.Utils;
-using Remotion.Linq.Clauses.ResultOperators;
-using osu.Game.Rulesets.Taiko.Objects;
-using osu.Game.Rulesets.Difficulty.Skills;
-using osu.Game.Skinning;
-using NUnit.Framework.Internal;
-using osu.Game.Screens.Edit;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -79,7 +70,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             OsuHitObject baseHit = (OsuHitObject)osuDiffHit.BaseObject;
 
             string groupName = osuDiffHit.BaseObject.GetType().Name;
-            valueList.AddGroup(groupName,new string[] { "Slider", "HitCircle","Spinner" });
+            valueList.AddGroup(groupName, new string[] { "Slider", "HitCircle", "Spinner" });
             valueList.SetValue(groupName, "Position", baseHit.StackedPosition);
             valueList.SetValue(groupName, "Strain Time", osuDiffHit.StrainTime);
             valueList.SetValue(groupName, "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(osuDiffHit, true));

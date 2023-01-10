@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -13,13 +12,10 @@ using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
-using osu.Game.Rulesets.Difficulty.Skills;
-using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
@@ -27,13 +23,8 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
-using osu.Game.Screens.Menu;
-using osuTK.Graphics.ES31;
 using osuTK.Input;
-using SharpGen.Runtime.Win32;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
-using FFmpeg.AutoGen;
-using System;
 using osu.Framework.Timing;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -122,7 +113,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 Anchor = Anchor.Centre,
                 Masking = true,
                 CornerRadius = 15f,
-                Padding = new MarginPadding() { Left = side_bar_width , Right = 0},
+                Padding = new MarginPadding() { Left = side_bar_width, Right = 0 },
                 RelativeSizeAxes = Axes.Both,
                 Child = clock,
             });
@@ -303,8 +294,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
 
             var amt = 0.25;
-            amt = e.ControlPressed ? amt * 2:  amt;
-            amt = e.ShiftPressed ? amt * 0.5: amt;
+            amt = e.ControlPressed ? amt * 2 : amt;
+            amt = e.ShiftPressed ? amt * 0.5 : amt;
             if (e.Key == Key.Q)
             {
                 clock.SeekBackward(amount: amt);
