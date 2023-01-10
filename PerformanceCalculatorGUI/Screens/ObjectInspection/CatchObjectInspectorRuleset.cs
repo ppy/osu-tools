@@ -57,7 +57,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             CatchDifficultyHitObject catchDiffHit = (CatchDifficultyHitObject)curDiffHit;
             string groupName = catchDiffHit.BaseObject.GetType().Name;
-            valueList.AddGroup(groupName, new string[] { "Fruit", "Droplet"});
+            valueList.AddGroup(groupName, new string[] { "Fruit", "Droplet" });
             valueList.SetValue(groupName, "Strain Time", catchDiffHit.StrainTime);
             valueList.SetValue(groupName, "Normalized Position", catchDiffHit.NormalizedPosition);
             valueList.UpdateValues();

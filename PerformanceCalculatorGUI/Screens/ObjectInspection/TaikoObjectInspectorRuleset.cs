@@ -58,9 +58,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             string groupName = taikoDiffHit.BaseObject.GetType().Name;
             valueList.AddGroup(groupName, new string[] { "Hit", "Swell", "DrumRoll" });
-            valueList.SetValue(groupName,$"Delta Time", taikoDiffHit.DeltaTime);
-            valueList.SetValue(groupName,$"Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty);
-            valueList.SetValue(groupName,$"Rhythm Ratio", taikoDiffHit.Rhythm.Ratio);
+            valueList.SetValue(groupName, $"Delta Time", taikoDiffHit.DeltaTime);
+            valueList.SetValue(groupName, $"Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty);
+            valueList.SetValue(groupName, $"Rhythm Ratio", taikoDiffHit.Rhythm.Ratio);
             valueList.UpdateValues();
         }
 
