@@ -27,6 +27,7 @@ using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Skinning;
 using NUnit.Framework.Internal;
+using osu.Game.Screens.Edit;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -34,32 +35,27 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     {
         public const int HIT_OBJECT_FADE_OUT_EXTENSION = 0;
 
-        public readonly OsuDifficultyHitObject[] DifficultyHitObjects;
-
-        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
-            : base(ruleset, beatmap, mods)
-        {
-            DifficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
-        }
+        private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
         private DebugValueList debugValueList { get; set; }
 
         private DifficultyHitObject lasthit;
 
+        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
+            : base(ruleset, beatmap, mods)
+        {
+            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
+        }
+
+
         protected override void Update()
         {
             base.Update();
-            var hitList = DifficultyHitObjects.Where(hit => { return hit.StartTime < Clock.CurrentTime; });
-            if (hitList.Any() && !(hitList.Last() == lasthit))
+            var returnedhit = ObjectInspector.GetCurrentHit(Playfield, difficultyHitObjects, lasthit, Clock);
+            if (returnedhit != null)
             {
-                var drawHitList = Playfield.AllHitObjects.Where(hit => { return hit.HitObject.StartTime < Clock.CurrentTime; });
-                Console.WriteLine(Clock.CurrentTime);
-                lasthit = hitList.Last();
-                if (drawHitList.Any())
-                {
-                    drawHitList.Last().Colour = Colour4.Red;
-                }
+                lasthit = returnedhit;
                 UpdateDebugList(debugValueList, lasthit);
             }
         }
@@ -68,7 +64,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
-        protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(DifficultyHitObjects);
+        protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
         protected void AddInitalGroups(DebugValueList valueList) {
 
@@ -79,14 +75,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             Console.WriteLine(curDiffHit.BaseObject.GetType());
             OsuDifficultyHitObject osuDiffHit = (OsuDifficultyHitObject)curDiffHit;
             OsuHitObject baseHit = (OsuHitObject)osuDiffHit.BaseObject;
-
-            // -- [[ Aim Evaluator Properties ]] -- \\
-            valueList.AddTypeFields("Aim Evaluator", typeof(AimEvaluator));
-            valueList.AddTypeFields("Flashlight Evaluator", typeof(FlashlightEvaluator));
-            valueList.AddTypeFields("Rhythm Evaluator", typeof(RhythmEvaluator));
-            valueList.AddTypeFields("Speed Evaluator", typeof(SpeedEvaluator));
-
-            // -- [[ HitObject Properties ]] -- \\
 
             string groupName = osuDiffHit.BaseObject.GetType().Name;
             valueList.AddGroup(groupName,new string[] { "Slider", "HitCircle","Spinner" });
@@ -109,14 +97,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 valueList.SetValue(groupName, "Min Jump Time", osuDiffHit.MinimumJumpTime);
             }
 
-            // -- [[ ------- ] -- \\
             valueList.UpdateValues();
 
-        }
-
-        void IDebugListUpdater.AddInitalGroups(DebugValueList valueList)
-        {
-            throw new NotImplementedException();
         }
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield

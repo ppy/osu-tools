@@ -78,7 +78,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public void UpdateValues()
         {
-            flowContainer.Text = "secret";
+            flowContainer.Text = "";
             foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InternalDict)
             {
                 // Big text
@@ -179,24 +179,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             return InternalDict[group][name];
         }
-        public void AddTypeFields(string groupName, Type type)
-        {
-            var props = type.GetFields(BindingFlags.NonPublic | BindingFlags.Static);
-            if (props.Length > 0 && !GroupExists(groupName))
-            {
-                AddGroup(groupName);
-            }
-            foreach (FieldInfo property in props)
-            {
 
-                if (property.GetCustomAttribute(typeof(HiddenDebugValueAttribute)) != default)
-                    continue;
-                var propval = property.GetValue(null);
-                var propname = property.Name;
-                if (propname.Length > 19)
-                    propname = propname[..17] + "...";
-                SetValue(groupName, propname, propval);
-            }
-        }
     }
 }

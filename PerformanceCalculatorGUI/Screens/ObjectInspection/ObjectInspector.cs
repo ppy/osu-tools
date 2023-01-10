@@ -33,6 +33,8 @@ using osuTK.Input;
 using SharpGen.Runtime.Win32;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using FFmpeg.AutoGen;
+using System;
+using osu.Framework.Timing;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -60,7 +62,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private readonly ProcessorWorkingBeatmap processorBeatmap;
         private EditorClock clock;
-        private Container layout;
+        private Container inspectContainer;
 
         private DebugValueList values;
 
@@ -93,7 +95,37 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             beatmap.Value = processorBeatmap;
 
-            AddInternal(layout = new Container
+            // Background
+            AddInternal(new Container
+            {
+                Origin = Anchor.Centre,
+                Anchor = Anchor.Centre,
+                CornerRadius = 15f,
+                RelativeSizeAxes = Axes.Both,
+                Children = new Drawable[] {
+                    new Box
+                    {
+                        Colour = Colour4.Black,
+                        Alpha = 0.95f,
+                        RelativeSizeAxes = Axes.Both
+                    },
+
+                }
+            });
+
+            // Object Inspector Container
+            AddInternal(inspectContainer = new Container
+            {
+                Origin = Anchor.Centre,
+                Anchor = Anchor.Centre,
+                Masking = true,
+                CornerRadius = 15f,
+                RelativeSizeAxes = Axes.Both,
+                Child = clock,
+            });
+
+            // layout
+            AddInternal(new Container
             {
                 Origin = Anchor.Centre,
                 Anchor = Anchor.Centre,
@@ -102,22 +134,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 RelativeSizeAxes = Axes.Both,
                 Children = new Drawable[]
                 {
-                    new Box
-                    {
-                        Colour = Colour4.Black,
-                        Alpha = 0.95f,
-                        RelativeSizeAxes = Axes.Both
-                    },
-                    values = new DebugValueList() {
-
-                    },
+                    values = new DebugValueList() { Clock = clock },
                     new Container
                     {
-                        Name = "Bottom bar",
-                        Anchor = Anchor.BottomLeft,
-                        Origin = Anchor.BottomLeft,
-                        RelativeSizeAxes = Axes.X,
-                        Height = bottom_bar_height,
+                            Name = "Bottom bar",
+                            Anchor = Anchor.BottomLeft,
+                            Origin = Anchor.BottomLeft,
+                            RelativeSizeAxes = Axes.X,
+                            Height = bottom_bar_height,
                         Children = new Drawable[]
                         {
                             new Box
@@ -146,13 +170,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             }
                         }
                     },
-                    clock
                 }
             });
             dependencies.CacheAs(values);
             DrawableRuleset inspectorRuleset = null;
 
-            layout.Add(ruleset.Value.ShortName switch
+            inspectContainer.Add(ruleset.Value.ShortName switch
             {
                 "osu" => new OsuPlayfieldAdjustmentContainer
                 {
@@ -176,7 +199,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
+                    Margin = new MarginPadding(10) { Left = 215, Bottom = bottom_bar_height },
                     Child = inspectorRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                         processorBeatmap.Track.Rate)
                     {
@@ -214,6 +237,22 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             ruleset.BindValueChanged(_ => PopOut());
             beatmap.BindValueChanged(_ => PopOut());
 
+        }
+
+        public static DifficultyHitObject GetCurrentHit(Playfield field, DifficultyHitObject[] difficultyHitObjects, DifficultyHitObject lasthit, IFrameBasedClock clock)
+        {
+            var hitList = difficultyHitObjects.Where(hit => { return hit.StartTime < clock.CurrentTime; });
+            if (hitList.Any() && !(hitList.Last() == lasthit))
+            {
+                var drawHitList = field.AllHitObjects.Where(hit => { return hit.HitObject.StartTime < clock.CurrentTime; });
+                DifficultyHitObject curhit = hitList.Last();
+                if (drawHitList.Any())
+                {
+                    drawHitList.Last().Colour = Colour4.Red;
+                }
+                return curhit;
+            }
+            return null;
         }
 
         protected override void Update()

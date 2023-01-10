@@ -7,6 +7,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Taiko;
@@ -18,9 +19,14 @@ using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class TaikoObjectInspectorRuleset : DrawableTaikoRuleset
+    public partial class TaikoObjectInspectorRuleset : DrawableTaikoRuleset, IDebugListUpdater
     {
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
+
+        [Resolved]
+        private DebugValueList debugValueList { get; set; }
+
+        private DifficultyHitObject lasthit;
 
         public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
@@ -34,6 +40,29 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public override bool PropagateNonPositionalInputSubTree => false;
 
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield(difficultyHitObjects);
+
+        protected override void Update()
+        {
+            base.Update();
+            var returnedhit = ObjectInspector.GetCurrentHit(Playfield, difficultyHitObjects, lasthit, Clock);
+            if (returnedhit != null)
+            {
+                lasthit = returnedhit;
+                UpdateDebugList(debugValueList, lasthit);
+            }
+        }
+
+        protected void UpdateDebugList(DebugValueList valueList, DifficultyHitObject curDiffHit)
+        {
+            TaikoDifficultyHitObject taikoDiffHit = (TaikoDifficultyHitObject)curDiffHit;
+
+            string groupName = taikoDiffHit.BaseObject.GetType().Name;
+            valueList.AddGroup(groupName, new string[] { "Hit", "Swell", "DrumRoll" });
+            valueList.SetValue(groupName,$"Delta Time", taikoDiffHit.DeltaTime);
+            valueList.SetValue(groupName,$"Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty);
+            valueList.SetValue(groupName,$"Rhythm Ratio", taikoDiffHit.Rhythm.Ratio);
+            valueList.UpdateValues();
+        }
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
