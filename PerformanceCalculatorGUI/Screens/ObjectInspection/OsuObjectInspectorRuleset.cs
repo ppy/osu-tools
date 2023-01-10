@@ -57,6 +57,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 lasthit = returnedhit;
                 UpdateDebugList(debugValueList, lasthit);
+                // change color
+                var drawHitList = Playfield.AllHitObjects.Where(hit => { return hit.HitObject.StartTime < Clock.CurrentTime; });
+                if (drawHitList.Any())
+                {
+                    drawHitList.Last().Colour = Colour4.Red;
+                }
             }
         }
 

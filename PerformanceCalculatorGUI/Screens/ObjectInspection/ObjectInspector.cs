@@ -72,6 +72,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private const int bottom_bar_height = 50;
 
+        private const int side_bar_width = 215;
+
         public ObjectInspector(ProcessorWorkingBeatmap working)
         {
             processorBeatmap = working;
@@ -120,6 +122,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 Anchor = Anchor.Centre,
                 Masking = true,
                 CornerRadius = 15f,
+                Padding = new MarginPadding() { Left = side_bar_width , Right = side_bar_width/5f},
                 RelativeSizeAxes = Axes.Both,
                 Child = clock,
             });
@@ -199,7 +202,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Margin = new MarginPadding(10) { Left = 215, Bottom = bottom_bar_height },
+                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
                     Child = inspectorRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                         processorBeatmap.Track.Rate)
                     {
@@ -211,15 +214,34 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 "fruits" => new CatchPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
+                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
                     Y = 100,
                     Children = new Drawable[]
                     {
+                        // guideline bar 
+                        new Container{
+                            RelativeSizeAxes = Axes.X,
+                            Height = 5,
+                            Y = 300,
+                            Colour = Colour4.Red,
+                            Children = new Drawable[]{
+                                // shadow
+                                new Circle{Colour = Colour4.Gray, Size = new osuTK.Vector2(10), Y = -2.5f+3, X = -5 },
+                                new Box{ Colour = Colour4.Gray,Size = new osuTK.Vector2(5,20), Y = -7f+3, X = 510 },
+                                new Box { Colour = Colour4.Gray, RelativeSizeAxes = Axes.Both, Y = 3},
+
+                                // main
+                                new Circle{ Size = new osuTK.Vector2(10), Y = -2.5f, X = -5 },
+                                new Box{ Size = new osuTK.Vector2(5,20), Y = -7f, X = 510 },
+                                new Box { RelativeSizeAxes = Axes.Both },
+                            }
+                        },
                         inspectorRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator, processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
                             ProcessCustomClock = false
-                        }
+                        },
                     }
                 },
                 _ => new Container
@@ -244,12 +266,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             var hitList = difficultyHitObjects.Where(hit => { return hit.StartTime < clock.CurrentTime; });
             if (hitList.Any() && !(hitList.Last() == lasthit))
             {
-                var drawHitList = field.AllHitObjects.Where(hit => { return hit.HitObject.StartTime < clock.CurrentTime; });
                 DifficultyHitObject curhit = hitList.Last();
-                if (drawHitList.Any())
-                {
-                    drawHitList.Last().Colour = Colour4.Red;
-                }
                 return curhit;
             }
             return null;
@@ -282,6 +299,20 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     clock.Stop();
                 else
                     clock.Start();
+            }
+
+
+            var amt = 0.25;
+            amt = e.ControlPressed ? amt * 2:  amt;
+            amt = e.ShiftPressed ? amt * 0.5: amt;
+            if (e.Key == Key.Q)
+            {
+                clock.SeekBackward(amount: amt);
+            }
+
+            if (e.Key == Key.E)
+            {
+                clock.SeekForward(amount: amt);
             }
 
             return base.OnKeyDown(e);
