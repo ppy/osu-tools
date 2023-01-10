@@ -98,12 +98,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 [BackgroundDependencyLoader]
                 private void load()
                 {
-                    ObjectInspectionPanel panel;
-                    AddInternal(panel = new ObjectInspectionPanel());
-
-                    panel.AddParagraph($"Delta Time: {dho.DeltaTime:N3}");
-                    panel.AddParagraph($"Rhythm Difficulty: {dho.Rhythm.Difficulty:N3}");
-                    panel.AddParagraph($"Rhythm Ratio: {dho.Rhythm.Ratio:N3}");
                 }
 
                 public override bool OnPressed(KeyBindingPressEvent<TaikoAction> e) => true;

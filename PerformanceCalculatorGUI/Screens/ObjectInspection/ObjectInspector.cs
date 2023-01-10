@@ -122,7 +122,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 Anchor = Anchor.Centre,
                 Masking = true,
                 CornerRadius = 15f,
-                Padding = new MarginPadding() { Left = side_bar_width , Right = side_bar_width/5f},
+                Padding = new MarginPadding() { Left = side_bar_width , Right = 0},
                 RelativeSizeAxes = Axes.Both,
                 Child = clock,
             });
@@ -202,7 +202,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
+                    Margin = new MarginPadding(10) { Left = 0, Bottom = bottom_bar_height },
                     Child = inspectorRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                         processorBeatmap.Track.Rate)
                     {
@@ -221,18 +221,18 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         // guideline bar 
                         new Container{
                             RelativeSizeAxes = Axes.X,
-                            Height = 5,
+                            Height = 3,
                             Y = 300,
                             Colour = Colour4.Red,
                             Children = new Drawable[]{
                                 // shadow
-                                new Circle{Colour = Colour4.Gray, Size = new osuTK.Vector2(10), Y = -2.5f+3, X = -5 },
-                                new Box{ Colour = Colour4.Gray,Size = new osuTK.Vector2(5,20), Y = -7f+3, X = 510 },
-                                new Box { Colour = Colour4.Gray, RelativeSizeAxes = Axes.Both, Y = 3},
+                                new Circle{Colour = Colour4.Gray, Size = new osuTK.Vector2(10), Y = -3.3f+2, X = -5 },
+                                new Box{ Colour = Colour4.Gray,Size = new osuTK.Vector2(5,20), Y = -8.3f+2, X = 508 },
+                                new Box { Colour = Colour4.Gray, RelativeSizeAxes = Axes.Both, Y = 2},
 
                                 // main
-                                new Circle{ Size = new osuTK.Vector2(10), Y = -2.5f, X = -5 },
-                                new Box{ Size = new osuTK.Vector2(5,20), Y = -7f, X = 510 },
+                                new Circle{ Size = new osuTK.Vector2(10), Y = -3.3f, X = -5 },
+                                new Box{ Size = new osuTK.Vector2(5,20), Y = -8.3f, X = 508 },
                                 new Box { RelativeSizeAxes = Axes.Both },
                             }
                         },

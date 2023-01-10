@@ -19,7 +19,6 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    // 2852853
     public partial class DebugValueList : Container
     {
 

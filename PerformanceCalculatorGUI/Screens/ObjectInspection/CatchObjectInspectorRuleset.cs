@@ -98,14 +98,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 [BackgroundDependencyLoader]
                 private void load()
                 {
-                    ObjectInspectionPanel panel;
-                    AddInternal(panel = new ObjectInspectionPanel
-                    {
-                        X = -50
-                    });
-
-                    panel.AddParagraph($"Strain Time: {dho.StrainTime:N3}");
-                    panel.AddParagraph($"Normalized Position: {dho.NormalizedPosition:N3}");
                 }
 
                 private class CatchInspectorHitObject : CatchHitObject

@@ -109,7 +109,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
-            private readonly OsuObjectInspectorRenderer objectRenderer;
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
 
             protected override GameplayCursorContainer CreateCursor() => null;
@@ -118,20 +117,17 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 this.difficultyHitObjects = difficultyHitObjects;
                 HitPolicy = new AnyOrderHitPolicy();
-                AddInternal(objectRenderer = new OsuObjectInspectorRenderer { RelativeSizeAxes = Axes.Both });
                 DisplayJudgements.Value = false;
             }
 
             protected override void OnHitObjectAdded(HitObject hitObject)
             {
                 base.OnHitObjectAdded(hitObject);
-                objectRenderer.AddDifficultyDataPanel((OsuHitObject)hitObject, difficultyHitObjects.FirstOrDefault(x => x.StartTime == hitObject.StartTime));
             }
 
             protected override void OnHitObjectRemoved(HitObject hitObject)
             {
                 base.OnHitObjectRemoved(hitObject);
-                objectRenderer.RemoveDifficultyDataPanel((OsuHitObject)hitObject);
             }
             protected override void OnNewDrawableHitObject(DrawableHitObject d)
             {
