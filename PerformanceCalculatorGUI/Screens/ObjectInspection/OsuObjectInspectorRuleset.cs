@@ -72,10 +72,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
-        protected void AddInitalGroups(DebugValueList valueList) {
-
-        }
-
         public void UpdateDebugList(DebugValueList valueList, DifficultyHitObject curDiffHit)
         {
             Console.WriteLine(curDiffHit.BaseObject.GetType());
