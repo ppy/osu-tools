@@ -10,6 +10,7 @@ using System.Linq;
 using Humanizer;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Configuration;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -43,6 +44,12 @@ namespace PerformanceCalculator.Difficulty
                 Description = mod.Description.ToString(),
                 Type = mod.Type.ToString(),
                 Settings = getSettingsDefinitions(mod),
+                Icon = mod.Icon is IconUsage icon ? new
+                {
+                    icon.Family,
+                    icon.Icon,
+                    icon.Weight,
+                } : null,
                 IncompatibleMods = getAllImplementations(mod.IncompatibleMods),
                 mod.RequiresConfiguration,
                 mod.UserPlayable,
