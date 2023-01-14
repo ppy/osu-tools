@@ -44,18 +44,26 @@ namespace PerformanceCalculator.Difficulty
                 Description = mod.Description.ToString(),
                 Type = mod.Type.ToString(),
                 Settings = getSettingsDefinitions(mod),
-                Icon = mod.Icon is IconUsage icon ? new
-                {
-                    icon.Family,
-                    icon.Icon,
-                    icon.Weight,
-                } : null,
+                Icon = extractIconSpecifics(mod.Icon),
                 IncompatibleMods = getAllImplementations(mod.IncompatibleMods),
                 mod.RequiresConfiguration,
                 mod.UserPlayable,
                 mod.ValidForMultiplayer,
                 mod.ValidForMultiplayerAsFreeMod,
             });
+
+            dynamic? extractIconSpecifics(IconUsage? icon)
+            {
+                if (icon == null)
+                    return null;
+
+                return new
+                {
+                    icon.Value.Family,
+                    icon.Value.Icon,
+                    icon.Value.Weight,
+                };
+            }
 
             IEnumerable<string> getAllImplementations(Type[] incompatibleTypes)
             {
