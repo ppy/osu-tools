@@ -20,8 +20,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class CatchObjectInspectorRuleset : DrawableCatchRuleset
     {
-
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;
+
         [Resolved]
         private ObjectDifficultyValuesContainer debugValueList { get; set; }
 
@@ -37,7 +37,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public override bool PropagatePositionalInputSubTree => false;
 
         public override bool PropagateNonPositionalInputSubTree => false;
-
 
         protected override Playfield CreatePlayfield() => new CatchObjectInspectorPlayfield(Beatmap.Difficulty, difficultyHitObjects);
 

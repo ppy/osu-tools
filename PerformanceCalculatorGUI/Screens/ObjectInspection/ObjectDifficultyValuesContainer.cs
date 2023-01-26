@@ -3,12 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
@@ -16,16 +14,13 @@ using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class DebugValueList : Container
+    public partial class ObjectDifficultyValuesContainer : Container
     {
-
-
         protected Dictionary<string, Dictionary<string, object>> InternalDict;
         private Box bgBox;
         private TextFlowContainer flowContainer;
-        private Container switchContainer;
 
-        public DebugValueList()
+        public ObjectDifficultyValuesContainer()
         {
             InternalDict = new Dictionary<string, Dictionary<string, object>>();
         }
@@ -33,44 +28,28 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colors)
         {
-            RelativeSizeAxes = Axes.Both;
+            RelativeSizeAxes = Axes.Y;
             Width = 215;
             Children = new Drawable[]{
                 bgBox = new Box
                 {
+                    RelativeSizeAxes = Axes.Both,
                     Colour = colors.Background5,
                     Alpha = 0.95f,
-                    RelativeSizeAxes = Axes.Y,
-                    Width = 215
                 },
                 new OsuScrollContainer() {
-                    Width = 215,
-                    Height = 670,
+                    RelativeSizeAxes = Axes.Both,
                     ScrollbarAnchor = Anchor.TopLeft,
                     Child = flowContainer = new TextFlowContainer()
                     {
+                        AutoSizeAxes = Axes.Both,
                         Masking = false,
-                        Margin = new MarginPadding { Left = 15 },
-                        Size = new Vector2(200,3500),
-                        Y = 3500,
-                        Origin = Anchor.BottomLeft
+                        Margin = new MarginPadding {Left = 15},
+                        Origin = Anchor.TopLeft
                     },
                 },
-                switchContainer = new Container {
-                    Size = new Vector2(215,3500),
-                    X  = -85 + -1446 * 214,
-                    Anchor = Anchor.TopRight,
-                    Origin = Anchor.TopRight,
-                    Child = new Box
-                    {
-                        Colour = colors.Background5,
-                        Alpha = 0.95f,
-                        RelativeSizeAxes = Axes.Both
-                    },
-                }
             };
         }
-
 
         public void UpdateValues()
         {
@@ -109,31 +88,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
         }
 
-        public void UpdateToggles()
-        {
-            switchContainer.Clear();
-            switchContainer.Add(new Box
-            {
-                Colour = Colour4.Pink,
-                Alpha = 0.95f,
-                RelativeSizeAxes = Axes.Both
-            });
-
-            for (int i = 1; i < InternalDict.Keys.Count; i++)
-            {
-                string group = InternalDict.Keys.ElementAt(i);
-                switchContainer.Add(new SpriteText
-                {
-                    Name = group,
-                    Colour = Colour4.Red,
-                    Size = new Vector2(200, 50),
-                    Scale = new Vector2(1.8f),
-                    Font = OsuFont.Torus.With(weight: "Bold"),
-                    Shadow = true,
-                });
-            }
-
-        }
         public void AddGroup(string name, string[] overrides = null)
         {
             overrides ??= Array.Empty<string>();
@@ -142,7 +96,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 InternalDict.Remove(other);
             }
             InternalDict[name] = new Dictionary<string, object>();
-            UpdateToggles();
         }
 
         public bool GroupExists(string name)
@@ -177,6 +130,5 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             return InternalDict[group][name];
         }
-
     }
 }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -29,7 +28,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private DebugValueList debugValueList { get; set; }
+        private ObjectDifficultyValuesContainer debugValueList { get; set; }
 
         private DifficultyHitObject lasthit;
 
@@ -62,9 +61,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
-        public void UpdateDebugList(DebugValueList valueList, DifficultyHitObject curDiffHit)
+        public void UpdateDebugList(ObjectDifficultyValuesContainer valueList, DifficultyHitObject curDiffHit)
         {
-            Console.WriteLine(curDiffHit.BaseObject.GetType());
             OsuDifficultyHitObject osuDiffHit = (OsuDifficultyHitObject)curDiffHit;
             OsuHitObject baseHit = (OsuHitObject)osuDiffHit.BaseObject;
 
@@ -114,6 +112,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 base.OnHitObjectRemoved(hitObject);
             }
+
             protected override void OnNewDrawableHitObject(DrawableHitObject d)
             {
                 d.ApplyCustomUpdateState += updateState;
