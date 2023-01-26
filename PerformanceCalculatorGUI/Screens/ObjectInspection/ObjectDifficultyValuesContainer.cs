@@ -23,13 +23,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public ObjectDifficultyValuesContainer()
         {
             InternalDict = new Dictionary<string, Dictionary<string, object>>();
+            RelativeSizeAxes = Axes.Y;
+            Width = 215;
         }
 
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colors)
         {
-            RelativeSizeAxes = Axes.Y;
-            Width = 215;
             Children = new Drawable[]{
                 bgBox = new Box
                 {
@@ -45,7 +45,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         AutoSizeAxes = Axes.Both,
                         Masking = false,
                         Margin = new MarginPadding {Left = 15},
-                        Origin = Anchor.TopLeft
+                        Origin = Anchor.TopLeft,
                     },
                 },
             };
@@ -61,8 +61,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 Dictionary<string, object> groupDict = GroupPair.Value;
                 flowContainer.AddText($"- {GroupPair.Key}\n", t =>
                 {
-                    t.Scale = new Vector2(1.8f);
-                    t.Font = OsuFont.Torus.With(weight: "Bold");
+                    t.Font = OsuFont.Torus.With(weight: "Bold", size: 28);
                     t.Colour = Colour4.Pink;
                     t.Shadow = true;
                 });
@@ -71,16 +70,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     flowContainer.AddText($"   {ValuePair.Key}:\n", t =>
                     {
-                        t.Scale = new Vector2(1.3f);
-                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold");
+                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold", size: 21);
                         t.Colour = Colour4.White;
                         t.Shadow = true;
                         t.Truncate = true;
                     });
                     flowContainer.AddText($"     -> {ValuePair.Value}\n\n", t =>
                     {
-                        t.Scale = new Vector2(1.3f);
-                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold");
+                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold", size: 21);
                         t.Colour = Colour4.White;
                         t.Shadow = true;
                     });

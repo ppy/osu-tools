@@ -89,80 +89,84 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             beatmap.Value = processorBeatmap;
 
             // Background
-            AddInternal(new Container
-            {
-                Origin = Anchor.Centre,
-                Anchor = Anchor.Centre,
-                CornerRadius = 15f,
-                RelativeSizeAxes = Axes.Both,
-                Children = new Drawable[] {
-                    new Box
-                    {
-                        Colour = Colour4.Black,
-                        Alpha = 0.95f,
-                        RelativeSizeAxes = Axes.Both
-                    },
-                }
-            });
-
-            // Object Inspector Container
-            AddInternal(inspectContainer = new Container
-            {
-                Origin = Anchor.Centre,
-                Anchor = Anchor.Centre,
-                Masking = true,
-                CornerRadius = 15f,
-                Padding = new MarginPadding() { Left = side_bar_width, Right = 0 },
-                RelativeSizeAxes = Axes.Both,
-                Child = clock,
-            });
-
-            // layout
-            AddInternal(new Container
-            {
-                Origin = Anchor.Centre,
-                Anchor = Anchor.Centre,
-                Masking = true,
-                CornerRadius = 15f,
-                RelativeSizeAxes = Axes.Both,
-                Children = new Drawable[]
+            AddRange(new Drawable[] {
+                new Container
                 {
-                    values = new ObjectDifficultyValuesContainer() { Clock = clock },
-                    new Container
+                    Origin = Anchor.Centre,
+                    Anchor = Anchor.Centre,
+                    CornerRadius = 15f,
+                    RelativeSizeAxes = Axes.Both,
+                    Children = new Drawable[] {
+                        new Box
+                        {
+                            Colour = Colour4.Black,
+                            Alpha = 0.95f,
+                            RelativeSizeAxes = Axes.Both
+                        },
+                    }
+                },
+
+                // Object Inspector Container
+                inspectContainer = new Container
+                {
+                    Origin = Anchor.Centre,
+                    Anchor = Anchor.Centre,
+                    Masking = true,
+                    CornerRadius = 15f,
+                    Padding = new MarginPadding() { Left = side_bar_width },
+                    RelativeSizeAxes = Axes.Both,
+                    Child = clock,
+                },
+
+                // layout
+                new Container
+                {
+                    Origin = Anchor.Centre,
+                    Anchor = Anchor.Centre,
+                    Masking = true,
+                    CornerRadius = 15f,
+                    RelativeSizeAxes = Axes.Both,
+                    Children = new Drawable[]
                     {
+                        values = new ObjectDifficultyValuesContainer() {
+                            Padding = new MarginPadding { Bottom = 5 },
+                        },
+                        new Container
+                        {
                             Name = "Bottom bar",
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
                             RelativeSizeAxes = Axes.X,
                             Height = bottom_bar_height,
-                        Children = new Drawable[]
-                        {
-                            new Box
+                            Children = new Drawable[]
                             {
-                                RelativeSizeAxes = Axes.Both,
-                                Colour = colourProvider.Background4,
-                            },
-                            new GridContainer
-                            {
-                                RelativeSizeAxes = Axes.Both,
-                                ColumnDimensions = new[]
+                                new Box
                                 {
-                                    new Dimension(GridSizeMode.Absolute, 170),
-                                    new Dimension(),
-                                    new Dimension(GridSizeMode.Absolute, 220)
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = colourProvider.Background4,
                                 },
-                                Content = new[]
+                                new GridContainer
                                 {
-                                    new Drawable[]
+                                    RelativeSizeAxes = Axes.Both,
+                                    ColumnDimensions = new[]
                                     {
-                                        new TimeInfoContainer { RelativeSizeAxes = Axes.Both },
-                                        new SummaryTimeline { RelativeSizeAxes = Axes.Both },
-                                        new PlaybackControl { RelativeSizeAxes = Axes.Both },
+                                        new Dimension(GridSizeMode.Absolute, 170),
+                                        new Dimension(),
+                                        new Dimension(GridSizeMode.Absolute, 220)
                                     },
+                                    Content = new[]
+                                    {
+                                        new Drawable[]
+                                        {
+                                            new TimeInfoContainer { RelativeSizeAxes = Axes.Both },
+                                            new SummaryTimeline { RelativeSizeAxes = Axes.Both },
+                                            new PlaybackControl { RelativeSizeAxes = Axes.Both },
+                                        },
+                                    }
                                 }
                             }
-                        }
-                    },
+                        },
+                    }
                 }
             });
             dependencies.CacheAs(values);
@@ -208,7 +212,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Y = 100,
                     Children = new Drawable[]
                     {
-                        // guideline bar 
+                        // guideline bar
                         new Container{
                             RelativeSizeAxes = Axes.X,
                             Height = 3,

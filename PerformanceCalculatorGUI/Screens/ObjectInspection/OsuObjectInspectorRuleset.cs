@@ -23,8 +23,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset
     {
-        public const int HIT_OBJECT_FADE_OUT_EXTENSION = 0;
-
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
@@ -46,12 +44,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 lasthit = returnedhit;
                 UpdateDebugList(debugValueList, lasthit);
-                // change color
-                var drawHitList = Playfield.AllHitObjects.Where(hit => { return hit.HitObject.StartTime < Clock.CurrentTime; });
-                if (drawHitList.Any())
-                {
-                    drawHitList.Last().Colour = Colour4.Red;
-                }
             }
         }
 
@@ -128,7 +120,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     using (circle.BeginAbsoluteSequence(circle.HitStateUpdateTime))
                     {
                         circle.ApproachCircle
-                              .FadeOutFromOne(HIT_OBJECT_FADE_OUT_EXTENSION * 4)
+                              .FadeOutFromOne()
                               .Expire();
 
                         circle.ApproachCircle.ScaleTo(1.1f, 300, Easing.OutQuint);
@@ -155,7 +147,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         hitObject.RemoveTransform(existing);
 
                         using (hitObject.BeginAbsoluteSequence(hitObject.HitStateUpdateTime))
-                            hitObject.FadeOut(HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
+                            hitObject.FadeOut().Expire();
                         break;
                 }
             }
