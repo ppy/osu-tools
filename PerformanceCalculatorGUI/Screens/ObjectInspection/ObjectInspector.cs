@@ -55,7 +55,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private EditorClock clock;
         private Container inspectContainer;
 
-        private DebugValueList values;
+        private ObjectDifficultyValuesContainer values;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -127,7 +127,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 RelativeSizeAxes = Axes.Both,
                 Children = new Drawable[]
                 {
-                    values = new DebugValueList() { Clock = clock },
+                    values = new ObjectDifficultyValuesContainer() { Clock = clock },
                     new Container
                     {
                             Name = "Bottom bar",

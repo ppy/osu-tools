@@ -23,7 +23,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;
         [Resolved]
-        private DebugValueList debugValueList { get; set; }
+        private ObjectDifficultyValuesContainer debugValueList { get; set; }
 
         private DifficultyHitObject lasthit;
 
@@ -52,7 +52,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
         }
 
-        public void UpdateDebugList(DebugValueList valueList, DifficultyHitObject curDiffHit)
+        public void UpdateDebugList(ObjectDifficultyValuesContainer valueList, DifficultyHitObject curDiffHit)
         {
             CatchDifficultyHitObject catchDiffHit = (CatchDifficultyHitObject)curDiffHit;
             string groupName = catchDiffHit.BaseObject.GetType().Name;

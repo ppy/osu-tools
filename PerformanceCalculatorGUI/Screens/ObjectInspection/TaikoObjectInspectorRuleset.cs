@@ -24,7 +24,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private DebugValueList debugValueList { get; set; }
+        private ObjectDifficultyValuesContainer debugValueList { get; set; }
 
         private DifficultyHitObject lasthit;
 
@@ -52,7 +52,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
         }
 
-        protected void UpdateDebugList(DebugValueList valueList, DifficultyHitObject curDiffHit)
+        protected void UpdateDebugList(ObjectDifficultyValuesContainer valueList, DifficultyHitObject curDiffHit)
         {
             TaikoDifficultyHitObject taikoDiffHit = (TaikoDifficultyHitObject)curDiffHit;
 
