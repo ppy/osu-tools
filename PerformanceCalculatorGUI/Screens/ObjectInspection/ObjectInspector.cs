@@ -9,7 +9,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
-using osu.Framework.Timing;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -57,6 +56,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private ObjectDifficultyValuesContainer values;
 
+        private Bindable<DifficultyHitObject> focusedDiffHitBind;
+
         protected override bool BlockNonPositionalInput => true;
 
         protected override bool DimMainContent => false;
@@ -87,6 +88,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             dependencies.CacheAs(editorBeatmap);
 
             beatmap.Value = processorBeatmap;
+            focusedDiffHitBind = new Bindable<DifficultyHitObject>();
 
             // Background
             AddRange(new Drawable[] {
@@ -128,9 +130,10 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
-                        values = new ObjectDifficultyValuesContainer() {
+                        values = new ObjectDifficultyValuesContainer(focusedDiffHitBind) {
                             Padding = new MarginPadding { Bottom = 5 },
                         },
+
                         new Container
                         {
                             Name = "Bottom bar",
@@ -169,6 +172,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     }
                 }
             });
+
             dependencies.CacheAs(values);
             DrawableRuleset inspectorRuleset = null;
 
@@ -185,7 +189,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             RelativeSizeAxes = Axes.Both,
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
-                        inspectorRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator, processorBeatmap.Track.Rate)
+                        inspectorRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator, processorBeatmap.Track.Rate,focusedDiffHitBind)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -198,7 +202,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     RelativeSizeAxes = Axes.Both,
                     Margin = new MarginPadding(10) { Left = 0, Bottom = bottom_bar_height },
                     Child = inspectorRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
-                        processorBeatmap.Track.Rate)
+                        processorBeatmap.Track.Rate, focusedDiffHitBind)
                     {
                         RelativeSizeAxes = Axes.Both,
                         Clock = clock,
@@ -230,7 +234,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                                 new Box { RelativeSizeAxes = Axes.Both },
                             }
                         },
-                        inspectorRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator, processorBeatmap.Track.Rate)
+                        inspectorRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator, processorBeatmap.Track.Rate,focusedDiffHitBind)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -252,17 +256,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             ruleset.BindValueChanged(_ => PopOut());
             beatmap.BindValueChanged(_ => PopOut());
-        }
-
-        public static DifficultyHitObject GetCurrentHit(Playfield field, DifficultyHitObject[] difficultyHitObjects, DifficultyHitObject lasthit, IFrameBasedClock clock)
-        {
-            var hitList = difficultyHitObjects.Where(hit => { return hit.StartTime < clock.CurrentTime; });
-            if (hitList.Any() && !(hitList.Last() == lasthit))
-            {
-                DifficultyHitObject curhit = hitList.Last();
-                return curhit;
-            }
-            return null;
         }
 
         protected override void Update()

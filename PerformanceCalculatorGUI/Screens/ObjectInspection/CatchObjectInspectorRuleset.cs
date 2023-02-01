@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
@@ -27,11 +28,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private DifficultyHitObject lasthit;
 
-        public CatchObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedCatchDifficultyCalculator difficultyCalculator, double clockRate)
+        private Bindable<DifficultyHitObject> focusedDiffHitBind;
+
+        public CatchObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedCatchDifficultyCalculator difficultyCalculator, double clockRate, Bindable<DifficultyHitObject> diffHitBind)
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
                                                        .Select(x => (CatchDifficultyHitObject)x).ToArray();
+            focusedDiffHitBind = diffHitBind;
+            focusedDiffHitBind.ValueChanged += (ValueChangedEvent<DifficultyHitObject> newHit) => UpdateDebugList(debugValueList, newHit.NewValue);
         }
 
         public override bool PropagatePositionalInputSubTree => false;
@@ -43,16 +48,19 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         protected override void Update()
         {
             base.Update();
-            var returnedhit = ObjectInspector.GetCurrentHit(Playfield, difficultyHitObjects, lasthit, Clock);
-            if (returnedhit != null)
+            var hitList = difficultyHitObjects.Where(hit => hit.StartTime < Clock.CurrentTime);
+            if (hitList.Any() && hitList.Last() != lasthit)
             {
-                lasthit = returnedhit;
-                UpdateDebugList(debugValueList, lasthit);
+                lasthit = hitList.Last();
+                focusedDiffHitBind.Value = lasthit;
             }
+            focusedDiffHitBind.Value = null;
         }
 
         public void UpdateDebugList(ObjectDifficultyValuesContainer valueList, DifficultyHitObject curDiffHit)
         {
+            if (curDiffHit == null) return;
+
             CatchDifficultyHitObject catchDiffHit = (CatchDifficultyHitObject)curDiffHit;
             string groupName = catchDiffHit.BaseObject.GetType().Name;
             valueList.AddGroup(groupName, new string[] { "Fruit", "Droplet" });

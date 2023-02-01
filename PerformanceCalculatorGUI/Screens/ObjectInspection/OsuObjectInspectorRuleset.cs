@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
@@ -30,21 +31,26 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private DifficultyHitObject lasthit;
 
-        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
+        private Bindable<DifficultyHitObject> focusedDiffHitBind;
+
+        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate, Bindable<DifficultyHitObject> diffHitBind)
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
+            focusedDiffHitBind = diffHitBind;
+            focusedDiffHitBind.ValueChanged += (ValueChangedEvent<DifficultyHitObject> newHit) => UpdateDebugList(debugValueList, newHit.NewValue);
         }
 
         protected override void Update()
         {
             base.Update();
-            var returnedhit = ObjectInspector.GetCurrentHit(Playfield, difficultyHitObjects, lasthit, Clock);
-            if (returnedhit != null)
+            var hitList = difficultyHitObjects.Where(hit => hit.StartTime < Clock.CurrentTime);
+            if (hitList.Any() && hitList.Last() != lasthit)
             {
-                lasthit = returnedhit;
-                UpdateDebugList(debugValueList, lasthit);
+                lasthit = hitList.Last();
+                focusedDiffHitBind.Value = lasthit;
             }
+            focusedDiffHitBind.Value = null;
         }
 
         public override bool PropagatePositionalInputSubTree => false;
@@ -55,6 +61,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public void UpdateDebugList(ObjectDifficultyValuesContainer valueList, DifficultyHitObject curDiffHit)
         {
+            if (curDiffHit == null) return;
+
             OsuDifficultyHitObject osuDiffHit = (OsuDifficultyHitObject)curDiffHit;
             OsuHitObject baseHit = (OsuHitObject)osuDiffHit.BaseObject;
 

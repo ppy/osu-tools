@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
@@ -28,11 +29,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private DifficultyHitObject lasthit;
 
-        public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate)
+        private Bindable<DifficultyHitObject> focusedDiffHitBind;
+
+        public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate, Bindable<DifficultyHitObject> diffHitBind)
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
                                                        .Select(x => (TaikoDifficultyHitObject)x).ToArray();
+            focusedDiffHitBind = diffHitBind;
+            focusedDiffHitBind.ValueChanged += (ValueChangedEvent<DifficultyHitObject> newHit) => UpdateDebugList(debugValueList, newHit.NewValue);
         }
 
         public override bool PropagatePositionalInputSubTree => false;
@@ -44,23 +49,26 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         protected override void Update()
         {
             base.Update();
-            var returnedhit = ObjectInspector.GetCurrentHit(Playfield, difficultyHitObjects, lasthit, Clock);
-            if (returnedhit != null)
+            var hitList = difficultyHitObjects.Where(hit => hit.StartTime < Clock.CurrentTime);
+            if (hitList.Any() && hitList.Last() != lasthit)
             {
-                lasthit = returnedhit;
-                UpdateDebugList(debugValueList, lasthit);
+                lasthit = hitList.Last();
+                focusedDiffHitBind.Value = lasthit;
             }
+            focusedDiffHitBind.Value = null;
         }
 
         protected void UpdateDebugList(ObjectDifficultyValuesContainer valueList, DifficultyHitObject curDiffHit)
         {
+            if (curDiffHit == null) return;
+
             TaikoDifficultyHitObject taikoDiffHit = (TaikoDifficultyHitObject)curDiffHit;
 
             string groupName = taikoDiffHit.BaseObject.GetType().Name;
             valueList.AddGroup(groupName, new string[] { "Hit", "Swell", "DrumRoll" });
-            valueList.SetValue(groupName, $"Delta Time", taikoDiffHit.DeltaTime);
-            valueList.SetValue(groupName, $"Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty);
-            valueList.SetValue(groupName, $"Rhythm Ratio", taikoDiffHit.Rhythm.Ratio);
+            valueList.SetValue(groupName, "Delta Time", taikoDiffHit.DeltaTime);
+            valueList.SetValue(groupName, "Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty);
+            valueList.SetValue(groupName, "Rhythm Ratio", taikoDiffHit.Rhythm.Ratio);
             valueList.UpdateValues();
         }
 

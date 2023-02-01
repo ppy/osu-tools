@@ -4,25 +4,32 @@
 using System;
 using System.Collections.Generic;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
+using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class ObjectDifficultyValuesContainer : Container
     {
-        protected Dictionary<string, Dictionary<string, object>> InternalDict;
+        public Dictionary<string, Dictionary<string, object>> InfoDictionary;
+
         private Box bgBox;
         private TextFlowContainer flowContainer;
+        private Bindable<DifficultyHitObject> focusedDiffHit = new Bindable<DifficultyHitObject>();
 
-        public ObjectDifficultyValuesContainer()
+        public ObjectDifficultyValuesContainer(Bindable<DifficultyHitObject> diffHitBind)
         {
-            InternalDict = new Dictionary<string, Dictionary<string, object>>();
+            focusedDiffHit.BindTo(diffHitBind);
+            focusedDiffHit.ValueChanged += (ValueChangedEvent<DifficultyHitObject> hit) => UpdateValues();
+
+            InfoDictionary = new Dictionary<string, Dictionary<string, object>>();
             RelativeSizeAxes = Axes.Y;
             Width = 215;
         }
@@ -54,7 +61,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public void UpdateValues()
         {
             flowContainer.Text = "";
-            foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InternalDict)
+            foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InfoDictionary)
             {
                 // Big text
                 string groupName = GroupPair.Key;
@@ -90,19 +97,19 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             overrides ??= Array.Empty<string>();
             foreach (string other in overrides)
             {
-                InternalDict.Remove(other);
+                InfoDictionary.Remove(other);
             }
-            InternalDict[name] = new Dictionary<string, object>();
+            InfoDictionary[name] = new Dictionary<string, object>();
         }
 
         public bool GroupExists(string name)
         {
-            return InternalDict.ContainsKey(name);
+            return InfoDictionary.ContainsKey(name);
         }
 
         public void SetValue(string group, string name, object value)
         {
-            InternalDict.TryGetValue(group, out var exists);
+            InfoDictionary.TryGetValue(group, out var exists);
             if (exists == null)
             {
                 AddGroup(group);
@@ -120,12 +127,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 value = new Vector2((float)(Math.Truncate(val3.X * 100) / 100), (float)Math.Truncate(val3.Y * 100) / 100);
             }
 
-            InternalDict[group][name] = value;
+            InfoDictionary[group][name] = value;
         }
 
         public object GetValue(string group, string name)
         {
-            return InternalDict[group][name];
+            return InfoDictionary[group][name];
         }
     }
 }
