@@ -35,7 +35,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
-                                                       .Select(x => (TaikoDifficultyHitObject)x).ToArray();
+                                                       .Cast<TaikoDifficultyHitObject>().ToArray();
             focusedDiffHitBind = diffHitBind;
             focusedDiffHitBind.ValueChanged += (ValueChangedEvent<DifficultyHitObject> newHit) => UpdateDebugList(debugValueList, newHit.NewValue);
         }

@@ -36,7 +36,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate, Bindable<DifficultyHitObject> diffHitBind)
             : base(ruleset, beatmap, mods)
         {
-            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
+            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
             focusedDiffHitBind = diffHitBind;
             focusedDiffHitBind.ValueChanged += (ValueChangedEvent<DifficultyHitObject> newHit) => UpdateDebugList(debugValueList, newHit.NewValue);
         }
