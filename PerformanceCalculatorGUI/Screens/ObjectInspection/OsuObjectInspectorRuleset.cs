@@ -67,27 +67,29 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             OsuHitObject baseHit = (OsuHitObject)osuDiffHit.BaseObject;
 
             string groupName = osuDiffHit.BaseObject.GetType().Name;
+            Dictionary<string, Dictionary<string, object>> infoDict = valueList.InfoDictionary.Value;
+
             valueList.AddGroup(groupName, new string[] { "Slider", "HitCircle", "Spinner" });
-            valueList.SetValue(groupName, "Position", baseHit.StackedPosition);
-            valueList.SetValue(groupName, "Strain Time", osuDiffHit.StrainTime);
-            valueList.SetValue(groupName, "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(osuDiffHit, true));
-            valueList.SetValue(groupName, "Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit));
-            valueList.SetValue(groupName, "Rhythm Diff", RhythmEvaluator.EvaluateDifficultyOf(osuDiffHit));
-            valueList.SetValue(groupName, "Flashlight Diff", FlashlightEvaluator.EvaluateDifficultyOf(osuDiffHit, false));
+            infoDict[groupName] = new Dictionary<string, object> {
+                { "Position", baseHit.StackedPosition },
+                { "Strain Time", osuDiffHit.StrainTime },
+                { "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(osuDiffHit, true) },
+                { "Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit) },
+                { "Rhythm Diff",SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit) },
+                { "Flashlight Diff", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit)},
+            };
 
             if (osuDiffHit.Angle is not null)
-                valueList.SetValue(groupName, "Angle", MathUtils.RadiansToDegrees(osuDiffHit.Angle.Value));
+                infoDict[groupName].Add("Angle", MathUtils.RadiansToDegrees(osuDiffHit.Angle.Value));
 
             if (osuDiffHit.BaseObject is Slider)
             {
-                valueList.SetValue(groupName, "FL Travel Time", FlashlightEvaluator.EvaluateDifficultyOf(osuDiffHit, false));
-                valueList.SetValue(groupName, "Travel Time", osuDiffHit.TravelTime);
-                valueList.SetValue(groupName, "Travel Distance", osuDiffHit.TravelDistance);
-                valueList.SetValue(groupName, "Min Jump Dist", osuDiffHit.MinimumJumpDistance);
-                valueList.SetValue(groupName, "Min Jump Time", osuDiffHit.MinimumJumpTime);
+                infoDict[groupName].Add("FL Travel Time", FlashlightEvaluator.EvaluateDifficultyOf(osuDiffHit, false));
+                infoDict[groupName].Add("Travel Time", osuDiffHit.TravelTime);
+                infoDict[groupName].Add("Travel Distance", osuDiffHit.TravelDistance);
+                infoDict[groupName].Add("Min Jump Dist", osuDiffHit.MinimumJumpDistance);
+                infoDict[groupName].Add("Min Jump Time", osuDiffHit.MinimumJumpTime);
             }
-
-            valueList.UpdateValues();
         }
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield

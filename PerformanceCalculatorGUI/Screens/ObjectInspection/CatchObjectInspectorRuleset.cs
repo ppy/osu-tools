@@ -34,7 +34,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
-                                                       .Select(x => (CatchDifficultyHitObject)x).ToArray();
+                                                       .Cast<CatchDifficultyHitObject>().ToArray();
             focusedDiffHitBind = diffHitBind;
             focusedDiffHitBind.ValueChanged += (ValueChangedEvent<DifficultyHitObject> newHit) => UpdateDebugList(debugValueList, newHit.NewValue);
         }
@@ -62,11 +62,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             if (curDiffHit == null) return;
 
             CatchDifficultyHitObject catchDiffHit = (CatchDifficultyHitObject)curDiffHit;
+
             string groupName = catchDiffHit.BaseObject.GetType().Name;
             valueList.AddGroup(groupName, new string[] { "Fruit", "Droplet" });
-            valueList.SetValue(groupName, "Strain Time", catchDiffHit.StrainTime);
-            valueList.SetValue(groupName, "Normalized Position", catchDiffHit.NormalizedPosition);
-            valueList.UpdateValues();
+
+            Dictionary<string, Dictionary<string, object>> infoDict = valueList.InfoDictionary.Value;
+            infoDict[groupName] = new Dictionary<string, object> {
+                { "Strain Time", catchDiffHit.StrainTime },
+                { "Normalized Position", catchDiffHit.NormalizedPosition },
+            };
         }
 
         private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield

@@ -66,10 +66,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             string groupName = taikoDiffHit.BaseObject.GetType().Name;
             valueList.AddGroup(groupName, new string[] { "Hit", "Swell", "DrumRoll" });
-            valueList.SetValue(groupName, "Delta Time", taikoDiffHit.DeltaTime);
-            valueList.SetValue(groupName, "Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty);
-            valueList.SetValue(groupName, "Rhythm Ratio", taikoDiffHit.Rhythm.Ratio);
-            valueList.UpdateValues();
+
+            Dictionary<string, Dictionary<string, object>> infoDict = valueList.InfoDictionary.Value;
+            infoDict[groupName] = new Dictionary<string, object> {
+                { "Delta Time", taikoDiffHit.DeltaTime },
+                { "Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty },
+                { "Rhythm Ratio", taikoDiffHit.Rhythm.Ratio }
+            };
         }
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield

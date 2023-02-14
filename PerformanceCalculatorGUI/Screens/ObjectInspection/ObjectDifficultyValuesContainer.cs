@@ -18,18 +18,21 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class ObjectDifficultyValuesContainer : Container
     {
-        public Dictionary<string, Dictionary<string, object>> InfoDictionary;
+        public Bindable<Dictionary<string, Dictionary<string, object>>> InfoDictionary;
 
         private Box bgBox;
         private TextFlowContainer flowContainer;
-        private Bindable<DifficultyHitObject> focusedDiffHit = new Bindable<DifficultyHitObject>();
+        private Bindable<DifficultyHitObject> focusedDiffHit = new();
 
         public ObjectDifficultyValuesContainer(Bindable<DifficultyHitObject> diffHitBind)
         {
             focusedDiffHit.BindTo(diffHitBind);
-            focusedDiffHit.ValueChanged += (ValueChangedEvent<DifficultyHitObject> hit) => UpdateValues();
+            focusedDiffHit.ValueChanged += (ValueChangedEvent<DifficultyHitObject> _) => UpdateValues();
 
-            InfoDictionary = new Dictionary<string, Dictionary<string, object>>();
+            InfoDictionary = new Bindable<Dictionary<string, Dictionary<string, object>>>
+            {
+                Value = new Dictionary<string, Dictionary<string, object>>()
+            };
             RelativeSizeAxes = Axes.Y;
             Width = 215;
         }
@@ -61,14 +64,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public void UpdateValues()
         {
             flowContainer.Text = "";
-            foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InfoDictionary)
+            foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InfoDictionary.Value)
             {
                 // Big text
                 string groupName = GroupPair.Key;
                 Dictionary<string, object> groupDict = GroupPair.Value;
                 flowContainer.AddText($"- {GroupPair.Key}\n", t =>
                 {
-                    t.Font = OsuFont.Torus.With(weight: "Bold", size: 28);
+                    t.Font = OsuFont.Torus.With(size: 28, weight: "Bold");
                     t.Colour = Colour4.Pink;
                     t.Shadow = true;
                 });
@@ -77,14 +80,29 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     flowContainer.AddText($"   {ValuePair.Key}:\n", t =>
                     {
-                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold", size: 21);
+                        t.Font = OsuFont.TorusAlternate.With(size: 21, weight: "SemiBold");
                         t.Colour = Colour4.White;
                         t.Shadow = true;
                         t.Truncate = true;
                     });
-                    flowContainer.AddText($"     -> {ValuePair.Value}\n\n", t =>
+
+                    // value formatting
+                    object value = ValuePair.Value;
+                    if (value is double val)
                     {
-                        t.Font = OsuFont.TorusAlternate.With(weight: "SemiBold", size: 21);
+                        value = Math.Truncate(val * 1000) / 1000;
+                    }
+                    if (value is float val2)
+                    {
+                        value = Math.Truncate(val2 * 1000) / 1000;
+                    }
+                    if (value is Vector2 val3)
+                    {
+                        value = new Vector2((float)(Math.Truncate(val3.X * 100) / 100), (float)Math.Truncate(val3.Y * 100) / 100);
+                    }
+                    flowContainer.AddText($"     -> {value}\n\n", t =>
+                    {
+                        t.Font = OsuFont.TorusAlternate.With(size: 21, weight: "SemiBold");
                         t.Colour = Colour4.White;
                         t.Shadow = true;
                     });
@@ -97,19 +115,19 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             overrides ??= Array.Empty<string>();
             foreach (string other in overrides)
             {
-                InfoDictionary.Remove(other);
+                InfoDictionary.Value.Remove(other);
             }
-            InfoDictionary[name] = new Dictionary<string, object>();
+            InfoDictionary.Value[name] = new Dictionary<string, object>();
         }
 
         public bool GroupExists(string name)
         {
-            return InfoDictionary.ContainsKey(name);
+            return InfoDictionary.Value.ContainsKey(name);
         }
 
         public void SetValue(string group, string name, object value)
         {
-            InfoDictionary.TryGetValue(group, out var exists);
+            InfoDictionary.Value.TryGetValue(group, out var exists);
             if (exists == null)
             {
                 AddGroup(group);
@@ -127,12 +145,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 value = new Vector2((float)(Math.Truncate(val3.X * 100) / 100), (float)Math.Truncate(val3.Y * 100) / 100);
             }
 
-            InfoDictionary[group][name] = value;
+            InfoDictionary.Value[group][name] = value;
         }
 
         public object GetValue(string group, string name)
         {
-            return InfoDictionary[group][name];
+            return InfoDictionary.Value[group][name];
         }
     }
 }
