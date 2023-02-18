@@ -51,7 +51,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private readonly ProcessorWorkingBeatmap processorBeatmap;
         private EditorClock clock;
-        private Container inspectContainer;
+        private Container layout;
+        private Container rulesetContainer;
 
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
 
@@ -86,100 +87,78 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             beatmap.Value = processorBeatmap;
 
-            // Background
-            AddRange(new Drawable[]
+            AddInternal(layout = new Container
             {
-                new Container
+                Origin = Anchor.Centre,
+                Anchor = Anchor.Centre,
+                Masking = true,
+                CornerRadius = 15f,
+                RelativeSizeAxes = Axes.Both,
+                Children = new Drawable[]
                 {
-                    Origin = Anchor.Centre,
-                    Anchor = Anchor.Centre,
-                    CornerRadius = 15f,
-                    RelativeSizeAxes = Axes.Both,
-                    Children = new Drawable[]
+                    new Box
                     {
-                        new Box
-                        {
-                            Colour = Colour4.Black,
-                            Alpha = 0.95f,
-                            RelativeSizeAxes = Axes.Both
-                        },
-                    }
-                },
-
-                // Object Inspector Container
-                inspectContainer = new Container
-                {
-                    Origin = Anchor.Centre,
-                    Anchor = Anchor.Centre,
-                    Masking = true,
-                    CornerRadius = 15f,
-                    Padding = new MarginPadding() { Left = side_bar_width },
-                    RelativeSizeAxes = Axes.Both,
-                    Child = clock,
-                },
-
-                // layout
-                new Container
-                {
-                    Origin = Anchor.Centre,
-                    Anchor = Anchor.Centre,
-                    Masking = true,
-                    CornerRadius = 15f,
-                    RelativeSizeAxes = Axes.Both,
-                    Children = new Drawable[]
+                        Colour = Colour4.Black,
+                        Alpha = 0.95f,
+                        RelativeSizeAxes = Axes.Both
+                    },
+                    difficultyValuesContainer = new ObjectDifficultyValuesContainer
                     {
-                        difficultyValuesContainer = new ObjectDifficultyValuesContainer
+                        Padding = new MarginPadding { Bottom = bottom_bar_height },
+                        Width = side_bar_width
+                    },
+                    rulesetContainer = new Container
+                    {
+                        Origin = Anchor.TopRight,
+                        Anchor = Anchor.TopRight,
+                        Padding = new MarginPadding { Left = side_bar_width, Bottom = bottom_bar_height },
+                        RelativeSizeAxes = Axes.Both
+                    },
+                    new Container
+                    {
+                        Name = "Bottom bar",
+                        Anchor = Anchor.BottomLeft,
+                        Origin = Anchor.BottomLeft,
+                        RelativeSizeAxes = Axes.X,
+                        Height = bottom_bar_height,
+                        Children = new Drawable[]
                         {
-                            Padding = new MarginPadding { Bottom = 5 }
-                        },
-
-                        new Container
-                        {
-                            Name = "Bottom bar",
-                            Anchor = Anchor.BottomLeft,
-                            Origin = Anchor.BottomLeft,
-                            RelativeSizeAxes = Axes.X,
-                            Height = bottom_bar_height,
-                            Children = new Drawable[]
+                            new Box
                             {
-                                new Box
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = colourProvider.Background4,
+                            },
+                            new GridContainer
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                ColumnDimensions = new[]
                                 {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Colour = colourProvider.Background4,
+                                    new Dimension(GridSizeMode.Absolute, 170),
+                                    new Dimension(),
+                                    new Dimension(GridSizeMode.Absolute, 220)
                                 },
-                                new GridContainer
+                                Content = new[]
                                 {
-                                    RelativeSizeAxes = Axes.Both,
-                                    ColumnDimensions = new[]
+                                    new Drawable[]
                                     {
-                                        new Dimension(GridSizeMode.Absolute, 170),
-                                        new Dimension(),
-                                        new Dimension(GridSizeMode.Absolute, 220)
+                                        new TimeInfoContainer { RelativeSizeAxes = Axes.Both },
+                                        new SummaryTimeline { RelativeSizeAxes = Axes.Both },
+                                        new PlaybackControl { RelativeSizeAxes = Axes.Both },
                                     },
-                                    Content = new[]
-                                    {
-                                        new Drawable[]
-                                        {
-                                            new TimeInfoContainer { RelativeSizeAxes = Axes.Both },
-                                            new SummaryTimeline { RelativeSizeAxes = Axes.Both },
-                                            new PlaybackControl { RelativeSizeAxes = Axes.Both },
-                                        },
-                                    }
                                 }
                             }
-                        },
-                    }
+                        }
+                    },
+                    clock
                 }
             });
-
             dependencies.CacheAs(difficultyValuesContainer);
 
-            inspectContainer.Add(ruleset.Value.ShortName switch
+            rulesetContainer.Add(ruleset.Value.ShortName switch
             {
                 "osu" => new OsuPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
                     Children = new Drawable[]
                     {
                         new PlayfieldBorder
@@ -199,7 +178,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Margin = new MarginPadding(10) { Left = 0, Bottom = bottom_bar_height },
                     Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                         processorBeatmap.Track.Rate)
                     {
@@ -211,7 +189,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 "fruits" => new CatchPlayfieldAdjustmentContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Margin = new MarginPadding(10) { Bottom = bottom_bar_height },
                     Y = 100,
                     Children = new Drawable[]
                     {

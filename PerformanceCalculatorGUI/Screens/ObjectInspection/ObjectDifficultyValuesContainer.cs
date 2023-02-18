@@ -39,8 +39,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public ObjectDifficultyValuesContainer()
         {
-            CurrentDifficultyHitObject.ValueChanged += h => updateValues(h.NewValue);
-
             infoDictionary = new Dictionary<string, Dictionary<string, object>>();
             RelativeSizeAxes = Axes.Y;
             Width = 215;
@@ -70,6 +68,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     },
                 },
             };
+
+            CurrentDifficultyHitObject.ValueChanged += h => updateValues(h.NewValue);
         }
 
         private void updateValues(DifficultyHitObject hitObject)
