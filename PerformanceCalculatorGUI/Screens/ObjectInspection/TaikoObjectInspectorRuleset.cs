@@ -31,7 +31,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private Bindable<DifficultyHitObject> focusedDiffHitBind;
 
-        public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate, Bindable<DifficultyHitObject> diffHitBind)
+        public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate,
+                                           Bindable<DifficultyHitObject> diffHitBind)
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
@@ -50,11 +51,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             base.Update();
             var hitList = difficultyHitObjects.Where(hit => hit.StartTime < Clock.CurrentTime);
+
             if (hitList.Any() && hitList.Last() != lasthit)
             {
                 lasthit = hitList.Last();
                 focusedDiffHitBind.Value = lasthit;
             }
+
             focusedDiffHitBind.Value = null;
         }
 
@@ -68,7 +71,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             valueList.AddGroup(groupName, new string[] { "Hit", "Swell", "DrumRoll" });
 
             Dictionary<string, Dictionary<string, object>> infoDict = valueList.InfoDictionary.Value;
-            infoDict[groupName] = new Dictionary<string, object> {
+            infoDict[groupName] = new Dictionary<string, object>
+            {
                 { "Delta Time", taikoDiffHit.DeltaTime },
                 { "Rhythm Difficulty", taikoDiffHit.Rhythm.Difficulty },
                 { "Rhythm Ratio", taikoDiffHit.Rhythm.Ratio }

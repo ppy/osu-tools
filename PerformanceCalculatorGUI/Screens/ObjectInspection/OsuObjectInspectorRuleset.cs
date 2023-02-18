@@ -33,7 +33,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private Bindable<DifficultyHitObject> focusedDiffHitBind;
 
-        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate, Bindable<DifficultyHitObject> diffHitBind)
+        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate,
+                                         Bindable<DifficultyHitObject> diffHitBind)
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
@@ -45,11 +46,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             base.Update();
             var hitList = difficultyHitObjects.Where(hit => hit.StartTime < Clock.CurrentTime);
+
             if (hitList.Any() && hitList.Last() != lasthit)
             {
                 lasthit = hitList.Last();
                 focusedDiffHitBind.Value = lasthit;
             }
+
             focusedDiffHitBind.Value = null;
         }
 
@@ -70,13 +73,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             Dictionary<string, Dictionary<string, object>> infoDict = valueList.InfoDictionary.Value;
 
             valueList.AddGroup(groupName, new string[] { "Slider", "HitCircle", "Spinner" });
-            infoDict[groupName] = new Dictionary<string, object> {
+            infoDict[groupName] = new Dictionary<string, object>
+            {
                 { "Position", baseHit.StackedPosition },
                 { "Strain Time", osuDiffHit.StrainTime },
                 { "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(osuDiffHit, true) },
                 { "Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit) },
-                { "Rhythm Diff",SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit) },
-                { "Flashlight Diff", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit)},
+                { "Rhythm Diff", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit) },
+                { "Flashlight Diff", SpeedEvaluator.EvaluateDifficultyOf(osuDiffHit) },
             };
 
             if (osuDiffHit.Angle is not null)

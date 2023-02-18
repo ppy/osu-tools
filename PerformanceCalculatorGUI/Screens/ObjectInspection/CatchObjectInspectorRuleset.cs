@@ -30,7 +30,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private Bindable<DifficultyHitObject> focusedDiffHitBind;
 
-        public CatchObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedCatchDifficultyCalculator difficultyCalculator, double clockRate, Bindable<DifficultyHitObject> diffHitBind)
+        public CatchObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedCatchDifficultyCalculator difficultyCalculator, double clockRate,
+                                           Bindable<DifficultyHitObject> diffHitBind)
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
@@ -49,11 +50,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             base.Update();
             var hitList = difficultyHitObjects.Where(hit => hit.StartTime < Clock.CurrentTime);
+
             if (hitList.Any() && hitList.Last() != lasthit)
             {
                 lasthit = hitList.Last();
                 focusedDiffHitBind.Value = lasthit;
             }
+
             focusedDiffHitBind.Value = null;
         }
 
@@ -67,7 +70,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             valueList.AddGroup(groupName, new string[] { "Fruit", "Droplet" });
 
             Dictionary<string, Dictionary<string, object>> infoDict = valueList.InfoDictionary.Value;
-            infoDict[groupName] = new Dictionary<string, object> {
+            infoDict[groupName] = new Dictionary<string, object>
+            {
                 { "Strain Time", catchDiffHit.StrainTime },
                 { "Normalized Position", catchDiffHit.NormalizedPosition },
             };

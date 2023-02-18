@@ -24,6 +24,7 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
+using osuTK;
 using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -91,14 +92,16 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             focusedDiffHitBind = new Bindable<DifficultyHitObject>();
 
             // Background
-            AddRange(new Drawable[] {
+            AddRange(new Drawable[]
+            {
                 new Container
                 {
                     Origin = Anchor.Centre,
                     Anchor = Anchor.Centre,
                     CornerRadius = 15f,
                     RelativeSizeAxes = Axes.Both,
-                    Children = new Drawable[] {
+                    Children = new Drawable[]
+                    {
                         new Box
                         {
                             Colour = Colour4.Black,
@@ -130,7 +133,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
-                        values = new ObjectDifficultyValuesContainer(focusedDiffHitBind) {
+                        values = new ObjectDifficultyValuesContainer(focusedDiffHitBind)
+                        {
                             Padding = new MarginPadding { Bottom = 5 },
                         },
 
@@ -189,7 +193,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             RelativeSizeAxes = Axes.Both,
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
-                        inspectorRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator, processorBeatmap.Track.Rate,focusedDiffHitBind)
+                        inspectorRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
+                            processorBeatmap.Track.Rate, focusedDiffHitBind)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -217,24 +222,27 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Children = new Drawable[]
                     {
                         // guideline bar
-                        new Container{
+                        new Container
+                        {
                             RelativeSizeAxes = Axes.X,
                             Height = 3,
                             Y = 300,
                             Colour = Colour4.Red,
-                            Children = new Drawable[]{
+                            Children = new Drawable[]
+                            {
                                 // shadow
-                                new Circle{Colour = Colour4.Gray, Size = new osuTK.Vector2(10), Y = -3.3f+2, X = -5 },
-                                new Box{ Colour = Colour4.Gray,Size = new osuTK.Vector2(5,20), Y = -8.3f+2, X = 508 },
-                                new Box { Colour = Colour4.Gray, RelativeSizeAxes = Axes.Both, Y = 2},
+                                new Circle { Colour = Colour4.Gray, Size = new Vector2(10), Y = -3.3f + 2, X = -5 },
+                                new Box { Colour = Colour4.Gray, Size = new Vector2(5, 20), Y = -8.3f + 2, X = 508 },
+                                new Box { Colour = Colour4.Gray, RelativeSizeAxes = Axes.Both, Y = 2 },
 
                                 // main
-                                new Circle{ Size = new osuTK.Vector2(10), Y = -3.3f, X = -5 },
-                                new Box{ Size = new osuTK.Vector2(5,20), Y = -8.3f, X = 508 },
+                                new Circle { Size = new Vector2(10), Y = -3.3f, X = -5 },
+                                new Box { Size = new Vector2(5, 20), Y = -8.3f, X = 508 },
                                 new Box { RelativeSizeAxes = Axes.Both },
                             }
                         },
-                        inspectorRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator, processorBeatmap.Track.Rate,focusedDiffHitBind)
+                        inspectorRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
+                            processorBeatmap.Track.Rate, focusedDiffHitBind)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -289,6 +297,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             var amt = 0.25;
             amt = e.ControlPressed ? amt * 2 : amt;
             amt = e.ShiftPressed ? amt * 0.5 : amt;
+
             if (e.Key == Key.Q)
             {
                 clock.SeekBackward(amount: amt);
