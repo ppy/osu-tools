@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -14,9 +16,11 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
@@ -28,6 +32,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     {
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; }
+
+        [Resolved]
+        private Bindable<IReadOnlyList<Mod>> appliedMods { get; set; }
 
         private SpriteText hitObjectTypeText;
 
@@ -120,6 +127,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private void drawOsuValues(OsuDifficultyHitObject hitObject)
         {
+            var hidden = appliedMods.Value.Any(x => x is ModHidden);
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),
@@ -127,7 +135,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 new ObjectInspectorDifficultyValue("Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(hitObject, true)),
                 new ObjectInspectorDifficultyValue("Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Rhythm Diff", RhythmEvaluator.EvaluateDifficultyOf(hitObject)),
-                new ObjectInspectorDifficultyValue("Flashlight Diff", FlashlightEvaluator.EvaluateDifficultyOf(hitObject, false)),
+                new ObjectInspectorDifficultyValue(hidden ? "FLHD Difficulty" : "Flashlight Diff", FlashlightEvaluator.EvaluateDifficultyOf(hitObject, hidden)),
             });
 
             if (hitObject.Angle is not null)
@@ -137,7 +145,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 flowContainer.AddRange(new[]
                 {
-                    new ObjectInspectorDifficultyValue("FL Travel Time", FlashlightEvaluator.EvaluateDifficultyOf(hitObject, false)),
                     new ObjectInspectorDifficultyValue("Travel Time", hitObject.TravelTime),
                     new ObjectInspectorDifficultyValue("Travel Distance", hitObject.TravelDistance),
                     new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
