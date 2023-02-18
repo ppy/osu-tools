@@ -51,7 +51,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private readonly ProcessorWorkingBeatmap processorBeatmap;
         private EditorClock clock;
-        private Container layout;
         private Container rulesetContainer;
 
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
@@ -62,7 +61,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private const int bottom_bar_height = 50;
 
-        private const int side_bar_width = 215;
+        private const int side_bar_width = 220;
 
         public ObjectInspector(ProcessorWorkingBeatmap working)
         {
@@ -87,7 +86,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             beatmap.Value = processorBeatmap;
 
-            AddInternal(layout = new Container
+            AddInternal(new Container
             {
                 Origin = Anchor.Centre,
                 Anchor = Anchor.Centre,
@@ -104,6 +103,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     },
                     difficultyValuesContainer = new ObjectDifficultyValuesContainer
                     {
+                        RelativeSizeAxes = Axes.Y,
                         Padding = new MarginPadding { Bottom = bottom_bar_height },
                         Width = side_bar_width
                     },
