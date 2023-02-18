@@ -24,7 +24,6 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
-using osuTK;
 using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -178,7 +177,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             });
 
             dependencies.CacheAs(values);
-            DrawableRuleset inspectorRuleset = null;
 
             inspectContainer.Add(ruleset.Value.ShortName switch
             {
@@ -193,7 +191,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             RelativeSizeAxes = Axes.Both,
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
-                        inspectorRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
+                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
                             processorBeatmap.Track.Rate, focusedDiffHitBind)
                         {
                             RelativeSizeAxes = Axes.Both,
@@ -206,7 +204,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     RelativeSizeAxes = Axes.Both,
                     Margin = new MarginPadding(10) { Left = 0, Bottom = bottom_bar_height },
-                    Child = inspectorRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
+                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                         processorBeatmap.Track.Rate, focusedDiffHitBind)
                     {
                         RelativeSizeAxes = Axes.Both,
@@ -221,27 +219,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Y = 100,
                     Children = new Drawable[]
                     {
-                        // guideline bar
-                        new Container
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            Height = 3,
-                            Y = 300,
-                            Colour = Colour4.Red,
-                            Children = new Drawable[]
-                            {
-                                // shadow
-                                new Circle { Colour = Colour4.Gray, Size = new Vector2(10), Y = -3.3f + 2, X = -5 },
-                                new Box { Colour = Colour4.Gray, Size = new Vector2(5, 20), Y = -8.3f + 2, X = 508 },
-                                new Box { Colour = Colour4.Gray, RelativeSizeAxes = Axes.Both, Y = 2 },
-
-                                // main
-                                new Circle { Size = new Vector2(10), Y = -3.3f, X = -5 },
-                                new Box { Size = new Vector2(5, 20), Y = -8.3f, X = 508 },
-                                new Box { RelativeSizeAxes = Axes.Both },
-                            }
-                        },
-                        inspectorRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
+                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
                             processorBeatmap.Track.Rate, focusedDiffHitBind)
                         {
                             RelativeSizeAxes = Axes.Both,

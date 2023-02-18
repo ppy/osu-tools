@@ -40,21 +40,23 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colors)
         {
-            Children = new Drawable[]{
+            Children = new Drawable[]
+            {
                 bgBox = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = colors.Background5,
                     Alpha = 0.95f,
                 },
-                new OsuScrollContainer() {
+                new OsuScrollContainer()
+                {
                     RelativeSizeAxes = Axes.Both,
                     ScrollbarAnchor = Anchor.TopLeft,
                     Child = flowContainer = new TextFlowContainer()
                     {
                         AutoSizeAxes = Axes.Both,
                         Masking = false,
-                        Margin = new MarginPadding {Left = 15},
+                        Margin = new MarginPadding { Left = 15 },
                         Origin = Anchor.TopLeft,
                     },
                 },
@@ -64,6 +66,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public void UpdateValues()
         {
             flowContainer.Text = "";
+
             foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InfoDictionary.Value)
             {
                 // Big text
@@ -88,18 +91,22 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
                     // value formatting
                     object value = ValuePair.Value;
+
                     if (value is double val)
                     {
                         value = Math.Truncate(val * 1000) / 1000;
                     }
+
                     if (value is float val2)
                     {
                         value = Math.Truncate(val2 * 1000) / 1000;
                     }
+
                     if (value is Vector2 val3)
                     {
                         value = new Vector2((float)(Math.Truncate(val3.X * 100) / 100), (float)Math.Truncate(val3.Y * 100) / 100);
                     }
+
                     flowContainer.AddText($"     -> {value}\n\n", t =>
                     {
                         t.Font = OsuFont.TorusAlternate.With(size: 21, weight: "SemiBold");
@@ -113,10 +120,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public void AddGroup(string name, string[] overrides = null)
         {
             overrides ??= Array.Empty<string>();
+
             foreach (string other in overrides)
             {
                 InfoDictionary.Value.Remove(other);
             }
+
             InfoDictionary.Value[name] = new Dictionary<string, object>();
         }
 
@@ -128,18 +137,22 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public void SetValue(string group, string name, object value)
         {
             InfoDictionary.Value.TryGetValue(group, out var exists);
+
             if (exists == null)
             {
                 AddGroup(group);
             }
+
             if (value is double val)
             {
                 value = Math.Truncate(val * 1000) / 1000;
             }
+
             if (value is float val2)
             {
                 value = Math.Truncate(val2 * 1000) / 1000;
             }
+
             if (value is Vector2 val3)
             {
                 value = new Vector2((float)(Math.Truncate(val3.X * 100) / 100), (float)Math.Truncate(val3.Y * 100) / 100);

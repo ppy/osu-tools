@@ -5,16 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
+using osu.Game.Graphics;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Catch.Edit;
-using osu.Game.Rulesets.Catch.Objects;
-using osu.Game.Rulesets.Catch.Objects.Drawables;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -44,7 +45,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
-        protected override Playfield CreatePlayfield() => new CatchObjectInspectorPlayfield(Beatmap.Difficulty, difficultyHitObjects);
+        protected override Playfield CreatePlayfield() => new CatchObjectInspectorPlayfield(Beatmap.Difficulty);
 
         protected override void Update()
         {
@@ -79,48 +80,25 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
         {
-            private readonly IReadOnlyList<CatchDifficultyHitObject> difficultyHitObjects;
-
             protected override GameplayCursorContainer CreateCursor() => null;
 
-            public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty, IReadOnlyList<CatchDifficultyHitObject> difficultyHitObjects)
+            public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty)
                 : base(difficulty)
             {
-                this.difficultyHitObjects = difficultyHitObjects;
                 DisplayJudgements.Value = false;
-            }
-
-            [BackgroundDependencyLoader]
-            private void load()
-            {
-                foreach (var dho in difficultyHitObjects)
+                AddInternal(new Container
                 {
-                    HitObjectContainer.Add(new CatchInspectorDrawableHitObject(dho));
-                }
-            }
-
-            private partial class CatchInspectorDrawableHitObject : DrawableCatchHitObject
-            {
-                private readonly CatchDifficultyHitObject dho;
-
-                public CatchInspectorDrawableHitObject(CatchDifficultyHitObject dho)
-                    : base(new CatchInspectorHitObject(dho.BaseObject))
-                {
-                    this.dho = dho;
-                }
-
-                [BackgroundDependencyLoader]
-                private void load()
-                {
-                }
-
-                private class CatchInspectorHitObject : CatchHitObject
-                {
-                    public CatchInspectorHitObject(HitObject obj)
+                    RelativeSizeAxes = Axes.X,
+                    Y = 440,
+                    Height = 6.0f,
+                    CornerRadius = 4.0f,
+                    Masking = true,
+                    Child = new Box
                     {
-                        StartTime = obj.StartTime;
+                        Colour = OsuColour.Gray(0.5f),
+                        RelativeSizeAxes = Axes.Both
                     }
-                }
+                });
             }
         }
     }
