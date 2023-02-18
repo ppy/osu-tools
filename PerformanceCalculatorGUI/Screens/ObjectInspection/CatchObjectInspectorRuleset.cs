@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -14,7 +13,6 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Catch.Edit;
 using osu.Game.Rulesets.Catch.UI;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 
@@ -25,20 +23,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private ObjectDifficultyValuesContainer debugValueList { get; set; }
+        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
 
-        private DifficultyHitObject lasthit;
-
-        private Bindable<DifficultyHitObject> focusedDiffHitBind;
-
-        public CatchObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedCatchDifficultyCalculator difficultyCalculator, double clockRate,
-                                           Bindable<DifficultyHitObject> diffHitBind)
+        public CatchObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedCatchDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
                                                        .Cast<CatchDifficultyHitObject>().ToArray();
-            focusedDiffHitBind = diffHitBind;
-            focusedDiffHitBind.ValueChanged += (ValueChangedEvent<DifficultyHitObject> newHit) => UpdateDebugList(debugValueList, newHit.NewValue);
         }
 
         public override bool PropagatePositionalInputSubTree => false;
@@ -50,32 +41,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         protected override void Update()
         {
             base.Update();
-            var hitList = difficultyHitObjects.Where(hit => hit.StartTime < Clock.CurrentTime);
-
-            if (hitList.Any() && hitList.Last() != lasthit)
-            {
-                lasthit = hitList.Last();
-                focusedDiffHitBind.Value = lasthit;
-            }
-
-            focusedDiffHitBind.Value = null;
-        }
-
-        public void UpdateDebugList(ObjectDifficultyValuesContainer valueList, DifficultyHitObject curDiffHit)
-        {
-            if (curDiffHit == null) return;
-
-            CatchDifficultyHitObject catchDiffHit = (CatchDifficultyHitObject)curDiffHit;
-
-            string groupName = catchDiffHit.BaseObject.GetType().Name;
-            valueList.AddGroup(groupName, new string[] { "Fruit", "Droplet" });
-
-            Dictionary<string, Dictionary<string, object>> infoDict = valueList.InfoDictionary.Value;
-            infoDict[groupName] = new Dictionary<string, object>
-            {
-                { "Strain Time", catchDiffHit.StrainTime },
-                { "Normalized Position", catchDiffHit.NormalizedPosition },
-            };
+            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
         }
 
         private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield

@@ -8,31 +8,40 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Utils;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
+using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Osu.Objects;
+using osu.Game.Rulesets.Taiko;
+using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class ObjectDifficultyValuesContainer : Container
     {
-        public Bindable<Dictionary<string, Dictionary<string, object>>> InfoDictionary;
+        [Resolved]
+        private Bindable<RulesetInfo> ruleset { get; set; }
 
-        private Box bgBox;
+        private readonly Dictionary<string, Dictionary<string, object>> infoDictionary;
+
         private TextFlowContainer flowContainer;
-        private Bindable<DifficultyHitObject> focusedDiffHit = new();
 
-        public ObjectDifficultyValuesContainer(Bindable<DifficultyHitObject> diffHitBind)
+        public Bindable<DifficultyHitObject> CurrentDifficultyHitObject { get; } = new();
+
+        public ObjectDifficultyValuesContainer()
         {
-            focusedDiffHit.BindTo(diffHitBind);
-            focusedDiffHit.ValueChanged += (ValueChangedEvent<DifficultyHitObject> _) => UpdateValues();
+            CurrentDifficultyHitObject.ValueChanged += h => updateValues(h.NewValue);
 
-            InfoDictionary = new Bindable<Dictionary<string, Dictionary<string, object>>>
-            {
-                Value = new Dictionary<string, Dictionary<string, object>>()
-            };
+            infoDictionary = new Dictionary<string, Dictionary<string, object>>();
             RelativeSizeAxes = Axes.Y;
             Width = 215;
         }
@@ -42,17 +51,17 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             Children = new Drawable[]
             {
-                bgBox = new Box
+                new Box
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = colors.Background5,
                     Alpha = 0.95f,
                 },
-                new OsuScrollContainer()
+                new OsuScrollContainer
                 {
                     RelativeSizeAxes = Axes.Both,
                     ScrollbarAnchor = Anchor.TopLeft,
-                    Child = flowContainer = new TextFlowContainer()
+                    Child = flowContainer = new TextFlowContainer
                     {
                         AutoSizeAxes = Axes.Both,
                         Masking = false,
@@ -63,16 +72,101 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             };
         }
 
-        public void UpdateValues()
+        private void updateValues(DifficultyHitObject hitObject)
+        {
+            if (hitObject == null)
+            {
+                flowContainer.Text = "";
+                return;
+            }
+
+            switch (ruleset.Value.ShortName)
+            {
+                case OsuRuleset.SHORT_NAME:
+                {
+                    drawOsuValues(hitObject as OsuDifficultyHitObject);
+                    break;
+                }
+
+                case TaikoRuleset.SHORT_NAME:
+                {
+                    drawTaikoValues(hitObject as TaikoDifficultyHitObject);
+                    break;
+                }
+
+                case CatchRuleset.SHORT_NAME:
+                {
+                    drawCatchValues(hitObject as CatchDifficultyHitObject);
+                    break;
+                }
+            }
+        }
+
+        private void drawOsuValues(OsuDifficultyHitObject hitObject)
+        {
+            var groupName = hitObject.BaseObject.GetType().Name;
+            addGroup(groupName, new[] { "Slider", "HitCircle", "Spinner" });
+            infoDictionary[groupName] = new Dictionary<string, object>
+            {
+                { "Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition },
+                { "Strain Time", hitObject.StrainTime },
+                { "Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(hitObject, true) },
+                { "Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(hitObject) },
+                { "Rhythm Diff", SpeedEvaluator.EvaluateDifficultyOf(hitObject) },
+                { "Flashlight Diff", SpeedEvaluator.EvaluateDifficultyOf(hitObject) },
+            };
+
+            if (hitObject.Angle is not null)
+                infoDictionary[groupName].Add("Angle", MathUtils.RadiansToDegrees(hitObject.Angle.Value));
+
+            if (hitObject.BaseObject is Slider)
+            {
+                infoDictionary[groupName].Add("FL Travel Time", FlashlightEvaluator.EvaluateDifficultyOf(hitObject, false));
+                infoDictionary[groupName].Add("Travel Time", hitObject.TravelTime);
+                infoDictionary[groupName].Add("Travel Distance", hitObject.TravelDistance);
+                infoDictionary[groupName].Add("Min Jump Dist", hitObject.MinimumJumpDistance);
+                infoDictionary[groupName].Add("Min Jump Time", hitObject.MinimumJumpTime);
+            }
+
+            redrawValues();
+        }
+
+        private void drawTaikoValues(TaikoDifficultyHitObject hitObject)
+        {
+            var groupName = hitObject.BaseObject.GetType().Name;
+            addGroup(groupName, new[] { "Hit", "Swell", "DrumRoll" });
+            infoDictionary[groupName] = new Dictionary<string, object>
+            {
+                { "Delta Time", hitObject.DeltaTime },
+                { "Rhythm Difficulty", hitObject.Rhythm.Difficulty },
+                { "Rhythm Ratio", hitObject.Rhythm.Ratio }
+            };
+
+            redrawValues();
+        }
+
+        private void drawCatchValues(CatchDifficultyHitObject hitObject)
+        {
+            var groupName = hitObject.BaseObject.GetType().Name;
+            addGroup(groupName, new[] { "Fruit", "Droplet" });
+            infoDictionary[groupName] = new Dictionary<string, object>
+            {
+                { "Strain Time", hitObject.StrainTime },
+                { "Normalized Position", hitObject.NormalizedPosition },
+            };
+
+            redrawValues();
+        }
+
+        private void redrawValues()
         {
             flowContainer.Text = "";
 
-            foreach (KeyValuePair<string, Dictionary<string, object>> GroupPair in InfoDictionary.Value)
+            foreach (KeyValuePair<string, Dictionary<string, object>> groupPair in infoDictionary)
             {
                 // Big text
-                string groupName = GroupPair.Key;
-                Dictionary<string, object> groupDict = GroupPair.Value;
-                flowContainer.AddText($"- {GroupPair.Key}\n", t =>
+                Dictionary<string, object> groupDict = groupPair.Value;
+                flowContainer.AddText($"- {groupPair.Key}\n", t =>
                 {
                     t.Font = OsuFont.Torus.With(size: 28, weight: "Bold");
                     t.Colour = Colour4.Pink;
@@ -117,53 +211,16 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
         }
 
-        public void AddGroup(string name, string[] overrides = null)
+        private void addGroup(string name, string[] overrides = null)
         {
             overrides ??= Array.Empty<string>();
 
             foreach (string other in overrides)
             {
-                InfoDictionary.Value.Remove(other);
+                infoDictionary.Remove(other);
             }
 
-            InfoDictionary.Value[name] = new Dictionary<string, object>();
-        }
-
-        public bool GroupExists(string name)
-        {
-            return InfoDictionary.Value.ContainsKey(name);
-        }
-
-        public void SetValue(string group, string name, object value)
-        {
-            InfoDictionary.Value.TryGetValue(group, out var exists);
-
-            if (exists == null)
-            {
-                AddGroup(group);
-            }
-
-            if (value is double val)
-            {
-                value = Math.Truncate(val * 1000) / 1000;
-            }
-
-            if (value is float val2)
-            {
-                value = Math.Truncate(val2 * 1000) / 1000;
-            }
-
-            if (value is Vector2 val3)
-            {
-                value = new Vector2((float)(Math.Truncate(val3.X * 100) / 100), (float)Math.Truncate(val3.Y * 100) / 100);
-            }
-
-            InfoDictionary.Value[group][name] = value;
-        }
-
-        public object GetValue(string group, string name)
-        {
-            return InfoDictionary.Value[group][name];
+            infoDictionary[name] = new Dictionary<string, object>();
         }
     }
 }

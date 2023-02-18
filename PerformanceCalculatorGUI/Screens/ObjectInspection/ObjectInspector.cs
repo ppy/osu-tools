@@ -16,7 +16,6 @@ using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
@@ -54,9 +53,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private EditorClock clock;
         private Container inspectContainer;
 
-        private ObjectDifficultyValuesContainer values;
-
-        private Bindable<DifficultyHitObject> focusedDiffHitBind;
+        private ObjectDifficultyValuesContainer difficultyValuesContainer;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -88,7 +85,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             dependencies.CacheAs(editorBeatmap);
 
             beatmap.Value = processorBeatmap;
-            focusedDiffHitBind = new Bindable<DifficultyHitObject>();
 
             // Background
             AddRange(new Drawable[]
@@ -132,9 +128,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
-                        values = new ObjectDifficultyValuesContainer(focusedDiffHitBind)
+                        difficultyValuesContainer = new ObjectDifficultyValuesContainer
                         {
-                            Padding = new MarginPadding { Bottom = 5 },
+                            Padding = new MarginPadding { Bottom = 5 }
                         },
 
                         new Container
@@ -176,7 +172,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             });
 
-            dependencies.CacheAs(values);
+            dependencies.CacheAs(difficultyValuesContainer);
 
             inspectContainer.Add(ruleset.Value.ShortName switch
             {
@@ -192,7 +188,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
                         new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
-                            processorBeatmap.Track.Rate, focusedDiffHitBind)
+                            processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -205,7 +201,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     RelativeSizeAxes = Axes.Both,
                     Margin = new MarginPadding(10) { Left = 0, Bottom = bottom_bar_height },
                     Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
-                        processorBeatmap.Track.Rate, focusedDiffHitBind)
+                        processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
                         Clock = clock,
@@ -220,7 +216,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Children = new Drawable[]
                     {
                         new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
-                            processorBeatmap.Track.Rate, focusedDiffHitBind)
+                            processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
