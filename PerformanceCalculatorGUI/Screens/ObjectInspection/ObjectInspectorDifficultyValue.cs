@@ -4,6 +4,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
+using osu.Game.Graphics;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -46,13 +47,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     new SpriteText
                     {
-                        Text = label
+                        Text = label,
+                        Font = OsuFont.GetFont(weight: FontWeight.SemiBold)
                     },
                     new SpriteText
                     {
                         Anchor = Anchor.CentreRight,
                         Origin = Anchor.CentreRight,
-                        Text = value
+                        Text = value,
+                        Font = OsuFont.GetFont(weight: FontWeight.Regular, fixedWidth: true)
                     }
                 }
             };

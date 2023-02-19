@@ -20,7 +20,6 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
@@ -52,7 +51,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = colors.Background5,
+                    Colour = colors.Background5
                 },
                 new OsuScrollContainer
                 {
@@ -69,6 +68,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 },
                 new Container
                 {
+                    Name = "Hit object type name container",
                     RelativeSizeAxes = Axes.X,
                     Height = hit_object_type_container_height,
                     Margin = new MarginPadding { Bottom = 10 },
@@ -143,8 +143,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (hitObject.BaseObject is Slider)
             {
-                flowContainer.AddRange(new[]
+                flowContainer.AddRange(new Drawable[]
                 {
+                    new Box
+                    {
+                        Name = "Separator",
+                        Height = 1,
+                        RelativeSizeAxes = Axes.X,
+                        Alpha = 0.5f
+                    },
                     new ObjectInspectorDifficultyValue("Travel Time", hitObject.TravelTime),
                     new ObjectInspectorDifficultyValue("Travel Distance", hitObject.TravelDistance),
                     new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
