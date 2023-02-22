@@ -245,19 +245,26 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     clock.Start();
             }
 
-            var amt = 0.25;
-            amt = e.ControlPressed ? amt * 2 : amt;
-            amt = e.ShiftPressed ? amt * 0.5 : amt;
+            double? seekTo = null;
 
             if (e.Key == Key.Q)
             {
-                clock.SeekBackward(amount: amt);
+                seekTo = beatmap.Value.GetPlayableBeatmap(ruleset.Value, mods.Value)
+                                .HitObjects
+                                .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
+                                .StartTime;
             }
 
             if (e.Key == Key.E)
             {
-                clock.SeekForward(amount: amt);
+                seekTo = beatmap.Value.GetPlayableBeatmap(ruleset.Value, mods.Value)
+                                .HitObjects
+                                .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
+                                .StartTime;
             }
+
+            if (seekTo != null)
+                clock.Seek(seekTo.Value);
 
             return base.OnKeyDown(e);
         }
