@@ -12,16 +12,12 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Utils;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
-using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
-using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osuTK;
 
@@ -29,9 +25,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class ObjectDifficultyValuesContainer : Container
     {
-        [Resolved]
-        private Bindable<RulesetInfo> ruleset { get; set; }
-
         [Resolved]
         private Bindable<IReadOnlyList<Mod>> appliedMods { get; set; }
 
@@ -103,23 +96,23 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             hitObjectTypeText.Text = hitObject.BaseObject.GetType().Name;
 
-            switch (ruleset.Value.ShortName)
+            switch (hitObject)
             {
-                case OsuRuleset.SHORT_NAME:
+                case OsuDifficultyHitObject osuDifficultyHitObject:
                 {
-                    drawOsuValues(hitObject as OsuDifficultyHitObject);
+                    drawOsuValues(osuDifficultyHitObject);
                     break;
                 }
 
-                case TaikoRuleset.SHORT_NAME:
+                case TaikoDifficultyHitObject taikoDifficultyHitObject:
                 {
-                    drawTaikoValues(hitObject as TaikoDifficultyHitObject);
+                    drawTaikoValues(taikoDifficultyHitObject);
                     break;
                 }
 
-                case CatchRuleset.SHORT_NAME:
+                case CatchDifficultyHitObject catchDifficultyHitObject:
                 {
-                    drawCatchValues(hitObject as CatchDifficultyHitObject);
+                    drawCatchValues(catchDifficultyHitObject);
                     break;
                 }
             }
