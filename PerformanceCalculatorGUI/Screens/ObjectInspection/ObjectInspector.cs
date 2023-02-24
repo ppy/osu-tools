@@ -54,6 +54,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private Container rulesetContainer;
 
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
+        private IBeatmap playableBeatmap;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -74,7 +75,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             var rulesetInstance = ruleset.Value.CreateInstance();
             var modifiedMods = mods.Value.Append(rulesetInstance.GetAutoplayMod()).ToList();
 
-            var playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
+            playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
             processorBeatmap.LoadTrack();
 
             clock = new EditorClock(playableBeatmap, beatDivisor);
@@ -247,20 +248,22 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             double? seekTo = null;
 
-            if (e.Key == Key.Q)
+            if (e.Key == Key.Left)
             {
-                seekTo = beatmap.Value.GetPlayableBeatmap(ruleset.Value, mods.Value)
-                                .HitObjects
-                                .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
-                                .StartTime;
+                seekTo = playableBeatmap.HitObjects
+                                        .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
+                                        .StartTime;
+
+                // slight leeway to make going back beyond just one object possible when the clock is running
+                if (clock.IsRunning)
+                    seekTo -= 100;
             }
 
-            if (e.Key == Key.E)
+            if (e.Key == Key.Right)
             {
-                seekTo = beatmap.Value.GetPlayableBeatmap(ruleset.Value, mods.Value)
-                                .HitObjects
-                                .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
-                                .StartTime;
+                seekTo = playableBeatmap.HitObjects
+                                        .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
+                                        .StartTime;
             }
 
             if (seekTo != null)
