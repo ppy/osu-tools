@@ -3,14 +3,13 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
@@ -19,14 +18,21 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset
     {
-        public const int HIT_OBJECT_FADE_OUT_EXTENSION = 600;
-
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
+
+        [Resolved]
+        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
 
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
         {
-            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Select(x => (OsuDifficultyHitObject)x).ToArray();
+            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
         }
 
         public override bool PropagatePositionalInputSubTree => false;
@@ -37,29 +43,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
-            private readonly OsuObjectInspectorRenderer objectRenderer;
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
-
             protected override GameplayCursorContainer CreateCursor() => null;
 
             public OsuObjectInspectorPlayfield(IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects)
             {
                 this.difficultyHitObjects = difficultyHitObjects;
                 HitPolicy = new AnyOrderHitPolicy();
-                AddInternal(objectRenderer = new OsuObjectInspectorRenderer { RelativeSizeAxes = Axes.Both });
                 DisplayJudgements.Value = false;
-            }
-
-            protected override void OnHitObjectAdded(HitObject hitObject)
-            {
-                base.OnHitObjectAdded(hitObject);
-                objectRenderer.AddDifficultyDataPanel((OsuHitObject)hitObject, difficultyHitObjects.FirstOrDefault(x => x.StartTime == hitObject.StartTime));
-            }
-
-            protected override void OnHitObjectRemoved(HitObject hitObject)
-            {
-                base.OnHitObjectRemoved(hitObject);
-                objectRenderer.RemoveDifficultyDataPanel((OsuHitObject)hitObject);
             }
 
             protected override void OnNewDrawableHitObject(DrawableHitObject d)
@@ -72,18 +63,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 if (state == ArmedState.Idle)
                     return;
 
-                if (hitObject is DrawableHitCircle circle)
-                {
-                    using (circle.BeginAbsoluteSequence(circle.HitStateUpdateTime))
-                    {
-                        circle.ApproachCircle
-                              .FadeOutFromOne(HIT_OBJECT_FADE_OUT_EXTENSION * 4)
-                              .Expire();
-
-                        circle.ApproachCircle.ScaleTo(1.1f, 300, Easing.OutQuint);
-                    }
-                }
-
                 if (hitObject is DrawableSliderRepeat repeat)
                 {
                     repeat.Arrow.ApplyTransformsAt(hitObject.StateUpdateTime, true);
@@ -95,16 +74,22 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     case DrawableSlider _:
                     case DrawableHitCircle _:
-                        // Get the existing fade out transform
-                        var existing = hitObject.Transforms.LastOrDefault(t => t.TargetMember == nameof(Alpha));
+                        var nextHitObject = difficultyHitObjects.FirstOrDefault(x => x.StartTime > hitObject.StartTimeBindable.Value)?.BaseObject;
 
-                        if (existing == null)
-                            return;
+                        if (nextHitObject != null)
+                        {
+                            // Get the existing fade out transform
+                            var existing = hitObject.Transforms.LastOrDefault(t => t.TargetMember == nameof(Alpha));
 
-                        hitObject.RemoveTransform(existing);
+                            if (existing == null)
+                                return;
 
-                        using (hitObject.BeginAbsoluteSequence(hitObject.HitStateUpdateTime))
-                            hitObject.FadeOut(HIT_OBJECT_FADE_OUT_EXTENSION).Expire();
+                            hitObject.RemoveTransform(existing);
+
+                            using (hitObject.BeginAbsoluteSequence(hitObject.StartTimeBindable.Value))
+                                hitObject.Delay(nextHitObject.StartTime - hitObject.StartTimeBindable.Value).FadeOut().Expire();
+                        }
+
                         break;
                 }
             }
