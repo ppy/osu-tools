@@ -1,7 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -13,17 +12,15 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Logging;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
-using osu.Game.Online.API;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Overlays.BeatmapSet.Scores;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
-using osu.Game.Users;
-using osu.Game.Utils;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
@@ -38,6 +35,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private GridContainer layout;
         private ScoreTable scoreTable;
+        private OsuSpriteText noScoresPlaceholder;
 
         private Container beatmapPanelContainer;
         private BeatmapCard beatmapPanel;
@@ -137,22 +135,37 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                         new Drawable[]
                         {
-                            new OsuScrollContainer
+                            new Container
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Children = new Drawable[]
                                 {
-                                    new Box
+                                    new OsuScrollContainer
                                     {
                                         RelativeSizeAxes = Axes.Both,
-                                        Colour = colourProvider.Background5
+                                        Children = new Drawable[]
+                                        {
+                                            new Box
+                                            {
+                                                RelativeSizeAxes = Axes.Both,
+                                                Colour = colourProvider.Background5
+                                            },
+                                            scoreTable = new ScoreTable
+                                            {
+                                                Anchor = Anchor.TopCentre,
+                                                Origin = Anchor.TopCentre,
+                                            }
+                                        }
                                     },
-                                    scoreTable = new ScoreTable
+                                    noScoresPlaceholder = new OsuSpriteText
                                     {
-                                        Anchor = Anchor.TopCentre,
-                                        Origin = Anchor.TopCentre,
+                                        Text = "No scores available :(",
+                                        Font = OsuFont.Default.With(size: 24, weight: FontWeight.Bold),
+                                        Anchor = Anchor.Centre,
+                                        Origin = Anchor.Centre,
+                                        Alpha = 0
                                     }
-                                }
+                                },
                             }
                         }
                     }
@@ -175,6 +188,7 @@ namespace PerformanceCalculatorGUI.Screens
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
 
+            scoreTable.Hide();
             loadingLayer.Show();
             calculationButton.State.Value = ButtonState.Loading;
 
@@ -203,13 +217,10 @@ namespace PerformanceCalculatorGUI.Screens
                     layout.RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, 40), new Dimension(GridSizeMode.AutoSize), new Dimension() };
                 });
 
-                var random = false;
+                noScoresPlaceholder.Alpha = leaderboard.Scores.Count > 0 ? 0 : 1;
 
                 if (leaderboard.Scores.Count == 0)
-                {
-                    leaderboard.Scores = generateRandomScores(working);
-                    random = true;
-                }
+                    return;
 
                 foreach (var score in leaderboard.Scores)
                 {
@@ -225,8 +236,7 @@ namespace PerformanceCalculatorGUI.Screens
                     var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
 
                     Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
-                    if (!random)
-                        mods = RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods);
+                    mods = RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods);
 
                     var difficultyAttributes = difficultyCalculator.Calculate(mods);
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
@@ -256,102 +266,6 @@ namespace PerformanceCalculatorGUI.Screens
                     calculationButton.State.Value = ButtonState.Done;
                 });
             }, token);
-        }
-
-        private List<SoloScoreInfo> generateRandomScores(ProcessorWorkingBeatmap working)
-        {
-            var scores = new List<SoloScoreInfo>();
-
-            var rng = new Random();
-
-            var rulesetInstance = ruleset.Value.CreateInstance();
-            var diffCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-
-            var allowedMods = ModUtils.FlattenMods(diffCalculator.CreateDifficultyAdjustmentModCombinations())
-                                      .Distinct()
-                                      .Where(x => x.GetType() != typeof(ModNoMod))
-                                      .ToArray();
-
-            var difficultyAttributes = diffCalculator.Calculate();
-
-            for (var i = 0; i < generate_score_amount; i++)
-            {
-                var appliedMods = new List<Mod>();
-
-                for (var m = 0; m < rng.Next(0, generate_score_max_mod_amount); m++)
-                {
-                    var mod = allowedMods[rng.Next(0, allowedMods.Length)];
-
-                    if (appliedMods.SelectMany(x => x.IncompatibleMods).Any(c => c == mod.GetType() || c.IsInstanceOfType(mod)) ||
-                        appliedMods.Any(c => c.GetType() == mod.GetType()))
-                    {
-                        m--;
-                        continue;
-                    }
-
-                    appliedMods.Add(mod);
-                }
-
-                appliedMods = appliedMods.ToList();
-
-                const double min_count300_ratio = 0.8; // ratio of the least amount of 300s out of all objects, i.e "there should be at least 800 300s out of 1000 objects"
-                const double min_count100_ratio = 0.85; // ratio of the least amount of 100s out of remaining unjudged objects, i.e "there should be at least 170 100s out of remaining 200 objects"
-                const double min_count50_ratio = 0.5; // ratio of the least amount of 50s out of remaining unjudged objects, i.e "there should be at least 15 50s out of remaining 30 objects"
-
-                var unjudgedObjects = working.Beatmap.HitObjects.Count;
-                var count300 = rng.Next((int)(working.Beatmap.HitObjects.Count * min_count300_ratio), unjudgedObjects + 1);
-                unjudgedObjects -= count300;
-
-                var count100 = rng.Next((int)(unjudgedObjects * min_count100_ratio), unjudgedObjects + 1);
-                unjudgedObjects -= count100;
-
-                var count50 = rng.Next((int)(unjudgedObjects * min_count50_ratio), unjudgedObjects + 1);
-                unjudgedObjects -= count50;
-
-                var countMiss = unjudgedObjects;
-
-                var combo = difficultyAttributes.MaxCombo;
-                if (countMiss > 0)
-                    combo = rng.Next((int)(0.5 * difficultyAttributes.MaxCombo) / countMiss, Math.Min(difficultyAttributes.MaxCombo, (int)(difficultyAttributes.MaxCombo / (0.1 * countMiss))));
-
-                var statistics = new Dictionary<HitResult, int>
-                {
-                    { HitResult.Great, count300 },
-                    { HitResult.Ok, count100 },
-                    { HitResult.Meh, count50 },
-                    { HitResult.Miss, countMiss }
-                };
-
-                var accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
-
-                var scoreInfo = new ScoreInfo(working.BeatmapInfo, ruleset.Value)
-                {
-                    Statistics = statistics,
-                    MaxCombo = combo,
-                    Accuracy = accuracy
-                };
-
-                var scoreProcessor = rulesetInstance.CreateScoreProcessor();
-                scoreProcessor.Mods.Value = appliedMods;
-                scoreProcessor.Accuracy.Value = accuracy;
-
-                scores.Add(new SoloScoreInfo
-                {
-                    Rank = scoreProcessor.Rank.Value,
-                    Accuracy = accuracy,
-                    TotalScore = (int)scoreProcessor.ComputeScore(ScoringMode.Standardised, scoreInfo),
-                    MaxCombo = combo,
-                    Mods = appliedMods.Select(x => new APIMod(x)).ToArray(),
-                    Statistics = statistics,
-                    User = new APIUser
-                    {
-                        Username = $"dummy {i}",
-                        CountryCode = CountryCode.Unknown
-                    }
-                });
-            }
-
-            return scores;
         }
     }
 }
