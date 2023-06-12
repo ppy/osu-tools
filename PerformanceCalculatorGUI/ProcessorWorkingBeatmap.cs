@@ -135,7 +135,7 @@ namespace PerformanceCalculatorGUI
         }
 
         protected override IBeatmap GetBeatmap() => beatmap;
-        public override Texture GetBackground() => null;
+        protected override Texture GetBackground() => null;
         protected override ISkin GetSkin() => null;
         public override Stream GetStream(string storagePath) => null;
     }
