@@ -226,7 +226,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override void PopIn()
         {
-            base.PopIn();
             this.FadeIn();
         }
 
