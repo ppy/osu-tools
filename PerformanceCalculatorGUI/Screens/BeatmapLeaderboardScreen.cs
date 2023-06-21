@@ -60,9 +60,6 @@ namespace PerformanceCalculatorGUI.Screens
         [Resolved]
         private SettingsManager configManager { get; set; }
 
-        [Resolved]
-        private ScoreManager scoreManager { get; set; }
-
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
 
         private const int settings_height = 40;
@@ -247,7 +244,7 @@ namespace PerformanceCalculatorGUI.Screens
                     plays.Add(score);
                 }
 
-                var sortedScores = scoreManager.OrderByTotalScore(plays.Select(x => x.ToScoreInfo(rulesets, working.BeatmapInfo))).ToList();
+                var sortedScores = plays.Select(x => x.ToScoreInfo(rulesets, working.BeatmapInfo)).OrderByTotalScore().ToList();
 
                 Schedule(() =>
                 {
