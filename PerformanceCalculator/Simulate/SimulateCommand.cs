@@ -53,7 +53,13 @@ namespace PerformanceCalculator.Simulate
         public virtual int? Mehs { get; }
 
         [UsedImplicitly]
+        public virtual int? Oks { get; }
+
+        [UsedImplicitly]
         public virtual int? Goods { get; }
+
+        [UsedImplicitly]
+        public virtual int? Greats { get; }
 
         [UsedImplicitly]
         [Option(Template = "-j|--json", Description = "Output results as JSON.")]
@@ -73,7 +79,7 @@ namespace PerformanceCalculator.Simulate
 
             var beatmapMaxCombo = GetMaxCombo(beatmap);
             var maxCombo = Combo ?? (int)Math.Round(PercentCombo / 100 * beatmapMaxCombo);
-            var statistics = GenerateHitResults(Accuracy / 100, beatmap, Misses, Mehs, Goods);
+            var statistics = GenerateHitResults(Accuracy / 100, beatmap, Misses, Mehs, Oks, Goods, Greats);
             var score = Score;
             var accuracy = GetAccuracy(statistics);
 
@@ -182,7 +188,7 @@ namespace PerformanceCalculator.Simulate
 
         protected abstract int GetMaxCombo(IBeatmap beatmap);
 
-        protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
+        protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat);
 
         protected virtual double GetAccuracy(Dictionary<HitResult, int> statistics) => 0;
 

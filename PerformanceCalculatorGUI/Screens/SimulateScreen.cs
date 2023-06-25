@@ -57,7 +57,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         private GridContainer accuracyContainer;
         private LimitedLabelledFractionalNumberBox accuracyTextBox;
+        private LimitedLabelledNumberBox greatsTextBox;
         private LimitedLabelledNumberBox goodsTextBox;
+        private LimitedLabelledNumberBox oksTextBox;
         private LimitedLabelledNumberBox mehsTextBox;
         private SwitchButton fullScoreDataSwitch;
 
@@ -212,6 +214,8 @@ namespace PerformanceCalculatorGUI.Screens
                                                         new Dimension(),
                                                         new Dimension(GridSizeMode.Absolute),
                                                         new Dimension(GridSizeMode.Absolute),
+                                                        new Dimension(GridSizeMode.Absolute),
+                                                        new Dimension(GridSizeMode.Absolute),
                                                         new Dimension(GridSizeMode.AutoSize)
                                                     },
                                                     RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
@@ -229,11 +233,27 @@ namespace PerformanceCalculatorGUI.Screens
                                                                 MinValue = 0.0,
                                                                 Value = { Value = 100.0 }
                                                             },
+                                                            greatsTextBox = new LimitedLabelledNumberBox
+                                                            {
+                                                                RelativeSizeAxes = Axes.X,
+                                                                Anchor = Anchor.TopLeft,
+                                                                Label = "Greats",
+                                                                PlaceholderText = "0",
+                                                                MinValue = 0
+                                                            },
                                                             goodsTextBox = new LimitedLabelledNumberBox
                                                             {
                                                                 RelativeSizeAxes = Axes.X,
                                                                 Anchor = Anchor.TopLeft,
                                                                 Label = "Goods",
+                                                                PlaceholderText = "0",
+                                                                MinValue = 0
+                                                            },
+                                                            oksTextBox = new LimitedLabelledNumberBox
+                                                            {
+                                                                RelativeSizeAxes = Axes.X,
+                                                                Anchor = Anchor.TopLeft,
+                                                                Label = "Oks",
                                                                 PlaceholderText = "0",
                                                                 MinValue = 0
                                                             },
@@ -440,8 +460,10 @@ namespace PerformanceCalculatorGUI.Screens
             });
 
             accuracyTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            greatsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             goodsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             mehsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            oksTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             missesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             comboTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             scoreTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
@@ -614,11 +636,13 @@ namespace PerformanceCalculatorGUI.Screens
             if (working == null || difficultyAttributes == null)
                 return;
 
-            int? countGood = null, countMeh = null;
+            int? countGreat = null, countGood = null, countOk = null, countMeh = null;
 
             if (fullScoreDataSwitch.Current.Value)
             {
+                countGreat = greatsTextBox.Value.Value;
                 countGood = goodsTextBox.Value.Value;
+                countOk = oksTextBox.Value.Value;
                 countMeh = mehsTextBox.Value.Value;
             }
 
@@ -629,12 +653,14 @@ namespace PerformanceCalculatorGUI.Screens
                 var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
 
                 var accuracy = accuracyTextBox.Value.Value / 100.0;
+                var countMiss = missesTextBox.Value.Value;
+
                 Dictionary<HitResult, int> statistics = null;
 
                 if (ruleset.Value.OnlineID != -1)
                 {
                     // official rulesets can generate more precise hits from accuracy
-                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood);
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracy, beatmap, countMiss, countMeh, countOk, countGood, countGreat);
                     accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
                 }
 
@@ -686,9 +712,6 @@ namespace PerformanceCalculatorGUI.Screens
                 accuracyContainer.Show();
 
                 missesTextBox.Show();
-
-                scoreTextBox.Text = string.Empty;
-                scoreTextBox.Show();
             }
             else
             {
@@ -705,32 +728,54 @@ namespace PerformanceCalculatorGUI.Screens
             }
         }
 
-        private void updateAccuracyParams(bool useFullScoreData)
+        private void resetTextBoxes()
         {
+            greatsTextBox.Text = string.Empty;
+            greatsTextBox.Value.Value = 0;
+
             goodsTextBox.Text = string.Empty;
             goodsTextBox.Value.Value = 0;
+
+            oksTextBox.Text = string.Empty;
+            oksTextBox.Value.Value = 0;
 
             mehsTextBox.Text = string.Empty;
             mehsTextBox.Value.Value = 0;
 
             accuracyTextBox.Text = string.Empty;
             accuracyTextBox.Value.Value = 100;
+        }
+
+        private void updateAccuracyParams(bool useFullScoreData)
+        {
+            resetTextBoxes();
 
             if (useFullScoreData)
             {
+                greatsTextBox.Label = ruleset.Value.ShortName switch
+                {
+                    _ => "300s"
+                };
+
                 goodsTextBox.Label = ruleset.Value.ShortName switch
                 {
                     "osu" => "100s",
                     "taiko" => "Goods",
                     "fruits" => "Droplets",
+                    "mania" => "200s",
+                    _ => ""
+                };
+
+                oksTextBox.Label = ruleset.Value.ShortName switch
+                {
+                    "mania" => "100s",
                     _ => ""
                 };
 
                 mehsTextBox.Label = ruleset.Value.ShortName switch
                 {
-                    "osu" => "50s",
                     "fruits" => "Tiny Droplets",
-                    _ => ""
+                    _ => "50s",
                 };
 
                 accuracyContainer.ColumnDimensions = ruleset.Value.ShortName switch
@@ -739,7 +784,9 @@ namespace PerformanceCalculatorGUI.Screens
                         new[]
                         {
                             new Dimension(GridSizeMode.Absolute),
+                            new Dimension(GridSizeMode.Absolute),
                             new Dimension(),
+                            new Dimension(GridSizeMode.Absolute),
                             new Dimension(),
                             new Dimension(GridSizeMode.AutoSize)
                         },
@@ -747,12 +794,26 @@ namespace PerformanceCalculatorGUI.Screens
                         new[]
                         {
                             new Dimension(GridSizeMode.Absolute),
+                            new Dimension(GridSizeMode.Absolute),
                             new Dimension(),
                             new Dimension(GridSizeMode.Absolute),
+                            new Dimension(GridSizeMode.Absolute),
+                            new Dimension(GridSizeMode.AutoSize)
+                        },
+                    "mania" =>
+                        new[]
+                        {
+                            new Dimension(GridSizeMode.Absolute),
+                            new Dimension(),
+                            new Dimension(),
+                            new Dimension(),
+                            new Dimension(),
                             new Dimension(GridSizeMode.AutoSize)
                         },
                     _ => new[]
                     {
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.Absolute),
                         new Dimension(GridSizeMode.Absolute),
                         new Dimension(GridSizeMode.Absolute),
                         new Dimension(GridSizeMode.Absolute),
@@ -768,6 +829,8 @@ namespace PerformanceCalculatorGUI.Screens
                 accuracyContainer.ColumnDimensions = new[]
                 {
                     new Dimension(),
+                    new Dimension(GridSizeMode.Absolute),
+                    new Dimension(GridSizeMode.Absolute),
                     new Dimension(GridSizeMode.Absolute),
                     new Dimension(GridSizeMode.Absolute),
                     new Dimension(GridSizeMode.AutoSize)
