@@ -18,7 +18,7 @@ namespace PerformanceCalculator
     [Command("dotnet PerformanceCalculator.dll")]
     [Subcommand(typeof(DifficultyCommand))]
     [Subcommand(typeof(ModsCommand))]
-    [Subcommand(typeof(PerformanceCommand))]
+    [Subcommand(typeof(PerformanceListingCommand))]
     [Subcommand(typeof(ProfileCommand))]
     [Subcommand(typeof(SimulateListingCommand))]
     [Subcommand(typeof(LeaderboardCommand))]
