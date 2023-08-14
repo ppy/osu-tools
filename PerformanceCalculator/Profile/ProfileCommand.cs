@@ -30,10 +30,6 @@ namespace PerformanceCalculator.Profile
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
 
-        [UsedImplicitly]
-        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
-        public bool OutputJson { get; }
-
         public override void Execute()
         {
             var displayPlays = new List<UserPlayInfo>();

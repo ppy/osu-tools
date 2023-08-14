@@ -32,10 +32,6 @@ namespace PerformanceCalculator.Leaderboard
         [Option(Template = "-p|--page:<page-number>", Description = "Leaderboard page number.")]
         public int? LeaderboardPage { get; } = 1;
 
-        [UsedImplicitly]
-        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
-        public bool OutputJson { get; }
-
         public override void Execute()
         {
             var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
