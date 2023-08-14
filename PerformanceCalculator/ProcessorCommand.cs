@@ -61,9 +61,9 @@ namespace PerformanceCalculator
 
             if (OutputJson)
             {
-                string json = JsonConvert.SerializeObject(result);
+                string json = JsonConvert.SerializeObject(result, Formatting.Indented);
 
-                Console.Write(json);
+                Console.WriteLine(json);
 
                 if (OutputFile != null)
                     File.WriteAllText(OutputFile, json);
