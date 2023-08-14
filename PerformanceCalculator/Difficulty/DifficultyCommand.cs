@@ -39,10 +39,6 @@ namespace PerformanceCalculator.Difficulty
         public string[] Mods { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-j|--json", Description = "Output results as JSON.")]
-        public bool OutputJson { get; }
-
-        [UsedImplicitly]
         [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
         public bool NoClassicMod { get; }
 
