@@ -40,7 +40,7 @@ namespace PerformanceCalculator.Performance
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapInfo!.OnlineID.ToString());
             var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
-            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, score.Mods));
+            var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, score.Mods));
             var performanceCalculator = ruleset.CreatePerformanceCalculator();
             var performanceAttributes = performanceCalculator?.Calculate(score, difficultyAttributes);
 
