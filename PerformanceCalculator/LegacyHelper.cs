@@ -67,21 +67,12 @@ namespace PerformanceCalculator
         /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
         /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
         /// </summary>
-        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
         {
-            var beatmap = new EmptyWorkingBeatmap
-            {
-                BeatmapInfo =
-                {
-                    Ruleset = ruleset.RulesetInfo,
-                    Difficulty = new BeatmapDifficulty()
-                }
-            };
-
             var allMods = ruleset.CreateAllMods().ToArray();
 
             var allowedMods = ModUtils.FlattenMods(
-                                          ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
+                                          ruleset.CreateDifficultyCalculator(new EmptyWorkingBeatmap(beatmapInfo)).CreateDifficultyAdjustmentModCombinations())
                                       .Select(m => m.GetType())
                                       .Distinct()
                                       .ToHashSet();
@@ -103,8 +94,8 @@ namespace PerformanceCalculator
 
         private class EmptyWorkingBeatmap : WorkingBeatmap
         {
-            public EmptyWorkingBeatmap()
-                : base(new BeatmapInfo(), null)
+            public EmptyWorkingBeatmap(BeatmapInfo beatmapInfo)
+                : base(beatmapInfo, null)
             {
             }
 

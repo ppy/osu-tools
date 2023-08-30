@@ -38,7 +38,7 @@ namespace PerformanceCalculator.Performance
 
             Mod[] mods = score.ScoreInfo.Mods;
             if (score.ScoreInfo.IsLegacyScore)
-                mods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, mods);
+                mods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, mods);
 
             var difficultyAttributes = difficultyCalculator.Calculate(mods);
             var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
