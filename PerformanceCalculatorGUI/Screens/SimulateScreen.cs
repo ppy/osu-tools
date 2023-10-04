@@ -108,6 +108,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private const int file_selection_container_height = 40;
         private const int map_title_container_height = 40;
+        private const float mod_selection_container_scale = 0.7f;
 
         public SimulateScreen()
         {
@@ -300,21 +301,14 @@ namespace PerformanceCalculatorGUI.Screens
                                                         modDisplay = new ModDisplay()
                                                     }
                                                 },
-                                                new ScalingContainer(ScalingMode.Everything)
+                                                userModsSelectOverlay = new ExtendedUserModSelectOverlay
                                                 {
-                                                    Name = "Mod selection overlay",
                                                     RelativeSizeAxes = Axes.X,
-                                                    Height = 300,
-                                                    Width = 0.75f,
-                                                    Scale = new Vector2(1.5f),
-                                                    Child = userModsSelectOverlay = new ExtendedUserModSelectOverlay
-                                                    {
-                                                        RelativeSizeAxes = Axes.Both,
-                                                        Anchor = Anchor.TopLeft,
-                                                        Origin = Anchor.TopLeft,
-                                                        IsValidMod = mod => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
-                                                        SelectedMods = { BindTarget = appliedMods }
-                                                    }
+                                                    Height = 460 / mod_selection_container_scale,
+                                                    Width = 1f / mod_selection_container_scale,
+                                                    Scale = new Vector2(mod_selection_container_scale),
+                                                    IsValidMod = mod => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
+                                                    SelectedMods = { BindTarget = appliedMods }
                                                 }
                                             }
                                         }
