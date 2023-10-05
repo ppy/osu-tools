@@ -32,7 +32,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private FillFlowContainer flowContainer;
 
-        public Bindable<DifficultyHitObject> CurrentDifficultyHitObject { get; } = new();
+        public Bindable<DifficultyHitObject> CurrentDifficultyHitObject { get; } = new Bindable<DifficultyHitObject>();
 
         private const int hit_object_type_container_height = 50;
 

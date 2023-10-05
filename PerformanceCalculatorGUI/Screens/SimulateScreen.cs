@@ -68,7 +68,7 @@ namespace PerformanceCalculatorGUI.Screens
         private PerformanceCalculator performanceCalculator;
 
         [Cached]
-        private Bindable<DifficultyCalculator> difficultyCalculator = new();
+        private Bindable<DifficultyCalculator> difficultyCalculator = new Bindable<DifficultyCalculator>();
 
         private FillFlowContainer beatmapDataContainer;
         private Container beatmapTitle;

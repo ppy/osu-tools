@@ -35,8 +35,8 @@ namespace PerformanceCalculatorGUI.Components
         public SoloScoreInfo SoloScore { get; }
         public double LivePP { get; }
 
-        public Bindable<int> Position { get; } = new();
-        public Bindable<int> PositionChange { get; } = new();
+        public Bindable<int> Position { get; } = new Bindable<int>();
+        public Bindable<int> PositionChange { get; } = new Bindable<int>();
 
         public PerformanceAttributes PerformanceAttributes { get; }
 

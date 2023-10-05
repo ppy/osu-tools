@@ -58,7 +58,7 @@ namespace PerformanceCalculatorGUI
 
         public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId, AudioManager audioManager = null, string cachePath = "cache")
         {
-            if (fileOrId.EndsWith(".osu"))
+            if (fileOrId.EndsWith(".osu", StringComparison.Ordinal))
             {
                 if (!File.Exists(fileOrId))
                     throw new ArgumentException($"Beatmap file {fileOrId} does not exist.");
