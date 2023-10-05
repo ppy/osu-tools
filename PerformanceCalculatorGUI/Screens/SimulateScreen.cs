@@ -623,7 +623,7 @@ namespace PerformanceCalculatorGUI.Screens
                 var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
 
                 var accuracy = accuracyTextBox.Value.Value / 100.0;
-                Dictionary<HitResult, int> statistics = null;
+                Dictionary<HitResult, int> statistics = new Dictionary<HitResult, int>();
 
                 if (ruleset.Value.OnlineID != -1)
                 {

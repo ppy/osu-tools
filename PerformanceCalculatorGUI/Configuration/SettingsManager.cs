@@ -30,7 +30,7 @@ namespace PerformanceCalculatorGUI.Configuration
             SetDefault(Settings.ClientId, string.Empty);
             SetDefault(Settings.ClientSecret, string.Empty);
             SetDefault(Settings.DefaultPath, Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-            SetDefault(Settings.CachePath, Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "cache"));
+            SetDefault(Settings.CachePath, Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "cache"));
         }
     }
 }

@@ -282,7 +282,7 @@ namespace PerformanceCalculatorGUI.Components
                                         {
                                             var ruleset = rulesets.GetRuleset(Score.SoloScore.RulesetID) ?? throw new InvalidOperationException();
 
-                                            return new ModIcon(ruleset.CreateInstance().CreateModFromAcronym(mod.Acronym))
+                                            return new ModIcon(ruleset.CreateInstance().CreateModFromAcronym(mod.Acronym)!)
                                             {
                                                 Scale = new Vector2(0.35f)
                                             };
