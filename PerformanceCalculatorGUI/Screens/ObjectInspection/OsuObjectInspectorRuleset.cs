@@ -72,8 +72,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 // adjust the visuals of top-level object types to make them stay on screen for longer than usual.
                 switch (hitObject)
                 {
-                    case DrawableSlider _:
-                    case DrawableHitCircle _:
+                    case DrawableSlider:
+                    case DrawableHitCircle:
                         var nextHitObject = difficultyHitObjects.FirstOrDefault(x => x.StartTime > hitObject.StartTimeBindable.Value)?.BaseObject;
 
                         if (nextHitObject != null)

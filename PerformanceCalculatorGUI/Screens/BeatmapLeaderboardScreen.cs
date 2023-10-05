@@ -43,7 +43,7 @@ namespace PerformanceCalculatorGUI.Screens
         private CancellationTokenSource calculationCancellatonToken;
 
         [Cached]
-        private OverlayColourProvider colourProvider = new(OverlayColourScheme.Orange);
+        private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Orange);
 
         [Resolved]
         private NotificationDisplay notificationDisplay { get; set; }

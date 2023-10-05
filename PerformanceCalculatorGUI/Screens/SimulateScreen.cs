@@ -68,7 +68,7 @@ namespace PerformanceCalculatorGUI.Screens
         private PerformanceCalculator performanceCalculator;
 
         [Cached]
-        private Bindable<DifficultyCalculator> difficultyCalculator = new();
+        private Bindable<DifficultyCalculator> difficultyCalculator = new Bindable<DifficultyCalculator>();
 
         private FillFlowContainer beatmapDataContainer;
         private Container beatmapTitle;
@@ -108,6 +108,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private const int file_selection_container_height = 40;
         private const int map_title_container_height = 40;
+        private const float mod_selection_container_scale = 0.7f;
 
         public SimulateScreen()
         {
@@ -300,21 +301,14 @@ namespace PerformanceCalculatorGUI.Screens
                                                         modDisplay = new ModDisplay()
                                                     }
                                                 },
-                                                new ScalingContainer(ScalingMode.Everything)
+                                                userModsSelectOverlay = new ExtendedUserModSelectOverlay
                                                 {
-                                                    Name = "Mod selection overlay",
                                                     RelativeSizeAxes = Axes.X,
-                                                    Height = 300,
-                                                    Width = 0.75f,
-                                                    Scale = new Vector2(1.5f),
-                                                    Child = userModsSelectOverlay = new ExtendedUserModSelectOverlay
-                                                    {
-                                                        RelativeSizeAxes = Axes.Both,
-                                                        Anchor = Anchor.TopLeft,
-                                                        Origin = Anchor.TopLeft,
-                                                        IsValidMod = mod => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
-                                                        SelectedMods = { BindTarget = appliedMods }
-                                                    }
+                                                    Height = 460 / mod_selection_container_scale,
+                                                    Width = 1f / mod_selection_container_scale,
+                                                    Scale = new Vector2(mod_selection_container_scale),
+                                                    IsValidMod = mod => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
+                                                    SelectedMods = { BindTarget = appliedMods }
                                                 }
                                             }
                                         }
@@ -594,7 +588,7 @@ namespace PerformanceCalculatorGUI.Screens
             if (difficultyCalculator.Value is IExtendedDifficultyCalculator extendedDifficultyCalculator)
             {
                 // StrainSkill always skips the first object
-                if (working.Beatmap?.HitObjects?.Count > 1)
+                if (working.Beatmap?.HitObjects.Count > 1)
                     strainVisualizer.TimeUntilFirstStrain.Value = (int)working.Beatmap.HitObjects[1].StartTime;
 
                 strainVisualizer.Skills.Value = extendedDifficultyCalculator.GetSkills();
@@ -629,7 +623,7 @@ namespace PerformanceCalculatorGUI.Screens
                 var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
 
                 var accuracy = accuracyTextBox.Value.Value / 100.0;
-                Dictionary<HitResult, int> statistics = null;
+                Dictionary<HitResult, int> statistics = new Dictionary<HitResult, int>();
 
                 if (ruleset.Value.OnlineID != -1)
                 {

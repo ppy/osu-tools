@@ -28,7 +28,7 @@ namespace PerformanceCalculator.Performance
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(apiScore.RulesetID);
             var score = apiScore.ToScoreInfo(apiScore.Mods.Select(m => m.ToMod(ruleset)).ToArray(), apiBeatmap);
-            score.BeatmapInfo.Metadata = new BeatmapMetadata
+            score.BeatmapInfo!.Metadata = new BeatmapMetadata
             {
                 Title = apiBeatmap.Metadata.Title,
                 Artist = apiBeatmap.Metadata.Artist,

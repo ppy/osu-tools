@@ -47,8 +47,8 @@ namespace PerformanceCalculator
                 Score = new ScoreStatistics
                 {
                     RulesetId = score.Ruleset.OnlineID,
-                    BeatmapId = score.BeatmapInfo.OnlineID,
-                    Beatmap = score.BeatmapInfo.ToString(),
+                    BeatmapId = score.BeatmapInfo?.OnlineID ?? -1,
+                    Beatmap = score.BeatmapInfo?.ToString() ?? "Unknown beatmap",
                     Mods = score.Mods.Select(m => new APIMod(m)).ToList(),
                     Score = score.TotalScore,
                     Accuracy = score.Accuracy * 100,

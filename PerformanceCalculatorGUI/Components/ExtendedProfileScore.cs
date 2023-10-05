@@ -35,8 +35,8 @@ namespace PerformanceCalculatorGUI.Components
         public SoloScoreInfo SoloScore { get; }
         public double LivePP { get; }
 
-        public Bindable<int> Position { get; } = new();
-        public Bindable<int> PositionChange { get; } = new();
+        public Bindable<int> Position { get; } = new Bindable<int>();
+        public Bindable<int> PositionChange { get; } = new Bindable<int>();
 
         public PerformanceAttributes PerformanceAttributes { get; }
 
@@ -282,7 +282,7 @@ namespace PerformanceCalculatorGUI.Components
                                         {
                                             var ruleset = rulesets.GetRuleset(Score.SoloScore.RulesetID) ?? throw new InvalidOperationException();
 
-                                            return new ModIcon(ruleset.CreateInstance().CreateModFromAcronym(mod.Acronym))
+                                            return new ModIcon(ruleset.CreateInstance().CreateModFromAcronym(mod.Acronym)!)
                                             {
                                                 Scale = new Vector2(0.35f)
                                             };

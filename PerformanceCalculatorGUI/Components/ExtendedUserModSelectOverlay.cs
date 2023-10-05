@@ -9,7 +9,7 @@ namespace PerformanceCalculatorGUI.Components
 {
     public partial class ExtendedUserModSelectOverlay : UserModSelectOverlay
     {
-        protected override bool ShowTotalMultiplier => false;
+        protected override bool ShowModEffects => false;
 
         public ExtendedUserModSelectOverlay()
             : base(OverlayColourScheme.Blue)

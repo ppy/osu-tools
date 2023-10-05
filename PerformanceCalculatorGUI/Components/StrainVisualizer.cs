@@ -73,11 +73,11 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class StrainVisualizer : Container
     {
-        public readonly Bindable<Skill[]> Skills = new();
+        public readonly Bindable<Skill[]> Skills = new Bindable<Skill[]>();
 
-        private readonly List<Bindable<bool>> graphToggles = new();
+        private readonly List<Bindable<bool>> graphToggles = new List<Bindable<bool>>();
 
-        public readonly Bindable<int> TimeUntilFirstStrain = new();
+        public readonly Bindable<int> TimeUntilFirstStrain = new Bindable<int>();
 
         private ZoomableScrollContainer graphsContainer;
         private FillFlowContainer legendContainer;
@@ -109,7 +109,7 @@ namespace PerformanceCalculatorGUI.Components
 
             var graphAlpha = Math.Min(1.5f / skills.Length, 0.9f);
 
-            List<(float val, string tooltip)[]> strainLists = new();
+            List<(float val, string tooltip)[]> strainLists = new List<(float val, string tooltip)[]>();
 
             foreach (var skill in skills)
             {

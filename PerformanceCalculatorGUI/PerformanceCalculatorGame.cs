@@ -26,7 +26,7 @@ namespace PerformanceCalculatorGUI
         // This overwrites OsuGameBase's SelectedMods to make sure it can't tweak mods when we don't want it to
         [Cached]
         [Cached(typeof(IBindable<IReadOnlyList<Mod>>))]
-        private readonly Bindable<IReadOnlyList<Mod>> mods = new(Array.Empty<Mod>());
+        private readonly Bindable<IReadOnlyList<Mod>> mods = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
 
         [Resolved]
         private FrameworkConfigManager frameworkConfig { get; set; }
