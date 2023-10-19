@@ -49,7 +49,7 @@ namespace PerformanceCalculatorGUI
                                       .ToHashSet();
 
             // Special case to allow either DT or NC.
-            if (mods.Any(m => m is ModDoubleTime))
+            if (allowedMods.Any(type => type.IsSubclassOf(typeof(ModDoubleTime))) && mods.Any(m => m is ModNightcore))
                 allowedMods.Add(allMods.Single(m => m is ModNightcore).GetType());
 
             var result = new List<Mod>();
