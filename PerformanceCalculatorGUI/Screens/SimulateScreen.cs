@@ -116,7 +116,7 @@ namespace PerformanceCalculatorGUI.Screens
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OsuColour osuColour)
         {
             InternalChildren = new Drawable[]
             {
@@ -279,6 +279,14 @@ namespace PerformanceCalculatorGUI.Screens
                                                     MinValue = 0,
                                                     MaxValue = 1000000,
                                                     Value = { Value = 1000000 }
+                                                },
+                                                new OsuSpriteText
+                                                {
+                                                    RelativeSizeAxes = Axes.X,
+                                                    Anchor = Anchor.TopLeft,
+                                                    Font = new FontUsage(size: 14.0f),
+                                                    Colour = osuColour.Yellow,
+                                                    Text = "Don't forget to enable CL (classic) mod for osu!stable score simulation!"
                                                 },
                                                 new FillFlowContainer
                                                 {
