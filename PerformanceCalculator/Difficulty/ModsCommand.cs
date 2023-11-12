@@ -48,6 +48,7 @@ namespace PerformanceCalculator.Difficulty
                 mod.UserPlayable,
                 mod.ValidForMultiplayer,
                 mod.ValidForMultiplayerAsFreeMod,
+                mod.AlwaysValidForSubmission,
             });
 
             IEnumerable<string> getAllImplementations(Type[] incompatibleTypes)
