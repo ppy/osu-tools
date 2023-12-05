@@ -6,9 +6,11 @@ using System.IO;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
+using osu.Game.Database;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Scoring.Legacy;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 
@@ -30,17 +32,25 @@ namespace PerformanceCalculator.Performance
             using (var stream = File.OpenRead(Replay))
                 score = scoreDecoder.Parse(stream);
 
+            var ruleset = score.ScoreInfo.Ruleset.CreateInstance();
+
             // At this point the beatmap will have been cached locally due to the lookup during decode, so this is practically free.
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(score.ScoreInfo.BeatmapInfo!.OnlineID.ToString());
+            var playableBeatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, score.ScoreInfo.Mods);
 
-            var ruleset = score.ScoreInfo.Ruleset.CreateInstance();
-            var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
+            Mod[] difficultyMods = score.ScoreInfo.Mods;
 
-            Mod[] mods = score.ScoreInfo.Mods;
             if (score.ScoreInfo.IsLegacyScore)
-                mods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, mods);
+            {
+                difficultyMods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, difficultyMods);
+                score.ScoreInfo.LegacyTotalScore = (int)score.ScoreInfo.TotalScore;
+                score.ScoreInfo.TotalScore = StandardisedScoreMigrationTools.ConvertFromLegacyTotalScore(
+                    score.ScoreInfo,
+                    LegacyBeatmapConversionDifficultyInfo.FromBeatmap(playableBeatmap),
+                    ((ILegacyRuleset)ruleset).CreateLegacyScoreSimulator().Simulate(workingBeatmap, playableBeatmap));
+            }
 
-            var difficultyAttributes = difficultyCalculator.Calculate(mods);
+            var difficultyAttributes = ruleset.CreateDifficultyCalculator(workingBeatmap).Calculate(difficultyMods);
             var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
             var performanceAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes);
 
