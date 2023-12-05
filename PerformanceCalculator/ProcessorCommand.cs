@@ -50,7 +50,8 @@ namespace PerformanceCalculator
                     BeatmapId = score.BeatmapInfo?.OnlineID ?? -1,
                     Beatmap = score.BeatmapInfo?.ToString() ?? "Unknown beatmap",
                     Mods = score.Mods.Select(m => new APIMod(m)).ToList(),
-                    Score = score.TotalScore,
+                    TotalScore = score.TotalScore,
+                    LegacyTotalScore = score.LegacyTotalScore ?? 0,
                     Accuracy = score.Accuracy * 100,
                     Combo = score.MaxCombo,
                     Statistics = score.Statistics
@@ -76,7 +77,8 @@ namespace PerformanceCalculator
 
                 document.Children.Add(
                     FormatDocumentLine("beatmap", $"{result.Score.BeatmapId} - {result.Score.Beatmap}"),
-                    FormatDocumentLine("score", result.Score.Score.ToString(CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("total score", result.Score.TotalScore.ToString(CultureInfo.InvariantCulture)),
+                    FormatDocumentLine("legacy total score", result.Score.LegacyTotalScore.ToString(CultureInfo.InvariantCulture)),
                     FormatDocumentLine("accuracy", result.Score.Accuracy.ToString("N2", CultureInfo.InvariantCulture)),
                     FormatDocumentLine("combo", result.Score.Combo.ToString(CultureInfo.InvariantCulture)),
                     FormatDocumentLine("mods", result.Score.Mods.Count > 0 ? result.Score.Mods.Select(m => m.ToString()).Aggregate((c, n) => $"{c}, {n}") : "None")
@@ -168,7 +170,10 @@ namespace PerformanceCalculator
             public List<APIMod> Mods { get; set; }
 
             [JsonProperty("total_score")]
-            public long Score { get; set; }
+            public long TotalScore { get; set; }
+
+            [JsonProperty("legacy_total_score")]
+            public long LegacyTotalScore { get; set; }
 
             [JsonProperty("accuracy")]
             public double Accuracy { get; set; }

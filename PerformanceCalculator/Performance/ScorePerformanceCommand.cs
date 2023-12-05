@@ -4,9 +4,12 @@
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
+using osu.Game.Database;
 using osu.Game.Models;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Scoring.Legacy;
 
 namespace PerformanceCalculator.Performance
 {
@@ -28,6 +31,7 @@ namespace PerformanceCalculator.Performance
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(apiScore.RulesetID);
             var score = apiScore.ToScoreInfo(apiScore.Mods.Select(m => m.ToMod(ruleset)).ToArray(), apiBeatmap);
+            score.Ruleset = ruleset.RulesetInfo;
             score.BeatmapInfo!.Metadata = new BeatmapMetadata
             {
                 Title = apiBeatmap.Metadata.Title,
@@ -35,10 +39,19 @@ namespace PerformanceCalculator.Performance
                 Author = new RealmUser { Username = apiBeatmap.Metadata.Author.Username },
             };
 
-            if (apiScore.BuildID == null)
-                score.Mods = score.Mods.Append(ruleset.CreateMod<ModClassic>()).ToArray();
-
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapInfo!.OnlineID.ToString());
+
+            if (apiScore.BuildID == null)
+            {
+                score.Mods = score.Mods.Append(ruleset.CreateMod<ModClassic>()).ToArray();
+                score.IsLegacyScore = true;
+                score.LegacyTotalScore = (int)score.TotalScore;
+                score.TotalScore = StandardisedScoreMigrationTools.ConvertFromLegacyTotalScore(
+                    score,
+                    LegacyBeatmapConversionDifficultyInfo.FromAPIBeatmap(apiBeatmap),
+                    ((ILegacyRuleset)ruleset).CreateLegacyScoreSimulator().Simulate(workingBeatmap, workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, score.Mods)));
+            }
+
             var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
             var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, score.Mods));
             var performanceCalculator = ruleset.CreatePerformanceCalculator();
