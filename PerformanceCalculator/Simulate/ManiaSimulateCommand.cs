@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
@@ -19,19 +18,6 @@ namespace PerformanceCalculator.Simulate
     [Command(Name = "mania", Description = "Computes the performance (pp) of a simulated osu!mania play.")]
     public class ManiaSimulateCommand : SimulateCommand
     {
-        public override int Score
-        {
-            get
-            {
-                Debug.Assert(score != null);
-                return score.Value;
-            }
-        }
-
-        [UsedImplicitly]
-        [Option(Template = "-s|--score <score>", Description = "Score. An integer 0-1000000.")]
-        private int? score { get; set; }
-
         [UsedImplicitly]
         [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100."
                                                                      + " Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
@@ -63,25 +49,6 @@ namespace PerformanceCalculator.Simulate
         public override string[] Mods { get; }
 
         public override Ruleset Ruleset => new ManiaRuleset();
-
-        public override void Execute()
-        {
-            if (score == null)
-            {
-                double scoreMultiplier = 1;
-
-                // Cap score depending on difficulty adjustment mods (matters for mania).
-                foreach (var mod in GetMods(Ruleset))
-                {
-                    if (mod.Type == ModType.DifficultyReduction)
-                        scoreMultiplier *= mod.ScoreMultiplier;
-                }
-
-                score = (int)Math.Round(1000000 * scoreMultiplier);
-            }
-
-            base.Execute();
-        }
 
         protected override int GetMaxCombo(IBeatmap beatmap) => 0;
 
