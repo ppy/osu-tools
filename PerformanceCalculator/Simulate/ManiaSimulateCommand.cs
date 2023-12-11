@@ -10,7 +10,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mania.Objects;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator.Simulate
