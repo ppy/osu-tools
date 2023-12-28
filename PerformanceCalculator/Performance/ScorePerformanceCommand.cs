@@ -46,7 +46,7 @@ namespace PerformanceCalculator.Performance
                 score.Mods = score.Mods.Append(ruleset.CreateMod<ModClassic>()).ToArray();
                 score.IsLegacyScore = true;
                 score.LegacyTotalScore = (int)score.TotalScore;
-                score.TotalScore = StandardisedScoreMigrationTools.ConvertFromLegacyTotalScore(
+                StandardisedScoreMigrationTools.UpdateFromLegacy(
                     score,
                     LegacyBeatmapConversionDifficultyInfo.FromAPIBeatmap(apiBeatmap),
                     ((ILegacyRuleset)ruleset).CreateLegacyScoreSimulator().Simulate(workingBeatmap, workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, score.Mods)));
