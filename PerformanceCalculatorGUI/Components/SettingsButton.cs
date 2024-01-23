@@ -19,7 +19,6 @@ namespace PerformanceCalculatorGUI.Components
 
         public SettingsButton()
         {
-            Width = PerformanceCalculatorSceneManager.CONTROL_AREA_HEIGHT;
             Hotkey = GlobalAction.ToggleSettings;
             TooltipMain = "Settings";
 
