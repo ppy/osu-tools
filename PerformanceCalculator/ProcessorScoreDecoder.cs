@@ -23,7 +23,7 @@ namespace PerformanceCalculator
         public Score Parse(ScoreInfo scoreInfo)
         {
             var score = new Score { ScoreInfo = scoreInfo };
-            PopulateAccuracy(score.ScoreInfo);
+            PopulateLegacyAccuracyAndRank(score.ScoreInfo);
             return score;
         }
 
