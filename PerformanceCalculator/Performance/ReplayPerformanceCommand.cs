@@ -42,7 +42,7 @@ namespace PerformanceCalculator.Performance
 
             if (score.ScoreInfo.IsLegacyScore)
             {
-                difficultyMods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, difficultyMods);
+                difficultyMods = LegacyHelper.FilterDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, difficultyMods);
                 score.ScoreInfo.LegacyTotalScore = (int)score.ScoreInfo.TotalScore;
                 StandardisedScoreMigrationTools.UpdateFromLegacy(
                     score.ScoreInfo,
