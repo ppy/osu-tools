@@ -44,8 +44,10 @@ namespace PerformanceCalculator.Performance
             {
                 difficultyMods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, difficultyMods);
                 score.ScoreInfo.LegacyTotalScore = (int)score.ScoreInfo.TotalScore;
+                LegacyScoreDecoder.PopulateMaximumStatistics(score.ScoreInfo, workingBeatmap);
                 StandardisedScoreMigrationTools.UpdateFromLegacy(
                     score.ScoreInfo,
+                    ruleset,
                     LegacyBeatmapConversionDifficultyInfo.FromBeatmap(playableBeatmap),
                     ((ILegacyRuleset)ruleset).CreateLegacyScoreSimulator().Simulate(workingBeatmap, playableBeatmap));
             }
