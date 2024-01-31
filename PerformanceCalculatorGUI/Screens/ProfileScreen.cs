@@ -225,7 +225,7 @@ namespace PerformanceCalculatorGUI.Screens
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
                     var livePp = score.PP ?? 0.0;
-                    var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                    var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
                     score.PP = perfAttributes?.Total ?? 0.0;
 
                     var extendedScore = new ExtendedScore(score, livePp, perfAttributes);

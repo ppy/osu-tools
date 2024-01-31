@@ -238,7 +238,7 @@ namespace PerformanceCalculatorGUI.Screens
                     var difficultyAttributes = difficultyCalculator.Calculate(mods);
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
-                    var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                    var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
                     score.PP = perfAttributes?.Total ?? 0.0;
 
                     plays.Add(score);

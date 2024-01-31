@@ -25,6 +25,7 @@ namespace PerformanceCalculatorGUI
         {
             var score = new Score { ScoreInfo = scoreInfo };
             score.ScoreInfo.LegacyTotalScore = score.ScoreInfo.TotalScore;
+            PopulateMaximumStatistics(score.ScoreInfo, beatmap);
             StandardisedScoreMigrationTools.UpdateFromLegacy(score.ScoreInfo, beatmap);
             return score;
         }
