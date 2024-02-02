@@ -21,6 +21,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Scoring.Legacy;
 using osu.Game.Rulesets.Taiko.Difficulty;
+using osu.Game.Scoring.Legacy;
 
 namespace PerformanceCalculator.Performance
 {
@@ -57,8 +58,10 @@ namespace PerformanceCalculator.Performance
                 score.Mods = score.Mods.Append(ruleset.CreateMod<ModClassic>()).ToArray();
                 score.IsLegacyScore = true;
                 score.LegacyTotalScore = (int)score.TotalScore;
+                LegacyScoreDecoder.PopulateMaximumStatistics(score, workingBeatmap);
                 StandardisedScoreMigrationTools.UpdateFromLegacy(
                     score,
+                    ruleset,
                     LegacyBeatmapConversionDifficultyInfo.FromAPIBeatmap(apiBeatmap),
                     ((ILegacyRuleset)ruleset).CreateLegacyScoreSimulator().Simulate(workingBeatmap, workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, score.Mods)));
             }

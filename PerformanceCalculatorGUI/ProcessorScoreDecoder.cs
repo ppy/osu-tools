@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Game.Beatmaps;
+using osu.Game.Database;
 using osu.Game.Rulesets;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
@@ -23,7 +24,9 @@ namespace PerformanceCalculatorGUI
         public Score Parse(ScoreInfo scoreInfo)
         {
             var score = new Score { ScoreInfo = scoreInfo };
-            PopulateLegacyAccuracyAndRank(score.ScoreInfo);
+            score.ScoreInfo.LegacyTotalScore = score.ScoreInfo.TotalScore;
+            PopulateMaximumStatistics(score.ScoreInfo, beatmap);
+            StandardisedScoreMigrationTools.UpdateFromLegacy(score.ScoreInfo, beatmap);
             return score;
         }
 

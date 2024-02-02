@@ -49,6 +49,8 @@ namespace PerformanceCalculator.Profile
                 Mod[] mods = play.Mods.Select(x => x.ToMod(ruleset)).ToArray();
 
                 var scoreInfo = play.ToScoreInfo(mods);
+                scoreInfo.Ruleset = ruleset.RulesetInfo;
+
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                 var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
