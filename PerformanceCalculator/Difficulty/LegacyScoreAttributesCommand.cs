@@ -18,8 +18,8 @@ using osu.Game.Rulesets.Scoring.Legacy;
 
 namespace PerformanceCalculator.Difficulty
 {
-    [Command(Name = "legacy-score", Description = "Computes the legacy scoring attributes of a beatmap.")]
-    public class LegacyScoreCommand : ProcessorCommand
+    [Command(Name = "legacy-score-attributes", Description = "Computes the legacy scoring attributes of a beatmap.")]
+    public class LegacyScoreAttributesCommand : ProcessorCommand
     {
         [UsedImplicitly]
         [Required]
