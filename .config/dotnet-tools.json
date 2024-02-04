@@ -3,13 +3,13 @@
   "isRoot": true,
   "tools": {
     "CodeFileSanity": {
-      "version": "0.0.36",
+      "version": "0.0.37",
       "commands": [
         "CodeFileSanity"
       ]
     },
     "jetbrains.resharper.globaltools": {
-      "version": "2022.1.2",
+      "version": "2023.3.3",
       "commands": [
         "jb"
       ]
