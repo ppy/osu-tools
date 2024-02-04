@@ -46,7 +46,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
         {
-            protected override GameplayCursorContainer CreateCursor() => null;
+            protected override GameplayCursorContainer CreateCursor() => null!;
 
             public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty)
                 : base(difficulty)
