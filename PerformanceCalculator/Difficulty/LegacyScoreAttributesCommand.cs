@@ -17,8 +17,8 @@ using osu.Game.Rulesets.Scoring.Legacy;
 
 namespace PerformanceCalculator.Difficulty
 {
-    [Command(Name = "legacy-score", Description = "Computes the legacy scoring attributes of a beatmap.")]
-    public class LegacyScoreCommand : ProcessorCommand
+    [Command(Name = "legacy-score-attributes", Description = "Computes the legacy scoring attributes of a beatmap.")]
+    public class LegacyScoreAttributesCommand : ProcessorCommand
     {
         [UsedImplicitly]
         [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
