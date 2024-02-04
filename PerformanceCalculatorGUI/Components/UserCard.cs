@@ -33,7 +33,7 @@ namespace PerformanceCalculatorGUI.Components
         private OsuSpriteText differenceLabel;
         private OsuSpriteText playcountLabel;
 
-        public Bindable<UserCardData> Data = new();
+        public Bindable<UserCardData> Data = new Bindable<UserCardData>();
 
         public UserCard(APIUser user)
             : base(user)

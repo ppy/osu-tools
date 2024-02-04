@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -7,20 +7,19 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
-using Humanizer;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Game.Beatmaps;
 using osu.Game.Online.API;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Scoring.Legacy;
 
 namespace PerformanceCalculator.Difficulty
 {
-    [Command(Name = "difficulty", Description = "Computes the difficulty of a beatmap.")]
-    public class DifficultyCommand : ProcessorCommand
+    [Command(Name = "legacy-score-attributes", Description = "Computes the legacy scoring attributes of a beatmap.")]
+    public class LegacyScoreAttributesCommand : ProcessorCommand
     {
         [UsedImplicitly]
         [Required]
@@ -37,10 +36,6 @@ namespace PerformanceCalculator.Difficulty
         [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
         public string[] Mods { get; }
-
-        [UsedImplicitly]
-        [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
-        public bool NoClassicMod { get; }
 
         public override void Execute()
         {
@@ -92,25 +87,23 @@ namespace PerformanceCalculator.Difficulty
 
                     foreach (var result in group)
                     {
-                        var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(result.Attributes)) ?? new Dictionary<string, object>();
-
                         // Headers
                         if (firstResult)
                         {
-                            grid.Columns.Add(GridLength.Auto);
-                            grid.Children.Add(new Cell("beatmap"));
-
-                            foreach (var column in attributeValues)
+                            foreach (var column in new[] { "Beatmap", "Mods", "Accuracy score", "Combo score", "Bonus score ratio", "Mod multiplier" })
                             {
                                 grid.Columns.Add(GridLength.Auto);
-                                grid.Children.Add(new Cell(column.Key.Humanize()));
+                                grid.Children.Add(new Cell(column));
                             }
                         }
 
                         // Values
                         grid.Children.Add(new Cell($"{result.BeatmapId} - {result.Beatmap}"));
-                        foreach (var column in attributeValues)
-                            grid.Children.Add(new Cell($"{column.Value:N2}") { Align = Align.Right });
+                        grid.Children.Add(new Cell(string.Join(", ", result.Mods.Select(mod => mod.Acronym))));
+                        grid.Children.Add(new Cell($"{result.ScoreAttributes.AccuracyScore:N0}") { Align = Align.Right });
+                        grid.Children.Add(new Cell($"{result.ScoreAttributes.ComboScore:N0}") { Align = Align.Right });
+                        grid.Children.Add(new Cell($"{result.ScoreAttributes.BonusScoreRatio:N6}") { Align = Align.Right });
+                        grid.Children.Add(new Cell($"{result.ModMultiplier:N4}") { Align = Align.Right });
 
                         firstResult = false;
                     }
@@ -126,8 +119,17 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.Ruleset.OnlineID);
-            var mods = NoClassicMod ? getMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(beatmap.BeatmapInfo, ruleset, getMods(ruleset));
-            var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
+
+            // bit of a hack to discard non-legacy mods.
+            var mods = ruleset.ConvertFromLegacyMods(ruleset.ConvertToLegacyMods(getMods(ruleset))).ToList();
+
+            var legacyRuleset = (ILegacyRuleset)ruleset;
+            var simulator = legacyRuleset.CreateLegacyScoreSimulator();
+            var playableBeatmap = beatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
+            var attributes = simulator.Simulate(beatmap, playableBeatmap);
+
+            var conversionInfo = LegacyBeatmapConversionDifficultyInfo.FromBeatmap(playableBeatmap);
+            var modMultiplier = simulator.GetLegacyScoreMultiplier(mods, conversionInfo);
 
             return new Result
             {
@@ -135,7 +137,8 @@ namespace PerformanceCalculator.Difficulty
                 BeatmapId = beatmap.BeatmapInfo.OnlineID,
                 Beatmap = beatmap.BeatmapInfo.ToString(),
                 Mods = mods.Select(m => new APIMod(m)).ToList(),
-                Attributes = attributes
+                ScoreAttributes = attributes,
+                ModMultiplier = modMultiplier
             };
         }
 
@@ -182,8 +185,11 @@ namespace PerformanceCalculator.Difficulty
             [JsonProperty("mods")]
             public List<APIMod> Mods { get; set; }
 
-            [JsonProperty("attributes")]
-            public DifficultyAttributes Attributes { get; set; }
+            [JsonProperty("score_attributes")]
+            public LegacyScoreAttributes ScoreAttributes { get; set; }
+
+            [JsonProperty("mod_multiplier")]
+            public double ModMultiplier { get; set; }
         }
     }
 }

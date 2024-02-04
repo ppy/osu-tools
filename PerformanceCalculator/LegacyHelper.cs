@@ -67,27 +67,18 @@ namespace PerformanceCalculator
         /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
         /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
         /// </summary>
-        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
         {
-            var beatmap = new EmptyWorkingBeatmap
-            {
-                BeatmapInfo =
-                {
-                    Ruleset = ruleset.RulesetInfo,
-                    Difficulty = new BeatmapDifficulty()
-                }
-            };
-
             var allMods = ruleset.CreateAllMods().ToArray();
 
             var allowedMods = ModUtils.FlattenMods(
-                                          ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
+                                          ruleset.CreateDifficultyCalculator(new EmptyWorkingBeatmap(beatmapInfo)).CreateDifficultyAdjustmentModCombinations())
                                       .Select(m => m.GetType())
                                       .Distinct()
                                       .ToHashSet();
 
             // Special case to allow either DT or NC.
-            if (mods.Any(m => m is ModDoubleTime))
+            if (allowedMods.Any(type => type.IsSubclassOf(typeof(ModDoubleTime))) && mods.Any(m => m is ModNightcore))
                 allowedMods.Add(allMods.Single(m => m is ModNightcore).GetType());
 
             var result = new List<Mod>();
@@ -103,14 +94,14 @@ namespace PerformanceCalculator
 
         private class EmptyWorkingBeatmap : WorkingBeatmap
         {
-            public EmptyWorkingBeatmap()
-                : base(new BeatmapInfo(), null)
+            public EmptyWorkingBeatmap(BeatmapInfo beatmapInfo)
+                : base(beatmapInfo, null)
             {
             }
 
             protected override IBeatmap GetBeatmap() => throw new NotImplementedException();
 
-            protected override Texture GetBackground() => throw new NotImplementedException();
+            public override Texture GetBackground() => throw new NotImplementedException();
 
             protected override Track GetBeatmapTrack() => throw new NotImplementedException();
 

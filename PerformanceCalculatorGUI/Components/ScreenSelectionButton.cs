@@ -12,7 +12,6 @@ namespace PerformanceCalculatorGUI.Components
     {
         public ScreenSelectionButton(string title, IconUsage? icon = null, GlobalAction? hotkey = null)
         {
-            Width = PerformanceCalculatorSceneManager.CONTROL_AREA_HEIGHT;
             Hotkey = hotkey;
             TooltipMain = title;
 

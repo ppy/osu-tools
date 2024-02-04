@@ -32,7 +32,7 @@ namespace PerformanceCalculatorGUI.Components
         /// <summary>
         /// Metadata decoder is created once to not recreate it for every file
         /// </summary>
-        private readonly LegacyBeatmapMetadataDecoder beatmapDecoder = new();
+        private readonly LegacyBeatmapMetadataDecoder beatmapDecoder = new LegacyBeatmapMetadataDecoder();
 
         protected override DirectoryListingFile CreateFileItem(FileInfo file) => new ExtendedOsuDirectoryListingFile(file, beatmapDecoder);
 

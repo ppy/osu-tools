@@ -33,7 +33,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
 
         public IEnumerable<string> HandledExtensions => handledExtensions;
 
-        private readonly Bindable<FileInfo> currentFile = new();
+        private readonly Bindable<FileInfo> currentFile = new Bindable<FileInfo>();
 
         [Resolved]
         private OsuGameBase game { get; set; }
