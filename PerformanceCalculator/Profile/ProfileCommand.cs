@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
@@ -20,7 +19,6 @@ namespace PerformanceCalculator.Profile
     public class ProfileCommand : ApiCommand
     {
         [UsedImplicitly]
-        [Required]
         [Argument(0, Name = "user", Description = "User ID is preferred, but username should also work.")]
         public string ProfileName { get; }
 

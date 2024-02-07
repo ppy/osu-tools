@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
@@ -23,7 +22,6 @@ namespace PerformanceCalculator.Difficulty
     public class DifficultyCommand : ProcessorCommand
     {
         [UsedImplicitly]
-        [Required]
         [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
         public string Path { get; }
 
