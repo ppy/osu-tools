@@ -10,18 +10,15 @@ using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Legacy;
-using osu.Game.Database;
 using osu.Game.Models;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania.Difficulty;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Difficulty;
-using osu.Game.Rulesets.Scoring.Legacy;
 using osu.Game.Rulesets.Taiko.Difficulty;
-using osu.Game.Scoring.Legacy;
+using osu.Game.Scoring;
 
 namespace PerformanceCalculator.Performance
 {
@@ -42,29 +39,8 @@ namespace PerformanceCalculator.Performance
             APIBeatmap apiBeatmap = GetJsonFromApi<APIBeatmap>($"beatmaps/lookup?id={apiScore.BeatmapID}");
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(apiScore.RulesetID);
-            var score = apiScore.ToScoreInfo(apiScore.Mods.Select(m => m.ToMod(ruleset)).ToArray(), apiBeatmap);
-            score.Ruleset = ruleset.RulesetInfo;
-            score.BeatmapInfo!.Metadata = new BeatmapMetadata
-            {
-                Title = apiBeatmap.Metadata.Title,
-                Artist = apiBeatmap.Metadata.Artist,
-                Author = new RealmUser { Username = apiBeatmap.Metadata.Author.Username },
-            };
-
-            var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapInfo!.OnlineID.ToString());
-
-            if (apiScore.BuildID == null)
-            {
-                score.Mods = score.Mods.Append(ruleset.CreateMod<ModClassic>()).ToArray();
-                score.IsLegacyScore = true;
-                score.LegacyTotalScore = (int)score.TotalScore;
-                LegacyScoreDecoder.PopulateMaximumStatistics(score, workingBeatmap);
-                StandardisedScoreMigrationTools.UpdateFromLegacy(
-                    score,
-                    ruleset,
-                    LegacyBeatmapConversionDifficultyInfo.FromAPIBeatmap(apiBeatmap),
-                    ((ILegacyRuleset)ruleset).CreateLegacyScoreSimulator().Simulate(workingBeatmap, workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, score.Mods)));
-            }
+            var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(apiScore.BeatmapID.ToString());
+            var score = CreateScore(apiScore, ruleset, apiBeatmap, workingBeatmap);
 
             DifficultyAttributes attributes;
 
@@ -86,6 +62,20 @@ namespace PerformanceCalculator.Performance
         }
 
         protected virtual SoloScoreInfo QueryScore() => GetJsonFromApi<SoloScoreInfo>($"scores/{ScoreId}");
+
+        protected virtual ScoreInfo CreateScore(SoloScoreInfo apiScore, Ruleset ruleset, APIBeatmap apiBeatmap, WorkingBeatmap workingBeatmap)
+        {
+            var score = apiScore.ToScoreInfo(apiScore.Mods.Select(m => m.ToMod(ruleset)).ToArray(), apiBeatmap);
+            score.Ruleset = ruleset.RulesetInfo;
+            score.BeatmapInfo!.Metadata = new BeatmapMetadata
+            {
+                Title = apiBeatmap.Metadata.Title,
+                Artist = apiBeatmap.Metadata.Artist,
+                Author = new RealmUser { Username = apiBeatmap.Metadata.Author.Username },
+            };
+
+            return score;
+        }
 
         private DifficultyAttributes queryApiAttributes(int beatmapId, int rulesetId, LegacyMods mods)
         {
