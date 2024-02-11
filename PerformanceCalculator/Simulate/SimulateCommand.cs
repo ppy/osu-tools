@@ -57,7 +57,7 @@ namespace PerformanceCalculator.Simulate
             var ruleset = Ruleset;
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
-            var mods = NoClassicMod ? GetMods(ruleset) : LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, GetMods(ruleset));
+            var mods = NoClassicMod ? GetMods(ruleset) : LegacyHelper.FilterDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, GetMods(ruleset));
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
             var beatmapMaxCombo = GetMaxCombo(beatmap);

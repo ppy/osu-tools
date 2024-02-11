@@ -9,6 +9,7 @@ namespace PerformanceCalculator.Performance
     [Command(Name = "performance", Description = "Computes the performance (pp) of scores or replays.")]
     [Subcommand(typeof(ReplayPerformanceCommand))]
     [Subcommand(typeof(ScorePerformanceCommand))]
+    [Subcommand(typeof(LegacyScorePerformanceCommand))]
     public class PerformanceListingCommand
     {
         [UsedImplicitly]
