@@ -127,19 +127,38 @@ namespace PerformanceCalculatorGUI
             }
             else
             {
-                // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
-                var targetTotal = (int)Math.Round(accuracy * totalResultCount * 6);
+                // Accuracy if we will remove misses
+                int relevantResultCount = totalResultCount - countMiss;
+                double relevantAccuracy = accuracy * totalResultCount / relevantResultCount;
+                relevantAccuracy = Math.Clamp(relevantAccuracy, 0, 1);
 
-                // Start by assuming every non miss is a meh
-                // This is how much increase is needed by greats and goods
-                var delta = targetTotal - (totalResultCount - countMiss);
+                if (relevantAccuracy < 1.0 / 6) // in that case we have only 50s or misses
+                {
+                    double count50estimate = 6 * relevantResultCount * relevantAccuracy;
 
-                // Each great increases total by 5 (great-meh=5)
-                countGreat = delta / 5;
-                // Each good increases total by 1 (good-meh=1). Covers remaining difference.
-                countGood = delta % 5;
-                // Mehs are left over. Could be negative if impossible value of amountMiss chosen
-                countMeh = totalResultCount - countGreat - countGood - countMiss;
+                    countGood = 0;
+                    countMeh = (int?)Math.Round(count50estimate);
+                    countMiss = (int)(totalResultCount - countMeh);
+                }
+                else if (relevantAccuracy < 0.25) // point where we have no 300s
+                {
+                    double count100estimate = 6 * relevantResultCount * relevantAccuracy - relevantResultCount;
+                    double count50estimate = relevantResultCount - count100estimate;
+
+                    countGood = (int?)Math.Round(count100estimate);
+                    countMeh = (int?)(Math.Round(count100estimate + count50estimate) - countGood);
+                }
+                else
+                {
+                    double ratio50to100 = Math.Pow(1 - (relevantAccuracy - 0.25) / 0.75, 2);
+                    double count100estimate = 6 * relevantResultCount * (1 - relevantAccuracy) / (5 * ratio50to100 + 4);
+                    double count50estimate = count100estimate * ratio50to100;
+
+                    countGood = (int?)Math.Round(count100estimate);
+                    countMeh = (int?)(Math.Round(count100estimate + count50estimate) - countGood);
+                }
+
+                countGreat = (int)(totalResultCount - countGood - countMeh - countMiss);
             }
 
             return new Dictionary<HitResult, int>
