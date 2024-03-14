@@ -10,6 +10,7 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -27,6 +28,8 @@ namespace PerformanceCalculatorGUI.Components
 
         private LinkFlowContainer linkContainer;
 
+        private GameHost gameHost;
+
         private Bindable<string> clientIdBindable;
         private Bindable<string> clientSecretBindable;
         private Bindable<string> pathBindable;
@@ -36,7 +39,7 @@ namespace PerformanceCalculatorGUI.Components
         private const string api_key_link = "https://osu.ppy.sh/home/account/edit#new-oauth-application";
 
         [BackgroundDependencyLoader]
-        private void load(SettingsManager configManager, OsuConfigManager osuConfig)
+        private void load(SettingsManager configManager, OsuConfigManager osuConfig, GameHost gameHost)
         {
             this.configManager = configManager;
             clientIdBindable = configManager.GetBindable<string>(Settings.ClientId);
@@ -44,6 +47,7 @@ namespace PerformanceCalculatorGUI.Components
             pathBindable = configManager.GetBindable<string>(Settings.DefaultPath);
             cacheBindable = configManager.GetBindable<string>(Settings.CachePath);
             scaleBindable = osuConfig.GetBindable<float>(OsuSetting.UIScale);
+            this.gameHost = gameHost;
 
             Add(new Container
             {
@@ -184,28 +188,9 @@ namespace PerformanceCalculatorGUI.Components
             openFolder(cacheBindable.Value);
         }
 
-        private static void openFolder(string path)
+        private void openFolder(string path)
         {
-            // Check Platform
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // For Windows
-                Process.Start(new ProcessStartInfo("explorer.exe", path));
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // For MacOS
-                Process.Start("open", path);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                // For Linux
-                Process.Start("xdg-open", path);
-            }
-            else
-            {
-                // For others, do nothing
-            }
+            gameHost.GetStorage(path).PresentExternally();
         }
     }
 }
