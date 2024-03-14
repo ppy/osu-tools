@@ -186,7 +186,7 @@ namespace PerformanceCalculatorGUI.Components
 
         private static void openFolder(string path)
         {
-            // 检查当前运行的平台
+            // Check Platform
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // For Windows
