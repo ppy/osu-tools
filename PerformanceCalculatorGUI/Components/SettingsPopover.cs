@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
@@ -83,17 +84,53 @@ namespace PerformanceCalculatorGUI.Components
                                 Size = new Vector2(0.8f, 3f),
                                 Colour = OsuColour.Gray(0.5f)
                             },
-                            new LabelledTextBox
+                            new GridContainer
                             {
                                 RelativeSizeAxes = Axes.X,
-                                Label = "Default file path",
-                                Current = { BindTarget = pathBindable }
-                            },
-                            new LabelledTextBox
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                Label = "Beatmap cache path",
-                                Current = { BindTarget = cacheBindable }
+                                Height = 100,
+                                Content = new[]
+                                {
+                                    new Drawable[]
+                                    {
+                                        new LabelledTextBox
+                                        {
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                            RelativeSizeAxes = Axes.X,
+                                            Label = "Default file path",
+                                            Current = { BindTarget = pathBindable }
+                                        },
+                                        new RoundedButton
+                                        {
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                            Size = new Vector2(100, 40),
+                                            Margin = new MarginPadding { Left = 10 },
+                                            Text = "Open",
+                                            Action = openPathDirectory
+                                        }
+                                    },
+                                    new Drawable[]
+                                    {
+                                         new LabelledTextBox
+                                         {
+                                             Anchor = Anchor.CentreLeft,
+                                             Origin = Anchor.CentreLeft,
+                                             RelativeSizeAxes = Axes.X,
+                                             Label = "Beatmap cache path",
+                                             Current = { BindTarget = cacheBindable }
+                                         },
+                                         new RoundedButton
+                                         {
+                                             Anchor = Anchor.CentreLeft,
+                                             Origin = Anchor.CentreLeft,
+                                             Size = new Vector2(100, 40),
+                                             Margin = new MarginPadding { Left = 10 },
+                                             Text = "Open",
+                                             Action = openCacheDirectory
+                                         }
+                                    }
+                                }
                             },
                             new Box
                             {
@@ -133,6 +170,21 @@ namespace PerformanceCalculatorGUI.Components
             configManager.Save();
 
             this.HidePopover();
+        }
+
+        private void openPathDirectory()
+        {
+            openFolder(pathBindable.Value);
+        }
+
+        private void openCacheDirectory()
+        {
+            openFolder(cacheBindable.Value);
+        }
+
+        private static void openFolder(string folderPath)
+        {
+            Process.Start("explorer.exe", folderPath);
         }
     }
 }
