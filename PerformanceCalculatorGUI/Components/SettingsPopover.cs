@@ -1,7 +1,9 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
@@ -182,9 +184,28 @@ namespace PerformanceCalculatorGUI.Components
             openFolder(cacheBindable.Value);
         }
 
-        private static void openFolder(string folderPath)
+        private static void openFolder(string path)
         {
-            Process.Start("explorer.exe", folderPath);
+            // 检查当前运行的平台
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // For Windows
+                Process.Start(new ProcessStartInfo("explorer.exe", path));
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // For MacOS
+                Process.Start("open", path);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // For Linux
+                Process.Start("xdg-open", path);
+            }
+            else
+            {
+                // For others, do nothing
+            }
         }
     }
 }
