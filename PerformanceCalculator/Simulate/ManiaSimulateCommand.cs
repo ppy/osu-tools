@@ -80,11 +80,12 @@ namespace PerformanceCalculator.Simulate
             int delta = targetTotal - remainingHits;
 
             // Each great and perfect increases total by 5 (great-meh=5)
-            // There is no difference in accuracy between them, so just halve arbitrarily.
-            greats = Math.Min(delta / 5, remainingHits) / 2;
-            int perfects = greats.Value;
+            // There is no difference in accuracy between them, so just halve arbitrarily (favouring perfects for an odd number).
+            int greatsAndPerfects = Math.Min(delta / 5, remainingHits);
+            greats = greatsAndPerfects / 2;
+            int perfects = greats.Value + greatsAndPerfects % 2;
             delta -= (greats.Value + perfects) * 5;
-            remainingHits -= (greats.Value + perfects);
+            remainingHits -= greats.Value + perfects;
 
             // Each good increases total by 3 (good-meh=3).
             countGood = Math.Min(delta / 3, remainingHits);
@@ -93,6 +94,7 @@ namespace PerformanceCalculator.Simulate
 
             // Each ok increases total by 1 (ok-meh=1).
             oks = delta;
+            remainingHits -= oks.Value;
 
             // Everything else is a meh, as initially assumed.
             countMeh = remainingHits;
