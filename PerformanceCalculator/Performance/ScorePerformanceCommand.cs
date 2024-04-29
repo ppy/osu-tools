@@ -84,22 +84,40 @@ namespace PerformanceCalculator.Performance
                 { "mods", ((int)mods).ToString(CultureInfo.InvariantCulture) }
             };
 
+            var beatmap = GetJsonFromApi<APIBeatmap>($"beatmaps/{beatmapId}");
+
             switch (rulesetId)
             {
                 case 0:
-                    return GetJsonFromApi<AttributesResponse<OsuDifficultyAttributes>>($"beatmaps/{beatmapId}/attributes", HttpMethod.Post, parameters).Attributes;
+                    return getMergedAttributes<OsuDifficultyAttributes>(beatmap);
 
                 case 1:
-                    return GetJsonFromApi<AttributesResponse<TaikoDifficultyAttributes>>($"beatmaps/{beatmapId}/attributes", HttpMethod.Post, parameters).Attributes;
+                    return getMergedAttributes<TaikoDifficultyAttributes>(beatmap);
 
                 case 2:
-                    return GetJsonFromApi<AttributesResponse<CatchDifficultyAttributes>>($"beatmaps/{beatmapId}/attributes", HttpMethod.Post, parameters).Attributes;
+                    return getMergedAttributes<CatchDifficultyAttributes>(beatmap);
 
                 case 3:
-                    return GetJsonFromApi<AttributesResponse<ManiaDifficultyAttributes>>($"beatmaps/{beatmapId}/attributes", HttpMethod.Post, parameters).Attributes;
+                    return getMergedAttributes<ManiaDifficultyAttributes>(beatmap);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(rulesetId));
+            }
+
+            DifficultyAttributes getMergedAttributes<TAttributes>(APIBeatmap apiBeatmap)
+                where TAttributes : DifficultyAttributes, new()
+            {
+                // the osu-web endpoint queries osu-beatmap-difficulty-cache, which in turn does not return the full set of attributes -
+                // it skips ones that are already present on `APIBeatmap`
+                // (https://github.com/ppy/osu-beatmap-difficulty-lookup-cache/blob/db2203368221109803f2031788da31deb94e0f11/BeatmapDifficultyLookupCache/DifficultyCache.cs#L125-L128).
+                // to circumvent this, do some manual grafting on our side to produce a fully populated set of attributes.
+                var databasedAttributes = GetJsonFromApi<AttributesResponse<TAttributes>>($"beatmaps/{beatmapId}/attributes", HttpMethod.Post, parameters).Attributes;
+                var fullAttributes = new TAttributes();
+                fullAttributes.FromDatabaseAttributes(databasedAttributes.ToDatabaseAttributes().ToDictionary(
+                    pair => pair.attributeId,
+                    pair => Convert.ToDouble(pair.value, CultureInfo.InvariantCulture)
+                ), apiBeatmap);
+                return fullAttributes;
             }
         }
 
