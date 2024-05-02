@@ -83,7 +83,7 @@ namespace PerformanceCalculator.Simulate
             // There is no difference in accuracy between them, so just halve arbitrarily (favouring perfects for an odd number).
             int greatsAndPerfects = Math.Min(delta / 5, remainingHits);
             greats = greatsAndPerfects / 2;
-            int perfects = greats.Value + (greatsAndPerfects % 2);
+            int perfects = greatsAndPerfects - greats.Value;
             delta -= (greats.Value + perfects) * 5;
             remainingHits -= greats.Value + perfects;
 
