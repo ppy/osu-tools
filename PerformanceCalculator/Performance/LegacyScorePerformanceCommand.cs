@@ -1,13 +1,11 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring.Legacy;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
@@ -26,9 +24,6 @@ namespace PerformanceCalculator.Performance
         {
             var score = base.CreateScore(apiScore, ruleset, apiBeatmap, workingBeatmap);
 
-            score.Mods = score.Mods.Append(ruleset.CreateMod<ModClassic>()).ToArray();
-            score.IsLegacyScore = true;
-            score.LegacyTotalScore = (int)score.TotalScore;
             LegacyScoreDecoder.PopulateMaximumStatistics(score, workingBeatmap);
             StandardisedScoreMigrationTools.UpdateFromLegacy(
                 score,
