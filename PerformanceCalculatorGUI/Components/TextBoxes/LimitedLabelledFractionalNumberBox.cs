@@ -3,7 +3,6 @@
 
 using System.Globalization;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions;
 using osu.Game.Graphics.UserInterface;
 
 namespace PerformanceCalculatorGUI.Components.TextBoxes

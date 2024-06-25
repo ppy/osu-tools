@@ -9,7 +9,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.Utils;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
