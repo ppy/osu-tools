@@ -9,7 +9,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.Utils;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
@@ -132,7 +131,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             });
 
             if (hitObject.Angle is not null)
-                flowContainer.Add(new ObjectInspectorDifficultyValue("Angle", MathUtils.RadiansToDegrees(hitObject.Angle.Value)));
+                flowContainer.Add(new ObjectInspectorDifficultyValue("Angle", double.RadiansToDegrees(hitObject.Angle.Value)));
 
             if (hitObject.BaseObject is Slider)
             {

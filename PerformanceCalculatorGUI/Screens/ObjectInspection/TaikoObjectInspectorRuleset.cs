@@ -8,12 +8,13 @@ using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Taiko.Edit;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class TaikoObjectInspectorRuleset : DrawableTaikoRuleset
+    public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset
     {
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
 
@@ -30,6 +31,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public override bool PropagatePositionalInputSubTree => false;
 
         public override bool PropagateNonPositionalInputSubTree => false;
+
+        public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
 

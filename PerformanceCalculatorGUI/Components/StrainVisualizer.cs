@@ -97,7 +97,7 @@ namespace PerformanceCalculatorGUI.Components
         {
             graphsContainer.Clear();
 
-            var skills = val.NewValue.Where(x => x is StrainSkill).ToArray();
+            var skills = val.NewValue.Where(x => x is StrainSkill or StrainDecaySkill).ToArray();
 
             // dont bother if there are no strain skills to draw
             if (skills.Length == 0)
