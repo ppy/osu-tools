@@ -14,15 +14,16 @@ using osu.Game.Rulesets.Osu.Edit;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
 {
-    public partial class OsuObjectInspectorRuleset : DrawableOsuEditorRuleset
+    public partial class OsuObjectInspectorRuleset : DrawableOsuEditorRuleset, IDrawableInspectionRuleset
     {
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
+        private ObjectDifficultyValuesContainer difficultyValuesContainer { get; set; }
 
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
@@ -33,7 +34,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         protected override void Update()
         {
             base.Update();
-            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
         }
 
         public override bool PropagatePositionalInputSubTree => false;
@@ -43,6 +43,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
+
+        public InspectBlueprintContainer CreateBindInspectBlueprintContainer()
+        {
+            var result = new OsuInspectBlueprintContainer(Playfield);
+            result.SelectedItem.BindValueChanged(value =>
+                difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
+            return result;
+        }
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {

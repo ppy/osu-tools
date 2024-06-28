@@ -11,15 +11,16 @@ using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Taiko.Edit;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
 {
-    public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset
+    public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset, IDrawableInspectionRuleset
     {
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
+        private ObjectDifficultyValuesContainer difficultyValuesContainer { get; set; }
 
         public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
@@ -36,10 +37,18 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
 
+        public InspectBlueprintContainer CreateBindInspectBlueprintContainer()
+        {
+            var result = new TaikoInspectBlueprintContainer(Playfield);
+            result.SelectedItem.BindValueChanged(value =>
+                difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
+            return result;
+        }
+
         protected override void Update()
         {
             base.Update();
-            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
+            // difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
         }
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield

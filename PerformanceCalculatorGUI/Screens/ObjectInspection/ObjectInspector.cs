@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using NuGet.Packaging.Rules;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -23,7 +24,10 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
+using osu.Game.Screens.Edit.Compose.Components;
 using osuTK.Input;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
@@ -55,6 +59,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
         private IBeatmap playableBeatmap;
+
+        private IDrawableInspectionRuleset drawableInspectionRuleset;
+        private InspectBlueprintContainer blueprintContainer;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -155,63 +162,90 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             });
             dependencies.CacheAs(difficultyValuesContainer);
 
-            rulesetContainer.Add(ruleset.Value.ShortName switch
+            switch (ruleset.Value.ShortName)
             {
-                "osu" => new OsuPlayfieldAdjustmentContainer
+                case "osu":
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Children = new Drawable[]
+                    drawableInspectionRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
+                                processorBeatmap.Track.Rate)
                     {
-                        new PlayfieldBorder
+                        RelativeSizeAxes = Axes.Both,
+                        Clock = clock,
+                        ProcessCustomClock = false,
+                    };
+                    rulesetContainer.Add(new OsuPlayfieldAdjustmentContainer
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Children = new Drawable[]
                         {
-                            RelativeSizeAxes = Axes.Both,
-                            PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
-                        },
-                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
-                            processorBeatmap.Track.Rate)
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Clock = clock,
-                            ProcessCustomClock = false
+                            new PlayfieldBorder
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
+                            },
+                            (Drawable)drawableInspectionRuleset,
+                            blueprintContainer = drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
                         }
-                    }
-                },
-                "taiko" => new TaikoPlayfieldAdjustmentContainer
+                    });
+                    break;
+                }
+                case "taiko":
                 {
-                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
-                        processorBeatmap.Track.Rate)
+                    drawableInspectionRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
+                            processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
                         Clock = clock,
                         ProcessCustomClock = false
-                    }
-                },
-                "fruits" => new CatchPlayfieldAdjustmentContainer
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Y = 100,
-                    Children = new Drawable[]
+                    };
+                    rulesetContainer.Add(new TaikoPlayfieldAdjustmentContainer
                     {
-                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
-                            processorBeatmap.Track.Rate)
+                        RelativeSizeAxes = Axes.Both,
+                        Children = new Drawable[]
                         {
-                            RelativeSizeAxes = Axes.Both,
-                            Clock = clock,
-                            ProcessCustomClock = false
-                        },
-                    }
-                },
-                _ => new Container
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Child = new OsuSpriteText
-                    {
-                        Origin = Anchor.Centre,
-                        Anchor = Anchor.Centre,
-                        Text = "This ruleset is not supported yet!"
-                    }
+                            (Drawable)drawableInspectionRuleset,
+                            blueprintContainer = drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
+                        }
+                    });
+                    break;
                 }
-            });
+                case "fruits":
+                {
+                    drawableInspectionRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
+                                processorBeatmap.Track.Rate)
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Clock = clock,
+                        ProcessCustomClock = false
+                    };
+                    dependencies.CacheAs(((CatchObjectInspectorRuleset)drawableInspectionRuleset).Playfield);
+                    rulesetContainer.Add(new CatchPlayfieldAdjustmentContainer
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Y = 100,
+                        Children = new Drawable[]
+                        {
+                            (Drawable)drawableInspectionRuleset,
+                            blueprintContainer = drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
+                        }
+                    });
+                    break;
+                }
+                default:
+                {
+                    rulesetContainer.Add(new Container
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Child = new OsuSpriteText
+                        {
+                            Origin = Anchor.Centre,
+                            Anchor = Anchor.Centre,
+                            Text = "This ruleset is not supported yet!"
+                        }
+                    });
+                    break;
+                }
+            };
 
             ruleset.BindValueChanged(_ => PopOut());
             beatmap.BindValueChanged(_ => PopOut());
