@@ -10,13 +10,14 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Osu.Edit;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class OsuObjectInspectorRuleset : DrawableOsuRuleset
+    public partial class OsuObjectInspectorRuleset : DrawableOsuEditorRuleset
     {
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
@@ -39,6 +40,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
+        public override bool AllowBackwardsSeeks => true;
+
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
@@ -55,14 +58,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             protected override void OnNewDrawableHitObject(DrawableHitObject d)
             {
+                base.OnNewDrawableHitObject(d);
                 d.ApplyCustomUpdateState += updateState;
             }
 
             private void updateState(DrawableHitObject hitObject, ArmedState state)
             {
-                if (state == ArmedState.Idle)
-                    return;
-
                 if (hitObject is DrawableSliderRepeat repeat)
                 {
                     repeat.Arrow.ApplyTransformsAt(hitObject.StateUpdateTime, true);

@@ -178,7 +178,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 },
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
-                    RelativeSizeAxes = Axes.Both,
                     Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                         processorBeatmap.Track.Rate)
                     {
