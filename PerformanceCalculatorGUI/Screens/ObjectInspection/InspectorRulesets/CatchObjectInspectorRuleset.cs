@@ -4,18 +4,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
+using osu.Game.Graphics;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Catch.Edit;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Scoring;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.Old;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
 {
-    public partial class CatchObjectInspectorRuleset : DrawableCatchEditorRuleset, IDrawableInspectionRuleset
+    public partial class CatchObjectInspectorRuleset : DrawableCatchEditorRuleset
     {
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;
 
@@ -41,36 +45,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
             result.SelectedItem.BindValueChanged(value =>
                 difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
             return result;
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-            // difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
-        }
-
-        private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
-        {
-            protected override GameplayCursorContainer CreateCursor() => null!;
-
-            public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty)
-                : base(difficulty)
-            {
-                DisplayJudgements.Value = false;
-                //AddInternal(new Container
-                //{
-                //    RelativeSizeAxes = Axes.X,
-                //    Y = 440,
-                //    Height = 6.0f,
-                //    CornerRadius = 4.0f,
-                //    Masking = true,
-                //    Child = new Box
-                //    {
-                //        Colour = OsuColour.Gray(0.5f),
-                //        RelativeSizeAxes = Axes.Both
-                //    }
-                //});
-            }
         }
     }
 }

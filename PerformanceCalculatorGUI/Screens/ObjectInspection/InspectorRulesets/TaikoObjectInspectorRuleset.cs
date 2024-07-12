@@ -12,10 +12,11 @@ using osu.Game.Rulesets.Taiko.Edit;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
 using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.Old;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset, IDrawableInspectionRuleset
+    public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset
     {
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
 
@@ -36,19 +37,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
         public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
-
         public InspectBlueprintContainer CreateBindInspectBlueprintContainer()
         {
             var result = new TaikoInspectBlueprintContainer(Playfield);
             result.SelectedItem.BindValueChanged(value =>
                 difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
             return result;
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-            // difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
         }
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield

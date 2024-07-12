@@ -5,20 +5,25 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Edit;
+using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
 using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.Osu;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.Old;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
 {
-    public partial class OsuObjectInspectorRuleset : DrawableOsuEditorRuleset, IDrawableInspectionRuleset
+    public partial class OsuObjectInspectorRuleset : DrawableOsuEditorRuleset
     {
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
@@ -29,14 +34,16 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
+            //AddInternal(CreatePlayfieldAdjustmentContainer().WithChild(pool));
+            
         }
-
-        protected override void Update()
+        protected override void LoadComplete()
         {
-            base.Update();
+            base.LoadComplete();
+            KeyBindingInputManager.AllowGameplayInputs = false;
         }
 
-        public override bool PropagatePositionalInputSubTree => false;
+        // public override bool PropagatePositionalInputSubTree => true;
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
@@ -54,14 +61,33 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
+            private readonly OsuSelectableObjectPool pool;
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
             protected override GameplayCursorContainer CreateCursor() => null;
+
+            public override bool PropagatePositionalInputSubTree => true;
 
             public OsuObjectInspectorPlayfield(IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects)
             {
                 this.difficultyHitObjects = difficultyHitObjects;
+                AddInternal(pool = new OsuSelectableObjectPool { RelativeSizeAxes = Axes.Both });
+
                 HitPolicy = new AnyOrderHitPolicy();
                 DisplayJudgements.Value = false;
+            }
+
+            protected override void OnHitObjectAdded(HitObject hitObject)
+            {
+                base.OnHitObjectAdded(hitObject);
+                if (hitObject is not HitCircle) return;
+                pool.AddSelectableObject((OsuHitObject)hitObject);
+            }
+
+            protected override void OnHitObjectRemoved(HitObject hitObject)
+            {
+                base.OnHitObjectRemoved(hitObject);
+                if (hitObject is not HitCircle) return;
+                pool.RemoveSelectableObject((OsuHitObject)hitObject);
             }
 
             protected override void OnNewDrawableHitObject(DrawableHitObject d)

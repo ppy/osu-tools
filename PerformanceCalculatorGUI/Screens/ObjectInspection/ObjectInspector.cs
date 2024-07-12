@@ -60,9 +60,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
         private IBeatmap playableBeatmap;
 
-        private IDrawableInspectionRuleset drawableInspectionRuleset;
-        private InspectBlueprintContainer blueprintContainer;
-
         protected override bool BlockNonPositionalInput => true;
 
         protected override bool DimMainContent => false;
@@ -166,7 +163,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 case "osu":
                 {
-                    drawableInspectionRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
+                    OsuObjectInspectorRuleset drawableInspectionRuleset = new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
                                 processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
@@ -183,15 +180,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                                 RelativeSizeAxes = Axes.Both,
                                 PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                             },
-                            (Drawable)drawableInspectionRuleset,
-                            blueprintContainer = drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
+                            drawableInspectionRuleset,
+                            //drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
                         }
                     });
                     break;
                 }
                 case "taiko":
                 {
-                    drawableInspectionRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
+                    TaikoObjectInspectorRuleset drawableInspectionRuleset = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
                             processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
@@ -200,33 +197,33 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     };
                     rulesetContainer.Add(new TaikoPlayfieldAdjustmentContainer
                     {
-                        RelativeSizeAxes = Axes.Both,
                         Children = new Drawable[]
                         {
-                            (Drawable)drawableInspectionRuleset,
-                            blueprintContainer = drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
+                            drawableInspectionRuleset,
+                            //drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
                         }
                     });
                     break;
                 }
                 case "fruits":
                 {
-                    drawableInspectionRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
+                    CatchObjectInspectorRuleset drawableInspectionRuleset = new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
                                 processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
                         Clock = clock,
                         ProcessCustomClock = false
                     };
-                    dependencies.CacheAs(((CatchObjectInspectorRuleset)drawableInspectionRuleset).Playfield);
+                    //dependencies.CacheAs(drawableInspectionRuleset.Playfield);
+
                     rulesetContainer.Add(new CatchPlayfieldAdjustmentContainer
                     {
-                        RelativeSizeAxes = Axes.Both,
+                        //RelativeSizeAxes = Axes.Both,
                         Y = 100,
                         Children = new Drawable[]
                         {
-                            (Drawable)drawableInspectionRuleset,
-                            blueprintContainer = drawableInspectionRuleset.CreateBindInspectBlueprintContainer()
+                            drawableInspectionRuleset,
+                            //drawableInspectionRuleset.CreatePlayfieldAdjustmentContainer().WithChild(drawableInspectionRuleset.CreateBindInspectBlueprintContainer())
                         }
                     });
                     break;
