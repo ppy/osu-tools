@@ -55,23 +55,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         public void AddSelectableObject(HitObject hitObject)
         {
             var newEntry = CreateEntry(hitObject);
-            //newEntry.BindEvents();
             Add(newEntry);
         }
 
         public void RemoveSelectableObject(HitObject hitObject)
         {
             var entry = Entries.First(e => e.HitObject == hitObject);
-            //entry.UnbindEvents();
             Remove(entry);
-        }
-
-        protected override void Dispose(bool isDisposing)
-        {
-            base.Dispose(isDisposing);
-
-            //foreach (var entry in Entries)
-            //    entry.UnbindEvents();
         }
     }
 }

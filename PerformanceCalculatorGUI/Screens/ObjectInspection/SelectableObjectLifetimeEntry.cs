@@ -14,35 +14,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public abstract class SelectableObjectLifetimeEntry : LifetimeEntry
     {
-        public event Action Invalidated;
         public HitObject HitObject { get; private set; }
-
-        private bool wasBound = false;
 
         public SelectableObjectLifetimeEntry(HitObject hitObject)
         {
             HitObject = hitObject;
             RefreshLifetimes();
         }
-
-        public void BindEvents()
-        {
-            UnbindEvents();
-            //HitObject.DefaultsApplied += onDefaultsApplied;
-            wasBound = true;
-            RefreshLifetimes();
-        }
-
-        public void UnbindEvents()
-        {
-            if (!wasBound)
-                return;
-
-            //HitObject.DefaultsApplied -= onDefaultsApplied;
-            wasBound = false;
-        }
-
-        private void onDefaultsApplied(HitObject obj) => RefreshLifetimes();
 
         protected abstract double GetHitObjectStartTime();
 
@@ -52,8 +30,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             LifetimeStart = GetHitObjectStartTime();
             LifetimeEnd = GetHitObjectEndTime();
-
-            Invalidated?.Invoke();
         }
     }
 }

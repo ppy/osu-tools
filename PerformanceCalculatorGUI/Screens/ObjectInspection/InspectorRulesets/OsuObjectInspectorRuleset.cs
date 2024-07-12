@@ -32,7 +32,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
-            //AddInternal(CreatePlayfieldAdjustmentContainer().WithChild(pool));
             
         }
         protected override void LoadComplete()
@@ -40,8 +39,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
             base.LoadComplete();
             KeyBindingInputManager.AllowGameplayInputs = false;
         }
-
-        // public override bool PropagatePositionalInputSubTree => true;
 
         public override bool PropagateNonPositionalInputSubTree => false;
 

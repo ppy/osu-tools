@@ -19,19 +19,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public partial class OsuSelectableObjectPool : SelectableObjectPool
     {
-        //private DrawablePool<SelectableHitCircle> circlesPool;
-
-        //[BackgroundDependencyLoader]
-        //private void load()
-        //{
-        //    InternalChildren = new Drawable[]
-        //    {
-        //        circlesPool = new(1)
-        //    };
-        //}
-
-        //circlesPool.Get().With(o => o.HitObject = circle)
-
         public override SelectableObjectLifetimeEntry CreateEntry(HitObject hitObject) => new OsuSelectableObjectLifetimeEntry((OsuHitObject)hitObject);
 
         protected override SelectableHitObject GetDrawable(SelectableObjectLifetimeEntry entry)

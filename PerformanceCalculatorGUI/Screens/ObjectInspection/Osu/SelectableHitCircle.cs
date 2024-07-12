@@ -27,9 +27,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
             base.Update();
             CirclePiece.UpdateFrom(HitObject);
         }
-
-        //public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => DrawableObject.HitArea.ReceivePositionalInputAt(screenSpacePos);
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => CirclePiece.ReceivePositionalInputAt(screenSpacePos);
-        //public override Quad SelectionQuad => CirclePiece.ScreenSpaceDrawQuad;
     }
 }
