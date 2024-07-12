@@ -15,7 +15,6 @@ using osu.Game.Rulesets.Catch.Edit;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Scoring;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.Old;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
 {
@@ -38,13 +37,5 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
         public override bool PropagateNonPositionalInputSubTree => false;
 
         public override bool AllowBackwardsSeeks => true;
-
-        public InspectBlueprintContainer CreateBindInspectBlueprintContainer()
-        {
-            var result = new CatchInspectBlueprintContainer(Playfield);
-            result.SelectedItem.BindValueChanged(value =>
-                difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
-            return result;
-        }
     }
 }

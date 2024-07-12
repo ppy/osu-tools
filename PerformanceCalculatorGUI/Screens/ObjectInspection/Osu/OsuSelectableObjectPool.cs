@@ -15,7 +15,7 @@ using osu.Game.Rulesets.Osu.Edit.Blueprints.Spinners;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.Osu
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public partial class OsuSelectableObjectPool : SelectableObjectPool
     {
@@ -38,7 +38,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.
         {
             SelectableHitObject result = entry.HitObject switch
             {
-                HitCircle circle => new SelectableHitCircle().With(o => o.HitObject = circle), 
+                HitCircle circle => new SelectableHitCircle().With(o => o.HitObject = circle),
                 Slider slider => null,
                 Spinner spinner => null,
                 _ => null

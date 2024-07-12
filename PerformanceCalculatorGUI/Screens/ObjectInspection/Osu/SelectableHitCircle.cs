@@ -12,7 +12,7 @@ using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osuTK;
 using TagLib.Id3v2;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.Osu
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public partial class SelectableHitCircle : OsuSelectableHitObject<HitCircle>
     {
@@ -30,6 +30,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.
 
         //public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => DrawableObject.HitArea.ReceivePositionalInputAt(screenSpacePos);
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => CirclePiece.ReceivePositionalInputAt(screenSpacePos);
-        public override Quad SelectionQuad => CirclePiece.ScreenSpaceDrawQuad;
+        //public override Quad SelectionQuad => CirclePiece.ScreenSpaceDrawQuad;
     }
 }

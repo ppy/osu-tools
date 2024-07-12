@@ -18,7 +18,7 @@ using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 using TagLib.Ape;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public abstract partial class SelectableHitObject : PoolableDrawableWithLifetime<SelectableObjectLifetimeEntry>
     {

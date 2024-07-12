@@ -17,9 +17,7 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.Osu;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.Old;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.Osu;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
 {
@@ -50,14 +48,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
         public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
-
-        public InspectBlueprintContainer CreateBindInspectBlueprintContainer()
-        {
-            var result = new OsuInspectBlueprintContainer(Playfield);
-            result.SelectedItem.BindValueChanged(value =>
-                difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
-            return result;
-        }
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {

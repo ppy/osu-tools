@@ -16,7 +16,7 @@ using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Screens.Edit;
 using TagLib.Ape;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.Osu
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public abstract partial class OsuSelectableHitObject<THitObject> : SelectableHitObject<THitObject>
         where THitObject : OsuHitObject

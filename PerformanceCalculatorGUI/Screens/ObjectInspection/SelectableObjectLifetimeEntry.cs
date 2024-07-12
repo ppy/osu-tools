@@ -10,7 +10,7 @@ using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
 using PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public abstract class SelectableObjectLifetimeEntry : LifetimeEntry
     {
@@ -24,7 +24,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers
             HitObject = hitObject;
             RefreshLifetimes();
         }
-        
+
         public void BindEvents()
         {
             UnbindEvents();

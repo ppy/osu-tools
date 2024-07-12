@@ -9,7 +9,7 @@ using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components;
 using osu.Game.Rulesets.Osu.Objects;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers.Osu
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public partial class OsuSelectableObjectLifetimeEntry : SelectableObjectLifetimeEntry
     {

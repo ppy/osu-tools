@@ -26,7 +26,6 @@ using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
 using osu.Game.Screens.Edit.Compose.Components;
 using osuTK.Input;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers;
 using PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection

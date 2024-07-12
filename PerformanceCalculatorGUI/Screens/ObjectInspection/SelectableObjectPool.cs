@@ -20,9 +20,9 @@ using osuTK.Input;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Edit;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public abstract partial class SelectableObjectPool: PooledDrawableWithLifetimeContainer<SelectableObjectLifetimeEntry, SelectableHitObject>
+    public abstract partial class SelectableObjectPool : PooledDrawableWithLifetimeContainer<SelectableObjectLifetimeEntry, SelectableHitObject>
     {
         public abstract SelectableObjectLifetimeEntry CreateEntry(HitObject hitObject);
 
@@ -33,9 +33,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.BlueprintContainers
             if (e.Button == MouseButton.Right)
                 return false;
 
-            bool wasSomethingSelected = false;
+            var wasSomethingSelected = false;
 
-            foreach (SelectableHitObject blueprint in AliveEntries.Values)
+            foreach (var blueprint in AliveEntries.Values)
             {
                 if (wasSomethingSelected || blueprint.IsSelected)
                 {
