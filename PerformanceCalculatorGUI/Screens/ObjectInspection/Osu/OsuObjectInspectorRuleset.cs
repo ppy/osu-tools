@@ -19,10 +19,9 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.Osu;
 using SharpGen.Runtime;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public partial class OsuObjectInspectorRuleset : DrawableOsuEditorRuleset
     {
@@ -35,7 +34,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRules
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
-            
+
         }
         protected override void LoadComplete()
         {

@@ -8,7 +8,6 @@ using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {

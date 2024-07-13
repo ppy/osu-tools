@@ -16,7 +16,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Scoring;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.ObjectInspectorRulesets
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
     public partial class CatchObjectInspectorRuleset : DrawableCatchEditorRuleset
     {

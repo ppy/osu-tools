@@ -12,7 +12,7 @@ using osu.Game.Rulesets.Taiko.Edit;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 {
     public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset
     {
