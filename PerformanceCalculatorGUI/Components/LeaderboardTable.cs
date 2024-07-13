@@ -28,6 +28,7 @@ namespace PerformanceCalculatorGUI.Components
         public LeaderboardTable(int page, IReadOnlyList<LeaderboardUser> rankings)
             : base(page, rankings)
         {
+            Padding = new MarginPadding { Horizontal = 5 };
         }
 
         protected override RankingsTableColumn[] CreateAdditionalHeaders() => new[]
