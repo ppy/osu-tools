@@ -1,19 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using osu.Framework.Allocation;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Pooling;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Edit;
+﻿using osu.Framework.Graphics;
 using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles;
-using osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders;
-using osu.Game.Rulesets.Osu.Edit.Blueprints.Spinners;
 using osu.Game.Rulesets.Osu.Objects;
-using osu.Game.Rulesets.Osu.Objects.Drawables;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
@@ -23,11 +10,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 
         protected override SelectableHitObject GetDrawable(SelectableObjectLifetimeEntry entry)
         {
+            // Potential room for pooling here
             SelectableHitObject result = entry.HitObject switch
             {
                 HitCircle circle => new SelectableHitCircle().With(o => o.HitObject = circle),
-                Slider slider => null,
-                Spinner spinner => null,
+                Slider slider => new SelectableSlider().With(o => o.HitObject = slider),
+                Spinner spinner => null, // Do selectable spinner even needed here?
                 _ => null
             };
 

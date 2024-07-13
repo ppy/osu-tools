@@ -21,6 +21,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
     public abstract partial class OsuSelectableHitObject<THitObject> : SelectableHitObject<THitObject>
         where THitObject : OsuHitObject
     {
+        // Looks like this thing isn't necessary?
         //protected override bool ShouldBeAlive => base.ShouldBeAlive
         //                                         || (DrawableObject is not DrawableSpinner && ShowHitMarkers.Value && editorClock.CurrentTime >= Item.StartTime
         //                                             && editorClock.CurrentTime - Item.GetEndTime() < HitCircleOverlapMarker.FADE_OUT_EXTENSION);

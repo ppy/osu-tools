@@ -94,6 +94,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
 
             hitObjectTypeText.Text = hitObject.BaseObject.GetType().Name;
+            flowContainer.Add(new ObjectInspectorDifficultyValue("Start Time", hitObject.StartTime));
 
             switch (hitObject)
             {

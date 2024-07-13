@@ -22,6 +22,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public abstract partial class SelectableHitObject : PoolableDrawableWithLifetime<SelectableObjectLifetimeEntry>
     {
+        public abstract HitObject GetHitObject();
         public override bool HandlePositionalInput => IsSelectable;
 
         protected override void LoadComplete()
@@ -29,6 +30,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             base.LoadComplete();
             updateState();
         }
+
+        protected override bool ShouldBeAlive => base.ShouldBeAlive || IsSelected;
+        public override bool RemoveCompletedTransforms => true; // To prevent selecting when rewinding back
 
         private SelectionState state;
 
@@ -74,8 +78,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             foreach (var d in InternalChildren)
                 d.Show();
         }
-        protected override bool ShouldBeConsideredForInput(Drawable child) => State == SelectionState.Selected;
 
+        protected override bool ShouldBeConsideredForInput(Drawable child) => State == SelectionState.Selected;
         public void Select() => State = SelectionState.Selected;
         public void Deselect() => State = SelectionState.NotSelected;
         public void ToggleSelection() => State = IsSelected ? SelectionState.NotSelected : SelectionState.Selected;
@@ -86,5 +90,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         where THitObject : HitObject
     {
         public THitObject HitObject;
+        public override HitObject GetHitObject() => HitObject;
     }
 }

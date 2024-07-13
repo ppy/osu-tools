@@ -28,8 +28,47 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected void RefreshLifetimes()
         {
-            LifetimeStart = GetHitObjectStartTime();
-            LifetimeEnd = GetHitObjectEndTime();
+            SetLifetimeStart(GetHitObjectStartTime());
+            SetLifetimeEnd(GetHitObjectEndTime());
+        }
+
+        // The lifetime, as set by the hitobject.
+        private double realLifetimeStart = double.MinValue;
+        private double realLifetimeEnd = double.MaxValue;
+
+        // This method is called even if `start == LifetimeStart` when `KeepAlive` is true (necessary to update `realLifetimeStart`).
+        protected override void SetLifetimeStart(double start)
+        {
+            realLifetimeStart = start;
+            if (!keepAlive)
+                base.SetLifetimeStart(start);
+        }
+
+        protected override void SetLifetimeEnd(double end)
+        {
+            realLifetimeEnd = end;
+            if (!keepAlive)
+                base.SetLifetimeEnd(end);
+        }
+
+        private bool keepAlive;
+
+        /// <summary>
+        /// Whether the <see cref="HitObject"/> should be kept always alive.
+        /// </summary>
+        internal bool KeepAlive
+        {
+            set
+            {
+                if (keepAlive == value)
+                    return;
+
+                keepAlive = value;
+                if (keepAlive)
+                    SetLifetime(double.MinValue, double.MaxValue);
+                else
+                    SetLifetime(realLifetimeStart, realLifetimeEnd);
+            }
         }
     }
 }
