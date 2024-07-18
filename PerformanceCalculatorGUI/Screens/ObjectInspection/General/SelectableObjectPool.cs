@@ -1,30 +1,16 @@
 ﻿#nullable enable
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using osu.Framework.Allocation;
-using osu.Framework.Graphics.Pooling;
-using osu.Framework.Graphics;
 using osu.Game.Rulesets.Objects.Pooling;
-using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Osu.Objects;
-using osu.Framework.Graphics.Performance;
 using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
-using osu.Framework.Extensions.TypeExtensions;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Framework.Input.Events;
-using osu.Game.Screens.Edit.Compose.Components;
 using osuTK.Input;
-using osu.Game.Graphics.UserInterface;
-using osu.Game.Rulesets.Edit;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Bindables;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.General
 {
     public abstract partial class SelectableObjectPool : PooledDrawableWithLifetimeContainer<SelectableObjectLifetimeEntry, SelectableHitObject>
     {
@@ -37,11 +23,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 return false;
 
             // Variable for handling selection of desired object in the stack (otherwise it will iterate between 2)
-            bool wasSelectedJustDeselected = false;
+            var wasSelectedJustDeselected = false;
 
             KeyValuePair<SelectableObjectLifetimeEntry, SelectableHitObject>? newSelectedEntry = null;
 
-            foreach (var entry in AliveEntries.OrderBy(pair => pair.Value.GetHitObject().StartTime))
+            foreach (var entry in AliveEntries.OrderBy(pair => pair.Value.HitObject.StartTime))
             {
                 var lifetimeEntry = entry.Key;
                 var blueprint = entry.Value;
@@ -70,14 +56,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             }
 
             if (newSelectedEntry.IsNotNull()) newSelectedEntry.Value.Key.KeepAlive = true;
-            SelectedObject.Value = newSelectedEntry?.Value.GetHitObject();
+            SelectedObject.Value = newSelectedEntry?.Value.HitObject;
             return true;
         }
 
-        public abstract SelectableObjectLifetimeEntry CreateEntry(HitObject hitObject);
-        public void AddSelectableObject(HitObject hitObject)
+        public abstract SelectableObjectLifetimeEntry CreateEntry(HitObject hitObject, DrawableHitObject drawableHitObject);
+        public void AddSelectableObject(HitObject hitObject, DrawableHitObject drawableHitObject)
         {
-            var newEntry = CreateEntry(hitObject);
+            var newEntry = CreateEntry(hitObject, drawableHitObject);
             Add(newEntry);
         }
 

@@ -1,29 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿#nullable enable
+
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Primitives;
-using osu.Framework.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Pooling;
-using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Osu.Objects;
-using osuTK;
-using TagLib.Ape;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.General
 {
     public abstract partial class SelectableHitObject : PoolableDrawableWithLifetime<SelectableObjectLifetimeEntry>
     {
-        public abstract HitObject GetHitObject();
-        public override bool HandlePositionalInput => IsSelectable;
+        public abstract HitObject? HitObject { get; protected set; }
+
+        protected DrawableHitObject? DrawableObject;
 
         protected override void LoadComplete()
         {
@@ -33,6 +22,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         protected override bool ShouldBeAlive => base.ShouldBeAlive || IsSelected;
         public override bool RemoveCompletedTransforms => true; // To prevent selecting when rewinding back
+        public override bool HandlePositionalInput => IsSelectable;
+
 
         private SelectionState state;
 
@@ -79,6 +70,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 d.Show();
         }
 
+        protected override void OnApply(SelectableObjectLifetimeEntry entry)
+        {
+            HitObject = entry.HitObject;
+            DrawableObject = entry.DrawableHitObject;
+        }
+
         protected override bool ShouldBeConsideredForInput(Drawable child) => State == SelectionState.Selected;
         public void Select() => State = SelectionState.Selected;
         public void Deselect() => State = SelectionState.NotSelected;
@@ -89,7 +86,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     public abstract partial class SelectableHitObject<THitObject> : SelectableHitObject
         where THitObject : HitObject
     {
-        public THitObject HitObject;
-        public override HitObject GetHitObject() => HitObject;
+        private THitObject? hitObject;
+        public override HitObject? HitObject
+        {
+            get => hitObject;
+            protected set => hitObject = (THitObject)value;
+        }
     }
 }

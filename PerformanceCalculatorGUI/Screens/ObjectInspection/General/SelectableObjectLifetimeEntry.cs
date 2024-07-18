@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using osu.Framework.Graphics.Performance;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
-using osu.Game.Rulesets.Osu.Objects;
+﻿#nullable enable
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection
+using osu.Framework.Graphics.Performance;
+using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Objects.Drawables;
+
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.General
 {
     public abstract class SelectableObjectLifetimeEntry : LifetimeEntry
     {
+        public DrawableHitObject? DrawableHitObject { get; private set; }
         public HitObject HitObject { get; private set; }
 
-        public SelectableObjectLifetimeEntry(HitObject hitObject)
+        public SelectableObjectLifetimeEntry(HitObject hitObject, DrawableHitObject? drawableHitObject)
         {
+            DrawableHitObject = drawableHitObject;
             HitObject = hitObject;
             RefreshLifetimes();
         }
@@ -55,7 +52,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         /// <summary>
         /// Whether the <see cref="HitObject"/> should be kept always alive.
         /// </summary>
-        internal bool KeepAlive
+        public bool KeepAlive
         {
             set
             {

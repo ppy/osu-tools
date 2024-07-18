@@ -2,13 +2,16 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Taiko.Edit;
+using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
 
@@ -35,6 +38,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
         public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
+
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
             protected override GameplayCursorContainer CreateCursor() => null;
@@ -42,6 +46,21 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
             public TaikoObjectInspectorPlayfield()
             {
                 DisplayJudgements.Value = false;
+            }
+
+            protected override void OnHitObjectAdded(HitObject hitObject)
+            {
+                base.OnHitObjectAdded(hitObject);
+
+                TaikoSelectableDrawableObject newSelectable = hitObject switch
+                {
+                    TaikoStrongableHitObject strongable => new TaikoSelectableStrongableDrawableObject(strongable),
+                    TaikoHitObject normal => new TaikoSelectableDrawableObject(normal),
+                    _ => null
+                };
+
+                if (newSelectable != null)
+                    HitObjectContainer.Add(newSelectable);
             }
         }
     }

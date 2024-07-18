@@ -4,12 +4,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
@@ -19,7 +16,6 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
-using SharpGen.Runtime;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
@@ -54,9 +50,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         {
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
 
-            //public readonly Bindable<DifficultyHitObject> CurrentDifficultyHitObject = new();
-
             public OsuSelectableObjectPool Pool { get; private set; }
+
             public OsuObjectInspectorPlayfield(IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects)
             {
                 this.difficultyHitObjects = difficultyHitObjects;
@@ -72,20 +67,20 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 
             protected override GameplayCursorContainer CreateCursor() => null;
 
-            public override bool PropagatePositionalInputSubTree => true;
-
             protected override void OnHitObjectAdded(HitObject hitObject)
             {
                 base.OnHitObjectAdded(hitObject);
+
                 if (hitObject is Spinner) return;
-                Pool.AddSelectableObject((OsuHitObject)hitObject);
+                Pool.AddSelectableObject(hitObject, null);
             }
 
             protected override void OnHitObjectRemoved(HitObject hitObject)
             {
                 base.OnHitObjectRemoved(hitObject);
+
                 if (hitObject is Spinner) return;
-                Pool.RemoveSelectableObject((OsuHitObject)hitObject);
+                Pool.RemoveSelectableObject(hitObject);
             }
 
             protected override void OnNewDrawableHitObject(DrawableHitObject d)

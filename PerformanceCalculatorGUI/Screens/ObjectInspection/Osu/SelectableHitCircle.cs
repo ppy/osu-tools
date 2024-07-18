@@ -1,20 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using osu.Framework.Graphics.Primitives;
-using osu.Framework.Graphics;
-using osu.Game.Rulesets.Objects;
+﻿#nullable enable
+
 using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components;
 using osu.Game.Rulesets.Osu.Objects;
-using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osuTK;
 using osu.Framework.Allocation;
-using osu.Game.Configuration;
-using osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components;
-using osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders;
-using osu.Game.Screens.Play;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
@@ -23,7 +12,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         private HitCirclePiece circlePiece;
 
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config)
+        private void load()
         {
             InternalChild = circlePiece = new HitCirclePiece();
         }
@@ -31,7 +20,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         protected override void Update()
         {
             base.Update();
-            circlePiece.UpdateFrom(HitObject);
+
+            if (HitObject != null)
+                circlePiece.UpdateFrom((HitCircle)HitObject);
         }
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => circlePiece.ReceivePositionalInputAt(screenSpacePos);
     }
