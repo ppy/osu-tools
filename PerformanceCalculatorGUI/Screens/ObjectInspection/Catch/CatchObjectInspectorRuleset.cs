@@ -12,9 +12,15 @@ using osu.Game.Graphics;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Catch.Edit;
+using osu.Game.Rulesets.Catch.Objects;
+using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Taiko.Objects;
+using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
 using osu.Game.Scoring;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
@@ -37,5 +43,42 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
         public override bool PropagateNonPositionalInputSubTree => false;
 
         public override bool AllowBackwardsSeeks => true;
+
+        protected override Playfield CreatePlayfield() => new CatchObjectInspectorPlayfield(Beatmap.Difficulty);
+
+        private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
+        {
+            public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty)
+                : base(difficulty)
+            {
+                DisplayJudgements.Value = false;
+            }
+
+            protected override void OnHitObjectAdded(HitObject hitObject)
+            {
+                base.OnHitObjectAdded(hitObject);
+
+                // Potential room for pooling here
+                switch (hitObject)
+                {
+                    case Fruit fruit:
+                    {
+                        HitObjectContainer.Add(new CatchSelectableDrawableObject(fruit));
+                        break;
+                    }
+                    case JuiceStream juiceStream:
+                    {
+                        foreach (var nested in juiceStream.NestedHitObjects)
+                        {
+                            if (nested is TinyDroplet)
+                                continue;
+
+                            HitObjectContainer.Add(new CatchSelectableDrawableObject((CatchHitObject)nested));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

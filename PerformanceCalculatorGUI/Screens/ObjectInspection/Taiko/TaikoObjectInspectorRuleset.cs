@@ -52,6 +52,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
             {
                 base.OnHitObjectAdded(hitObject);
 
+                // Potential room for pooling here
                 TaikoSelectableDrawableObject newSelectable = hitObject switch
                 {
                     TaikoStrongableHitObject strongable => new TaikoSelectableStrongableDrawableObject(strongable),
