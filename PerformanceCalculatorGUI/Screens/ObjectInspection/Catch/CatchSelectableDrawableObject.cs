@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#nullable enable
+
 using osu.Framework.Allocation;
-using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Catch.Objects.Drawables;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Catch.Edit.Blueprints.Components;
 using osuTK;
-using osu.Game.Rulesets.Objects.Types;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
