@@ -3,48 +3,49 @@
 using osu.Framework.Allocation;
 using osu.Game.Rulesets.Catch.Objects.Drawables;
 using osu.Game.Rulesets.Catch.Objects;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Catch.Edit.Blueprints.Components;
 using osuTK;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
     public partial class CatchSelectableHitObject : DrawableCatchHitObject
     {
-        private float x, scale;
-        public CatchSelectableHitObject(CatchHitObject hitObject)
-            : base(new CatchInspectorHitObject(hitObject))
+        // This is HitCirclePiece instead of FruitOutline because FruitOutline doesn't register input for some reason
+        private HitCirclePiece outline;
+        public CatchSelectableHitObject()
+            : base(new CatchDummyHitObject())
         {
-            x = hitObject.EffectiveX;
-            scale = hitObject.Scale;
-
-            if (hitObject is Droplet)
-                scale *= 0.5f;
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            AddInternal(new FruitOutline()
-            {
-                X = x,
-                Scale = new Vector2(scale)
-            });
+            AddInternal(outline = new HitCirclePiece());
+            UpdateState();
         }
 
-        private class CatchInspectorHitObject : CatchHitObject
+        public void UpdateFromHitObject(CatchHitObject hitObject)
         {
-            public CatchInspectorHitObject(HitObject obj)
+            Deselect();
+            HitObject.StartTime = hitObject.StartTime;
+            X = hitObject.EffectiveX;
+            outline.Scale = new Vector2(hitObject.Scale);
+
+            if (hitObject is Droplet)
+                outline.Scale *= 0.5f;
+        }
+
+        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => outline.ReceivePositionalInputAt(screenSpacePos);
+
+        private class CatchDummyHitObject : CatchHitObject
+        {
+            public CatchDummyHitObject()
             {
-                StartTime = obj.StartTime;
             }
         }
 
         #region Selection Logic
-
-        protected override bool ShouldBeAlive => base.ShouldBeAlive || IsSelected;
-        public override bool RemoveCompletedTransforms => true; // To prevent selecting when rewinding back
         public override bool HandlePositionalInput => ShouldBeAlive || IsPresent;
 
         private SelectionState state;

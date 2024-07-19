@@ -4,7 +4,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Edit.Blueprints;
 using osu.Game.Rulesets.Taiko.Objects;
@@ -17,7 +16,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
     public partial class TaikoSelectableHitObject : DrawableTaikoHitObject
     {
         private HitPiece hitPiece;
-        public TaikoSelectableHitObject(TaikoHitObject hitObject) : base(new TaikoInspectorHitObject(hitObject))
+        public TaikoSelectableHitObject() : base(new TaikoDummyHitObject())
         {
             Anchor = Anchor.CentreLeft;
             Origin = Anchor.CentreLeft;
@@ -30,18 +29,20 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
             UpdateState();
         }
 
+        public virtual void UpdateFromHitObject(TaikoHitObject hitObject)
+        {
+            Deselect();
+            HitObject.StartTime = hitObject.StartTime;
+        }
+
         protected virtual Vector2 GetObjectSize() => new Vector2(TaikoHitObject.DEFAULT_SIZE * TaikoPlayfield.BASE_HEIGHT);
 
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => hitPiece.ReceivePositionalInputAt(screenSpacePos);
-
+            
         public override bool OnPressed(KeyBindingPressEvent<TaikoAction> e) => true;
 
-        private class TaikoInspectorHitObject : TaikoHitObject
+        private class TaikoDummyHitObject : TaikoHitObject
         {
-            public TaikoInspectorHitObject(HitObject obj)
-            {
-                StartTime = obj.StartTime;
-            }
         }
 
         #region Selection Logic

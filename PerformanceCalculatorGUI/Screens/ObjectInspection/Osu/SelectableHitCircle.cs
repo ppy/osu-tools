@@ -15,15 +15,16 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         private void load()
         {
             InternalChild = circlePiece = new HitCirclePiece();
+            UpdateFromHitObject();
         }
 
-        protected override void Update()
+        public override void UpdateFromHitObject()
         {
-            base.Update();
-
             if (HitObject != null)
                 circlePiece.UpdateFrom((HitCircle)HitObject);
         }
+
+
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => circlePiece.ReceivePositionalInputAt(screenSpacePos);
     }
 }

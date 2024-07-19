@@ -20,9 +20,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
             UpdateState();
         }
 
+        public abstract void UpdateFromHitObject();
         protected override void OnApply(OsuSelectableObjectLifetimeEntry entry)
         {
             HitObject = entry.HitObject;
+            UpdateFromHitObject();
         }
 
         #region Selection Logic

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
-using osu.Framework.Input;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -27,8 +26,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         [Resolved]
         private ObjectDifficultyValuesContainer difficultyValuesContainer { get; set; }
 
-        protected override PassThroughInputManager CreateInputManager() => new PassThroughInputManager();
-
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
         {
@@ -38,17 +35,17 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            //KeyBindingInputManager.AllowGameplayInputs = false;
+            KeyBindingInputManager.AllowGameplayInputs = false;
             ((OsuObjectInspectorPlayfield)Playfield).Pool.SelectedObject.BindValueChanged(value =>
                 difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
         }
 
+        public override bool PropagatePositionalInputSubTree => true;
         public override bool PropagateNonPositionalInputSubTree => false;
 
         public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
-
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;

@@ -3,14 +3,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Game.Rulesets.Objects.Pooling;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Drawables;
 using osu.Framework.Input.Events;
 using osuTK.Input;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Bindables;
 using osu.Game.Rulesets.Osu.Objects;
 using System.Diagnostics;
+using osu.Framework.Graphics.Pooling;
+using osu.Framework.Allocation;
+using osu.Framework.Graphics;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
@@ -18,6 +19,23 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
     {
         public readonly Bindable<OsuHitObject?> SelectedObject = new();
         public override bool HandlePositionalInput => true;
+
+        private DrawablePool<SelectableHitCircle> circlesPool;
+        private DrawablePool<SelectableSlider> slidersPool;
+
+        public OsuSelectableObjectPool()
+        {
+        }
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            InternalChildren = new Drawable[]
+            {
+                circlesPool = new DrawablePool<SelectableHitCircle>(1, 200),
+                slidersPool = new DrawablePool<SelectableSlider>(1, 200)
+            };
+        }
 
         protected override bool OnClick(ClickEvent e)
         {
@@ -52,8 +70,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
                 blueprint.Select();
 
                 newSelectedEntry = entry;
-
-
                 wasSelectedJustDeselected = false;
             }
 
@@ -67,8 +83,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
             // Potential room for pooling here
             OsuSelectableHitObject? result = entry.HitObject switch
             {
-                HitCircle => new SelectableHitCircle(),
-                Slider => new SelectableSlider(),
+                HitCircle => circlesPool.Get(),
+                Slider => slidersPool.Get(),
                 _ => null
             };
 

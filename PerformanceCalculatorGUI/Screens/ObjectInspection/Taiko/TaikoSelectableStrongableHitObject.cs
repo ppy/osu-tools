@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Taiko.UI;
 using osuTK;
@@ -10,9 +9,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
     public partial class TaikoSelectableStrongableHitObject : TaikoSelectableHitObject
     {
         private bool isStrong;
-        public TaikoSelectableStrongableHitObject(TaikoStrongableHitObject hitObject) : base(hitObject)
+        public TaikoSelectableStrongableHitObject() : base()
         {
-            isStrong = hitObject.IsStrong;
+        }
+
+        public override void UpdateFromHitObject(TaikoHitObject hitObject)
+        {
+            base.UpdateFromHitObject(hitObject);
+            isStrong = ((TaikoStrongableHitObject)hitObject).IsStrong;
         }
 
         protected override Vector2 GetObjectSize()
