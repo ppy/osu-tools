@@ -36,6 +36,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                 outline.Scale *= 0.5f;
         }
 
+        protected override void OnApply()
+        {
+            base.OnApply();
+            UpdateState();
+        }
+
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => outline.ReceivePositionalInputAt(screenSpacePos);
 
         private class CatchDummyHitObject : CatchHitObject

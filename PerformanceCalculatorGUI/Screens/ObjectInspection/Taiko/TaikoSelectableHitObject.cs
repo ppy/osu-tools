@@ -37,6 +37,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
         protected virtual Vector2 GetObjectSize() => new Vector2(TaikoHitObject.DEFAULT_SIZE * TaikoPlayfield.BASE_HEIGHT);
 
+        protected override void OnApply()
+        {
+            base.OnApply();
+            UpdateState();
+        }
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => hitPiece.ReceivePositionalInputAt(screenSpacePos);
             
         public override bool OnPressed(KeyBindingPressEvent<TaikoAction> e) => true;

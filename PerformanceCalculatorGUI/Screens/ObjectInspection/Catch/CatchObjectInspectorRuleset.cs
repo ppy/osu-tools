@@ -106,7 +106,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                     case Fruit fruit:
                     {
                         var newSelectable = selectablesPool.Get(a => a.UpdateFromHitObject((CatchHitObject)hitObject));
-                        newSelectable.UpdateFromHitObject((CatchHitObject)hitObject);
                         HitObjectContainer.Add(newSelectable);
                         selectables.Add(newSelectable);
                         break;
@@ -119,7 +118,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                                 continue;
 
                             var newSelectable = selectablesPool.Get(a => a.UpdateFromHitObject((CatchHitObject)nested));
-                            newSelectable.UpdateFromHitObject((CatchHitObject)nested);
                             HitObjectContainer.Add(newSelectable);
                             selectables.Add(newSelectable);
                         }
