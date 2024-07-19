@@ -30,7 +30,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
             : base(ruleset, beatmap, mods)
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
-
         }
         protected override void LoadComplete()
         {
