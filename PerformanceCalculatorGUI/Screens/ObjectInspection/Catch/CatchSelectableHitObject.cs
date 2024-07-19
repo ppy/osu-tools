@@ -1,28 +1,44 @@
 ﻿#nullable enable
 
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.UserInterface;
-using osu.Game.Graphics.UserInterface;
+using osu.Framework.Allocation;
+using osu.Game.Rulesets.Catch.Objects.Drawables;
+using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Drawables;
-using osu.Game.Rulesets.Objects.Pooling;
-using osu.Game.Rulesets.Osu.Objects;
+using osu.Game.Rulesets.Catch.Edit.Blueprints.Components;
+using osuTK;
+using osu.Game.Graphics.UserInterface;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
-    public abstract partial class OsuSelectableHitObject : PoolableDrawableWithLifetime<OsuSelectableObjectLifetimeEntry>
+    public partial class CatchSelectableHitObject : DrawableCatchHitObject
     {
-        public abstract OsuHitObject? HitObject { get; protected set; }
-
-        protected override void LoadComplete()
+        private float x, scale;
+        public CatchSelectableHitObject(CatchHitObject hitObject)
+            : base(new CatchInspectorHitObject(hitObject))
         {
-            base.LoadComplete();
-            UpdateState();
+            x = hitObject.EffectiveX;
+            scale = hitObject.Scale;
+
+            if (hitObject is Droplet)
+                scale *= 0.5f;
         }
 
-        protected override void OnApply(OsuSelectableObjectLifetimeEntry entry)
+        [BackgroundDependencyLoader]
+        private void load()
         {
-            HitObject = entry.HitObject;
+            AddInternal(new FruitOutline()
+            {
+                X = x,
+                Scale = new Vector2(scale)
+            });
+        }
+
+        private class CatchInspectorHitObject : CatchHitObject
+        {
+            public CatchInspectorHitObject(HitObject obj)
+            {
+                StartTime = obj.StartTime;
+            }
         }
 
         #region Selection Logic
@@ -73,22 +89,10 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
             foreach (var d in InternalChildren)
                 d.Show();
         }
-
-        //protected override bool ShouldBeConsideredForInput(Drawable child) => State == SelectionState.Selected;
         public void Select() => State = SelectionState.Selected;
         public void Deselect() => State = SelectionState.NotSelected;
         public bool IsSelected => State == SelectionState.Selected;
 
         #endregion
-    }
-    public abstract partial class OsuSelectableHitObject<THitObject> : OsuSelectableHitObject
-        where THitObject : OsuHitObject
-    {
-        private THitObject? hitObject;
-        public override OsuHitObject? HitObject
-        {
-            get => hitObject;
-            protected set => hitObject = (THitObject?)value;
-        }
     }
 }

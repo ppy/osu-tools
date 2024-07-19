@@ -63,7 +63,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                 {
                     case Fruit fruit:
                     {
-                        HitObjectContainer.Add(new CatchSelectableDrawableObject(fruit));
+                        HitObjectContainer.Add(new CatchSelectableHitObject(fruit));
                         break;
                     }
                     case JuiceStream juiceStream:
@@ -73,7 +73,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                             if (nested is TinyDroplet)
                                 continue;
 
-                            HitObjectContainer.Add(new CatchSelectableDrawableObject((CatchHitObject)nested));
+                            HitObjectContainer.Add(new CatchSelectableHitObject((CatchHitObject)nested));
                         }
                         break;
                     }

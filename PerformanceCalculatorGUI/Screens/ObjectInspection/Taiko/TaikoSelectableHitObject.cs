@@ -1,34 +1,50 @@
 ﻿#nullable enable
 
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Drawables;
-using osu.Game.Rulesets.Objects.Pooling;
-using osu.Game.Rulesets.Osu.Objects;
+using osu.Game.Rulesets.Taiko;
+using osu.Game.Rulesets.Taiko.Edit.Blueprints;
+using osu.Game.Rulesets.Taiko.Objects;
+using osu.Game.Rulesets.Taiko.Objects.Drawables;
+using osu.Game.Rulesets.Taiko.UI;
+using osuTK;
 
-namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
+namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 {
-    public abstract partial class OsuSelectableHitObject : PoolableDrawableWithLifetime<OsuSelectableObjectLifetimeEntry>
+    public partial class TaikoSelectableHitObject : DrawableTaikoHitObject
     {
-        public abstract OsuHitObject? HitObject { get; protected set; }
-
-        protected override void LoadComplete()
+        private HitPiece hitPiece;
+        public TaikoSelectableHitObject(TaikoHitObject hitObject) : base(new TaikoInspectorHitObject(hitObject))
         {
-            base.LoadComplete();
+            Anchor = Anchor.CentreLeft;
+            Origin = Anchor.CentreLeft;
+        }
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            AddInternal(hitPiece = new HitPiece() {Size = GetObjectSize() });
             UpdateState();
         }
 
-        protected override void OnApply(OsuSelectableObjectLifetimeEntry entry)
+        protected virtual Vector2 GetObjectSize() => new Vector2(TaikoHitObject.DEFAULT_SIZE * TaikoPlayfield.BASE_HEIGHT);
+
+        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => hitPiece.ReceivePositionalInputAt(screenSpacePos);
+
+        public override bool OnPressed(KeyBindingPressEvent<TaikoAction> e) => true;
+
+        private class TaikoInspectorHitObject : TaikoHitObject
         {
-            HitObject = entry.HitObject;
+            public TaikoInspectorHitObject(HitObject obj)
+            {
+                StartTime = obj.StartTime;
+            }
         }
 
         #region Selection Logic
-
-        protected override bool ShouldBeAlive => base.ShouldBeAlive || IsSelected;
-        public override bool RemoveCompletedTransforms => true; // To prevent selecting when rewinding back
         public override bool HandlePositionalInput => ShouldBeAlive || IsPresent;
 
         private SelectionState state;
@@ -73,22 +89,10 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
             foreach (var d in InternalChildren)
                 d.Show();
         }
-
-        //protected override bool ShouldBeConsideredForInput(Drawable child) => State == SelectionState.Selected;
         public void Select() => State = SelectionState.Selected;
         public void Deselect() => State = SelectionState.NotSelected;
         public bool IsSelected => State == SelectionState.Selected;
 
         #endregion
-    }
-    public abstract partial class OsuSelectableHitObject<THitObject> : OsuSelectableHitObject
-        where THitObject : OsuHitObject
-    {
-        private THitObject? hitObject;
-        public override OsuHitObject? HitObject
-        {
-            get => hitObject;
-            protected set => hitObject = (THitObject?)value;
-        }
     }
 }

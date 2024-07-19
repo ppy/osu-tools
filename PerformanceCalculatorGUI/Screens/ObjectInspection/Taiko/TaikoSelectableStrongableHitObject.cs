@@ -1,15 +1,16 @@
 ﻿#nullable enable
 
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Taiko.UI;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 {
-    public partial class TaikoSelectableStrongableDrawableObject : TaikoSelectableDrawableObject
+    public partial class TaikoSelectableStrongableHitObject : TaikoSelectableHitObject
     {
         private bool isStrong;
-        public TaikoSelectableStrongableDrawableObject(TaikoStrongableHitObject hitObject) : base(hitObject)
+        public TaikoSelectableStrongableHitObject(TaikoStrongableHitObject hitObject) : base(hitObject)
         {
             isStrong = hitObject.IsStrong;
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Input;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -26,6 +27,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         [Resolved]
         private ObjectDifficultyValuesContainer difficultyValuesContainer { get; set; }
 
+        protected override PassThroughInputManager CreateInputManager() => new PassThroughInputManager();
+
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
         {
@@ -35,7 +38,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            KeyBindingInputManager.AllowGameplayInputs = false;
+            //KeyBindingInputManager.AllowGameplayInputs = false;
             ((OsuObjectInspectorPlayfield)Playfield).Pool.SelectedObject.BindValueChanged(value =>
                 difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject == value.NewValue));
         }
@@ -72,7 +75,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
                 base.OnHitObjectAdded(hitObject);
 
                 if (hitObject is Spinner) return;
-                Pool.AddSelectableObject(hitObject, null);
+                Pool.AddSelectableObject((OsuHitObject)hitObject);
             }
 
             protected override void OnHitObjectRemoved(HitObject hitObject)
@@ -80,7 +83,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
                 base.OnHitObjectRemoved(hitObject);
 
                 if (hitObject is Spinner) return;
-                Pool.RemoveSelectableObject(hitObject);
+                Pool.RemoveSelectableObject((OsuHitObject)hitObject);
             }
 
             protected override void OnNewDrawableHitObject(DrawableHitObject d)
