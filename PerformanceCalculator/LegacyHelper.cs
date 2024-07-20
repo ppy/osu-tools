@@ -67,6 +67,7 @@ namespace PerformanceCalculator
                                            | LegacyMods.Key9 | LegacyMods.KeyCoop;
 
         // See: https://github.com/ppy/osu-queue-score-statistics/blob/2264bfa68e14bb16ec71a7cac2072bdcfaf565b6/osu.Server.Queues.ScoreStatisticsProcessor/Helpers/LegacyModsHelper.cs
+        // Since hidden always affects pp calculation, it has been added to the base relevant mods, contrary to the source of this method
         public static LegacyMods MaskRelevantMods(LegacyMods mods, bool isConvertedBeatmap, int rulesetId)
         {
             LegacyMods relevantMods = LegacyMods.DoubleTime | LegacyMods.HalfTime | LegacyMods.HardRock | LegacyMods.Easy | LegacyMods.Hidden;
@@ -74,10 +75,7 @@ namespace PerformanceCalculator
             switch (rulesetId)
             {
                 case 0:
-                    if ((mods & LegacyMods.Flashlight) > 0)
-                        relevantMods |= LegacyMods.Flashlight | LegacyMods.Hidden | LegacyMods.TouchDevice;
-                    else
-                        relevantMods |= LegacyMods.Flashlight | LegacyMods.TouchDevice;
+                    relevantMods |= LegacyMods.Flashlight | LegacyMods.TouchDevice;
                     break;
 
                 case 3:
