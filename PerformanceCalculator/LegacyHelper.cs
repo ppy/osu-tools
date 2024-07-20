@@ -69,7 +69,7 @@ namespace PerformanceCalculator
         // See: https://github.com/ppy/osu-queue-score-statistics/blob/2264bfa68e14bb16ec71a7cac2072bdcfaf565b6/osu.Server.Queues.ScoreStatisticsProcessor/Helpers/LegacyModsHelper.cs
         public static LegacyMods MaskRelevantMods(LegacyMods mods, bool isConvertedBeatmap, int rulesetId)
         {
-            LegacyMods relevantMods = LegacyMods.DoubleTime | LegacyMods.HalfTime | LegacyMods.HardRock | LegacyMods.Easy;
+            LegacyMods relevantMods = LegacyMods.DoubleTime | LegacyMods.HalfTime | LegacyMods.HardRock | LegacyMods.Easy | LegacyMods.Hidden;
 
             switch (rulesetId)
             {
