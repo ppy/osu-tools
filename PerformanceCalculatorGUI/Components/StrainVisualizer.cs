@@ -46,6 +46,7 @@ namespace PerformanceCalculatorGUI.Components
         }
 
         private float graphAlpha;
+
         private void updateGraphs(ValueChangedEvent<Skill[]> val)
         {
             graphsContainer.Clear();
@@ -71,7 +72,7 @@ namespace PerformanceCalculatorGUI.Components
                 legendContainer.Clear();
                 graphToggles.Clear();
 
-                for (int i = 0; i < skills.Count(); i++)
+                for (int i = 0; i < skills.Length; i++)
                 {
                     // this is ugly, but it works
                     var graphToggleBindable = new Bindable<bool>();
@@ -118,7 +119,7 @@ namespace PerformanceCalculatorGUI.Components
             }
             else
             {
-                for (int i = 0; i < skills.Count(); i++)
+                for (int i = 0; i < skills.Length; i++)
                 {
                     // graphs are visible by default, we want to hide ones that were disabled before
                     if (!graphToggles[i].Value)
@@ -218,6 +219,7 @@ namespace PerformanceCalculatorGUI.Components
             double lastStrainTime = strainLists.Max(l => l.Length) * 400;
 
             var tooltipList = new List<string>();
+
             for (int i = 0; i < nBars; i++)
             {
                 var strainTime = TimeSpan.FromMilliseconds(TimeUntilFirstStrain.Value + lastStrainTime * i / nBars);
@@ -300,6 +302,7 @@ namespace PerformanceCalculatorGUI.Components
             }
         }
     }
+
     public partial class TooltipBar : Bar, IHasTooltip
     {
         public TooltipBar(string tooltip)
@@ -309,6 +312,7 @@ namespace PerformanceCalculatorGUI.Components
 
         public LocalisableString TooltipText { get; }
     }
+
     public partial class TooltipBarGraph : FillFlowContainer<TooltipBar>
     {
         /// <summary>
