@@ -9,8 +9,6 @@ namespace PerformanceCalculatorGUI.Components
 {
     public partial class ExtendedUserModSelectOverlay : UserModSelectOverlay
     {
-        protected override bool ShowModEffects => false;
-
         public ExtendedUserModSelectOverlay()
             : base(OverlayColourScheme.Blue)
         {
@@ -19,7 +17,8 @@ namespace PerformanceCalculatorGUI.Components
         protected override void PopIn()
         {
             Header.Hide();
-            MainAreaContent.Padding = new MarginPadding { Bottom = 64 };
+            MainAreaContent.Padding = new MarginPadding();
+            TopLevelContent.Children[0].Hide(); // hide the gray background of the ShearedOverlayContainer
 
             base.PopIn();
         }

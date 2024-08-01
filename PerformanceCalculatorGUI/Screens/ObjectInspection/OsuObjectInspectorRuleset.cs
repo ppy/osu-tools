@@ -33,7 +33,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         protected override void Update()
         {
             base.Update();
-            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime < Clock.CurrentTime);
+            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime <= Clock.CurrentTime);
         }
 
         public override bool PropagatePositionalInputSubTree => false;
