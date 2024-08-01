@@ -83,8 +83,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
             public readonly Bindable<TaikoHitObject> SelectedObject = new();
-
-            private List<TaikoSelectableHitObject> selectables = new();
+            private TaikoSelectableHitObject selectedSelectableObject;
 
             public TaikoObjectInspectorPlayfield()
             {
@@ -120,41 +119,26 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
                 newSelectable.UpdateFromHitObject((TaikoHitObject)hitObject);
                 HitObjectContainer.Add(newSelectable);
-                selectables.Add(newSelectable);
+
+                newSelectable.Selected += selectNewObject;
             }
 
             protected override GameplayCursorContainer CreateCursor() => null;
 
-            public override bool HandlePositionalInput => true;
+            private void selectNewObject(TaikoSelectableHitObject newSelectable)
+            {
+                selectedSelectableObject?.Deselect();
+                selectedSelectableObject = newSelectable;
+                SelectedObject.Value = newSelectable?.HitObject;
+            }
 
             protected override bool OnClick(ClickEvent e)
             {
                 if (e.Button == MouseButton.Right)
                     return false;
 
-                TaikoSelectableHitObject newSelectedObject = null;
-
-                // This search can be long if list of objects is very big. Potential for optimization
-                foreach (var selectable in selectables)
-                {
-                    if (selectable.IsSelected)
-                    {
-                        selectable.Deselect();
-                        continue;
-                    }
-
-                    if (!selectable.IsHovered)
-                        continue;
-
-                    if (newSelectedObject != null)
-                        continue;
-
-                    selectable.Select();
-                    newSelectedObject = selectable;
-                }
-
-                SelectedObject.Value = newSelectedObject?.HitObject;
-                return true;
+                selectNewObject(null);
+                return false;
             }
         }
     }

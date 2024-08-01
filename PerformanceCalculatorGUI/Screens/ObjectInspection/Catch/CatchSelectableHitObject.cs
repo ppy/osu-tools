@@ -6,6 +6,10 @@ using osu.Game.Rulesets.Catch.Objects;
 using osuTK;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko;
+using System;
+using osu.Framework.Input.Events;
+using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
@@ -40,6 +44,25 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
         {
             base.OnApply();
             UpdateState();
+        }
+
+        protected override bool OnClick(ClickEvent e)
+        {
+            if (e.Button == MouseButton.Right)
+                return false;
+
+            if (!IsHovered)
+                return false;
+
+            if (IsSelected)
+            {
+                Deselect();
+                Selected.Invoke(null);
+                return true;
+            }
+
+            Select();
+            return true;
         }
 
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => outline.ReceivePositionalInputAt(screenSpacePos);
@@ -95,7 +118,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
         {
             foreach (var d in InternalChildren)
                 d.Show();
+            Selected.Invoke(this);
         }
+
+        public event Action<CatchSelectableHitObject?> Selected;
+
         public void Select() => State = SelectionState.Selected;
         public void Deselect() => State = SelectionState.NotSelected;
         public bool IsSelected => State == SelectionState.Selected;

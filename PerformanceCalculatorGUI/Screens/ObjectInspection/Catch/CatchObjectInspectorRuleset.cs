@@ -20,6 +20,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.UI;
 using osuTK.Input;
+using PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
@@ -81,7 +82,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
         {
             public readonly Bindable<CatchHitObject> SelectedObject = new();
 
-            private List<CatchSelectableHitObject> selectables = new();
+            private CatchSelectableHitObject selectedSelectableObject;
+
             public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty)
                 : base(difficulty)
             {
@@ -107,7 +109,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                     {
                         var newSelectable = selectablesPool.Get(a => a.UpdateFromHitObject((CatchHitObject)hitObject));
                         HitObjectContainer.Add(newSelectable);
-                        selectables.Add(newSelectable);
+                        newSelectable.Selected += selectNewObject;
                         break;
                     }
                     case JuiceStream juiceStream:
@@ -119,7 +121,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 
                             var newSelectable = selectablesPool.Get(a => a.UpdateFromHitObject((CatchHitObject)nested));
                             HitObjectContainer.Add(newSelectable);
-                            selectables.Add(newSelectable);
+                            newSelectable.Selected += selectNewObject;
                         }
                         break;
                     }
@@ -127,36 +129,21 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
             }
 
             protected override GameplayCursorContainer CreateCursor() => null;
-            public override bool HandlePositionalInput => true;
+
+            private void selectNewObject(CatchSelectableHitObject newSelectable)
+            {
+                selectedSelectableObject?.Deselect();
+                selectedSelectableObject = newSelectable;
+                SelectedObject.Value = newSelectable?.HitObject;
+            }
 
             protected override bool OnClick(ClickEvent e)
             {
                 if (e.Button == MouseButton.Right)
                     return false;
 
-                CatchSelectableHitObject newSelectedObject = null;
-
-                // This search can be long if list of objects is very big. Potential for optimization
-                foreach (var selectable in selectables)
-                {
-                    if (selectable.IsSelected)
-                    {
-                        selectable.Deselect();
-                        continue;
-                    }
-
-                    if (!selectable.IsHovered)
-                        continue;
-
-                    if (newSelectedObject != null)
-                        continue;
-
-                    selectable.Select();
-                    newSelectedObject = selectable;
-                }
-
-                SelectedObject.Value = newSelectedObject?.HitObject;
-                return true;
+                selectNewObject(null);
+                return false;
             }
         }
     }
