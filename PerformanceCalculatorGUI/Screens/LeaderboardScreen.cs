@@ -13,6 +13,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
@@ -25,8 +26,22 @@ using PerformanceCalculatorGUI.Configuration;
 
 namespace PerformanceCalculatorGUI.Screens
 {
+    public class UserLeaderboardData
+    {
+        public decimal LivePP { get; set; }
+        public decimal LocalPP { get; set; }
+
+        public List<ExtendedScore> Scores { get; set; }
+    }
+
     public partial class LeaderboardScreen : PerformanceCalculatorScreen
     {
+        public enum Tabs
+        {
+            Players,
+            Scores
+        }
+
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Green);
 
@@ -35,11 +50,13 @@ namespace PerformanceCalculatorGUI.Screens
         private StatefulButton calculationButton;
         private VerboseLoadingLayer loadingLayer;
 
-        private OsuScrollContainer leaderboardContainer;
+        private Container players;
+        private FillFlowContainer scores;
+        private OsuTabControl<Tabs> tabs;
 
         private CancellationTokenSource calculationCancellatonToken;
 
-        public override bool ShouldShowConfirmationDialogOnSwitch => leaderboardContainer.Count > 0;
+        public override bool ShouldShowConfirmationDialogOnSwitch => players.Count > 0;
 
         [Resolved]
         private NotificationDisplay notificationDisplay { get; set; }
@@ -57,6 +74,7 @@ namespace PerformanceCalculatorGUI.Screens
         private SettingsManager configManager { get; set; }
 
         private const int settings_height = 40;
+        private const int tabs_height = 20;
 
         public LeaderboardScreen()
         {
@@ -129,9 +147,38 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                         new Drawable[]
                         {
-                            leaderboardContainer = new OsuScrollContainer
+                            new Container
                             {
-                                RelativeSizeAxes = Axes.Both
+                                RelativeSizeAxes = Axes.Both,
+                                Children = new Drawable[]
+                                {
+                                    tabs = new OsuTabControl<Tabs>
+                                    {
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        Height = tabs_height,
+                                        Width = 145,
+                                        IsSwitchable = true
+                                    },
+                                    new OsuScrollContainer
+                                    {
+                                        RelativeSizeAxes = Axes.Both,
+                                        Children = new Drawable[]
+                                        {
+                                            players = new Container
+                                            {
+                                                RelativeSizeAxes = Axes.Both
+                                            },
+                                            scores = new FillFlowContainer
+                                            {
+                                                Margin = new MarginPadding { Top = tabs_height },
+                                                RelativeSizeAxes = Axes.X,
+                                                AutoSizeAxes = Axes.Y,
+                                                Direction = FillDirection.Vertical,
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         },
                     }
@@ -139,6 +186,28 @@ namespace PerformanceCalculatorGUI.Screens
                 loadingLayer = new VerboseLoadingLayer(true)
                 {
                     RelativeSizeAxes = Axes.Both
+                }
+            };
+
+            scores.Hide();
+
+            tabs.Current.ValueChanged += e =>
+            {
+                switch (e.NewValue)
+                {
+                    case Tabs.Players:
+                    {
+                        scores.Hide();
+                        players.Show();
+                        break;
+                    }
+
+                    case Tabs.Scores:
+                    {
+                        scores.Show();
+                        players.Hide();
+                        break;
+                    }
                 }
             };
         }
@@ -160,7 +229,8 @@ namespace PerformanceCalculatorGUI.Screens
             loadingLayer.Show();
             calculationButton.State.Value = ButtonState.Loading;
 
-            leaderboardContainer.Clear();
+            players.Clear();
+            scores.Clear();
 
             calculationCancellatonToken = new CancellationTokenSource();
             var token = calculationCancellatonToken.Token;
@@ -172,6 +242,7 @@ namespace PerformanceCalculatorGUI.Screens
                 var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}");
 
                 var calculatedPlayers = new List<LeaderboardUser>();
+                var calculatedScores = new List<ExtendedScore>();
 
                 for (int i = 0; i < playerAmountTextBox.Value.Value; i++)
                 {
@@ -191,13 +262,23 @@ namespace PerformanceCalculatorGUI.Screens
                         LivePP = playerData.LivePP,
                         Difference = playerData.LocalPP - playerData.LivePP
                     });
+
+                    calculatedScores.AddRange(playerData.Scores);
                 }
 
                 Schedule(() =>
                 {
-                    var leaderboardTable = new LeaderboardTable(pageTextBox.Value.Value, calculatedPlayers.OrderByDescending(x => x.LocalPP).ToList());
+                    var leaderboardTable = new LeaderboardTable(pageTextBox.Value.Value, calculatedPlayers.OrderByDescending(x => x.LocalPP).ToList())
+                    {
+                        Margin = new MarginPadding { Top = tabs_height }
+                    };
                     LoadComponent(leaderboardTable);
-                    leaderboardContainer.Add(leaderboardTable);
+                    players.Add(leaderboardTable);
+
+                    foreach (var calculatedScore in calculatedScores.OrderByDescending(x => x.PerformanceAttributes.Total))
+                    {
+                        scores.Add(new ExtendedProfileScore(calculatedScore));
+                    }
                 });
             }, token).ContinueWith(t =>
             {
@@ -213,10 +294,10 @@ namespace PerformanceCalculatorGUI.Screens
             }, token);
         }
 
-        private async Task<UserCardData> calculatePlayer(UserStatistics player, CancellationToken token)
+        private async Task<UserLeaderboardData> calculatePlayer(UserStatistics player, CancellationToken token)
         {
             if (token.IsCancellationRequested)
-                return new UserCardData();
+                return new UserLeaderboardData();
 
             var plays = new List<ExtendedScore>();
 
@@ -278,10 +359,11 @@ namespace PerformanceCalculatorGUI.Screens
             var playcountBonusPP = (totalLivePP - nonBonusLivePP);
             totalLocalPP += playcountBonusPP;
 
-            return new UserCardData
+            return new UserLeaderboardData
             {
                 LivePP = totalLivePP,
-                LocalPP = totalLocalPP
+                LocalPP = totalLocalPP,
+                Scores = plays
             };
         }
     }
