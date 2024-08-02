@@ -138,7 +138,7 @@ namespace PerformanceCalculatorGUI
                 relevantAccuracy = Math.Clamp(relevantAccuracy, 0, 1);
 
                 // Main curve for accuracy > 25%, the closer accuracy is to 25% - the more 50s it adds
-                if (relevantAccuracy >= 0.25) 
+                if (relevantAccuracy >= 0.25)
                 {
                     // Main curve. Zero 50s if accuracy is 100%, one 50 per 9 100s if accuracy is 75% (excluding misses), 4 50s per 9 100s if accuracy is 50%
                     double ratio50to100 = Math.Pow(1 - (relevantAccuracy - 0.25) / 0.75, 2);
@@ -156,7 +156,7 @@ namespace PerformanceCalculatorGUI
                     countMeh = (int?)(Math.Round(count100estimate + count50estimate) - countGood);
                 }
                 // If accuracy is between 16.67% and 25% - we assume that we have no 300s
-                else if (relevantAccuracy >= 1.0 / 6) 
+                else if (relevantAccuracy >= 1.0 / 6)
                 {
                     // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c300 = 0
                     double count100estimate = 6 * relevantResultCount * relevantAccuracy - relevantResultCount;
