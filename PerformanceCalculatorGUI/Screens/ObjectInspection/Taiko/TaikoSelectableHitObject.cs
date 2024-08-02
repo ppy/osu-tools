@@ -27,7 +27,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
         [BackgroundDependencyLoader]
         private void load()
         {
-            AddInternal(hitPiece = new HitPiece() {Size = GetObjectSize() });
+            AddInternal(hitPiece = new HitPiece());
             UpdateState();
         }
 
@@ -35,6 +35,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
         {
             Deselect();
             HitObject.StartTime = hitObject.StartTime;
+            hitPiece.Size = GetObjectSize();
         }
 
         protected virtual Vector2 GetObjectSize() => new Vector2(TaikoHitObject.DEFAULT_SIZE * TaikoPlayfield.BASE_HEIGHT);

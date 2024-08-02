@@ -15,8 +15,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
         public override void UpdateFromHitObject(TaikoHitObject hitObject)
         {
-            base.UpdateFromHitObject(hitObject);
             isStrong = ((TaikoStrongableHitObject)hitObject).IsStrong;
+            base.UpdateFromHitObject(hitObject);
         }
 
         protected override Vector2 GetObjectSize()
