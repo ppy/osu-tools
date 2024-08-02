@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Pooling;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
+using osu.Framework.Input.States;
 using osu.Game.Beatmaps;
 using osu.Game.Input.Bindings;
 using osu.Game.Rulesets;
@@ -65,6 +66,10 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
             protected override KeyBindingContainer<TaikoAction> CreateKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique)
             => new EmptyKeyBindingContainer(ruleset, variant, unique);
+
+            protected override void SyncInputState(InputState state)
+            {
+            }
 
             private partial class EmptyKeyBindingContainer : RulesetKeyBindingContainer
             {
