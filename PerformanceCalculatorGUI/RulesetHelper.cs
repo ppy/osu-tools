@@ -137,39 +137,8 @@ namespace PerformanceCalculatorGUI
                 // Clamp accuracy to account for user trying to break the algorithm by inputting impossible values
                 relevantAccuracy = Math.Clamp(relevantAccuracy, 0, 1);
 
-                // If accuracy is less than 16.67% - it means that we have only 50s or misses
-                // Assuming that we removed misses in the 1st place - that means that we need to add additional misses to achieve target accuracy
-                if (relevantAccuracy < 1.0 / 6) 
-                {
-                    // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c300 = c100 = 0
-                    double count50estimate = 6 * relevantResultCount * relevantAccuracy;
-
-                    // We have 0 100s, because we can't start adding 100s again after reaching "only 50s" point
-                    countGood = 0;
-
-                    // Round it to get int number of 50s
-                    countMeh = (int?)Math.Round(count50estimate);
-
-                    // Fill the rest results with misses overwriting initial countMiss
-                    countMiss = (int)(totalResultCount - countMeh);
-                }
-                // If accuracy is between 16.67% and 25% - we assume that we have no 300s
-                else if (relevantAccuracy < 0.25) 
-                {
-                    // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c300 = 0
-                    double count100estimate = 6 * relevantResultCount * relevantAccuracy - relevantResultCount;
-
-                    // We only had 100s and 50s in that scenario so rest of the hits are 50s
-                    double count50estimate = relevantResultCount - count100estimate;
-
-                    // Round it to get int number of 100s
-                    countGood = (int?)Math.Round(count100estimate);
-
-                    // Get number of 50s as difference between total mistimed hits and count100
-                    countMeh = (int?)(Math.Round(count100estimate + count50estimate) - countGood);
-                }
                 // Main curve for accuracy > 25%, the closer accuracy is to 25% - the more 50s it adds
-                else
+                if (relevantAccuracy >= 0.25) 
                 {
                     // Main curve. Zero 50s if accuracy is 100%, one 50 per 9 100s if accuracy is 75% (excluding misses), 4 50s per 9 100s if accuracy is 50%
                     double ratio50to100 = Math.Pow(1 - (relevantAccuracy - 0.25) / 0.75, 2);
@@ -185,6 +154,37 @@ namespace PerformanceCalculatorGUI
 
                     // Get number of 50s as difference between total mistimed hits and count100
                     countMeh = (int?)(Math.Round(count100estimate + count50estimate) - countGood);
+                }
+                // If accuracy is between 16.67% and 25% - we assume that we have no 300s
+                else if (relevantAccuracy >= 1.0 / 6) 
+                {
+                    // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c300 = 0
+                    double count100estimate = 6 * relevantResultCount * relevantAccuracy - relevantResultCount;
+
+                    // We only had 100s and 50s in that scenario so rest of the hits are 50s
+                    double count50estimate = relevantResultCount - count100estimate;
+
+                    // Round it to get int number of 100s
+                    countGood = (int?)Math.Round(count100estimate);
+
+                    // Get number of 50s as difference between total mistimed hits and count100
+                    countMeh = (int?)(Math.Round(count100estimate + count50estimate) - countGood);
+                }
+                // If accuracy is less than 16.67% - it means that we have only 50s or misses
+                // Assuming that we removed misses in the 1st place - that means that we need to add additional misses to achieve target accuracy
+                else
+                {
+                    // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c300 = c100 = 0
+                    double count50estimate = 6 * relevantResultCount * relevantAccuracy;
+
+                    // We have 0 100s, because we can't start adding 100s again after reaching "only 50s" point
+                    countGood = 0;
+
+                    // Round it to get int number of 50s
+                    countMeh = (int?)Math.Round(count50estimate);
+
+                    // Fill the rest results with misses overwriting initial countMiss
+                    countMiss = (int)(totalResultCount - countMeh);
                 }
 
                 // Rest of the hits are 300s
