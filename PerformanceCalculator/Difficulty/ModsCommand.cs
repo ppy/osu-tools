@@ -10,6 +10,7 @@ using System.Linq;
 using Humanizer;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Configuration;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -43,6 +44,7 @@ namespace PerformanceCalculator.Difficulty
                 Description = mod.Description.ToString(),
                 Type = mod.Type.ToString(),
                 Settings = getSettingsDefinitions(mod),
+                Icon = extractIconSpecifics(mod.Icon),
                 IncompatibleMods = getAllImplementations(mod.IncompatibleMods),
                 mod.RequiresConfiguration,
                 mod.UserPlayable,
@@ -50,6 +52,19 @@ namespace PerformanceCalculator.Difficulty
                 mod.ValidForMultiplayerAsFreeMod,
                 mod.AlwaysValidForSubmission,
             });
+
+            dynamic? extractIconSpecifics(IconUsage? icon)
+            {
+                if (icon == null)
+                    return null;
+
+                return new
+                {
+                    icon.Value.Family,
+                    icon.Value.Icon,
+                    icon.Value.Weight,
+                };
+            }
 
             IEnumerable<string> getAllImplementations(Type[] incompatibleTypes)
             {
