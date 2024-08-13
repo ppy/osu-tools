@@ -54,15 +54,15 @@ namespace PerformanceCalculatorGUI.Components
         {
             APIBeatmapSet dummySet = new APIBeatmapSet
             {
-                Title = score.BeatmapInfo.Metadata.Title,
-                TitleUnicode = score.BeatmapInfo.Metadata.TitleUnicode,
-                Artist = score.BeatmapInfo.Metadata.Artist,
-                ArtistUnicode = score.BeatmapInfo.Metadata.ArtistUnicode,
+                Title = score.BeatmapInfo?.Metadata.Title ?? "Error Title",
+                TitleUnicode = score.BeatmapInfo?.Metadata.TitleUnicode ?? "Error Title",
+                Artist = score.BeatmapInfo?.Metadata.Artist ?? "Error Artist",
+                ArtistUnicode = score.BeatmapInfo?.Metadata.ArtistUnicode ?? "Error Artist",
             };
             APIBeatmap dummyBeatmap = new APIBeatmap
             {
-                OnlineID = score.BeatmapInfo.OnlineID,
-                DifficultyName = score.BeatmapInfo.DifficultyName,
+                OnlineID = score.BeatmapInfo?.OnlineID ?? 0,
+                DifficultyName = score.BeatmapInfo?.DifficultyName ?? "Error Difficulty",
             };
             SoloScoreInfo soloScoreInfo = new SoloScoreInfo
             {
@@ -79,7 +79,6 @@ namespace PerformanceCalculatorGUI.Components
 
             return soloScoreInfo;
         }
-
     }
 
     public partial class DrawableProfileScore : CompositeDrawable
@@ -214,7 +213,7 @@ namespace PerformanceCalculatorGUI.Components
                         Width = performance_width,
                         Anchor = Anchor.CentreRight,
                         Origin = Anchor.CentreRight,
-                        Children = new Drawable[]
+                        Children = new[]
                         {
                             new Box
                             {

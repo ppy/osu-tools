@@ -222,7 +222,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
 
-                Dictionary<int, DifficultyAttributes> attributesCache = new();
+                Dictionary<int, DifficultyAttributes> attributesCache = new Dictionary<int, DifficultyAttributes>();
 
                 foreach (var score in leaderboard.Scores)
                 {
@@ -236,14 +236,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                     var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
-                    DifficultyAttributes difficultyAttributes;
                     int modsHash = RulesetHelper.GenerateModsHash(mods, working.BeatmapInfo.Difficulty, ruleset.Value);
 
-                    if (attributesCache.ContainsKey(modsHash))
-                    {
-                        difficultyAttributes = attributesCache[modsHash];
-                    }
-                    else
+                    if (!attributesCache.TryGetValue(modsHash, out var difficultyAttributes))
                     {
                         difficultyAttributes = difficultyCalculator.Calculate(mods);
                         attributesCache[modsHash] = difficultyAttributes;

@@ -110,13 +110,14 @@ namespace PerformanceCalculatorGUI
                 bool isSliderAccuracy = mods.OfType<OsuModClassic>().All(m => !m.NoSliderHeadAccuracy.Value);
 
                 byte flashlightHash = 0;
+
                 if (mods.Any(h => h is OsuModFlashlight))
                 {
-                    if (!mods.Any(h => h is OsuModHidden)) flashlightHash = 1;
-                    else flashlightHash = 2;
+                    flashlightHash = (byte)(mods.Any(h => h is OsuModHidden) ? 2 : 1);
                 }
 
                 byte mirrorHash = 0;
+
                 if (mods.FirstOrDefault(m => m is OsuModMirror) is OsuModMirror mirror)
                 {
                     mirrorHash = (byte)(1 + (int)(mirror.Reflection.Value));

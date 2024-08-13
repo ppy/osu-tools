@@ -23,13 +23,13 @@ namespace PerformanceCalculatorGUI.Components
 {
     public partial class LazerCalculationSettings : ToolbarButton, IHasPopover
     {
-        private readonly Bindable<bool> calculateRankedMaps = new(true);
-        private readonly Bindable<bool> calculateUnrankedMaps = new(false);
+        private readonly Bindable<bool> calculateRankedMaps = new Bindable<bool>(true);
+        private readonly Bindable<bool> calculateUnrankedMaps = new Bindable<bool>(false);
 
-        private readonly Bindable<bool> calculateUnsubmittedScores = new(true);
-        private readonly Bindable<bool> calculateUnrankedMods = new(true);
+        private readonly Bindable<bool> calculateUnsubmittedScores = new Bindable<bool>(true);
+        private readonly Bindable<bool> calculateUnrankedMods = new Bindable<bool>(true);
 
-        private readonly Bindable<bool> enableScorev1Overwrite = new(false);
+        private readonly Bindable<bool> enableScorev1Overwrite = new Bindable<bool>(false);
 
         public bool IsScorev1OverwritingEnabled => enableScorev1Overwrite.Value;
 
@@ -45,6 +45,9 @@ namespace PerformanceCalculatorGUI.Components
         public bool ShouldBeFiltered(ScoreInfo score)
         {
             if (score.Mods.Any(h => h is OsuModRelax || h is OsuModAutopilot))
+                return true;
+
+            if (score.BeatmapInfo == null)
                 return true;
 
             if (!calculateRankedMaps.Value && score.BeatmapInfo.Status.GrantsPerformancePoints())

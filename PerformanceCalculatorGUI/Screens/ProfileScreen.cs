@@ -462,7 +462,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                     List<ProfileScore> tempScores = [];
 
-                    Dictionary<int, DifficultyAttributes> attributesCache = new();
+                    Dictionary<int, DifficultyAttributes> attributesCache = new Dictionary<int, DifficultyAttributes>();
 
                     foreach (var score in scoreList)
                     {
@@ -471,14 +471,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                         Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username}'s scores... {currentScoresCount} / {totalScoresCount}");
 
-                        DifficultyAttributes difficultyAttributes;
                         int modsHash = RulesetHelper.GenerateModsHash(score.Mods, working.BeatmapInfo.Difficulty, ruleset.Value);
 
-                        if (attributesCache.ContainsKey(modsHash))
-                        {
-                            difficultyAttributes = attributesCache[modsHash];
-                        }
-                        else
+                        if (!attributesCache.TryGetValue(modsHash, out var difficultyAttributes))
                         {
                             difficultyAttributes = difficultyCalculator.Calculate(score.Mods);
                             attributesCache[modsHash] = difficultyAttributes;
@@ -560,27 +555,27 @@ namespace PerformanceCalculatorGUI.Screens
             Schedule(() => loadingLayer.Text.Value = "Filtering scores...");
 
             realmScores.RemoveAll(x => !currentUser.Contains(x.User.Username) // Wrong username
-                                    || x.BeatmapInfo == null // No map for score
-                                    || x.Passed == false || x.Rank == ScoreRank.F // Failed score
-                                    || x.Ruleset.OnlineID != ruleset.Value.OnlineID // Incorrect ruleset
-                                    || settingsMenu.ShouldBeFiltered(x)); // Customisable filters
+                                               || x.BeatmapInfo == null // No map for score
+                                               || x.Passed == false || x.Rank == ScoreRank.F // Failed score
+                                               || x.Ruleset.OnlineID != ruleset.Value.OnlineID // Incorrect ruleset
+                                               || settingsMenu.ShouldBeFiltered(x)); // Customisable filters
 
-            List<List<ScoreInfo>> groupedScores = realmScores.GroupBy(g => g.BeatmapHash)
-                                                            .Select(s => s.ToList())
-                                                            .ToList();
+            List<List<ScoreInfo>> groupedScores = realmScores.GroupBy(g => g.BeatmapHash).Select(s => s.ToList()).ToList();
+
             // Simulate scorev1 if enabled
             if (settingsMenu.IsScorev1OverwritingEnabled)
             {
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                List<List<ScoreInfo>> filteredScores = new();
+                List<List<ScoreInfo>> filteredScores = new List<List<ScoreInfo>>();
 
                 foreach (var mapScores in groupedScores)
                 {
                     List<ScoreInfo> filteredMapScores = mapScores.Where(s => s.IsLegacyScore)
-                                                            .GroupBy(x => rulesetInstance.ConvertToLegacyMods(x.Mods))
-                                                            .Select(x => x.MaxBy(x => x.LegacyTotalScore))
-                                                            .ToList();
+                                                                 .GroupBy(x => rulesetInstance.ConvertToLegacyMods(x.Mods))
+                                                                 .Select(g => g.MaxBy(g => g.LegacyTotalScore))
+                                                                 .ToList();
+
                     filteredMapScores.AddRange(mapScores.Where(s => !s.IsLegacyScore));
                     filteredScores.Add(mapScores);
                 }
