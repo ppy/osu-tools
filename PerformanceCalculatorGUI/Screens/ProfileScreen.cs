@@ -453,8 +453,8 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (var scoreList in realmScores)
                 {
-
                     string beatmapHash = scoreList[0].BeatmapHash;
+
                     //get the .osu file from lazer file storage
                     var working = new FlatWorkingBeatmap(Path.Combine(lazerPath, "files", beatmapHash[..1], beatmapHash[..2], beatmapHash));
 
