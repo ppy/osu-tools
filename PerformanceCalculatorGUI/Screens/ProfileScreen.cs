@@ -453,6 +453,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (var scoreList in realmScores)
                 {
+
                     string beatmapHash = scoreList[0].BeatmapHash;
                     //get the .osu file from lazer file storage
                     var working = new FlatWorkingBeatmap(Path.Combine(lazerPath, "files", beatmapHash[..1], beatmapHash[..2], beatmapHash));
@@ -471,6 +472,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                         Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username}'s scores... {currentScoresCount} / {totalScoresCount}");
 
+                        if (score.BeatmapInfo == null)
+                            continue;
+
                         int modsHash = RulesetHelper.GenerateModsHash(score.Mods, working.BeatmapInfo.Difficulty, ruleset.Value);
 
                         if (!attributesCache.TryGetValue(modsHash, out var difficultyAttributes))
@@ -485,8 +489,8 @@ namespace PerformanceCalculatorGUI.Screens
 
                         currentScoresCount++;
 
-                        // Sanity check for aspire maps till my slider fix won't get merged
-                        if (difficultyAttributes.StarRating > 14 && score.BeatmapInfo.Status != BeatmapOnlineStatus.Ranked)
+                        // Sanity check for aspire maps till slider fix won't get merged
+                        if (difficultyAttributes.StarRating > 14 && !score.BeatmapInfo.Status.GrantsPerformancePoints())
                             continue;
 
                         tempScores.Add(new ProfileScore(score, perfAttributes));
@@ -555,10 +559,10 @@ namespace PerformanceCalculatorGUI.Screens
             Schedule(() => loadingLayer.Text.Value = "Filtering scores...");
 
             realmScores.RemoveAll(x => !currentUser.Contains(x.User.Username) // Wrong username
-                                               || x.BeatmapInfo == null // No map for score
-                                               || x.Passed == false || x.Rank == ScoreRank.F // Failed score
-                                               || x.Ruleset.OnlineID != ruleset.Value.OnlineID // Incorrect ruleset
-                                               || settingsMenu.ShouldBeFiltered(x)); // Customisable filters
+                                       || x.BeatmapInfo == null // No map for score
+                                       || x.Passed == false || x.Rank == ScoreRank.F // Failed score
+                                       || x.Ruleset.OnlineID != ruleset.Value.OnlineID // Incorrect ruleset
+                                       || settingsMenu.ShouldBeFiltered(x)); // Customisable filters
 
             List<List<ScoreInfo>> groupedScores = realmScores.GroupBy(g => g.BeatmapHash).Select(s => s.ToList()).ToList();
 
@@ -571,9 +575,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (var mapScores in groupedScores)
                 {
-                    List<ScoreInfo> filteredMapScores = mapScores.Where(s => s.IsLegacyScore)
+                    List<ScoreInfo> filteredMapScores = mapScores.Where(x => x.IsLegacyScore)
                                                                  .GroupBy(x => rulesetInstance.ConvertToLegacyMods(x.Mods))
-                                                                 .Select(g => g.MaxBy(g => g.LegacyTotalScore))
+                                                                 .Select(x => x.MaxBy(x => x.LegacyTotalScore))
                                                                  .ToList();
 
                     filteredMapScores.AddRange(mapScores.Where(s => !s.IsLegacyScore));
