@@ -13,8 +13,10 @@ using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Mania.Mods;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
@@ -85,6 +87,69 @@ namespace PerformanceCalculatorGUI
                 3 => new ManiaRuleset(),
                 _ => throw new ArgumentException("Invalid ruleset ID provided.")
             };
+        }
+
+        /// <summary>
+        /// Generates the unique hash of mods combo that affect difficulty calculation
+        /// Needs to be updated if list of difficulty adjusting mods changes
+        /// </summary>
+        public static int GenerateModsHash(Mod[] mods, BeatmapDifficulty difficulty, RulesetInfo ruleset)
+        {
+            // Rate changing mods
+            double rate = ModUtils.CalculateRateWithMods(mods);
+
+            int hash = 0;
+
+            if (ruleset.OnlineID == 0) // For osu we have many different things
+            {
+                BeatmapDifficulty d = new BeatmapDifficulty(difficulty);
+
+                foreach (var mod in mods.OfType<IApplicableToDifficulty>())
+                    mod.ApplyToDifficulty(d);
+
+                bool isSliderAccuracy = mods.OfType<OsuModClassic>().All(m => !m.NoSliderHeadAccuracy.Value);
+
+                byte flashlightHash = 0;
+                if (mods.Any(h => h is OsuModFlashlight))
+                {
+                    if (!mods.Any(h => h is OsuModHidden)) flashlightHash = 1;
+                    else flashlightHash = 2;
+                }
+
+                byte mirrorHash = 0;
+                if (mods.FirstOrDefault(m => m is OsuModMirror) is OsuModMirror mirror)
+                {
+                    mirrorHash = (byte)(1 + (int)(mirror.Reflection.Value));
+                }
+
+                hash = HashCode.Combine(rate, d.CircleSize, d.OverallDifficulty, isSliderAccuracy, flashlightHash, mirrorHash);
+            }
+            else if (ruleset.OnlineID == 1) // For taiko we only have rate
+            {
+                hash = rate.GetHashCode();
+            }
+            else if (ruleset.OnlineID == 2) // For catch we have rate and CS
+            {
+                BeatmapDifficulty d = new BeatmapDifficulty(difficulty);
+
+                foreach (var mod in mods.OfType<IApplicableToDifficulty>())
+                    mod.ApplyToDifficulty(d);
+
+                hash = HashCode.Combine(rate, d.CircleSize);
+            }
+            else if (ruleset.OnlineID == 3) // Mania is using rate, and keys data for converts
+            {
+                int keyCount = 0;
+
+                if (mods.FirstOrDefault(h => h is ManiaKeyMod) is ManiaKeyMod mod)
+                    keyCount = mod.KeyCount;
+
+                bool isDualStages = mods.Any(h => h is ManiaModDualStages);
+
+                hash = HashCode.Combine(rate, keyCount, isDualStages);
+            }
+
+            return hash;
         }
 
         public static int AdjustManiaScore(int score, IReadOnlyList<Mod> mods)
