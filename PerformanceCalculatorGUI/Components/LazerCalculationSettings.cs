@@ -30,7 +30,9 @@ namespace PerformanceCalculatorGUI.Components
         private readonly Bindable<bool> calculateUnrankedMods = new(true);
 
         private readonly Bindable<bool> enableScorev1Overwrite = new(false);
+
         public bool IsScorev1OverwritingEnabled => enableScorev1Overwrite.Value;
+
         protected override Anchor TooltipAnchor => Anchor.TopRight;
 
         public LazerCalculationSettings()
