@@ -44,7 +44,7 @@ namespace PerformanceCalculatorGUI.Components
 
         public bool ShouldBeFiltered(ScoreInfo score)
         {
-            if (score.Mods.Any(h => h is OsuModRelax || h is OsuModAutopilot))
+            if (score.Mods.Any(h => h is OsuModAutopilot))
                 return true;
 
             if (score.BeatmapInfo == null)
@@ -110,22 +110,22 @@ namespace PerformanceCalculatorGUI.Components
                         {
                             new OsuCheckbox
                             {
-                                LabelText = "Calculate Ranked Maps (ranked & approved)",
+                                LabelText = "Calculate Ranked Maps",
                                 Current = { BindTarget = bindables[0] }
                             },
                             new OsuCheckbox
                             {
-                                LabelText = "Calculate Unranked Maps (everything else)",
+                                LabelText = "Calculate Unranked Maps",
                                 Current = { BindTarget = bindables[1] }
                             },
                             new OsuCheckbox
                             {
-                                LabelText = "Calculate Unsubmitted Scores (on local difficulties for example)",
+                                LabelText = "Calculate Unsubmitted Scores, such as scores set on local difficulties",
                                 Current = { BindTarget = bindables[2] }
                             },
                             new OsuCheckbox
                             {
-                                LabelText = "Calculate Unranked Mods (RX and AP are excluded regardless)",
+                                LabelText = "Calculate Unranked Mods, Autopilot is excluded regardless",
                                 Current = { BindTarget = bindables[3] }
                             },
                             new OsuCheckbox
