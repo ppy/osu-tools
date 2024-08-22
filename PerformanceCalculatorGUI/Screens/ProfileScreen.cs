@@ -581,7 +581,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                                  .ToList();
 
                     filteredMapScores.AddRange(mapScores.Where(s => !s.IsLegacyScore));
-                    filteredScores.Add(mapScores);
+                    filteredScores.Add(filteredMapScores);
                 }
 
                 groupedScores = filteredScores;
