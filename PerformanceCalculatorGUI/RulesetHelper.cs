@@ -118,9 +118,13 @@ namespace PerformanceCalculatorGUI
 
                 byte mirrorHash = 0;
 
-                if (mods.FirstOrDefault(m => m is OsuModMirror) is OsuModMirror mirror)
+                if (mods.Any(m => m is OsuModHardRock))
                 {
-                    mirrorHash = (byte)(1 + (int)(mirror.Reflection.Value));
+                    mirrorHash = 1 + (int)OsuModMirror.MirrorType.Vertical;
+                }
+                else if (mods.FirstOrDefault(m => m is OsuModMirror) is OsuModMirror mirror)
+                {
+                    mirrorHash = (byte)(1 + (int)mirror.Reflection.Value);
                 }
 
                 hash = HashCode.Combine(rate, d.CircleSize, d.OverallDifficulty, isSliderAccuracy, flashlightHash, mirrorHash);
