@@ -311,7 +311,7 @@ namespace PerformanceCalculatorGUI.Screens
                 Schedule(() =>
                 {
                     loadingLayer.Hide();
-                    calculationButton.State.Value = Components.ButtonState.Done;
+                    calculationButton.State.Value = ButtonState.Done;
                 });
             }, TaskContinuationOptions.None);
         }
