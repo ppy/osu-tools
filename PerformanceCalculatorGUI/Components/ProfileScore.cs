@@ -54,15 +54,15 @@ namespace PerformanceCalculatorGUI.Components
         {
             APIBeatmapSet dummySet = new APIBeatmapSet
             {
-                Title = score.BeatmapInfo?.Metadata.Title ?? "Error Title",
-                TitleUnicode = score.BeatmapInfo?.Metadata.TitleUnicode ?? "Error Title",
-                Artist = score.BeatmapInfo?.Metadata.Artist ?? "Error Artist",
-                ArtistUnicode = score.BeatmapInfo?.Metadata.ArtistUnicode ?? "Error Artist",
+                Title = score.BeatmapInfo?.Metadata.Title ?? "Unknown Title",
+                TitleUnicode = score.BeatmapInfo?.Metadata.TitleUnicode ?? "Unknown Title",
+                Artist = score.BeatmapInfo?.Metadata.Artist ?? "Unknown Artist",
+                ArtistUnicode = score.BeatmapInfo?.Metadata.ArtistUnicode ?? "Unknown Artist",
             };
             APIBeatmap dummyBeatmap = new APIBeatmap
             {
                 OnlineID = score.BeatmapInfo?.OnlineID ?? 0,
-                DifficultyName = score.BeatmapInfo?.DifficultyName ?? "Error Difficulty",
+                DifficultyName = score.BeatmapInfo?.DifficultyName ?? "Unknown Difficulty",
             };
             SoloScoreInfo soloScoreInfo = new SoloScoreInfo
             {
