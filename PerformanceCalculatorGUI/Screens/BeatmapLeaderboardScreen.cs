@@ -19,6 +19,7 @@ using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Overlays.BeatmapSet.Scores;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using PerformanceCalculatorGUI.Components;
@@ -219,6 +220,10 @@ namespace PerformanceCalculatorGUI.Screens
                 if (leaderboard.Scores.Count == 0)
                     return;
 
+                var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+
+                Dictionary<int, DifficultyAttributes> attributesCache = new Dictionary<int, DifficultyAttributes>();
+
                 foreach (var score in leaderboard.Scores)
                 {
                     if (token.IsCancellationRequested)
@@ -227,14 +232,18 @@ namespace PerformanceCalculatorGUI.Screens
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {score.User?.Username}");
 
                     var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
+                    Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
 
                     var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
-                    var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                    int modsHash = RulesetHelper.GenerateModsHash(mods, working.BeatmapInfo.Difficulty, ruleset.Value);
 
-                    Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
+                    if (!attributesCache.TryGetValue(modsHash, out var difficultyAttributes))
+                    {
+                        difficultyAttributes = difficultyCalculator.Calculate(mods);
+                        attributesCache[modsHash] = difficultyAttributes;
+                    }
 
-                    var difficultyAttributes = difficultyCalculator.Calculate(mods);
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
                     var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;

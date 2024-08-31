@@ -13,7 +13,8 @@ namespace PerformanceCalculatorGUI.Configuration
         ClientId,
         ClientSecret,
         DefaultPath,
-        CachePath
+        CachePath,
+        LazerFolderPath
     }
 
     public class SettingsManager : IniConfigManager<Settings>
@@ -31,6 +32,7 @@ namespace PerformanceCalculatorGUI.Configuration
             SetDefault(Settings.ClientSecret, string.Empty);
             SetDefault(Settings.DefaultPath, Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             SetDefault(Settings.CachePath, Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "cache"));
+            SetDefault(Settings.LazerFolderPath, string.Empty);
         }
     }
 }

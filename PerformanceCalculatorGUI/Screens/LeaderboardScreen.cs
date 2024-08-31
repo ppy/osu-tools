@@ -31,7 +31,7 @@ namespace PerformanceCalculatorGUI.Screens
         public decimal LivePP { get; set; }
         public decimal LocalPP { get; set; }
 
-        public List<ExtendedScore> Scores { get; set; }
+        public List<ExtendedProfileScore> Scores { get; set; }
     }
 
     public partial class LeaderboardScreen : PerformanceCalculatorScreen
@@ -242,7 +242,7 @@ namespace PerformanceCalculatorGUI.Screens
                 var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}");
 
                 var calculatedPlayers = new List<LeaderboardUser>();
-                var calculatedScores = new List<ExtendedScore>();
+                var calculatedScores = new List<ExtendedProfileScore>();
 
                 for (int i = 0; i < playerAmountTextBox.Value.Value; i++)
                 {
@@ -277,7 +277,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                     foreach (var calculatedScore in calculatedScores.OrderByDescending(x => x.PerformanceAttributes.Total))
                     {
-                        scores.Add(new ExtendedProfileScore(calculatedScore));
+                        scores.Add(new DrawableExtendedProfileScore(calculatedScore));
                     }
                 });
             }, token).ContinueWith(t =>
@@ -299,7 +299,7 @@ namespace PerformanceCalculatorGUI.Screens
             if (token.IsCancellationRequested)
                 return new UserLeaderboardData();
 
-            var plays = new List<ExtendedScore>();
+            var plays = new List<ExtendedProfileScore>();
 
             var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
 
@@ -327,7 +327,7 @@ namespace PerformanceCalculatorGUI.Screens
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
                         score.PP = perfAttributes?.Total ?? 0.0;
 
-                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                        var extendedScore = new ExtendedProfileScore(score, livePp, perfAttributes);
                         plays.Add(extendedScore);
                     }
                     catch (Exception e)
