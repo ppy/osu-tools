@@ -80,7 +80,7 @@ namespace PerformanceCalculatorGUI.Components
 
         private const float performance_background_shear = 0.45f;
 
-        protected readonly ExtendedScore Score;
+        public readonly ExtendedScore Score;
 
         [Resolved]
         private OsuColour colours { get; set; }
