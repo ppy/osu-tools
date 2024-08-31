@@ -84,7 +84,13 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     RelativeSizeAxes = Axes.Both,
                     ColumnDimensions = new[] { new Dimension() },
-                    RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, username_container_height), new Dimension(GridSizeMode.Absolute), new Dimension(GridSizeMode.AutoSize), new Dimension() },
+                    RowDimensions = new[]
+                    {
+                        new Dimension(GridSizeMode.Absolute, username_container_height),
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension()
+                    },
                     Content = new[]
                     {
                         new Drawable[]
@@ -146,7 +152,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         Anchor = Anchor.CentreRight,
                                         Origin = Anchor.CentreRight,
                                         Margin = new MarginPadding { Right = 22 },
-                                        Current = { Value = ProfileSortCriteria.Local, BindTarget = sorting },
+                                        Current = { BindTarget = sorting },
                                         Alpha = 0
                                     }
                                 }
@@ -220,7 +226,13 @@ namespace PerformanceCalculatorGUI.Screens
                     sortingTabControl.Alpha = 1.0f;
                     sortingTabControl.Current.Value = ProfileSortCriteria.Local;
 
-                    layout.RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, username_container_height), new Dimension(GridSizeMode.AutoSize), new Dimension(GridSizeMode.AutoSize), new Dimension() };
+                    layout.RowDimensions = new[]
+                    {
+                        new Dimension(GridSizeMode.Absolute, username_container_height),
+                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension()
+                    };
                 });
 
                 if (token.IsCancellationRequested)
@@ -340,13 +352,25 @@ namespace PerformanceCalculatorGUI.Screens
             if (!scores.Children.Any())
                 return;
 
-            var sortedScores = sortCriteria switch
+            ExtendedProfileScore[] sortedScores;
+
+            switch (sortCriteria)
             {
-                ProfileSortCriteria.Live => scores.Children.OrderByDescending(x => x.Score.LivePP).ToArray(),
-                ProfileSortCriteria.Local => scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total).ToArray(),
-                ProfileSortCriteria.Difference => scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total - x.Score.LivePP).ToArray(),
-                _ => throw new ArgumentOutOfRangeException(nameof(sortCriteria), sortCriteria, null)
-            };
+                case ProfileSortCriteria.Live:
+                    sortedScores = scores.Children.OrderByDescending(x => x.Score.LivePP).ToArray();
+                    break;
+
+                case ProfileSortCriteria.Local:
+                    sortedScores = scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total).ToArray();
+                    break;
+
+                case ProfileSortCriteria.Difference:
+                    sortedScores = scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total - x.Score.LivePP).ToArray();
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(sortCriteria), sortCriteria, null);
+            }
 
             for (int i = 0; i < sortedScores.Length; i++)
             {
