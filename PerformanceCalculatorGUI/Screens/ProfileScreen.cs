@@ -489,10 +489,6 @@ namespace PerformanceCalculatorGUI.Screens
 
                         currentScoresCount++;
 
-                        // Sanity check for aspire maps till slider fix won't get merged
-                        if (difficultyAttributes.StarRating > 14 && !score.BeatmapInfo.Status.GrantsPerformancePoints())
-                            continue;
-
                         tempScores.Add(new ProfileScore(score, perfAttributes));
                     }
 

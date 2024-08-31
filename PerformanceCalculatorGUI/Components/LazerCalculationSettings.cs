@@ -44,9 +44,6 @@ namespace PerformanceCalculatorGUI.Components
 
         public bool ShouldBeFiltered(ScoreInfo score)
         {
-            if (score.Mods.Any(h => h is OsuModAutopilot))
-                return true;
-
             if (score.BeatmapInfo == null)
                 return true;
 
