@@ -23,15 +23,15 @@ namespace PerformanceCalculatorGUI.Components
 {
     public partial class LazerCalculationSettings : ToolbarButton, IHasPopover
     {
-        private readonly Bindable<bool> calculateRankedMaps = new Bindable<bool>(true);
-        private readonly Bindable<bool> calculateUnrankedMaps = new Bindable<bool>(false);
+        public readonly Bindable<bool> CalculateRankedMaps = new Bindable<bool>(true);
+        public readonly Bindable<bool> CalculateUnrankedMaps = new Bindable<bool>(false);
 
-        private readonly Bindable<bool> calculateUnsubmittedScores = new Bindable<bool>(true);
-        private readonly Bindable<bool> calculateUnrankedMods = new Bindable<bool>(true);
+        public readonly Bindable<bool> CalculateUnsubmittedScores = new Bindable<bool>(true);
+        public readonly Bindable<bool> CalculateUnrankedMods = new Bindable<bool>(true);
 
-        private readonly Bindable<bool> enableScorev1Overwrite = new Bindable<bool>(false);
+        public readonly Bindable<bool> EnableScorev1Overwrite = new Bindable<bool>(false);
 
-        public bool IsScorev1OverwritingEnabled => enableScorev1Overwrite.Value;
+        public bool IsScorev1OverwritingEnabled => EnableScorev1Overwrite.Value;
 
         protected override Anchor TooltipAnchor => Anchor.TopRight;
 
@@ -47,20 +47,20 @@ namespace PerformanceCalculatorGUI.Components
             if (score.BeatmapInfo == null)
                 return true;
 
-            if (!calculateRankedMaps.Value && score.BeatmapInfo.Status.GrantsPerformancePoints())
+            if (!CalculateRankedMaps.Value && score.BeatmapInfo.Status.GrantsPerformancePoints())
                 return true;
 
-            if (!calculateUnrankedMaps.Value && !score.BeatmapInfo.Status.GrantsPerformancePoints())
+            if (!CalculateUnrankedMaps.Value && !score.BeatmapInfo.Status.GrantsPerformancePoints())
                 return true;
 
-            if (!calculateUnrankedMods.Value)
+            if (!CalculateUnrankedMods.Value)
             {
                 // Check for legacy score because CL is unranked
                 if (!score.Mods.All(m => m.Ranked || (score.IsLegacyScore && m is OsuModClassic)))
                     return true;
             }
 
-            if (!calculateUnsubmittedScores.Value)
+            if (!CalculateUnsubmittedScores.Value)
             {
                 if (score.OnlineID <= 0 && score.LegacyOnlineID <= 0)
                     return true;
@@ -69,8 +69,7 @@ namespace PerformanceCalculatorGUI.Components
             return false;
         }
 
-        public Popover GetPopover() => new LazerCalculationSettingsPopover(
-            new[] { calculateRankedMaps, calculateUnrankedMaps, calculateUnsubmittedScores, calculateUnrankedMods, enableScorev1Overwrite });
+        public Popover GetPopover() => new LazerCalculationSettingsPopover(this);
 
         protected override bool OnClick(ClickEvent e)
         {
@@ -81,11 +80,11 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class LazerCalculationSettingsPopover : OsuPopover
     {
-        private readonly Bindable<bool>[] bindables;
+        private readonly LazerCalculationSettings parent;
 
-        public LazerCalculationSettingsPopover(Bindable<bool>[] bindables)
+        public LazerCalculationSettingsPopover(LazerCalculationSettings parent)
         {
-            this.bindables = bindables;
+            this.parent = parent;
         }
 
         [BackgroundDependencyLoader]
@@ -108,27 +107,27 @@ namespace PerformanceCalculatorGUI.Components
                             new OsuCheckbox
                             {
                                 LabelText = "Calculate Ranked Maps",
-                                Current = { BindTarget = bindables[0] }
+                                Current = { BindTarget = parent.CalculateRankedMaps }
                             },
                             new OsuCheckbox
                             {
                                 LabelText = "Calculate Unranked Maps",
-                                Current = { BindTarget = bindables[1] }
+                                Current = { BindTarget = parent.CalculateUnrankedMaps }
                             },
                             new OsuCheckbox
                             {
                                 LabelText = "Calculate Unsubmitted Scores, such as scores set on local difficulties",
-                                Current = { BindTarget = bindables[2] }
+                                Current = { BindTarget = parent.CalculateUnsubmittedScores }
                             },
                             new OsuCheckbox
                             {
                                 LabelText = "Calculate Unranked Mods, Autopilot is excluded regardless",
-                                Current = { BindTarget = bindables[3] }
+                                Current = { BindTarget = parent.CalculateUnsubmittedScores }
                             },
                             new OsuCheckbox
                             {
                                 LabelText = "Enable Scorev1 score overwrite for legacy scores",
-                                Current = { BindTarget = bindables[4] }
+                                Current = { BindTarget = parent.EnableScorev1Overwrite }
                             },
                         }
                     }
