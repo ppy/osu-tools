@@ -13,10 +13,8 @@ using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
-using osu.Game.Rulesets.Mania.Mods;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
@@ -28,10 +26,9 @@ namespace PerformanceCalculatorGUI
     public static class RulesetHelper
     {
         /// <summary>
-        /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
-        /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
+        /// Creates hashset of types for each <see cref="Mod"/> of <see cref="Ruleset"> that's affecting difficulty
         /// </summary>
-        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+        public static HashSet<Type> GetDifficultyAdjustingModsHashSet(Ruleset ruleset)
         {
             var beatmap = new EmptyWorkingBeatmap
             {
@@ -44,15 +41,30 @@ namespace PerformanceCalculatorGUI
 
             var allMods = ruleset.CreateAllMods().ToArray();
 
-            var allowedMods = ModUtils.FlattenMods(
+            var difficultyAdjustingMods = ModUtils.FlattenMods(
                                           ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
                                       .Select(m => m.GetType())
                                       .Distinct()
                                       .ToHashSet();
 
-            // Special case to allow either DT or NC.
-            if (allowedMods.Any(type => type.IsSubclassOf(typeof(ModDoubleTime))) && mods.Any(m => m is ModNightcore))
-                allowedMods.Add(allMods.Single(m => m is ModNightcore).GetType());
+            // Explicitly add NC and DC as they're not returned in CreateDifficultyAdjustmentModCombinations for some reason
+            if (difficultyAdjustingMods.Any(type => type.IsSubclassOf(typeof(ModDoubleTime))))
+                difficultyAdjustingMods.Add(allMods.Single(m => m is ModNightcore).GetType());
+
+            if (difficultyAdjustingMods.Any(type => type.IsSubclassOf(typeof(ModHalfTime))))
+                difficultyAdjustingMods.Add(allMods.Single(m => m is ModDaycore).GetType());
+
+            return difficultyAdjustingMods;
+        }
+
+        /// <summary>
+        /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
+        /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
+        /// </summary>
+        public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+        {
+            var allMods = ruleset.CreateAllMods().ToArray();
+            var allowedMods = GetDifficultyAdjustingModsHashSet(ruleset);
 
             var result = new List<Mod>();
 
@@ -87,74 +99,6 @@ namespace PerformanceCalculatorGUI
                 3 => new ManiaRuleset(),
                 _ => throw new ArgumentException("Invalid ruleset ID provided.")
             };
-        }
-
-        /// <summary>
-        /// Generates the unique hash of mods combo that affect difficulty calculation
-        /// Needs to be updated if list of difficulty adjusting mods changes
-        /// </summary>
-        public static int GenerateModsHash(Mod[] mods, BeatmapDifficulty difficulty, RulesetInfo ruleset)
-        {
-            // Rate changing mods
-            double rate = ModUtils.CalculateRateWithMods(mods);
-
-            int hash = 0;
-
-            if (ruleset.OnlineID == 0) // For osu we have many different things
-            {
-                BeatmapDifficulty d = new BeatmapDifficulty(difficulty);
-
-                foreach (var mod in mods.OfType<IApplicableToDifficulty>())
-                    mod.ApplyToDifficulty(d);
-
-                bool isSliderAccuracy = mods.OfType<OsuModClassic>().All(m => !m.NoSliderHeadAccuracy.Value);
-
-                byte flashlightHash = 0;
-
-                if (mods.Any(h => h is OsuModFlashlight))
-                {
-                    flashlightHash = (byte)(mods.Any(h => h is OsuModHidden) ? 2 : 1);
-                }
-
-                byte mirrorHash = 0;
-
-                if (mods.Any(m => m is OsuModHardRock))
-                {
-                    mirrorHash = 1 + (int)OsuModMirror.MirrorType.Vertical;
-                }
-                else if (mods.FirstOrDefault(m => m is OsuModMirror) is OsuModMirror mirror)
-                {
-                    mirrorHash = (byte)(1 + (int)mirror.Reflection.Value);
-                }
-
-                hash = HashCode.Combine(rate, d.CircleSize, d.OverallDifficulty, isSliderAccuracy, flashlightHash, mirrorHash);
-            }
-            else if (ruleset.OnlineID == 1) // For taiko we only have rate
-            {
-                hash = rate.GetHashCode();
-            }
-            else if (ruleset.OnlineID == 2) // For catch we have rate and CS
-            {
-                BeatmapDifficulty d = new BeatmapDifficulty(difficulty);
-
-                foreach (var mod in mods.OfType<IApplicableToDifficulty>())
-                    mod.ApplyToDifficulty(d);
-
-                hash = HashCode.Combine(rate, d.CircleSize);
-            }
-            else if (ruleset.OnlineID == 3) // Mania is using rate, and keys data for converts
-            {
-                int keyCount = 0;
-
-                if (mods.FirstOrDefault(h => h is ManiaKeyMod) is ManiaKeyMod mod)
-                    keyCount = mod.KeyCount;
-
-                bool isDualStages = mods.Any(h => h is ManiaModDualStages);
-
-                hash = HashCode.Combine(rate, keyCount, isDualStages);
-            }
-
-            return hash;
         }
 
         public static int AdjustManiaScore(int score, IReadOnlyList<Mod> mods)

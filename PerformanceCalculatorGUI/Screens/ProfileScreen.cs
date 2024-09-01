@@ -451,6 +451,8 @@ namespace PerformanceCalculatorGUI.Screens
                 int currentScoresCount = 0;
                 var totalScoresCount = realmScores.Sum(childList => childList.Count);
 
+                var relevantMods = RulesetHelper.GetDifficultyAdjustingModsHashSet(rulesetInstance);
+
                 foreach (var scoreList in realmScores)
                 {
                     string beatmapHash = scoreList[0].BeatmapHash;
@@ -475,7 +477,7 @@ namespace PerformanceCalculatorGUI.Screens
                         if (score.BeatmapInfo == null)
                             continue;
 
-                        int modsHash = RulesetHelper.GenerateModsHash(score.Mods, working.BeatmapInfo.Difficulty, ruleset.Value);
+                        int modsHash = generateModsHash(score.Mods, relevantMods);
 
                         if (!attributesCache.TryGetValue(modsHash, out var difficultyAttributes))
                         {
@@ -545,6 +547,18 @@ namespace PerformanceCalculatorGUI.Screens
                     calculationButtonLocal.State.Value = ButtonState.Done;
                 });
             }, token);
+        }
+
+        private int generateModsHash(IReadOnlyList<Mod> mods, HashSet<Type> relevantMods)
+        {
+            HashCode hash = new HashCode();
+
+            var filteredMods = mods.Where(m => relevantMods.Contains(m.GetType()));
+
+            foreach (var mod in filteredMods)
+                hash.Add(mod);
+
+            return hash.ToHashCode();
         }
 
         private List<List<ScoreInfo>> getRealmScores(RealmAccess realm)
