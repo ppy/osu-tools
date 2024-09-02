@@ -27,6 +27,7 @@ using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
 using System.IO;
 using osu.Framework.Platform;
+using osu.Game.Screens.Play;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -411,9 +412,24 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting user data...");
 
-                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
+                APIUser player = null;
 
-                currentUserNicknames = [player.Username, .. player.PreviousUsernames, player.Id.ToString()];
+                try
+                {
+                    player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
+
+                    currentUserNicknames = [player.Username, .. player.PreviousUsernames, player.Id.ToString()];
+
+                } catch {
+                    notificationDisplay.Display(new Notification("Unable to find player on the servers, using local name..."));
+
+                    player = new APIUser
+                    {
+                        Username = username
+                    };
+
+                    currentUserNicknames = [username];
+                }
 
                 Schedule(() =>
                 {
@@ -430,11 +446,8 @@ namespace PerformanceCalculatorGUI.Screens
 
                 if (token.IsCancellationRequested)
                     return;
-
                 var plays = new List<ProfileScore>();
-
                 var rulesetInstance = ruleset.Value.CreateInstance();
-
                 var lazerPath = configManager.GetBindable<string>(Settings.LazerFolderPath).Value;
 
                 if (lazerPath == string.Empty)
@@ -444,6 +457,7 @@ namespace PerformanceCalculatorGUI.Screens
                 }
 
                 var storage = gameHost.GetStorage(lazerPath);
+
                 var realmAccess = new RealmAccess(storage, @"client.realm");
 
                 var realmScores = getRealmScores(realmAccess);
@@ -472,7 +486,7 @@ namespace PerformanceCalculatorGUI.Screens
                         if (token.IsCancellationRequested)
                             return;
 
-                        Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username}'s scores... {currentScoresCount} / {totalScoresCount}");
+                        Schedule(() => loadingLayer.Text.Value = $"Calculating {username}'s scores... {currentScoresCount} / {totalScoresCount}");
 
                         if (score.BeatmapInfo == null)
                             continue;
@@ -568,7 +582,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             Schedule(() => loadingLayer.Text.Value = "Filtering scores...");
 
-            realmScores.RemoveAll(x => !currentUserNicknames.Contains(x.User.Username) // Wrong username
+            realmScores.RemoveAll(x => !currentUserNicknames.Any(nickname => nickname.Equals(x.User.Username, StringComparison.OrdinalIgnoreCase)) // Wrong username
                                        || x.BeatmapInfo == null // No map for score
                                        || x.Passed == false || x.Rank == ScoreRank.F // Failed score
                                        || x.Ruleset.OnlineID != ruleset.Value.OnlineID // Incorrect ruleset
