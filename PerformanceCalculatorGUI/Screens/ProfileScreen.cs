@@ -54,7 +54,7 @@ namespace PerformanceCalculatorGUI.Screens
         private StatefulButton calculationButtonLocal;
         private LazerCalculationSettings settingsMenu;
 
-        private string[] currentUser;
+        private string[] currentUserNicknames;
 
         private CancellationTokenSource calculationCancellatonToken;
 
@@ -280,7 +280,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
 
-                currentUser = [player.Username];
+                currentUserNicknames = [player.Username];
 
                 Schedule(() =>
                 {
@@ -413,7 +413,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
 
-                currentUser = [player.Username, .. player.PreviousUsernames, player.Id.ToString()];
+                currentUserNicknames = [player.Username, .. player.PreviousUsernames, player.Id.ToString()];
 
                 Schedule(() =>
                 {
@@ -568,7 +568,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             Schedule(() => loadingLayer.Text.Value = "Filtering scores...");
 
-            realmScores.RemoveAll(x => !currentUser.Contains(x.User.Username) // Wrong username
+            realmScores.RemoveAll(x => !currentUserNicknames.Contains(x.User.Username) // Wrong username
                                        || x.BeatmapInfo == null // No map for score
                                        || x.Passed == false || x.Rank == ScoreRank.F // Failed score
                                        || x.Ruleset.OnlineID != ruleset.Value.OnlineID // Incorrect ruleset
