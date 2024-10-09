@@ -8,6 +8,7 @@ using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Edit;
@@ -88,7 +89,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             hitObject.RemoveTransform(existing);
 
                             using (hitObject.BeginAbsoluteSequence(hitObject.StartTimeBindable.Value))
-                                hitObject.Delay(nextHitObject.StartTime - hitObject.StartTimeBindable.Value).FadeOut().Expire();
+                            {
+                                var hitObjectDuration = hitObject.HitObject.GetEndTime() - hitObject.StartTimeBindable.Value;
+
+                                hitObject.Delay(hitObjectDuration)
+                                         .FadeTo(0.25f, 200f, Easing.Out)
+                                         .Delay(nextHitObject.StartTime - hitObject.StartTimeBindable.Value - hitObjectDuration)
+                                         .FadeOut(100f, Easing.Out)
+                                         .Expire();
+                            }
                         }
 
                         break;

@@ -42,6 +42,9 @@ namespace PerformanceCalculatorGUI
         [Resolved]
         private DialogOverlay dialogOverlay { get; set; }
 
+        [Cached]
+        private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
+
         public PerformanceCalculatorSceneManager()
         {
             RelativeSizeAxes = Axes.Both;
