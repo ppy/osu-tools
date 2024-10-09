@@ -46,13 +46,13 @@ namespace PerformanceCalculator.Performance
 
             if (OnlineAttributes)
             {
-                LegacyMods legacyMods = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, score.Mods);
+                LegacyMods legacyMods = LegacyHelper.ConvertToLegacyMods(workingBeatmap.BeatmapInfo, ruleset, score.Mods);
                 attributes = queryApiAttributes(apiScore.BeatmapID, apiScore.RulesetID, legacyMods);
             }
             else
             {
                 var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
-                attributes = difficultyCalculator.Calculate(LegacyHelper.FilterDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, score.Mods));
+                attributes = difficultyCalculator.Calculate(score.Mods);
             }
 
             var performanceCalculator = ruleset.CreatePerformanceCalculator();

@@ -63,37 +63,11 @@ namespace PerformanceCalculator
             }
         }
 
-        public const LegacyMods KEY_MODS = LegacyMods.Key1 | LegacyMods.Key2 | LegacyMods.Key3 | LegacyMods.Key4 | LegacyMods.Key5 | LegacyMods.Key6 | LegacyMods.Key7 | LegacyMods.Key8
-                                           | LegacyMods.Key9 | LegacyMods.KeyCoop;
-
-        // See: https://github.com/ppy/osu-queue-score-statistics/blob/2264bfa68e14bb16ec71a7cac2072bdcfaf565b6/osu.Server.Queues.ScoreStatisticsProcessor/Helpers/LegacyModsHelper.cs
-        public static LegacyMods MaskRelevantMods(LegacyMods mods, bool isConvertedBeatmap, int rulesetId)
-        {
-            LegacyMods relevantMods = LegacyMods.DoubleTime | LegacyMods.HalfTime | LegacyMods.HardRock | LegacyMods.Easy;
-
-            switch (rulesetId)
-            {
-                case 0:
-                    if ((mods & LegacyMods.Flashlight) > 0)
-                        relevantMods |= LegacyMods.Flashlight | LegacyMods.Hidden | LegacyMods.TouchDevice;
-                    else
-                        relevantMods |= LegacyMods.Flashlight | LegacyMods.TouchDevice;
-                    break;
-
-                case 3:
-                    if (isConvertedBeatmap)
-                        relevantMods |= KEY_MODS;
-                    break;
-            }
-
-            return mods & relevantMods;
-        }
-
         /// <summary>
         /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
         /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
         /// </summary>
-        public static LegacyMods ConvertToLegacyDifficultyAdjustmentMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
+        public static LegacyMods ConvertToLegacyMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
         {
             var legacyMods = ruleset.ConvertToLegacyMods(mods);
 
@@ -101,15 +75,15 @@ namespace PerformanceCalculator
             if (mods.Any(mod => mod is ModDaycore))
                 legacyMods |= LegacyMods.HalfTime;
 
-            return MaskRelevantMods(legacyMods, ruleset.RulesetInfo.OnlineID != beatmapInfo.Ruleset.OnlineID, ruleset.RulesetInfo.OnlineID);
+            return legacyMods;
         }
 
         /// <summary>
         /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
         /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
         /// </summary>
-        public static Mod[] FilterDifficultyAdjustmentMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
-            => ruleset.ConvertFromLegacyMods(ConvertToLegacyDifficultyAdjustmentMods(beatmapInfo, ruleset, mods)).ToArray();
+        public static Mod[] FilterLegacyMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
+            => ruleset.ConvertFromLegacyMods(ConvertToLegacyMods(beatmapInfo, ruleset, mods)).ToArray();
 
         public static DifficultyAttributes CreateDifficultyAttributes(int legacyId)
         {
