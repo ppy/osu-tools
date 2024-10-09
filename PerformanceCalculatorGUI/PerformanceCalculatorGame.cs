@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
+using osu.Framework.Input.Handlers.Tablet;
 using osu.Framework.Platform;
 using osu.Game;
 using osu.Game.Graphics.Cursor;
@@ -71,6 +73,13 @@ namespace PerformanceCalculatorGUI
             base.SetHost(host);
 
             host.Window.CursorState |= CursorState.Hidden;
+
+            var tabletInputHandler = host.AvailableInputHandlers.FirstOrDefault(x => x is OpenTabletDriverHandler && x.IsActive);
+
+            if (tabletInputHandler != null)
+            {
+                tabletInputHandler.Enabled.Value = false;
+            }
         }
 
         protected override void LoadComplete()
