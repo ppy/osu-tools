@@ -48,16 +48,12 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         public virtual int? Goods { get; }
 
-        [UsedImplicitly]
-        [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
-        public bool NoClassicMod { get; }
-
         public override void Execute()
         {
             var ruleset = Ruleset;
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
-            var mods = NoClassicMod ? GetMods(ruleset) : LegacyHelper.FilterDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, GetMods(ruleset));
+            var mods = GetMods(ruleset);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
             var beatmapMaxCombo = GetMaxCombo(beatmap);

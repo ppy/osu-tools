@@ -28,6 +28,10 @@ namespace PerformanceCalculator.Profile
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-or|--only-ranked-mods", Description = "Excludes mods currently considered unranked.")]
+        public bool OnlyRankedMods { get; set; }
+
         public override void Execute()
         {
             var displayPlays = new List<UserPlayInfo>();
@@ -46,13 +50,18 @@ namespace PerformanceCalculator.Profile
 
                 Mod[] mods = play.Mods.Select(x => x.ToMod(ruleset)).ToArray();
 
+                if (OnlyRankedMods)
+                {
+                    mods = LegacyHelper.FilterLegacyMods(working.BeatmapInfo, ruleset, mods);
+                }
+
                 var scoreInfo = play.ToScoreInfo(mods);
                 scoreInfo.Ruleset = ruleset.RulesetInfo;
 
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                 var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
-                var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.FilterDifficultyAdjustmentMods(working.BeatmapInfo, ruleset, scoreInfo.Mods).ToArray());
+                var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
                 var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
                 var ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes);
