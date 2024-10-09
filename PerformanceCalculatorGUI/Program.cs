@@ -15,7 +15,8 @@ namespace PerformanceCalculatorGUI
             using DesktopGameHost host = Host.GetSuitableDesktopHost("PerformanceCalculatorGUI", new HostOptions
             {
                 PortableInstallation = true,
-                BypassCompositor = false
+                BypassCompositor = false,
+                FriendlyGameName = "Performance Calculator GUI"
             });
 
             using var game = new PerformanceCalculatorGame();
