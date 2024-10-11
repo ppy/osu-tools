@@ -28,10 +28,6 @@ namespace PerformanceCalculator.Profile
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
 
-        [UsedImplicitly]
-        [Option(Template = "-or|--only-ranked-mods", Description = "Excludes mods currently considered unranked.")]
-        public bool OnlyRankedMods { get; set; }
-
         public override void Execute()
         {
             var displayPlays = new List<UserPlayInfo>();
@@ -49,11 +45,6 @@ namespace PerformanceCalculator.Profile
                 var working = ProcessorWorkingBeatmap.FromFileOrId(play.BeatmapID.ToString());
 
                 Mod[] mods = play.Mods.Select(x => x.ToMod(ruleset)).ToArray();
-
-                if (OnlyRankedMods)
-                {
-                    mods = LegacyHelper.FilterLegacyMods(working.BeatmapInfo, ruleset, mods);
-                }
 
                 var scoreInfo = play.ToScoreInfo(mods);
                 scoreInfo.Ruleset = ruleset.RulesetInfo;
