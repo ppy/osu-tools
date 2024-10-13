@@ -135,8 +135,8 @@ namespace PerformanceCalculatorGUI.Screens
                                 AutoSizeAxes = Axes.Y,
                                 ColumnDimensions = new[]
                                 {
-                                    new Dimension(),
                                     new Dimension(GridSizeMode.Absolute),
+                                    new Dimension(),
                                     new Dimension(GridSizeMode.AutoSize)
                                 },
                                 RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
@@ -423,21 +423,21 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     beatmapImportContainer.ColumnDimensions = new[]
                     {
+                        new Dimension(),
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.AutoSize)
+                    };
+                }
+                else
+                {
+                    beatmapImportContainer.ColumnDimensions = new[]
+                    {
                         new Dimension(GridSizeMode.Absolute),
                         new Dimension(),
                         new Dimension(GridSizeMode.AutoSize)
                     };
 
                     fixupTextBox(beatmapIdTextBox);
-                }
-                else
-                {
-                    beatmapImportContainer.ColumnDimensions = new[]
-                    {
-                        new Dimension(),
-                        new Dimension(GridSizeMode.Absolute),
-                        new Dimension(GridSizeMode.AutoSize)
-                    };
                 }
             });
 
