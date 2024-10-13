@@ -116,8 +116,7 @@ namespace PerformanceCalculator.Difficulty
         private Result processBeatmap(WorkingBeatmap beatmap)
         {
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.Ruleset.OnlineID);
-
-            var mods = LegacyHelper.FilterLegacyMods(beatmap.BeatmapInfo, ruleset, getMods(ruleset));
+            var mods = getMods(ruleset);
 
             var legacyRuleset = (ILegacyRuleset)ruleset;
             var simulator = legacyRuleset.CreateLegacyScoreSimulator();

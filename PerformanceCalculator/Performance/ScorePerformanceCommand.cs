@@ -16,6 +16,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania.Difficulty;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Taiko.Difficulty;
 using osu.Game.Scoring;
@@ -46,7 +47,7 @@ namespace PerformanceCalculator.Performance
 
             if (OnlineAttributes)
             {
-                LegacyMods legacyMods = LegacyHelper.ConvertToLegacyMods(workingBeatmap.BeatmapInfo, ruleset, score.Mods);
+                LegacyMods legacyMods = convertToLegacyMods(workingBeatmap.BeatmapInfo, ruleset, score.Mods);
                 attributes = queryApiAttributes(apiScore.BeatmapID, apiScore.RulesetID, legacyMods);
             }
             else
@@ -119,6 +120,47 @@ namespace PerformanceCalculator.Performance
                 ), apiBeatmap);
                 return fullAttributes;
             }
+        }
+
+        /// <summary>
+        /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
+        /// This should only be used to match performance calculations using databased attributes.
+        /// </summary>
+        private static LegacyMods convertToLegacyMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
+        {
+            var legacyMods = ruleset.ConvertToLegacyMods(mods);
+
+            // mods that are not represented in `LegacyMods` (but we can approximate them well enough with others)
+            if (mods.Any(mod => mod is ModDaycore))
+                legacyMods |= LegacyMods.HalfTime;
+
+            // See: https://github.com/ppy/osu-queue-score-statistics/blob/2264bfa68e14bb16ec71a7cac2072bdcfaf565b6/osu.Server.Queues.ScoreStatisticsProcessor/Helpers/LegacyModsHelper.cs
+            static LegacyMods maskRelevantMods(LegacyMods mods, bool isConvertedBeatmap, int rulesetId)
+            {
+                const LegacyMods key_mods = LegacyMods.Key1 | LegacyMods.Key2 | LegacyMods.Key3 | LegacyMods.Key4 | LegacyMods.Key5 | LegacyMods.Key6 | LegacyMods.Key7 | LegacyMods.Key8
+                                            | LegacyMods.Key9 | LegacyMods.KeyCoop;
+
+                LegacyMods relevantMods = LegacyMods.DoubleTime | LegacyMods.HalfTime | LegacyMods.HardRock | LegacyMods.Easy;
+
+                switch (rulesetId)
+                {
+                    case 0:
+                        if ((mods & LegacyMods.Flashlight) > 0)
+                            relevantMods |= LegacyMods.Flashlight | LegacyMods.Hidden | LegacyMods.TouchDevice;
+                        else
+                            relevantMods |= LegacyMods.Flashlight | LegacyMods.TouchDevice;
+                        break;
+
+                    case 3:
+                        if (isConvertedBeatmap)
+                            relevantMods |= key_mods;
+                        break;
+                }
+
+                return mods & relevantMods;
+            }
+
+            return maskRelevantMods(legacyMods, ruleset.RulesetInfo.OnlineID != beatmapInfo.Ruleset.OnlineID, ruleset.RulesetInfo.OnlineID);
         }
 
         [JsonObject(MemberSerialization.OptIn)]

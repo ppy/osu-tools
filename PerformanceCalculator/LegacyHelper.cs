@@ -2,16 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Linq;
-using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mania.Difficulty;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Taiko;
@@ -62,28 +58,6 @@ namespace PerformanceCalculator
                     return "mania";
             }
         }
-
-        /// <summary>
-        /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
-        /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
-        /// </summary>
-        public static LegacyMods ConvertToLegacyMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
-        {
-            var legacyMods = ruleset.ConvertToLegacyMods(mods);
-
-            // mods that are not represented in `LegacyMods` (but we can approximate them well enough with others)
-            if (mods.Any(mod => mod is ModDaycore))
-                legacyMods |= LegacyMods.HalfTime;
-
-            return legacyMods;
-        }
-
-        /// <summary>
-        /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
-        /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
-        /// </summary>
-        public static Mod[] FilterLegacyMods(BeatmapInfo beatmapInfo, Ruleset ruleset, Mod[] mods)
-            => ruleset.ConvertFromLegacyMods(ConvertToLegacyMods(beatmapInfo, ruleset, mods)).ToArray();
 
         public static DifficultyAttributes CreateDifficultyAttributes(int legacyId)
         {

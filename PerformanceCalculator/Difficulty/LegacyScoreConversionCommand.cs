@@ -66,7 +66,7 @@ namespace PerformanceCalculator.Difficulty
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset);
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
-            Mod[] mods = [ruleset.CreateMod<ModClassic>(), .. LegacyHelper.FilterLegacyMods(workingBeatmap.BeatmapInfo, ruleset, getMods(ruleset))];
+            Mod[] mods = [ruleset.CreateMod<ModClassic>(), .. getMods(ruleset)];
 
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
