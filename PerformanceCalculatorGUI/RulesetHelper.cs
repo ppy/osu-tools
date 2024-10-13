@@ -103,11 +103,11 @@ namespace PerformanceCalculatorGUI
             return (int)Math.Round(1000000 * scoreMultiplier);
         }
 
-        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses)
         {
             return ruleset.OnlineID switch
             {
-                0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
+                0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood, countLargeTickMisses),
                 1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
                 2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
                 3 => generateManiaHitResults(accuracy, beatmap, countMiss),
@@ -115,7 +115,7 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses)
         {
             int countGreat;
 
@@ -196,6 +196,7 @@ namespace PerformanceCalculatorGUI
                 { HitResult.Great, countGreat },
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
+                { HitResult.LargeTickMiss, countLargeTickMisses ?? 0 },
                 { HitResult.Miss, countMiss }
             };
         }

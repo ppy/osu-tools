@@ -52,6 +52,7 @@ namespace PerformanceCalculatorGUI.Screens
         private SwitchButton beatmapImportTypeSwitch;
 
         private LimitedLabelledNumberBox missesTextBox;
+        private LimitedLabelledNumberBox largeTickMissesTextBox;
         private LimitedLabelledNumberBox comboTextBox;
         private LimitedLabelledNumberBox scoreTextBox;
 
@@ -135,8 +136,8 @@ namespace PerformanceCalculatorGUI.Screens
                                 AutoSizeAxes = Axes.Y,
                                 ColumnDimensions = new[]
                                 {
-                                    new Dimension(),
                                     new Dimension(GridSizeMode.Absolute),
+                                    new Dimension(),
                                     new Dimension(GridSizeMode.AutoSize)
                                 },
                                 RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
@@ -254,14 +255,6 @@ namespace PerformanceCalculatorGUI.Screens
                                                         }
                                                     }
                                                 },
-                                                missesTextBox = new LimitedLabelledNumberBox
-                                                {
-                                                    RelativeSizeAxes = Axes.X,
-                                                    Anchor = Anchor.TopLeft,
-                                                    Label = "Misses",
-                                                    PlaceholderText = "0",
-                                                    MinValue = 0
-                                                },
                                                 comboTextBox = new LimitedLabelledNumberBox
                                                 {
                                                     RelativeSizeAxes = Axes.X,
@@ -269,6 +262,39 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Label = "Combo",
                                                     PlaceholderText = "0",
                                                     MinValue = 0
+                                                },
+                                                new GridContainer
+                                                {
+                                                    RelativeSizeAxes = Axes.X,
+                                                    AutoSizeAxes = Axes.Y,
+                                                    ColumnDimensions = new[]
+                                                    {
+                                                        new Dimension(),
+                                                        new Dimension()
+                                                    },
+                                                    RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                                    Content = new[]
+                                                    {
+                                                        new Drawable[]
+                                                        {
+                                                            missesTextBox = new LimitedLabelledNumberBox
+                                                            {
+                                                                RelativeSizeAxes = Axes.X,
+                                                                Anchor = Anchor.TopLeft,
+                                                                Label = "Misses",
+                                                                PlaceholderText = "0",
+                                                                MinValue = 0
+                                                            },
+                                                            largeTickMissesTextBox = new LimitedLabelledNumberBox
+                                                            {
+                                                                RelativeSizeAxes = Axes.X,
+                                                                Anchor = Anchor.TopLeft,
+                                                                Label = "Large Tick Misses",
+                                                                PlaceholderText = "0",
+                                                                MinValue = 0
+                                                            }
+                                                        }
+                                                    }
                                                 },
                                                 scoreTextBox = new LimitedLabelledNumberBox
                                                 {
@@ -423,6 +449,15 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     beatmapImportContainer.ColumnDimensions = new[]
                     {
+                        new Dimension(),
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.AutoSize)
+                    };
+                }
+                else
+                {
+                    beatmapImportContainer.ColumnDimensions = new[]
+                    {
                         new Dimension(GridSizeMode.Absolute),
                         new Dimension(),
                         new Dimension(GridSizeMode.AutoSize)
@@ -430,21 +465,13 @@ namespace PerformanceCalculatorGUI.Screens
 
                     fixupTextBox(beatmapIdTextBox);
                 }
-                else
-                {
-                    beatmapImportContainer.ColumnDimensions = new[]
-                    {
-                        new Dimension(),
-                        new Dimension(GridSizeMode.Absolute),
-                        new Dimension(GridSizeMode.AutoSize)
-                    };
-                }
             });
 
             accuracyTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             goodsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             mehsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             missesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            largeTickMissesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             comboTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             scoreTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
 
@@ -636,7 +663,8 @@ namespace PerformanceCalculatorGUI.Screens
                 if (ruleset.Value.OnlineID != -1)
                 {
                     // official rulesets can generate more precise hits from accuracy
-                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood);
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood, largeTickMissesTextBox.Value.Value);
+
                     accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
                 }
 
@@ -671,6 +699,7 @@ namespace PerformanceCalculatorGUI.Screens
             accuracyContainer.Hide();
             comboTextBox.Hide();
             missesTextBox.Hide();
+            largeTickMissesTextBox.Hide();
             scoreTextBox.Hide();
 
             if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
@@ -681,6 +710,11 @@ namespace PerformanceCalculatorGUI.Screens
                 updateCombo(true);
                 comboTextBox.Show();
                 missesTextBox.Show();
+
+                if (ruleset.Value.ShortName == "osu")
+                {
+                    largeTickMissesTextBox.Show();
+                }
             }
             else if (ruleset.Value.ShortName == "mania")
             {
@@ -701,6 +735,7 @@ namespace PerformanceCalculatorGUI.Screens
                 updateCombo(true);
                 comboTextBox.Show();
                 missesTextBox.Show();
+                largeTickMissesTextBox.Show();
 
                 scoreTextBox.Text = string.Empty;
                 scoreTextBox.Show();
