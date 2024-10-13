@@ -36,10 +36,6 @@ namespace PerformanceCalculator.Difficulty
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
         public string[] Mods { get; }
 
-        [UsedImplicitly]
-        [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
-        public bool NoClassicMod { get; }
-
         public override void Execute()
         {
             var resultSet = new ResultSet();
@@ -124,7 +120,7 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.Ruleset.OnlineID);
-            var mods = NoClassicMod ? getMods(ruleset) : LegacyHelper.FilterDifficultyAdjustmentMods(beatmap.BeatmapInfo, ruleset, getMods(ruleset));
+            var mods = getMods(ruleset);
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
 
             return new Result

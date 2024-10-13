@@ -9,7 +9,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring.Legacy;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
@@ -38,11 +37,8 @@ namespace PerformanceCalculator.Performance
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(score.ScoreInfo.BeatmapInfo!.OnlineID.ToString());
             var playableBeatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, score.ScoreInfo.Mods);
 
-            Mod[] difficultyMods = score.ScoreInfo.Mods;
-
             if (score.ScoreInfo.IsLegacyScore)
             {
-                difficultyMods = LegacyHelper.FilterDifficultyAdjustmentMods(workingBeatmap.BeatmapInfo, ruleset, difficultyMods);
                 score.ScoreInfo.LegacyTotalScore = (int)score.ScoreInfo.TotalScore;
                 LegacyScoreDecoder.PopulateMaximumStatistics(score.ScoreInfo, workingBeatmap);
                 StandardisedScoreMigrationTools.UpdateFromLegacy(
@@ -52,7 +48,7 @@ namespace PerformanceCalculator.Performance
                     ((ILegacyRuleset)ruleset).CreateLegacyScoreSimulator().Simulate(workingBeatmap, playableBeatmap));
             }
 
-            var difficultyAttributes = ruleset.CreateDifficultyCalculator(workingBeatmap).Calculate(difficultyMods);
+            var difficultyAttributes = ruleset.CreateDifficultyCalculator(workingBeatmap).Calculate(score.ScoreInfo.Mods);
             var performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
             var performanceAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes);
 

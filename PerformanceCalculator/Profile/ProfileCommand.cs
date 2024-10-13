@@ -52,7 +52,7 @@ namespace PerformanceCalculator.Profile
                 var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                 var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
-                var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.FilterDifficultyAdjustmentMods(working.BeatmapInfo, ruleset, scoreInfo.Mods).ToArray());
+                var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
                 var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
                 var ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes);
