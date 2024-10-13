@@ -511,6 +511,11 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void modsChanged(ValueChangedEvent<IReadOnlyList<Mod>> mods)
         {
+            // Hotfix for preventing a difficulty and performance calculation from being trigger twice,
+            // as the mod overlay for some reason triggers a ValueChanged twice per mod change.
+            if (mods.OldValue.Count == mods.NewValue.Count)
+                return;
+
             modSettingChangeTracker?.Dispose();
 
             if (working is null)
