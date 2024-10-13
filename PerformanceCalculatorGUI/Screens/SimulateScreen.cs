@@ -28,6 +28,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play.HUD;
@@ -53,6 +54,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private LimitedLabelledNumberBox missesTextBox;
         private LimitedLabelledNumberBox largeTickMissesTextBox;
+        private LimitedLabelledNumberBox sliderTailMissesTextBox;
         private LimitedLabelledNumberBox comboTextBox;
         private LimitedLabelledNumberBox scoreTextBox;
 
@@ -270,6 +272,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     ColumnDimensions = new[]
                                                     {
                                                         new Dimension(),
+                                                        new Dimension(),
                                                         new Dimension()
                                                     },
                                                     RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
@@ -290,6 +293,14 @@ namespace PerformanceCalculatorGUI.Screens
                                                                 RelativeSizeAxes = Axes.X,
                                                                 Anchor = Anchor.TopLeft,
                                                                 Label = "Large Tick Misses",
+                                                                PlaceholderText = "0",
+                                                                MinValue = 0
+                                                            },
+                                                            sliderTailMissesTextBox = new LimitedLabelledNumberBox
+                                                            {
+                                                                RelativeSizeAxes = Axes.X,
+                                                                Anchor = Anchor.TopLeft,
+                                                                Label = "Slider Tail Misses",
                                                                 PlaceholderText = "0",
                                                                 MinValue = 0
                                                             }
@@ -472,6 +483,7 @@ namespace PerformanceCalculatorGUI.Screens
             mehsTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             missesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             largeTickMissesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            sliderTailMissesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             comboTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             scoreTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
 
@@ -660,10 +672,13 @@ namespace PerformanceCalculatorGUI.Screens
                 var accuracy = accuracyTextBox.Value.Value / 100.0;
                 Dictionary<HitResult, int> statistics = new Dictionary<HitResult, int>();
 
+                
+
                 if (ruleset.Value.OnlineID != -1)
                 {
                     // official rulesets can generate more precise hits from accuracy
-                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood, largeTickMissesTextBox.Value.Value);
+                    bool hasSliderAccuracy = !appliedMods.Value.Any(x => x is OsuModClassic cl && cl.NoSliderHeadAccuracy.Value);
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, hasSliderAccuracy, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood, largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
 
                     accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
                 }
@@ -700,6 +715,7 @@ namespace PerformanceCalculatorGUI.Screens
             comboTextBox.Hide();
             missesTextBox.Hide();
             largeTickMissesTextBox.Hide();
+            sliderTailMissesTextBox.Hide();
             scoreTextBox.Hide();
 
             if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
@@ -714,6 +730,7 @@ namespace PerformanceCalculatorGUI.Screens
                 if (ruleset.Value.ShortName == "osu")
                 {
                     largeTickMissesTextBox.Show();
+                    sliderTailMissesTextBox.Show();
                 }
             }
             else if (ruleset.Value.ShortName == "mania")
@@ -736,6 +753,7 @@ namespace PerformanceCalculatorGUI.Screens
                 comboTextBox.Show();
                 missesTextBox.Show();
                 largeTickMissesTextBox.Show();
+                sliderTailMissesTextBox.Show();
 
                 scoreTextBox.Text = string.Empty;
                 scoreTextBox.Show();
