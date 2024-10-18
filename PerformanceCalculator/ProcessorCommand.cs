@@ -27,10 +27,6 @@ namespace PerformanceCalculator
         public IConsole Console { get; private set; }
 
         [UsedImplicitly]
-        [Option(Template = "-o|--output <file.txt>", Description = "Output results to text file.")]
-        public string OutputFile { get; }
-
-        [UsedImplicitly]
         [Option(Template = "-j|--json", Description = "Output results as JSON.")]
         public bool OutputJson { get; }
 
@@ -65,9 +61,6 @@ namespace PerformanceCalculator
                 string json = JsonConvert.SerializeObject(result, Formatting.Indented);
 
                 Console.WriteLine(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {
@@ -131,8 +124,6 @@ namespace PerformanceCalculator
                 str = string.Join('\n', lines);
 
                 Console.Write(str);
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, str);
             }
         }
 

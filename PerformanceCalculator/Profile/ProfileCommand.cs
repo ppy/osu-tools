@@ -109,9 +109,6 @@ namespace PerformanceCalculator.Profile
                 });
 
                 Console.Write(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {

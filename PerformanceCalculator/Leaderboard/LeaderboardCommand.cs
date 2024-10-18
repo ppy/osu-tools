@@ -98,9 +98,6 @@ namespace PerformanceCalculator.Leaderboard
                 var json = JsonConvert.SerializeObject(calculatedPlayers);
 
                 Console.Write(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {

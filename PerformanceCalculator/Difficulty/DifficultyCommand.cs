@@ -63,9 +63,6 @@ namespace PerformanceCalculator.Difficulty
                 string json = JsonConvert.SerializeObject(resultSet);
 
                 Console.WriteLine(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {
