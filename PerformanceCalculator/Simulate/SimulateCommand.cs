@@ -4,16 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
-using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
-using osu.Game.Configuration;
-using osu.Game.Extensions;
 using osu.Game.Online.API;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
@@ -97,14 +91,13 @@ namespace PerformanceCalculator.Simulate
             if (Mods == null)
                 return Array.Empty<Mod>();
 
-            var availableMods = ruleset.CreateAllMods().ToList();
             var mods = new List<Mod>();
 
             foreach (var modString in Mods)
             {
-                APIMod mod = new APIMod() { Acronym = modString };
+                APIMod mod = new APIMod { Acronym = modString };
 
-                foreach(string modOption in ModOptions.Where(x => x.ToUpper().StartsWith($"{modString}_")))
+                foreach (string modOption in ModOptions.Where(x => x.StartsWith($"{modString}_", StringComparison.CurrentCultureIgnoreCase)))
                 {
                     string[] split = modOption[3..].Split('=');
                     if (split.Length != 2)
