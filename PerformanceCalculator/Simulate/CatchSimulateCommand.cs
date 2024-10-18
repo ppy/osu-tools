@@ -24,7 +24,7 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option."
                                                                      + " Enter as decimal 0-100.")]
-        public override double PercentCombo { get; }
+        public override double PercentCombo { get; } = 100;
 
         [UsedImplicitly]
         [Option(Template = "-T|--tiny-droplets <tinys>", Description = "Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
