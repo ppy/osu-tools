@@ -3,11 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Mods;
+using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator.Simulate
@@ -30,6 +33,14 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
         public override double PercentCombo { get; } = 100;
+
+        [UsedImplicitly]
+        [Option(Template = "-L|--large-tick-misses <misses>", Description = "Number of large tick misses. Defaults to 0.")]
+        private int largeTickMisses { get; } = 0;
+
+        [UsedImplicitly]
+        [Option(Template = "-S|--slider-tail-misses <misses>", Description = "Number of slider tail misses. Defaults to 0.")]
+        private int sliderTailMisses { get; } = 0;
 
         public override Ruleset Ruleset => new OsuRuleset();
 
@@ -111,11 +122,16 @@ namespace PerformanceCalculator.Simulate
                 countGreat = (int)(totalResultCount - countGood - countMeh - countMiss);
             }
 
+            bool hasSliderAccuracy = !GetMods(Ruleset).OfType<OsuModClassic>().All(m => m.NoSliderHeadAccuracy.Value);
+            int sliderTailHits = beatmap.HitObjects.Count(x => x is Slider) - sliderTailMisses;
+
             return new Dictionary<HitResult, int>
             {
                 { HitResult.Great, countGreat },
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
+                { HitResult.LargeTickMiss, largeTickMisses },
+                { hasSliderAccuracy ? HitResult.SliderTailHit : HitResult.SmallTickHit, sliderTailHits },
                 { HitResult.Miss, countMiss }
             };
         }
