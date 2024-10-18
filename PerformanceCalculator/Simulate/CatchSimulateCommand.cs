@@ -27,11 +27,11 @@ namespace PerformanceCalculator.Simulate
 
         [UsedImplicitly]
         [Option(Template = "-T|--tiny-droplets <tinys>", Description = "Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
-        public override int? Mehs { get; set; }
+        public override int? Mehs { get; }
 
         [UsedImplicitly]
         [Option(Template = "-D|--droplets <droplets>", Description = "Number of droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
-        public override int? Goods { get; set; }
+        public override int? Goods { get; }
 
         public override Ruleset Ruleset => new CatchRuleset();
 

@@ -19,7 +19,7 @@ namespace PerformanceCalculator.Simulate
     {
         [UsedImplicitly]
         [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
-        public override int? Goods { get; set; }
+        public override int? Goods { get; }
 
         [UsedImplicitly]
         [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
