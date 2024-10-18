@@ -22,31 +22,39 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
-        public string Beatmap { get; }
+        public string Beatmap { get; set; }
 
         [UsedImplicitly]
-        public virtual double Accuracy { get; }
+        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100."
+                                                                   + " Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
+        public double Accuracy { get; set; } = 100;
+
+        [UsedImplicitly]
+        [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
+                                                                                          + " Values: hr, dt, hd, fl, etc...")]
+        public string[] Mods { get; set; }
+
+        [UsedImplicitly]
+        [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
+        public int Misses { get; set; }
+
+        //
+        // Options implemented in the ruleset-specific commands
+        // -> Catch renames Mehs/Goods to (tiny-)droplets
+        // -> Mania does not have Combo
+        // -> Taiko does not have Mehs
+        //
+        [UsedImplicitly]
+        public virtual int? Mehs { get; set; }
+
+        [UsedImplicitly]
+        public virtual int? Goods { get; set; }
 
         [UsedImplicitly]
         public virtual int? Combo { get; }
 
         [UsedImplicitly]
         public virtual double PercentCombo { get; }
-
-        [UsedImplicitly]
-        public virtual int Score { get; }
-
-        [UsedImplicitly]
-        public virtual string[] Mods { get; }
-
-        [UsedImplicitly]
-        public virtual int Misses { get; }
-
-        [UsedImplicitly]
-        public virtual int? Mehs { get; }
-
-        [UsedImplicitly]
-        public virtual int? Goods { get; }
 
         public override void Execute()
         {
@@ -63,8 +71,7 @@ namespace PerformanceCalculator.Simulate
                 Accuracy = GetAccuracy(statistics),
                 MaxCombo = Combo ?? (int)Math.Round(PercentCombo / 100 * beatmapMaxCombo),
                 Statistics = statistics,
-                Mods = mods,
-                TotalScore = Score,
+                Mods = mods
             };
 
             var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);

@@ -18,34 +18,20 @@ namespace PerformanceCalculator.Simulate
     public class ManiaSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]
-        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100."
-                                                                     + " Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
-        public override double Accuracy { get; } = 100;
-
-        [UsedImplicitly]
-        [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
-        public override int Misses { get; }
-
-        [UsedImplicitly]
         [Option(Template = "-M|--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
-        public override int? Mehs { get; }
+        public override int? Mehs { get; set; }
+
+        [UsedImplicitly]
+        [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
+        public override int? Goods { get; set; }
 
         [UsedImplicitly]
         [Option(Template = "-O|--oks <oks>", Description = "Number of oks. Will override accuracy if used. Otherwise is automatically calculated.")]
         private int? oks { get; set; }
 
         [UsedImplicitly]
-        [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
-        public override int? Goods { get; }
-
-        [UsedImplicitly]
         [Option(Template = "-T|--greats <greats>", Description = "Number of greats. Will override accuracy if used. Otherwise is automatically calculated.")]
         private int? greats { get; set; }
-
-        [UsedImplicitly]
-        [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
-                                                                                            + " Values: hr, dt, fl, 4k, 5k, etc...")]
-        public override string[] Mods { get; }
 
         public override Ruleset Ruleset => new ManiaRuleset();
 
