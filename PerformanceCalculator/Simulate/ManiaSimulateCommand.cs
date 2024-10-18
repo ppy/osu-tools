@@ -19,19 +19,19 @@ namespace PerformanceCalculator.Simulate
     {
         [UsedImplicitly]
         [Option(Template = "-M|--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
-        public override int? Mehs { get; set; }
+        public override int? Mehs { get; }
 
         [UsedImplicitly]
         [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
-        public override int? Goods { get; set; }
+        public override int? Goods { get; }
 
         [UsedImplicitly]
         [Option(Template = "-O|--oks <oks>", Description = "Number of oks. Will override accuracy if used. Otherwise is automatically calculated.")]
-        private int? oks { get; set; }
+        private int? oks { get; }
 
         [UsedImplicitly]
         [Option(Template = "-T|--greats <greats>", Description = "Number of greats. Will override accuracy if used. Otherwise is automatically calculated.")]
-        private int? greats { get; set; }
+        private int? greats { get; }
 
         public override Ruleset Ruleset => new ManiaRuleset();
 
@@ -68,10 +68,10 @@ namespace PerformanceCalculator.Simulate
             // Each great and perfect increases total by 5 (great-meh=5)
             // There is no difference in accuracy between them, so just halve arbitrarily (favouring perfects for an odd number).
             int greatsAndPerfects = Math.Min(delta / 5, remainingHits);
-            greats = greatsAndPerfects / 2;
-            int perfects = greatsAndPerfects - greats.Value;
-            delta -= (greats.Value + perfects) * 5;
-            remainingHits -= greats.Value + perfects;
+            int countGreat = greatsAndPerfects / 2;
+            int perfects = greatsAndPerfects - countGreat;
+            delta -= (countGreat + perfects) * 5;
+            remainingHits -= countGreat + perfects;
 
             // Each good increases total by 3 (good-meh=3).
             countGood = Math.Min(delta / 3, remainingHits);
@@ -79,8 +79,8 @@ namespace PerformanceCalculator.Simulate
             remainingHits -= countGood.Value;
 
             // Each ok increases total by 1 (ok-meh=1).
-            oks = delta;
-            remainingHits -= oks.Value;
+            int countOk = delta;
+            remainingHits -= countOk;
 
             // Everything else is a meh, as initially assumed.
             countMeh = remainingHits;
@@ -88,8 +88,8 @@ namespace PerformanceCalculator.Simulate
             return new Dictionary<HitResult, int>
             {
                 { HitResult.Perfect, perfects },
-                { HitResult.Great, greats.Value },
-                { HitResult.Ok, oks.Value },
+                { HitResult.Great, countGreat },
+                { HitResult.Ok, countOk },
                 { HitResult.Good, countGood.Value },
                 { HitResult.Meh, countMeh.Value },
                 { HitResult.Miss, countMiss }
