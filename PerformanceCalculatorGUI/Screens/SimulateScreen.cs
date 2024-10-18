@@ -672,8 +672,6 @@ namespace PerformanceCalculatorGUI.Screens
                 var accuracy = accuracyTextBox.Value.Value / 100.0;
                 Dictionary<HitResult, int> statistics = new Dictionary<HitResult, int>();
 
-                
-
                 if (ruleset.Value.OnlineID != -1)
                 {
                     // official rulesets can generate more precise hits from accuracy
