@@ -122,16 +122,13 @@ namespace PerformanceCalculator.Simulate
                 countGreat = (int)(totalResultCount - countGood - countMeh - countMiss);
             }
 
-            bool hasSliderAccuracy = !GetMods(Ruleset).OfType<OsuModClassic>().All(m => m.NoSliderHeadAccuracy.Value);
-            int sliderTailHits = beatmap.HitObjects.Count(x => x is Slider) - sliderTailMisses;
-
             return new Dictionary<HitResult, int>
             {
                 { HitResult.Great, countGreat },
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
                 { HitResult.LargeTickMiss, largeTickMisses },
-                { hasSliderAccuracy ? HitResult.SliderTailHit : HitResult.SmallTickHit, sliderTailHits },
+                { HitResult.SliderTailHit, beatmap.HitObjects.Count(x => x is Slider) - sliderTailMisses },
                 { HitResult.Miss, countMiss }
             };
         }
