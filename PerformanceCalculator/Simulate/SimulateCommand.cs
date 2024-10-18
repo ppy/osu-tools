@@ -22,19 +22,19 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
-        public string Beatmap { get; set; }
+        public string Beatmap { get; }
 
         [UsedImplicitly]
         [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
-        public double Accuracy { get; set; } = 100;
+        public double Accuracy { get; } = 100;
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...")]
-        public string[] Mods { get; set; }
+        public string[] Mods { get; }
 
         [UsedImplicitly]
         [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
-        public int Misses { get; set; }
+        public int Misses { get; }
 
         //
         // Options implemented in the ruleset-specific commands
@@ -43,10 +43,10 @@ namespace PerformanceCalculator.Simulate
         // -> Taiko does not have Mehs
         //
         [UsedImplicitly]
-        public virtual int? Mehs { get; set; }
+        public virtual int? Mehs { get; }
 
         [UsedImplicitly]
-        public virtual int? Goods { get; set; }
+        public virtual int? Goods { get; }
 
         [UsedImplicitly]
         public virtual int? Combo { get; }
