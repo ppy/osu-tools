@@ -4,10 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
+using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
+using osu.Game.Extensions;
+using osu.Game.Online.API;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
@@ -33,6 +40,11 @@ namespace PerformanceCalculator.Simulate
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
                                                                                           + " Values: hr, dt, hd, fl, etc...")]
         public string[] Mods { get; set; }
+
+        [UsedImplicitly]
+        [Option(CommandOptionType.MultipleValue, Template = "-o|--mod-option <option>",
+            Description = "The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35")]
+        public string[] ModOptions { get; set; } = [];
 
         [UsedImplicitly]
         [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
@@ -92,11 +104,18 @@ namespace PerformanceCalculator.Simulate
 
             foreach (var modString in Mods)
             {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
-                if (newMod == null)
-                    throw new ArgumentException($"Invalid mod provided: {modString}");
+                APIMod mod = new APIMod() { Acronym = modString };
 
-                mods.Add(newMod);
+                foreach(string modOption in ModOptions.Where(x => x.ToUpper().StartsWith($"{modString}_")))
+                {
+                    string[] split = modOption[3..].Split('=');
+                    if (split.Length != 2)
+                        throw new ArgumentException($"Invalid mod-option format (key=value): {modOption[3..]}");
+
+                    mod.Settings[split[0]] = split[1];
+                }
+
+                mods.Add(mod.ToMod(ruleset));
             }
 
             return mods.ToArray();
