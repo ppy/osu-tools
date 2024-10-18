@@ -104,11 +104,11 @@ namespace PerformanceCalculatorGUI
             return (int)Math.Round(1000000 * scoreMultiplier);
         }
 
-        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, bool hasSliderAccuracy, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
+        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
         {
             return ruleset.OnlineID switch
             {
-                0 => generateOsuHitResults(accuracy, hasSliderAccuracy, beatmap, countMiss, countMeh, countGood, countLargeTickMisses, countSliderTailMisses),
+                0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood, countLargeTickMisses, countSliderTailMisses),
                 1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
                 2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
                 3 => generateManiaHitResults(accuracy, beatmap, countMiss),
@@ -116,7 +116,7 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, bool hasSliderAccuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
+        private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
         {
             int countGreat;
 
@@ -200,7 +200,7 @@ namespace PerformanceCalculatorGUI
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
                 { HitResult.LargeTickMiss, countLargeTickMisses },
-                { hasSliderAccuracy ? HitResult.SliderTailHit : HitResult.SmallTickHit, sliderTailHits },
+                { HitResult.SliderTailHit, sliderTailHits },
                 { HitResult.Miss, countMiss }
             };
         }

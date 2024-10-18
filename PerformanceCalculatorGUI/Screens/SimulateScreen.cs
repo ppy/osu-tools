@@ -675,8 +675,7 @@ namespace PerformanceCalculatorGUI.Screens
                 if (ruleset.Value.OnlineID != -1)
                 {
                     // official rulesets can generate more precise hits from accuracy
-                    bool hasSliderAccuracy = !appliedMods.Value.OfType<OsuModClassic>().All(m => m.NoSliderHeadAccuracy.Value);
-                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, hasSliderAccuracy, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood, largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood, largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
 
                     accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
                 }
