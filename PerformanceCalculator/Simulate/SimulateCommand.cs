@@ -25,13 +25,11 @@ namespace PerformanceCalculator.Simulate
         public string Beatmap { get; set; }
 
         [UsedImplicitly]
-        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100."
-                                                                   + " Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
+        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
         public double Accuracy { get; set; } = 100;
 
         [UsedImplicitly]
-        [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
-                                                                                          + " Values: hr, dt, hd, fl, etc...")]
+        [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...")]
         public string[] Mods { get; set; }
 
         [UsedImplicitly]
