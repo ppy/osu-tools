@@ -513,7 +513,7 @@ namespace PerformanceCalculatorGUI.Screens
         {
             // Hotfix for preventing a difficulty and performance calculation from being trigger twice,
             // as the mod overlay for some reason triggers a ValueChanged twice per mod change.
-            if (mods.OldValue.Count == mods.NewValue.Count)
+            if (mods.OldValue.SequenceEqual(mods.NewValue))
                 return;
 
             modSettingChangeTracker?.Dispose();
