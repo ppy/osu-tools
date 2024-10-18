@@ -26,9 +26,8 @@ namespace PerformanceCalculator.Simulate
         public override int? Combo { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option."
-                                                                     + " Enter as decimal 0-100.")]
-        public override double PercentCombo { get; }
+        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
+        public override double PercentCombo { get; } = 100;
 
         public override Ruleset Ruleset => new TaikoRuleset();
 
