@@ -528,7 +528,6 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 if (ruleset.Value.ShortName == "osu")
                 {
-
                     // Large tick misses and slider tail misses are only relevant in PP if slider head accuracy exists
                     if (mods.NewValue.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
                     {
