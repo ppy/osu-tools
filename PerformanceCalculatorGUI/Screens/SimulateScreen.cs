@@ -52,6 +52,7 @@ namespace PerformanceCalculatorGUI.Screens
         private LabelledTextBox beatmapIdTextBox;
         private SwitchButton beatmapImportTypeSwitch;
 
+        private GridContainer missesContainer;
         private LimitedLabelledNumberBox missesTextBox;
         private LimitedLabelledNumberBox largeTickMissesTextBox;
         private LimitedLabelledNumberBox sliderTailMissesTextBox;
@@ -265,7 +266,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     PlaceholderText = "0",
                                                     MinValue = 0
                                                 },
-                                                new GridContainer
+                                                missesContainer = new GridContainer
                                                 {
                                                     RelativeSizeAxes = Axes.X,
                                                     AutoSizeAxes = Axes.Y,
@@ -523,14 +524,36 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void modsChanged(ValueChangedEvent<IReadOnlyList<Mod>> mods)
         {
+            void updateMissesTextboxes()
+            {
+                if (ruleset.Value.ShortName == "osu")
+                {
+
+                    // Large tick misses and slider tail misses are only relevant in PP if slider head accuracy exists
+                    if (mods.NewValue.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
+                    {
+                        missesContainer.Content = new[] { new[] { missesTextBox } };
+                        missesContainer.ColumnDimensions = [new Dimension()];
+                    }
+                    else
+                    {
+                        missesContainer.Content = new[] { new[] { missesTextBox, largeTickMissesTextBox, sliderTailMissesTextBox } };
+                        missesContainer.ColumnDimensions = [new Dimension(), new Dimension(), new Dimension()];
+                    }
+                }
+            }
+
             modSettingChangeTracker?.Dispose();
 
             if (working is null)
                 return;
 
+            updateMissesTextboxes();
+
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += m =>
             {
+                updateMissesTextboxes();
                 debouncedStatisticsUpdate?.Cancel();
                 debouncedStatisticsUpdate = Scheduler.AddDelayed(() =>
                 {
