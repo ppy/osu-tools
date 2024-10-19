@@ -9,7 +9,6 @@ using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 
@@ -36,11 +35,11 @@ namespace PerformanceCalculator.Simulate
 
         [UsedImplicitly]
         [Option(Template = "-L|--large-tick-misses <misses>", Description = "Number of large tick misses. Defaults to 0.")]
-        private int largeTickMisses { get; } = 0;
+        private int largeTickMisses { get; }
 
         [UsedImplicitly]
         [Option(Template = "-S|--slider-tail-misses <misses>", Description = "Number of slider tail misses. Defaults to 0.")]
-        private int sliderTailMisses { get; } = 0;
+        private int sliderTailMisses { get; }
 
         public override Ruleset Ruleset => new OsuRuleset();
 
