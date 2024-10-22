@@ -16,35 +16,20 @@ namespace PerformanceCalculator.Simulate
     public class OsuSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]
-        [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100."
-                                                                     + " Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
-        public override double Accuracy { get; } = 100;
-
-        [UsedImplicitly]
-        [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
-        public override int? Combo { get; }
-
-        [UsedImplicitly]
-        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option."
-                                                                       + " Enter as decimal 0-100.")]
-        public override double PercentCombo { get; } = 100;
-
-        [UsedImplicitly]
-        [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with."
-                                                                                            + " Values: hr, dt, hd, fl, ez, etc...")]
-        public override string[] Mods { get; }
-
-        [UsedImplicitly]
-        [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
-        public override int Misses { get; }
-
-        [UsedImplicitly]
         [Option(Template = "-M|--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Mehs { get; }
 
         [UsedImplicitly]
         [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Goods { get; }
+
+        [UsedImplicitly]
+        [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
+        public override int? Combo { get; }
+
+        [UsedImplicitly]
+        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
+        public override double PercentCombo { get; } = 100;
 
         public override Ruleset Ruleset => new OsuRuleset();
 
