@@ -4,13 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
-using osu.Game.Online.API;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 
@@ -65,7 +62,7 @@ namespace PerformanceCalculator.Simulate
             var ruleset = Ruleset;
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
-            var mods = GetMods(ruleset);
+            var mods = ParseMods(ruleset, Mods, ModOptions);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
             var beatmapMaxCombo = GetMaxCombo(beatmap);
@@ -84,32 +81,6 @@ namespace PerformanceCalculator.Simulate
             var performanceAttributes = performanceCalculator?.Calculate(scoreInfo, difficultyAttributes);
 
             OutputPerformance(scoreInfo, performanceAttributes, difficultyAttributes);
-        }
-
-        protected Mod[] GetMods(Ruleset ruleset)
-        {
-            if (Mods == null)
-                return Array.Empty<Mod>();
-
-            var mods = new List<Mod>();
-
-            foreach (var modString in Mods)
-            {
-                APIMod mod = new APIMod { Acronym = modString };
-
-                foreach (string modOption in ModOptions.Where(x => x.StartsWith($"{modString}_", StringComparison.CurrentCultureIgnoreCase)))
-                {
-                    string[] split = modOption[3..].Split('=');
-                    if (split.Length != 2)
-                        throw new ArgumentException($"Invalid mod-option format (key=value): {modOption[3..]}");
-
-                    mod.Settings[split[0]] = split[1];
-                }
-
-                mods.Add(mod.ToMod(ruleset));
-            }
-
-            return mods.ToArray();
         }
 
         protected abstract int GetMaxCombo(IBeatmap beatmap);

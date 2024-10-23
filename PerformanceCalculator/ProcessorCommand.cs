@@ -12,7 +12,9 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Game.Online.API;
+using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 
@@ -129,6 +131,35 @@ namespace PerformanceCalculator
 
         public virtual void Execute()
         {
+        }
+
+        public static Mod[] ParseMods(Ruleset ruleset, string[] acronyms, string[] options)
+        {
+            acronyms ??= [];
+            options ??= [];
+
+            if (acronyms.Length == 0)
+                return [];
+
+            var mods = new List<Mod>();
+
+            foreach (var acronym in acronyms)
+            {
+                APIMod mod = new APIMod { Acronym = acronym };
+
+                foreach (string modOption in options.Where(x => x.StartsWith($"{acronym}_", StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    string[] split = modOption[3..].Split('=');
+                    if (split.Length != 2)
+                        throw new ArgumentException($"Invalid mod-option format (key=value): {modOption[3..]}");
+
+                    mod.Settings[split[0]] = split[1];
+                }
+
+                mods.Add(mod.ToMod(ruleset));
+            }
+
+            return mods.ToArray();
         }
 
         private class Result
