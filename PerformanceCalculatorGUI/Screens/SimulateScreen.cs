@@ -524,23 +524,10 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void modsChanged(ValueChangedEvent<IReadOnlyList<Mod>> mods)
         {
-            void updateMissesTextboxes()
-            {
-                if (ruleset.Value.ShortName == "osu")
-                {
-                    // Large tick misses and slider tail misses are only relevant in PP if slider head accuracy exists
-                    if (mods.NewValue.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
-                    {
-                        missesContainer.Content = new[] { new[] { missesTextBox } };
-                        missesContainer.ColumnDimensions = [new Dimension()];
-                    }
-                    else
-                    {
-                        missesContainer.Content = new[] { new[] { missesTextBox, largeTickMissesTextBox, sliderTailMissesTextBox } };
-                        missesContainer.ColumnDimensions = [new Dimension(), new Dimension(), new Dimension()];
-                    }
-                }
-            }
+            // Hotfix for preventing a difficulty and performance calculation from being trigger twice,
+            // as the mod overlay for some reason triggers a ValueChanged twice per mod change.
+            if (mods.OldValue.SequenceEqual(mods.NewValue))
+                return;
 
             modSettingChangeTracker?.Dispose();
 
@@ -564,6 +551,24 @@ namespace PerformanceCalculatorGUI.Screens
             calculateDifficulty();
             updateCombo(false);
             calculatePerformance();
+
+            void updateMissesTextboxes()
+            {
+                if (ruleset.Value.ShortName == "osu")
+                {
+                    // Large tick misses and slider tail misses are only relevant in PP if slider head accuracy exists
+                    if (mods.NewValue.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
+                    {
+                        missesContainer.Content = new[] { new[] { missesTextBox } };
+                        missesContainer.ColumnDimensions = [new Dimension()];
+                    }
+                    else
+                    {
+                        missesContainer.Content = new[] { new[] { missesTextBox, largeTickMissesTextBox, sliderTailMissesTextBox } };
+                        missesContainer.ColumnDimensions = [new Dimension(), new Dimension(), new Dimension()];
+                    }
+                }
+            }
         }
 
         private void resetBeatmap()
@@ -697,7 +702,8 @@ namespace PerformanceCalculatorGUI.Screens
                 if (ruleset.Value.OnlineID != -1)
                 {
                     // official rulesets can generate more precise hits from accuracy
-                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood, largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood,
+                        largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
 
                     accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, statistics);
                 }
