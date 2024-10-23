@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 
@@ -31,6 +29,11 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...")]
         public string[] Mods { get; }
+
+        [UsedImplicitly]
+        [Option(CommandOptionType.MultipleValue, Template = "-o|--mod-option <option>",
+            Description = "The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35")]
+        public string[] ModOptions { get; set; } = [];
 
         [UsedImplicitly]
         [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
@@ -59,7 +62,7 @@ namespace PerformanceCalculator.Simulate
             var ruleset = Ruleset;
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
-            var mods = GetMods(ruleset);
+            var mods = ParseMods(ruleset, Mods, ModOptions);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
             var beatmapMaxCombo = GetMaxCombo(beatmap);
@@ -78,26 +81,6 @@ namespace PerformanceCalculator.Simulate
             var performanceAttributes = performanceCalculator?.Calculate(scoreInfo, difficultyAttributes);
 
             OutputPerformance(scoreInfo, performanceAttributes, difficultyAttributes);
-        }
-
-        protected Mod[] GetMods(Ruleset ruleset)
-        {
-            if (Mods == null)
-                return Array.Empty<Mod>();
-
-            var availableMods = ruleset.CreateAllMods().ToList();
-            var mods = new List<Mod>();
-
-            foreach (var modString in Mods)
-            {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
-                if (newMod == null)
-                    throw new ArgumentException($"Invalid mod provided: {modString}");
-
-                mods.Add(newMod);
-            }
-
-            return mods.ToArray();
         }
 
         protected abstract int GetMaxCombo(IBeatmap beatmap);
