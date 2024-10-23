@@ -43,8 +43,6 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new OsuRuleset();
 
-        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.GetMaxCombo();
-
         protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
             int countGreat;

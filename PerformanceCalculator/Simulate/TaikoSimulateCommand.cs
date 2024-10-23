@@ -31,8 +31,6 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new TaikoRuleset();
 
-        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<Hit>().Count();
-
         protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
             var totalResultCount = GetMaxCombo(beatmap);

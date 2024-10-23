@@ -83,7 +83,7 @@ namespace PerformanceCalculator.Simulate
             OutputPerformance(scoreInfo, performanceAttributes, difficultyAttributes);
         }
 
-        protected abstract int GetMaxCombo(IBeatmap beatmap);
+        protected static int GetMaxCombo(IBeatmap beatmap) => beatmap.GetMaxCombo();
 
         protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
 
