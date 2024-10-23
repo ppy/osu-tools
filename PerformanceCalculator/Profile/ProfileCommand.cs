@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
@@ -109,9 +108,6 @@ namespace PerformanceCalculator.Profile
                 });
 
                 Console.Write(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {

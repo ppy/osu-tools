@@ -15,6 +15,7 @@ using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
@@ -103,11 +104,11 @@ namespace PerformanceCalculatorGUI
             return (int)Math.Round(1000000 * scoreMultiplier);
         }
 
-        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses)
+        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
         {
             return ruleset.OnlineID switch
             {
-                0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood, countLargeTickMisses),
+                0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood, countLargeTickMisses, countSliderTailMisses),
                 1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
                 2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
                 3 => generateManiaHitResults(accuracy, beatmap, countMiss),
@@ -115,7 +116,7 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses)
+        private static Dictionary<HitResult, int> generateOsuHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
         {
             int countGreat;
 
@@ -191,12 +192,15 @@ namespace PerformanceCalculatorGUI
                 countGreat = (int)(totalResultCount - countGood - countMeh - countMiss);
             }
 
+            int sliderTailHits = beatmap.HitObjects.Count(x => x is Slider) - countSliderTailMisses;
+
             return new Dictionary<HitResult, int>
             {
                 { HitResult.Great, countGreat },
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
-                { HitResult.LargeTickMiss, countLargeTickMisses ?? 0 },
+                { HitResult.LargeTickMiss, countLargeTickMisses },
+                { HitResult.SliderTailHit, sliderTailHits },
                 { HitResult.Miss, countMiss }
             };
         }
