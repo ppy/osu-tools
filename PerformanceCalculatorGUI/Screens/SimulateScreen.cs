@@ -529,24 +529,6 @@ namespace PerformanceCalculatorGUI.Screens
             if (mods.OldValue.SequenceEqual(mods.NewValue))
                 return;
 
-            void updateMissesTextboxes()
-            {
-                if (ruleset.Value.ShortName == "osu")
-                {
-                    // Large tick misses and slider tail misses are only relevant in PP if slider head accuracy exists
-                    if (mods.NewValue.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
-                    {
-                        missesContainer.Content = new[] { new[] { missesTextBox } };
-                        missesContainer.ColumnDimensions = [new Dimension()];
-                    }
-                    else
-                    {
-                        missesContainer.Content = new[] { new[] { missesTextBox, largeTickMissesTextBox, sliderTailMissesTextBox } };
-                        missesContainer.ColumnDimensions = [new Dimension(), new Dimension(), new Dimension()];
-                    }
-                }
-            }
-
             modSettingChangeTracker?.Dispose();
 
             if (working is null)
@@ -569,6 +551,24 @@ namespace PerformanceCalculatorGUI.Screens
             calculateDifficulty();
             updateCombo(false);
             calculatePerformance();
+
+            void updateMissesTextboxes()
+            {
+                if (ruleset.Value.ShortName == "osu")
+                {
+                    // Large tick misses and slider tail misses are only relevant in PP if slider head accuracy exists
+                    if (mods.NewValue.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
+                    {
+                        missesContainer.Content = new[] { new[] { missesTextBox } };
+                        missesContainer.ColumnDimensions = [new Dimension()];
+                    }
+                    else
+                    {
+                        missesContainer.Content = new[] { new[] { missesTextBox, largeTickMissesTextBox, sliderTailMissesTextBox } };
+                        missesContainer.ColumnDimensions = [new Dimension(), new Dimension(), new Dimension()];
+                    }
+                }
+            }
         }
 
         private void resetBeatmap()
