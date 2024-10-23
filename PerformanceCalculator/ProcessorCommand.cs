@@ -147,11 +147,13 @@ namespace PerformanceCalculator
             {
                 APIMod mod = new APIMod { Acronym = acronym };
 
-                foreach (string modOption in options.Where(x => x.StartsWith($"{acronym}_", StringComparison.CurrentCultureIgnoreCase)))
+                foreach (string optionString in options.Where(x => x.StartsWith($"{acronym}_", StringComparison.CurrentCultureIgnoreCase)))
                 {
-                    string[] split = modOption[3..].Split('=');
+                    string optionTuple = optionString[(acronym.Length + 1)..];
+
+                    string[] split = optionTuple.Split('=');
                     if (split.Length != 2)
-                        throw new ArgumentException($"Invalid mod-option format (key=value): {modOption[3..]}");
+                        throw new ArgumentException($"Invalid mod-option format (key=value): {optionTuple}");
 
                     mod.Settings[split[0]] = split[1];
                 }
