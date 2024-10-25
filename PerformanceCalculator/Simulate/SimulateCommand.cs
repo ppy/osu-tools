@@ -65,7 +65,7 @@ namespace PerformanceCalculator.Simulate
             var mods = ParseMods(ruleset, Mods, ModOptions);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
-            var beatmapMaxCombo = GetMaxCombo(beatmap);
+            var beatmapMaxCombo = beatmap.GetMaxCombo();
             var statistics = GenerateHitResults(Accuracy / 100, beatmap, Misses, Mehs, Goods);
             var scoreInfo = new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
             {
@@ -82,8 +82,6 @@ namespace PerformanceCalculator.Simulate
 
             OutputPerformance(scoreInfo, performanceAttributes, difficultyAttributes);
         }
-
-        protected static int GetMaxCombo(IBeatmap beatmap) => beatmap.GetMaxCombo();
 
         protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
 

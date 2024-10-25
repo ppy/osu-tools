@@ -33,7 +33,7 @@ namespace PerformanceCalculator.Simulate
 
         protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
-            var totalResultCount = GetMaxCombo(beatmap);
+            var totalResultCount = beatmap.GetMaxCombo();
 
             int countGreat;
 
