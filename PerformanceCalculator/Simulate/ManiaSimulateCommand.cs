@@ -35,8 +35,6 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new ManiaRuleset();
 
-        protected override int GetMaxCombo(IBeatmap beatmap) => 0;
-
         protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
             // One judgement per normal note. Two judgements per hold note (head + tail).

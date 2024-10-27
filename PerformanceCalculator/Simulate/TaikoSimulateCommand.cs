@@ -3,14 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
-using osu.Game.Rulesets.Taiko.Objects;
 
 namespace PerformanceCalculator.Simulate
 {
@@ -31,11 +29,9 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new TaikoRuleset();
 
-        protected override int GetMaxCombo(IBeatmap beatmap) => beatmap.HitObjects.OfType<Hit>().Count();
-
         protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
-            var totalResultCount = GetMaxCombo(beatmap);
+            var totalResultCount = beatmap.GetMaxCombo();
 
             int countGreat;
 
