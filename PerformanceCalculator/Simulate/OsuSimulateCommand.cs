@@ -130,15 +130,21 @@ namespace PerformanceCalculator.Simulate
             };
         }
 
-        protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
+        protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics)
         {
             var countGreat = statistics[HitResult.Great];
             var countGood = statistics[HitResult.Ok];
             var countMeh = statistics[HitResult.Meh];
             var countMiss = statistics[HitResult.Miss];
-            var total = countGreat + countGood + countMeh + countMiss;
 
-            return (double)((6 * countGreat) + (2 * countGood) + countMeh) / (6 * total);
+            var countSliders = beatmap.HitObjects.Count(x => x is Slider);
+            var countSliderTailHit = statistics[HitResult.SliderTailHit];
+            var countLargeTicks = beatmap.HitObjects.Sum(x => x.NestedHitObjects.Count(x => x is SliderTick or SliderRepeat));
+            var countLargeTickHit = countLargeTicks - statistics[HitResult.LargeTickMiss];
+
+            double total = 6 * (countGreat + countGood + countMeh + countMiss) + 3 * countSliders + 0.6 * countLargeTicks;
+
+            return (double)(6 * countGreat + 2 * countGood + countMeh + 3 * countSliderTailHit + 0.6 * countLargeTickHit) / total;
         }
     }
 }

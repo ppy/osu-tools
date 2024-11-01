@@ -57,7 +57,7 @@ namespace PerformanceCalculator.Simulate
             };
         }
 
-        protected override double GetAccuracy(Dictionary<HitResult, int> statistics)
+        protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics)
         {
             var countGreat = statistics[HitResult.Great];
             var countGood = statistics[HitResult.Ok];
