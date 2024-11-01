@@ -85,6 +85,6 @@ namespace PerformanceCalculator.Simulate
 
         protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
 
-        protected virtual double GetAccuracy(IBeatmap PlayableBeatmap, Dictionary<HitResult, int> statistics) => 0;
+        protected virtual double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics) => 0;
     }
 }
