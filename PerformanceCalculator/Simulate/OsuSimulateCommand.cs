@@ -8,7 +8,9 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 
@@ -43,7 +45,17 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new OsuRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, largeTickMisses, sliderTailMisses);
+        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods)
+        {
+            if (mods.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
+            {
+                return generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, null, null);
+            }
+            else
+            {
+                return generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, largeTickMisses, sliderTailMisses);
+            }
+        }
 
         private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses, int? countSliderTailMisses)
         {
