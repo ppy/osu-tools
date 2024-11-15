@@ -712,7 +712,6 @@ namespace PerformanceCalculatorGUI.Screens
                         statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood,
                             largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
                     }
-                        
 
                     accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, beatmap, statistics);
                 }
