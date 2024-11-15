@@ -21,7 +21,6 @@ using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Skinning;
 using osu.Game.Utils;
-using osuTK;
 
 namespace PerformanceCalculatorGUI
 {
