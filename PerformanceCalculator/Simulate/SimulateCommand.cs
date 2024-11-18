@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 
@@ -63,10 +64,10 @@ namespace PerformanceCalculator.Simulate
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
             var mods = ParseMods(ruleset, Mods, ModOptions);
-            var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
+            var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
             var beatmapMaxCombo = beatmap.GetMaxCombo();
-            var statistics = GenerateHitResults(Accuracy / 100, beatmap, Misses, Mehs, Goods);
+            var statistics = GenerateHitResults(beatmap, mods);
             var scoreInfo = new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
             {
                 Accuracy = GetAccuracy(beatmap, statistics),
@@ -83,7 +84,7 @@ namespace PerformanceCalculator.Simulate
             OutputPerformance(scoreInfo, performanceAttributes, difficultyAttributes);
         }
 
-        protected abstract Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood);
+        protected abstract Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods);
 
         protected virtual double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics) => 0;
     }
