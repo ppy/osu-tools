@@ -7,7 +7,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using System;
 using System.Collections.Generic;
@@ -36,9 +35,7 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new CatchRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods);
-
-        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countGood)
+        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
             var maxCombo = beatmap.GetMaxCombo();
             int maxTinyDroplets = beatmap.HitObjects.OfType<JuiceStream>().Sum(s => s.NestedHitObjects.OfType<TinyDroplet>().Count());

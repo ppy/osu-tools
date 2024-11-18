@@ -7,7 +7,6 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 
@@ -30,9 +29,7 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new TaikoRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods) => generateHitResults(Accuracy / 100, beatmap, Misses, Goods);
-
-        private static Dictionary<HitResult, int> generateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countGood)
+        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
         {
             var totalResultCount = beatmap.GetMaxCombo();
 
