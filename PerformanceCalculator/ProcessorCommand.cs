@@ -38,7 +38,7 @@ namespace PerformanceCalculator
             Execute();
         }
 
-        public void OutputPerformance(ScoreInfo score, PerformanceAttributes performanceAttributes, DifficultyAttributes difficultyAttributes)
+        public void OutputPerformance(ScoreInfo score, IPerformanceAttributes performanceAttributes, IDifficultyAttributes difficultyAttributes)
         {
             var result = new Result
             {
@@ -170,10 +170,10 @@ namespace PerformanceCalculator
             public ScoreStatistics Score { get; set; }
 
             [JsonProperty("performance_attributes")]
-            public PerformanceAttributes PerformanceAttributes { get; set; }
+            public IPerformanceAttributes PerformanceAttributes { get; set; }
 
             [JsonProperty("difficulty_attributes")]
-            public DifficultyAttributes DifficultyAttributes { get; set; }
+            public IDifficultyAttributes DifficultyAttributes { get; set; }
         }
 
         /// <summary>

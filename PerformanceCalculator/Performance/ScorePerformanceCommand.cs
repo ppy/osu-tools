@@ -43,7 +43,7 @@ namespace PerformanceCalculator.Performance
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(apiScore.BeatmapID.ToString());
             var score = CreateScore(apiScore, ruleset, apiBeatmap, workingBeatmap);
 
-            DifficultyAttributes attributes;
+            IDifficultyAttributes attributes;
 
             if (OnlineAttributes)
             {
@@ -78,7 +78,7 @@ namespace PerformanceCalculator.Performance
             return score;
         }
 
-        private DifficultyAttributes queryApiAttributes(int beatmapId, int rulesetId, LegacyMods mods)
+        private IDifficultyAttributes queryApiAttributes(int beatmapId, int rulesetId, LegacyMods mods)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -105,8 +105,8 @@ namespace PerformanceCalculator.Performance
                     throw new ArgumentOutOfRangeException(nameof(rulesetId));
             }
 
-            DifficultyAttributes getMergedAttributes<TAttributes>(APIBeatmap apiBeatmap)
-                where TAttributes : DifficultyAttributes, new()
+            IDifficultyAttributes getMergedAttributes<TAttributes>(APIBeatmap apiBeatmap)
+                where TAttributes : IDifficultyAttributes, new()
             {
                 // the osu-web endpoint queries osu-beatmap-difficulty-cache, which in turn does not return the full set of attributes -
                 // it skips ones that are already present on `APIBeatmap`
@@ -165,7 +165,7 @@ namespace PerformanceCalculator.Performance
 
         [JsonObject(MemberSerialization.OptIn)]
         private class AttributesResponse<T>
-            where T : DifficultyAttributes
+            where T : IDifficultyAttributes
         {
             [JsonProperty("attributes")]
             public T Attributes { get; set; }

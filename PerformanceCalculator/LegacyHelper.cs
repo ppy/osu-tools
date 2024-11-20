@@ -58,26 +58,5 @@ namespace PerformanceCalculator
                     return "mania";
             }
         }
-
-        public static DifficultyAttributes CreateDifficultyAttributes(int legacyId)
-        {
-            switch (legacyId)
-            {
-                case 0:
-                    return new OsuDifficultyAttributes();
-
-                case 1:
-                    return new TaikoDifficultyAttributes();
-
-                case 2:
-                    return new CatchDifficultyAttributes();
-
-                case 3:
-                    return new ManiaDifficultyAttributes();
-
-                default:
-                    throw new ArgumentException($"Invalid ruleset ID: {legacyId}", nameof(legacyId));
-            }
-        }
     }
 }

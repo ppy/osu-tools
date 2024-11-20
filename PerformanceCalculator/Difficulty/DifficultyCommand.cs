@@ -157,7 +157,7 @@ namespace PerformanceCalculator.Difficulty
             public List<APIMod> Mods { get; set; }
 
             [JsonProperty("attributes")]
-            public DifficultyAttributes Attributes { get; set; }
+            public IDifficultyAttributes Attributes { get; set; }
         }
     }
 }
