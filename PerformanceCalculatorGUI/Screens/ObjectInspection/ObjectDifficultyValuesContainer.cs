@@ -131,8 +131,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             });
 
             if (hitObject.Angle is not null)
-                flowContainer.Add(new ObjectInspectorDifficultyValue("Angle", double.RadiansToDegrees(hitObject.Angle.Value)));
-
+            {   
+                flowContainer.AddRange(new Drawable[]
+                {
+                    new ObjectInspectorDifficultyValue("Angle", double.RadiansToDegrees(hitObject.Angle.Value)),
+                    new ObjectInspectorDifficultyValue("Wide Angle Bonus", AimEvaluator.calcWideAngleBonus(hitObject.Angle.Value)),
+                    new ObjectInspectorDifficultyValue("Acute angle bonus", AimEvaluator.calcAcuteAngleBonus(hitObject.Angle.Value)),
+                });
+            }
             if (hitObject.BaseObject is Slider)
             {
                 flowContainer.AddRange(new Drawable[]
