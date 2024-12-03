@@ -121,6 +121,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             var hidden = appliedMods.Value.Any(x => x is ModHidden);
             var hitObjectLast = (OsuDifficultyHitObject)hitObject.Previous(0);
+
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),
@@ -128,7 +129,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 new ObjectInspectorDifficultyValue("Lazy Jump Distance", hitObject.LazyJumpDistance),
                 new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),                    
                 new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime),
-                new ObjectInspectorDifficultyValue("Velocity", AimEvaluator.VelocityEvaluator(hitObject, hitObjectLast, true)),
+                new ObjectInspectorDifficultyValue("Velocity", hitObject.Index > 1 ? AimEvaluator.VelocityEvaluator(hitObject, hitObjectLast, true):0),
                 new ObjectInspectorDifficultyValue("Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(hitObject, true)),
                 new ObjectInspectorDifficultyValue("Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Rhythm Diff", RhythmEvaluator.EvaluateDifficultyOf(hitObject)),
@@ -144,7 +145,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     new ObjectInspectorDifficultyValue("Acute angle bonus", AimEvaluator.calcAcuteAngleBonus(hitObject.Angle.Value)),
                 });
             }
-            if (hitObject.BaseObject is Slider )
+            if (hitObject.BaseObject is Slider)
             {
                 flowContainer.AddRange(new Drawable[]
                 {
@@ -159,7 +160,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     new ObjectInspectorDifficultyValue("Travel Distance", hitObject.TravelDistance),
                 });
             }
-            if (hitObjectLast.BaseObject is Slider )
+            if (hitObject.Index > 1)
+            {
+            if (hitObjectLast.BaseObject is Slider)
             {
                 flowContainer.AddRange(new Drawable[]
                 {
@@ -173,6 +176,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     new ObjectInspectorDifficultyValue("Travel Time Previous", hitObjectLast.TravelTime),
                     new ObjectInspectorDifficultyValue("Travel Distance Previous", hitObjectLast.TravelDistance),
                 });
+            }
             }
         }
 
