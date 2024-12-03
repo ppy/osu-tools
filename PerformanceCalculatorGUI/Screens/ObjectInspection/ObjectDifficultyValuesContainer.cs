@@ -120,6 +120,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private void drawOsuValues(OsuDifficultyHitObject hitObject)
         {
             var hidden = appliedMods.Value.Any(x => x is ModHidden);
+            var hitObjectLast = (OsuDifficultyHitObject)hitObject.Previous(0);
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),
@@ -142,7 +143,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     new ObjectInspectorDifficultyValue("Acute angle bonus", AimEvaluator.calcAcuteAngleBonus(hitObject.Angle.Value)),
                 });
             }
-            if (hitObject.BaseObject is Slider)
+            if (hitObject.BaseObject is Slider )
             {
                 flowContainer.AddRange(new Drawable[]
                 {
@@ -155,6 +156,21 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     },
                     new ObjectInspectorDifficultyValue("Travel Time", hitObject.TravelTime),
                     new ObjectInspectorDifficultyValue("Travel Distance", hitObject.TravelDistance),
+                });
+            }
+            if (hitObjectLast.BaseObject is Slider )
+            {
+                flowContainer.AddRange(new Drawable[]
+                {
+                    new Box
+                    {
+                        Name = "Separator",
+                        Height = 1,
+                        RelativeSizeAxes = Axes.X,
+                        Alpha = 0.5f
+                    },
+                    new ObjectInspectorDifficultyValue("Travel Time Previous", hitObjectLast.TravelTime),
+                    new ObjectInspectorDifficultyValue("Travel Distance Previous", hitObjectLast.TravelDistance),
                 });
             }
         }
