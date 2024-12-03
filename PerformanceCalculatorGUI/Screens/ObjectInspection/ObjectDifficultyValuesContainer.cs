@@ -124,6 +124,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),
                 new ObjectInspectorDifficultyValue("Strain Time", hitObject.StrainTime),
+                new ObjectInspectorDifficultyValue("Lazy Jump Distance", hitObject.LazyJumpDistance),
+                new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),                    
+                new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime),
                 new ObjectInspectorDifficultyValue("Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(hitObject, true)),
                 new ObjectInspectorDifficultyValue("Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Rhythm Diff", RhythmEvaluator.EvaluateDifficultyOf(hitObject)),
@@ -152,8 +155,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     },
                     new ObjectInspectorDifficultyValue("Travel Time", hitObject.TravelTime),
                     new ObjectInspectorDifficultyValue("Travel Distance", hitObject.TravelDistance),
-                    new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
-                    new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime)
                 });
             }
         }
