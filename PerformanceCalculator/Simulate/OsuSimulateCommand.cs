@@ -47,6 +47,7 @@ namespace PerformanceCalculator.Simulate
 
         protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods)
         {
+            // Use lazer info only if score has sliderhead accuracy
             if (mods.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
             {
                 return generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, null, null);
