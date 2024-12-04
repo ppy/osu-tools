@@ -67,7 +67,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
         }
 
-        protected partial class TimelineSelectionBlueprintContainer : BlueprintContainer<HitObject>.SelectionBlueprintContainer
+        protected partial class TimelineSelectionBlueprintContainer : SelectionBlueprintContainer
         {
             protected override Container<SelectionBlueprint<HitObject>> Content { get; }
 
