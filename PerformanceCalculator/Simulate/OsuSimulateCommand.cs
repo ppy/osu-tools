@@ -43,7 +43,9 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new OsuRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood)
+        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, largeTickMisses, sliderTailMisses);
+
+        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
         {
             int countGreat;
 
@@ -124,8 +126,8 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.Great, countGreat },
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
-                { HitResult.LargeTickMiss, largeTickMisses },
-                { HitResult.SliderTailHit, beatmap.HitObjects.Count(x => x is Slider) - sliderTailMisses },
+                { HitResult.LargeTickMiss, countLargeTickMisses },
+                { HitResult.SliderTailHit, beatmap.HitObjects.Count(x => x is Slider) - countSliderTailMisses },
                 { HitResult.Miss, countMiss }
             };
         }
