@@ -9,128 +9,79 @@ using osu.Game.Rulesets.Catch.Objects;
 using osuTK;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components;
-using System;
 using osu.Framework.Input.Events;
 using osuTK.Input;
+using osu.Framework.Bindables;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
     public partial class CatchSelectableHitObject : DrawableCatchHitObject
     {
         // This is HitCirclePiece instead of FruitOutline because FruitOutline doesn't register input for some reason
-        private HitCirclePiece outline;
+        private HitCirclePiece outline = null!;
+        private SelectionState state;
 
-        public CatchSelectableHitObject()
-            : base(new CatchDummyHitObject())
+        public readonly Bindable<CatchSelectableHitObject?> PlayfieldSelectedObject = new Bindable<CatchSelectableHitObject?>();
+
+        public CatchSelectableHitObject(CatchHitObject hitObject)
+            : base(hitObject)
         {
+            X = hitObject.EffectiveX;
+            state = SelectionState.NotSelected;
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            AddInternal(outline = new HitCirclePiece());
-            UpdateState();
-        }
+            AddInternal(outline = new HitCirclePiece
+            {
+                Alpha = 0,
+                Scale = HitObject is Droplet ? new Vector2(HitObject.Scale) * 0.5f : new Vector2(HitObject.Scale)
+            });
 
-        public void UpdateFromHitObject(CatchHitObject hitObject)
-        {
-            Deselect();
-            HitObject.StartTime = hitObject.StartTime;
-            X = hitObject.EffectiveX;
-            outline.Scale = new Vector2(hitObject.Scale);
-
-            if (hitObject is Droplet)
-                outline.Scale *= 0.5f;
-        }
-
-        protected override void OnApply()
-        {
-            base.OnApply();
-            UpdateState();
+            PlayfieldSelectedObject.BindValueChanged(x =>
+            {
+                if (x.NewValue != this)
+                {
+                    Deselect();
+                }
+            });
         }
 
         protected override bool OnClick(ClickEvent e)
         {
-            if (e.Button == MouseButton.Right)
+            if (e.Button != MouseButton.Left)
                 return false;
 
             if (!IsHovered)
                 return false;
 
-            if (IsSelected)
+            if (state == SelectionState.Selected)
             {
                 Deselect();
-                Selected.Invoke(null);
+                PlayfieldSelectedObject.Value = null;
+
                 return true;
             }
 
-            Select();
+            state = SelectionState.Selected;
+            outline.Show();
+            PlayfieldSelectedObject.Value = this;
+
             return true;
         }
 
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => outline.ReceivePositionalInputAt(screenSpacePos);
 
-        private class CatchDummyHitObject : CatchHitObject
-        {
-            public CatchDummyHitObject()
-            {
-            }
-        }
-
-        #region Selection Logic
-
         public override bool HandlePositionalInput => ShouldBeAlive || IsPresent;
 
-        private SelectionState state;
-
-        public SelectionState State
+        public void Deselect()
         {
-            get => state;
-            set
+            if (IsLoaded)
             {
-                if (state == value)
-                    return;
-
-                state = value;
-
-                if (IsLoaded)
-                    UpdateState();
+                state = SelectionState.NotSelected;
+                outline.Hide();
             }
         }
-
-        public void UpdateState()
-        {
-            switch (state)
-            {
-                case SelectionState.Selected:
-                    OnSelected();
-                    break;
-
-                case SelectionState.NotSelected:
-                    OnDeselected();
-                    break;
-            }
-        }
-
-        protected void OnDeselected()
-        {
-            foreach (var d in InternalChildren)
-                d.Hide();
-        }
-
-        protected void OnSelected()
-        {
-            foreach (var d in InternalChildren)
-                d.Show();
-            Selected.Invoke(this);
-        }
-
-        public event Action<CatchSelectableHitObject?> Selected;
-
-        public void Select() => State = SelectionState.Selected;
-        public void Deselect() => State = SelectionState.NotSelected;
-        public bool IsSelected => State == SelectionState.Selected;
-
-        #endregion
     }
 }

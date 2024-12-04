@@ -7,14 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Graphics.Pooling;
-using osu.Framework.Input;
-using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
-using osu.Game.Input.Bindings;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Catch.Edit;
 using osu.Game.Rulesets.Catch.Objects;
@@ -28,6 +23,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
     public partial class CatchObjectInspectorRuleset : DrawableCatchEditorRuleset
     {
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;
+        private CatchObjectInspectorPlayfield inspectorPlayfield;
 
         [Resolved]
         private ObjectDifficultyValuesContainer difficultyValuesContainer { get; set; }
@@ -42,8 +38,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            ((CatchObjectInspectorPlayfield)Playfield).SelectedObject.BindValueChanged(
-                value => difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject.StartTime == value.NewValue?.StartTime));
+
+            inspectorPlayfield.SelectedObject.BindValueChanged(value =>
+            {
+                difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject.StartTime == value.NewValue?.HitObject.StartTime);
+            });
         }
 
         public override bool PropagatePositionalInputSubTree => true;
@@ -52,38 +51,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 
         public override bool AllowBackwardsSeeks => true;
 
-        protected override PassThroughInputManager CreateInputManager() => new CatchObjectInspectorInputManager(Ruleset.RulesetInfo);
-
-        protected override Playfield CreatePlayfield() => new CatchObjectInspectorPlayfield(Beatmap.Difficulty);
-
-        private partial class CatchObjectInspectorInputManager : CatchInputManager
-        {
-            public CatchObjectInspectorInputManager(RulesetInfo ruleset) : base(ruleset)
-            {
-            }
-
-            protected override KeyBindingContainer<CatchAction> CreateKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique)
-                => new EmptyKeyBindingContainer(ruleset, variant, unique);
-
-            private partial class EmptyKeyBindingContainer : RulesetKeyBindingContainer
-            {
-                public EmptyKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique) : base(ruleset, variant, unique)
-                {
-                }
-
-                protected override void ReloadMappings(IQueryable<RealmKeyBinding> realmKeyBindings)
-                {
-                    base.ReloadMappings(realmKeyBindings);
-                    KeyBindings = Enumerable.Empty<IKeyBinding>();
-                }
-            }
-        }
+        protected override Playfield CreatePlayfield() => inspectorPlayfield = new CatchObjectInspectorPlayfield(Beatmap.Difficulty);
 
         private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
         {
-            public readonly Bindable<CatchHitObject?> SelectedObject = new Bindable<CatchHitObject?>();
-
-            private CatchSelectableHitObject? selectedSelectableObject;
+            public readonly Bindable<CatchSelectableHitObject?> SelectedObject = new Bindable<CatchSelectableHitObject?>();
 
             public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty)
                 : base(difficulty)
@@ -91,26 +63,20 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                 DisplayJudgements.Value = false;
             }
 
-            private DrawablePool<CatchSelectableHitObject> selectablesPool;
-
-            [BackgroundDependencyLoader]
-            private void load()
-            {
-                AddInternal(selectablesPool = new DrawablePool<CatchSelectableHitObject>(1, 200));
-            }
-
             protected override void OnHitObjectAdded(HitObject hitObject)
             {
                 base.OnHitObjectAdded(hitObject);
 
-                // Potential room for pooling here
+                // Potential room for pooling here?
                 switch (hitObject)
                 {
                     case Fruit fruit:
                     {
-                        var newSelectable = selectablesPool.Get(a => a.UpdateFromHitObject((CatchHitObject)hitObject));
-                        HitObjectContainer.Add(newSelectable);
-                        newSelectable.Selected += selectNewObject;
+                        HitObjectContainer.Add(new CatchSelectableHitObject(fruit)
+                        {
+                            PlayfieldSelectedObject = { BindTarget = SelectedObject }
+                        });
+
                         break;
                     }
 
@@ -121,9 +87,10 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                             if (nested is TinyDroplet)
                                 continue;
 
-                            var newSelectable = selectablesPool.Get(a => a.UpdateFromHitObject((CatchHitObject)nested));
-                            HitObjectContainer.Add(newSelectable);
-                            newSelectable.Selected += selectNewObject;
+                            HitObjectContainer.Add(new CatchSelectableHitObject((CatchHitObject)nested)
+                            {
+                                PlayfieldSelectedObject = { BindTarget = SelectedObject }
+                            });
                         }
 
                         break;
@@ -133,19 +100,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 
             protected override GameplayCursorContainer CreateCursor() => null!;
 
-            private void selectNewObject(CatchSelectableHitObject? newSelectable)
-            {
-                selectedSelectableObject?.Deselect();
-                selectedSelectableObject = newSelectable;
-                SelectedObject.Value = newSelectable?.HitObject;
-            }
-
             protected override bool OnClick(ClickEvent e)
             {
-                if (e.Button == MouseButton.Right)
-                    return false;
+                if (e.Button == MouseButton.Left)
+                {
+                    SelectedObject.Value?.Deselect();
+                    SelectedObject.Value = null;
+                }
 
-                selectNewObject(null);
                 return false;
             }
         }
