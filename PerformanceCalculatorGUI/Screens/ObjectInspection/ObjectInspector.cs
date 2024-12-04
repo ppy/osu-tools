@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using NuGet.Packaging.Rules;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;

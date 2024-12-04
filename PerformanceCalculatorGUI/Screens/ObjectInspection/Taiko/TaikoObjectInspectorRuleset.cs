@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -11,7 +10,6 @@ using osu.Framework.Graphics.Pooling;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
-using osu.Framework.Input.States;
 using osu.Game.Beatmaps;
 using osu.Game.Input.Bindings;
 using osu.Game.Rulesets;
@@ -65,7 +63,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
             }
 
             protected override KeyBindingContainer<TaikoAction> CreateKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique)
-            => new EmptyKeyBindingContainer(ruleset, variant, unique);
+                => new EmptyKeyBindingContainer(ruleset, variant, unique);
 
             private partial class EmptyKeyBindingContainer : RulesetKeyBindingContainer
             {
@@ -83,7 +81,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
-            public readonly Bindable<TaikoHitObject> SelectedObject = new();
+            public readonly Bindable<TaikoHitObject> SelectedObject = new Bindable<TaikoHitObject>();
             private TaikoSelectableHitObject selectedSelectableObject;
 
             public TaikoObjectInspectorPlayfield()

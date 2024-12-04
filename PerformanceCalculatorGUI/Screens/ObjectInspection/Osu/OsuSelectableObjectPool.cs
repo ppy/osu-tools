@@ -1,4 +1,7 @@
-﻿#nullable enable
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+#nullable enable
 
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +20,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public partial class OsuSelectableObjectPool : PooledDrawableWithLifetimeContainer<OsuSelectableObjectLifetimeEntry, OsuSelectableHitObject>
     {
-        public readonly Bindable<OsuHitObject?> SelectedObject = new();
+        public readonly Bindable<OsuHitObject?> SelectedObject = new Bindable<OsuHitObject?>();
         public override bool HandlePositionalInput => true;
 
         private DrawablePool<SelectableHitCircle> circlesPool;
@@ -47,7 +50,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 
             KeyValuePair<OsuSelectableObjectLifetimeEntry, OsuSelectableHitObject>? newSelectedEntry = null;
 
-            foreach (var entry in AliveEntries.OrderBy(pair => pair.Value.HitObject.StartTime))
+            foreach (var entry in AliveEntries.OrderBy(pair => pair.Value.HitObject?.StartTime))
             {
                 var lifetimeEntry = entry.Key;
                 var blueprint = entry.Value;
@@ -96,6 +99,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         }
 
         public OsuSelectableObjectLifetimeEntry CreateEntry(OsuHitObject hitObject) => new OsuSelectableObjectLifetimeEntry(hitObject);
+
         public void AddSelectableObject(OsuHitObject hitObject)
         {
             var newEntry = CreateEntry(hitObject);

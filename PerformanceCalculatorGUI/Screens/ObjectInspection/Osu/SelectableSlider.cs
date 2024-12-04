@@ -1,6 +1,8 @@
-﻿#nullable enable
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
 
-using osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components;
+#nullable enable
+
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
@@ -16,9 +18,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 {
     public partial class SelectableSlider : OsuSelectableHitObject<Slider>
     {
-        private CustomSliderBodyPiece bodyPiece;
-        private HitCirclePiece headOverlay;
-        private HitCirclePiece tailOverlay;
+        private CustomSliderBodyPiece bodyPiece = null!;
+        private HitCirclePiece headOverlay = null!;
+        private HitCirclePiece tailOverlay = null!;
 
         [BackgroundDependencyLoader]
         private void load()

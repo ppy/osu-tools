@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -9,7 +11,6 @@ using osu.Framework.Graphics.Pooling;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
-using osu.Framework.Input.States;
 using osu.Game.Beatmaps;
 using osu.Game.Input.Bindings;
 using osu.Game.Rulesets;
@@ -21,7 +22,6 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.UI;
 using osuTK.Input;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 {
@@ -63,7 +63,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
             }
 
             protected override KeyBindingContainer<CatchAction> CreateKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique)
-            => new EmptyKeyBindingContainer(ruleset, variant, unique);
+                => new EmptyKeyBindingContainer(ruleset, variant, unique);
 
             private partial class EmptyKeyBindingContainer : RulesetKeyBindingContainer
             {
@@ -81,9 +81,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
 
         private partial class CatchObjectInspectorPlayfield : CatchEditorPlayfield
         {
-            public readonly Bindable<CatchHitObject> SelectedObject = new();
+            public readonly Bindable<CatchHitObject?> SelectedObject = new Bindable<CatchHitObject?>();
 
-            private CatchSelectableHitObject selectedSelectableObject;
+            private CatchSelectableHitObject? selectedSelectableObject;
 
             public CatchObjectInspectorPlayfield(IBeatmapDifficultyInfo difficulty)
                 : base(difficulty)
@@ -113,6 +113,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                         newSelectable.Selected += selectNewObject;
                         break;
                     }
+
                     case JuiceStream juiceStream:
                     {
                         foreach (var nested in juiceStream.NestedHitObjects)
@@ -124,14 +125,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
                             HitObjectContainer.Add(newSelectable);
                             newSelectable.Selected += selectNewObject;
                         }
+
                         break;
                     }
                 }
             }
 
-            protected override GameplayCursorContainer CreateCursor() => null;
+            protected override GameplayCursorContainer CreateCursor() => null!;
 
-            private void selectNewObject(CatchSelectableHitObject newSelectable)
+            private void selectNewObject(CatchSelectableHitObject? newSelectable)
             {
                 selectedSelectableObject?.Deselect();
                 selectedSelectableObject = newSelectable;

@@ -31,6 +31,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
         }
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -45,6 +46,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
+
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
@@ -71,6 +73,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
                 base.OnHitObjectAdded(hitObject);
 
                 if (hitObject is Spinner) return;
+
                 Pool.AddSelectableObject((OsuHitObject)hitObject);
             }
 
@@ -79,6 +82,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
                 base.OnHitObjectRemoved(hitObject);
 
                 if (hitObject is Spinner) return;
+
                 Pool.RemoveSelectableObject((OsuHitObject)hitObject);
             }
 

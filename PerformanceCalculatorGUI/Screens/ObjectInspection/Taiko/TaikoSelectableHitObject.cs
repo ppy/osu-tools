@@ -1,4 +1,7 @@
-﻿#nullable enable
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+#nullable enable
 
 using System;
 using osu.Framework.Allocation;
@@ -18,7 +21,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
     public partial class TaikoSelectableHitObject : DrawableTaikoHitObject
     {
         private HitPiece hitPiece;
-        public TaikoSelectableHitObject() : base(new TaikoDummyHitObject())
+
+        public TaikoSelectableHitObject()
+            : base(new TaikoDummyHitObject())
         {
             Anchor = Anchor.CentreLeft;
             Origin = Anchor.CentreLeft;
@@ -45,6 +50,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
             base.OnApply();
             UpdateState();
         }
+
         protected override bool OnClick(ClickEvent e)
         {
             if (e.Button == MouseButton.Right)
@@ -65,7 +71,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
         }
 
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => hitPiece.ReceivePositionalInputAt(screenSpacePos);
-            
+
         public override bool OnPressed(KeyBindingPressEvent<TaikoAction> e) => true;
 
         private class TaikoDummyHitObject : TaikoHitObject
@@ -73,6 +79,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
         }
 
         #region Selection Logic
+
         public override bool HandlePositionalInput => ShouldBeAlive || IsPresent;
 
         private SelectionState state;

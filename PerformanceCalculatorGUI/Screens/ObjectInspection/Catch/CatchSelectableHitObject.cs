@@ -1,4 +1,7 @@
-﻿#nullable enable
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+#nullable enable
 
 using osu.Framework.Allocation;
 using osu.Game.Rulesets.Catch.Objects.Drawables;
@@ -6,7 +9,6 @@ using osu.Game.Rulesets.Catch.Objects;
 using osuTK;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components;
-using PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko;
 using System;
 using osu.Framework.Input.Events;
 using osuTK.Input;
@@ -17,6 +19,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
     {
         // This is HitCirclePiece instead of FruitOutline because FruitOutline doesn't register input for some reason
         private HitCirclePiece outline;
+
         public CatchSelectableHitObject()
             : base(new CatchDummyHitObject())
         {
@@ -75,6 +78,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Catch
         }
 
         #region Selection Logic
+
         public override bool HandlePositionalInput => ShouldBeAlive || IsPresent;
 
         private SelectionState state;

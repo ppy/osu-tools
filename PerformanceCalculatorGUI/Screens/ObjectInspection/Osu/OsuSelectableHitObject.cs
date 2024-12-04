@@ -1,10 +1,9 @@
-﻿#nullable enable
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
 
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.UserInterface;
+#nullable enable
+
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Pooling;
 using osu.Game.Rulesets.Osu.Objects;
 
@@ -21,6 +20,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
         }
 
         public abstract void UpdateFromHitObject();
+
         protected override void OnApply(OsuSelectableObjectLifetimeEntry entry)
         {
             HitObject = entry.HitObject;
@@ -83,10 +83,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 
         #endregion
     }
+
     public abstract partial class OsuSelectableHitObject<THitObject> : OsuSelectableHitObject
         where THitObject : OsuHitObject
     {
         private THitObject? hitObject;
+
         public override OsuHitObject? HitObject
         {
             get => hitObject;
