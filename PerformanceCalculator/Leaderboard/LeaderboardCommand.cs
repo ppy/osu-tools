@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
@@ -62,7 +61,7 @@ namespace PerformanceCalculator.Leaderboard
                     var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                     var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
-                    var difficultyAttributes = difficultyCalculator.Calculate(LegacyHelper.FilterDifficultyAdjustmentMods(working.BeatmapInfo, ruleset, scoreInfo.Mods).ToArray());
+                    var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
                     var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
                     plays.Add((performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes).Total ?? 0, play.PP ?? 0.0));
@@ -98,9 +97,6 @@ namespace PerformanceCalculator.Leaderboard
                 var json = JsonConvert.SerializeObject(calculatedPlayers);
 
                 Console.Write(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {

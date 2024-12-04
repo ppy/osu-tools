@@ -23,54 +23,6 @@ using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    public partial class StrainBar : Bar, IHasTooltip
-    {
-        public StrainBar(string tooltip)
-        {
-            TooltipText = tooltip;
-        }
-
-        public LocalisableString TooltipText { get; }
-    }
-
-    public partial class StrainBarGraph : FillFlowContainer<StrainBar>
-    {
-        /// <summary>
-        /// Manually sets the max value, if null <see cref="Enumerable.Max(IEnumerable{float})"/> is instead used
-        /// </summary>
-        public float? MaxValue { get; set; }
-
-        /// <summary>
-        /// A list of floats that defines the length of each <see cref="Bar"/>
-        /// </summary>
-        public IEnumerable<(float val, string tooltip)> Values
-        {
-            set
-            {
-                Clear();
-
-                foreach (var (val, tooltip) in value)
-                {
-                    float length = MaxValue ?? value.Max(x => x.val);
-                    if (length != 0)
-                        length = val / length;
-
-                    float size = value.Count();
-                    if (size != 0)
-                        size = 1.0f / size;
-
-                    Add(new StrainBar(tooltip)
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Size = new Vector2(size, 1),
-                        Length = length,
-                        Direction = BarDirection.BottomToTop
-                    });
-                }
-            }
-        }
-    }
-
     public partial class StrainVisualizer : Container
     {
         public readonly Bindable<Skill[]> Skills = new Bindable<Skill[]>();
@@ -93,6 +45,8 @@ namespace PerformanceCalculatorGUI.Components
             AutoSizeAxes = Axes.Y;
         }
 
+        private float graphAlpha;
+
         private void updateGraphs(ValueChangedEvent<Skill[]> val)
         {
             graphsContainer.Clear();
@@ -107,53 +61,10 @@ namespace PerformanceCalculatorGUI.Components
                 return;
             }
 
-            var graphAlpha = Math.Min(1.5f / skills.Length, 0.9f);
-
-            List<(float val, string tooltip)[]> strainLists = new List<(float val, string tooltip)[]>();
-
-            foreach (var skill in skills)
-            {
-                var strains = ((StrainSkill)skill).GetCurrentStrainPeaks().ToArray();
-
-                var skillStrainList = new List<(float val, string tooltip)>();
-
-                for (int i = 0; i < strains.Length; i++)
-                {
-                    var strain = strains[i];
-                    var strainTime = TimeSpan.FromMilliseconds(TimeUntilFirstStrain.Value + i * 400); // 400 is strain length in StrainSkill
-                    var tooltipText = $"~{strainTime:mm\\:ss\\.ff}";
-                    skillStrainList.Add(((float)strain, tooltipText));
-                }
-
-                strainLists.Add(skillStrainList.ToArray());
-            }
-
-            var strainMaxValue = strainLists.Max(list => list.Max(x => x.val));
-
-            for (int i = 0; i < skills.Length; i++)
-            {
-                graphsContainer.AddRange(new Drawable[]
-                {
-                    new BufferedContainer(cachedFrameBuffer: true)
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Alpha = graphAlpha,
-                        Colour = skillColours[i],
-                        Child = new StrainBarGraph
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            MaxValue = strainMaxValue,
-                            Values = strainLists[i]
-                        }
-                    }
-                });
-            }
-
-            graphsContainer.Add(new OsuSpriteText
-            {
-                Font = OsuFont.GetFont(size: 10),
-                Text = $"{strainMaxValue:0.00}"
-            });
+            graphAlpha = Math.Min(1.5f / skills.Length, 0.9f);
+            var strainLists = getStrainLists(skills);
+            addStrainBars(skills, strainLists);
+            addTooltipBars(strainLists);
 
             if (val.OldValue == null || !val.NewValue.All(x => val.OldValue.Any(y => y.GetType().Name == x.GetType().Name)))
             {
@@ -161,8 +72,7 @@ namespace PerformanceCalculatorGUI.Components
                 legendContainer.Clear();
                 graphToggles.Clear();
 
-                // we do Children - 1 because max strain value is in the graphsContainer too and we don't want it to have a toggle
-                for (int i = 0; i < graphsContainer.Children.Count - 1; i++)
+                for (int i = 0; i < skills.Length; i++)
                 {
                     // this is ugly, but it works
                     var graphToggleBindable = new Bindable<bool>();
@@ -209,8 +119,7 @@ namespace PerformanceCalculatorGUI.Components
             }
             else
             {
-                // skill list is the same, keep graph toggles
-                for (int i = 0; i < graphsContainer.Children.Count - 1; i++)
+                for (int i = 0; i < skills.Length; i++)
                 {
                     // graphs are visible by default, we want to hide ones that were disabled before
                     if (!graphToggles[i].Value)
@@ -273,6 +182,162 @@ namespace PerformanceCalculatorGUI.Components
             });
 
             Skills.BindValueChanged(updateGraphs);
+        }
+
+        private void addStrainBars(Skill[] skills, List<float[]> strainLists)
+        {
+            var strainMaxValue = strainLists.Max(list => list.Max());
+
+            for (int i = 0; i < skills.Length; i++)
+            {
+                graphsContainer.AddRange(new Drawable[]
+                {
+                    new BufferedContainer(cachedFrameBuffer: true)
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Alpha = graphAlpha,
+                        Colour = skillColours[i],
+                        Child = new StrainBarGraph
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            MaxValue = strainMaxValue,
+                            Values = strainLists[i]
+                        }
+                    }
+                });
+            }
+
+            graphsContainer.Add(new OsuSpriteText
+            {
+                Font = OsuFont.GetFont(size: 10),
+                Text = $"{strainMaxValue:0.00}"
+            });
+        }
+
+        private void addTooltipBars(List<float[]> strainLists, int nBars = 1000)
+        {
+            double lastStrainTime = strainLists.Max(l => l.Length) * 400;
+
+            var tooltipList = new List<string>();
+
+            for (int i = 0; i < nBars; i++)
+            {
+                var strainTime = TimeSpan.FromMilliseconds(TimeUntilFirstStrain.Value + lastStrainTime * i / nBars);
+                var tooltipText = $"~{strainTime:mm\\:ss\\.ff}";
+                tooltipList.Add(tooltipText);
+            }
+
+            graphsContainer.AddRange(new Drawable[]
+            {
+                new BufferedContainer(cachedFrameBuffer: true)
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Alpha = 1,
+                    Child = new TooltipBarGraph
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Values = tooltipList
+                    }
+                }
+            });
+        }
+
+        private static List<float[]> getStrainLists(Skill[] skills)
+        {
+            List<float[]> strainLists = new List<float[]>();
+
+            foreach (var skill in skills)
+            {
+                var strains = ((StrainSkill)skill).GetCurrentStrainPeaks().ToArray();
+
+                var skillStrainList = new List<float>();
+
+                for (int i = 0; i < strains.Length; i++)
+                {
+                    var strain = strains[i];
+                    skillStrainList.Add(((float)strain));
+                }
+
+                strainLists.Add(skillStrainList.ToArray());
+            }
+
+            return strainLists;
+        }
+    }
+
+    public partial class StrainBarGraph : FillFlowContainer<Bar>
+    {
+        /// <summary>
+        /// Manually sets the max value, if null <see cref="Enumerable.Max(IEnumerable{float})"/> is instead used
+        /// </summary>
+        public float? MaxValue { get; set; }
+
+        /// <summary>
+        /// A list of floats that defines the length of each <see cref="Bar"/>
+        /// </summary>
+        public IEnumerable<float> Values
+        {
+            set
+            {
+                Clear();
+
+                foreach (var val in value)
+                {
+                    float length = MaxValue ?? value.Max();
+                    if (length != 0)
+                        length = val / length;
+
+                    float size = value.Count();
+                    if (size != 0)
+                        size = 1.0f / size;
+
+                    Add(new Bar
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Size = new Vector2(size, 1),
+                        Length = length,
+                        Direction = BarDirection.BottomToTop
+                    });
+                }
+            }
+        }
+    }
+
+    public partial class TooltipBar : Bar, IHasTooltip
+    {
+        public TooltipBar(string tooltip)
+        {
+            TooltipText = tooltip;
+        }
+
+        public LocalisableString TooltipText { get; }
+    }
+
+    public partial class TooltipBarGraph : FillFlowContainer<TooltipBar>
+    {
+        /// <summary>
+        /// A list of strings that defines tooltips, don't make it too big
+        /// </summary>
+        public IEnumerable<string> Values
+        {
+            set
+            {
+                Clear();
+
+                foreach (var tooltip in value)
+                {
+                    float size = value.Count();
+                    if (size != 0)
+                        size = 1.0f / size;
+
+                    Add(new TooltipBar(tooltip)
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Size = new Vector2(size, 1),
+                        Direction = BarDirection.BottomToTop
+                    });
+                }
+            }
         }
     }
 }

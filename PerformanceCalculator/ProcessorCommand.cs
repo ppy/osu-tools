@@ -12,7 +12,9 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Game.Online.API;
+using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 
@@ -25,10 +27,6 @@ namespace PerformanceCalculator
         /// The console.
         /// </summary>
         public IConsole Console { get; private set; }
-
-        [UsedImplicitly]
-        [Option(Template = "-o|--output <file.txt>", Description = "Output results to text file.")]
-        public string OutputFile { get; }
 
         [UsedImplicitly]
         [Option(Template = "-j|--json", Description = "Output results as JSON.")]
@@ -65,9 +63,6 @@ namespace PerformanceCalculator
                 string json = JsonConvert.SerializeObject(result, Formatting.Indented);
 
                 Console.WriteLine(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {
@@ -131,13 +126,42 @@ namespace PerformanceCalculator
                 str = string.Join('\n', lines);
 
                 Console.Write(str);
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, str);
             }
         }
 
         public virtual void Execute()
         {
+        }
+
+        public static Mod[] ParseMods(Ruleset ruleset, string[] acronyms, string[] options)
+        {
+            acronyms ??= [];
+            options ??= [];
+
+            if (acronyms.Length == 0)
+                return [];
+
+            var mods = new List<Mod>();
+
+            foreach (var acronym in acronyms)
+            {
+                APIMod mod = new APIMod { Acronym = acronym };
+
+                foreach (string optionString in options.Where(x => x.StartsWith($"{acronym}_", StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    string optionTuple = optionString[(acronym.Length + 1)..];
+
+                    string[] split = optionTuple.Split('=');
+                    if (split.Length != 2)
+                        throw new ArgumentException($"Invalid mod-option format (key=value): {optionTuple}");
+
+                    mod.Settings[split[0]] = split[1];
+                }
+
+                mods.Add(mod.ToMod(ruleset));
+            }
+
+            return mods.ToArray();
         }
 
         private class Result

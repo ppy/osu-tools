@@ -17,7 +17,8 @@ namespace PerformanceCalculatorGUI.Components
         protected override void PopIn()
         {
             Header.Hide();
-            MainAreaContent.Padding = new MarginPadding { Bottom = 64 };
+            MainAreaContent.Padding = new MarginPadding();
+            TopLevelContent.Children[0].Hide(); // hide the gray background of the ShearedOverlayContainer
 
             base.PopIn();
         }

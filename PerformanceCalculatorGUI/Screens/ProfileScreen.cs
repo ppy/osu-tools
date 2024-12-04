@@ -11,6 +11,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input.Events;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterfaceV2;
@@ -19,9 +20,11 @@ using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osuTK.Graphics;
+using osuTK.Input;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
+using ButtonState = PerformanceCalculatorGUI.Components.ButtonState;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -35,7 +38,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private GridContainer layout;
 
-        private FillFlowContainer scores;
+        private FillFlowContainer<ExtendedProfileScore> scores;
 
         private LabelledTextBox usernameTextBox;
         private Container userPanelContainer;
@@ -44,6 +47,9 @@ namespace PerformanceCalculatorGUI.Screens
         private string currentUser;
 
         private CancellationTokenSource calculationCancellatonToken;
+
+        private OverlaySortTabControl<ProfileSortCriteria> sortingTabControl;
+        private readonly Bindable<ProfileSortCriteria> sorting = new Bindable<ProfileSortCriteria>(ProfileSortCriteria.Local);
 
         [Resolved]
         private NotificationDisplay notificationDisplay { get; set; }
@@ -78,7 +84,13 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     RelativeSizeAxes = Axes.Both,
                     ColumnDimensions = new[] { new Dimension() },
-                    RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, username_container_height), new Dimension(GridSizeMode.Absolute), new Dimension() },
+                    RowDimensions = new[]
+                    {
+                        new Dimension(GridSizeMode.Absolute, username_container_height),
+                        new Dimension(GridSizeMode.Absolute),
+                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension()
+                    },
                     Content = new[]
                     {
                         new Drawable[]
@@ -129,10 +141,29 @@ namespace PerformanceCalculatorGUI.Screens
                         },
                         new Drawable[]
                         {
+                            new Container
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Children = new Drawable[]
+                                {
+                                    sortingTabControl = new OverlaySortTabControl<ProfileSortCriteria>
+                                    {
+                                        Anchor = Anchor.CentreRight,
+                                        Origin = Anchor.CentreRight,
+                                        Margin = new MarginPadding { Right = 22 },
+                                        Current = { BindTarget = sorting },
+                                        Alpha = 0
+                                    }
+                                }
+                            }
+                        },
+                        new Drawable[]
+                        {
                             new OsuScrollContainer(Direction.Vertical)
                             {
                                 RelativeSizeAxes = Axes.Both,
-                                Child = scores = new FillFlowContainer
+                                Child = scores = new FillFlowContainer<ExtendedProfileScore>
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,
@@ -149,6 +180,7 @@ namespace PerformanceCalculatorGUI.Screens
             };
 
             usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
+            sorting.ValueChanged += e => { updateSorting(e.NewValue); };
 
             if (RuntimeInfo.IsDesktop)
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(currentUser); });
@@ -191,7 +223,16 @@ namespace PerformanceCalculatorGUI.Screens
                         RelativeSizeAxes = Axes.X
                     });
 
-                    layout.RowDimensions = new[] { new Dimension(GridSizeMode.Absolute, username_container_height), new Dimension(GridSizeMode.AutoSize), new Dimension() };
+                    sortingTabControl.Alpha = 1.0f;
+                    sortingTabControl.Current.Value = ProfileSortCriteria.Local;
+
+                    layout.RowDimensions = new[]
+                    {
+                        new Dimension(GridSizeMode.Absolute, username_container_height),
+                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension()
+                    };
                 });
 
                 if (token.IsCancellationRequested)
@@ -284,7 +325,7 @@ namespace PerformanceCalculatorGUI.Screens
                     loadingLayer.Hide();
                     calculationButton.State.Value = ButtonState.Done;
                 });
-            }, token);
+            }, TaskContinuationOptions.None);
         }
 
         protected override void Dispose(bool isDisposing)
@@ -294,6 +335,47 @@ namespace PerformanceCalculatorGUI.Screens
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
             calculationCancellatonToken = null;
+        }
+
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            if (e.Key == Key.Escape && !calculationCancellatonToken.IsCancellationRequested)
+            {
+                calculationCancellatonToken?.Cancel();
+            }
+
+            return base.OnKeyDown(e);
+        }
+
+        private void updateSorting(ProfileSortCriteria sortCriteria)
+        {
+            if (!scores.Children.Any())
+                return;
+
+            ExtendedProfileScore[] sortedScores;
+
+            switch (sortCriteria)
+            {
+                case ProfileSortCriteria.Live:
+                    sortedScores = scores.Children.OrderByDescending(x => x.Score.LivePP).ToArray();
+                    break;
+
+                case ProfileSortCriteria.Local:
+                    sortedScores = scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total).ToArray();
+                    break;
+
+                case ProfileSortCriteria.Difference:
+                    sortedScores = scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total - x.Score.LivePP).ToArray();
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(sortCriteria), sortCriteria, null);
+            }
+
+            for (int i = 0; i < sortedScores.Length; i++)
+            {
+                scores.SetLayoutPosition(sortedScores[i], i);
+            }
         }
     }
 }

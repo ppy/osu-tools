@@ -12,9 +12,7 @@ using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Game.Beatmaps;
 using osu.Game.Online.API;
-using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
-using osu.Game.Rulesets.Mods;
 
 namespace PerformanceCalculator.Difficulty
 {
@@ -37,8 +35,9 @@ namespace PerformanceCalculator.Difficulty
         public string[] Mods { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-nc|--no-classic", Description = "Excludes the classic mod.")]
-        public bool NoClassicMod { get; }
+        [Option(CommandOptionType.MultipleValue, Template = "-o|--mod-option <option>",
+            Description = "The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35")]
+        public string[] ModOptions { get; set; } = [];
 
         public override void Execute()
         {
@@ -67,9 +66,6 @@ namespace PerformanceCalculator.Difficulty
                 string json = JsonConvert.SerializeObject(resultSet);
 
                 Console.WriteLine(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {
@@ -124,7 +120,7 @@ namespace PerformanceCalculator.Difficulty
         {
             // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.Ruleset.OnlineID);
-            var mods = NoClassicMod ? getMods(ruleset) : LegacyHelper.FilterDifficultyAdjustmentMods(beatmap.BeatmapInfo, ruleset, getMods(ruleset));
+            var mods = ParseMods(ruleset, Mods, ModOptions);
             var attributes = ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods);
 
             return new Result
@@ -135,26 +131,6 @@ namespace PerformanceCalculator.Difficulty
                 Mods = mods.Select(m => new APIMod(m)).ToList(),
                 Attributes = attributes
             };
-        }
-
-        private Mod[] getMods(Ruleset ruleset)
-        {
-            var mods = new List<Mod>();
-            if (Mods == null)
-                return Array.Empty<Mod>();
-
-            var availableMods = ruleset.CreateAllMods().ToList();
-
-            foreach (var modString in Mods)
-            {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
-                if (newMod == null)
-                    throw new ArgumentException($"Invalid mod provided: {modString}");
-
-                mods.Add(newMod);
-            }
-
-            return mods.ToArray();
         }
 
         private class ResultSet

@@ -62,9 +62,6 @@ namespace PerformanceCalculator.Difficulty
                 string json = JsonConvert.SerializeObject(resultSet);
 
                 Console.WriteLine(json);
-
-                if (OutputFile != null)
-                    File.WriteAllText(OutputFile, json);
             }
             else
             {
@@ -115,11 +112,8 @@ namespace PerformanceCalculator.Difficulty
 
         private Result processBeatmap(WorkingBeatmap beatmap)
         {
-            // Get the ruleset
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? beatmap.BeatmapInfo.Ruleset.OnlineID);
-
-            // bit of a hack to discard non-legacy mods.
-            var mods = ruleset.ConvertFromLegacyMods(ruleset.ConvertToLegacyMods(getMods(ruleset))).ToList();
+            var mods = getMods(ruleset);
 
             var legacyRuleset = (ILegacyRuleset)ruleset;
             var simulator = legacyRuleset.CreateLegacyScoreSimulator();

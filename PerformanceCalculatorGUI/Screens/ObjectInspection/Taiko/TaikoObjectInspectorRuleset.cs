@@ -67,10 +67,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
             protected override KeyBindingContainer<TaikoAction> CreateKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique)
             => new EmptyKeyBindingContainer(ruleset, variant, unique);
 
-            protected override void SyncInputState(InputState state)
-            {
-            }
-
             private partial class EmptyKeyBindingContainer : RulesetKeyBindingContainer
             {
                 public EmptyKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique) : base(ruleset, variant, unique)
