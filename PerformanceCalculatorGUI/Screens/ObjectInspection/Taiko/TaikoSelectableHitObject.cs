@@ -3,8 +3,8 @@
 
 #nullable enable
 
-using System;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
@@ -21,52 +21,67 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
     public partial class TaikoSelectableHitObject : DrawableTaikoHitObject
     {
         private HitPiece hitPiece;
+        private SelectionState state;
+        private readonly bool isStrong;
 
-        public TaikoSelectableHitObject()
-            : base(new TaikoDummyHitObject())
+        public readonly Bindable<TaikoSelectableHitObject?> PlayfieldSelectedObject = new Bindable<TaikoSelectableHitObject?>();
+
+        public TaikoSelectableHitObject(TaikoHitObject hitObject)
+            : base(hitObject)
         {
             Anchor = Anchor.CentreLeft;
             Origin = Anchor.CentreLeft;
+
+            state = SelectionState.NotSelected;
+            isStrong = hitObject is TaikoStrongableHitObject;
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            AddInternal(hitPiece = new HitPiece());
-            UpdateState();
+            AddInternal(hitPiece = new HitPiece
+            {
+                Alpha = 0,
+                Size = getObjectSize()
+            });
+
+            PlayfieldSelectedObject.BindValueChanged(x =>
+            {
+                if (x.NewValue != this)
+                {
+                    Deselect();
+                }
+            });
         }
 
-        public virtual void UpdateFromHitObject(TaikoHitObject hitObject)
+        private Vector2 getObjectSize()
         {
-            Deselect();
-            HitObject.StartTime = hitObject.StartTime;
-            hitPiece.Size = GetObjectSize();
-        }
+            if (isStrong)
+                return new Vector2(TaikoStrongableHitObject.DEFAULT_STRONG_SIZE * TaikoPlayfield.BASE_HEIGHT);
 
-        protected virtual Vector2 GetObjectSize() => new Vector2(TaikoHitObject.DEFAULT_SIZE * TaikoPlayfield.BASE_HEIGHT);
-
-        protected override void OnApply()
-        {
-            base.OnApply();
-            UpdateState();
+            return new Vector2(TaikoHitObject.DEFAULT_SIZE * TaikoPlayfield.BASE_HEIGHT);
         }
 
         protected override bool OnClick(ClickEvent e)
         {
-            if (e.Button == MouseButton.Right)
+            if (e.Button != MouseButton.Left)
                 return false;
 
             if (!IsHovered)
                 return false;
 
-            if (IsSelected)
+            if (state == SelectionState.Selected)
             {
                 Deselect();
-                Selected.Invoke(null);
+                PlayfieldSelectedObject.Value = null;
+
                 return true;
             }
 
-            Select();
+            state = SelectionState.Selected;
+            hitPiece.Show();
+            PlayfieldSelectedObject.Value = this;
+
             return true;
         }
 
@@ -74,64 +89,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
         public override bool OnPressed(KeyBindingPressEvent<TaikoAction> e) => true;
 
-        private class TaikoDummyHitObject : TaikoHitObject
-        {
-        }
-
-        #region Selection Logic
-
         public override bool HandlePositionalInput => ShouldBeAlive || IsPresent;
 
-        private SelectionState state;
-
-        public SelectionState State
+        public void Deselect()
         {
-            get => state;
-            set
+            if (IsLoaded)
             {
-                if (state == value)
-                    return;
-
-                state = value;
-
-                if (IsLoaded)
-                    UpdateState();
+                state = SelectionState.NotSelected;
+                hitPiece.Hide();
             }
         }
-
-        public void UpdateState()
-        {
-            switch (state)
-            {
-                case SelectionState.Selected:
-                    OnSelected();
-                    break;
-
-                case SelectionState.NotSelected:
-                    OnDeselected();
-                    break;
-            }
-        }
-
-        protected void OnDeselected()
-        {
-            foreach (var d in InternalChildren)
-                d.Hide();
-        }
-
-        protected void OnSelected()
-        {
-            foreach (var d in InternalChildren)
-                d.Show();
-            Selected.Invoke(this);
-        }
-
-        public event Action<TaikoSelectableHitObject?> Selected;
-
-        public void Select() => State = SelectionState.Selected;
-        public void Deselect() => State = SelectionState.NotSelected;
-        public bool IsSelected => State == SelectionState.Selected;
-
-        #endregion
     }
 }

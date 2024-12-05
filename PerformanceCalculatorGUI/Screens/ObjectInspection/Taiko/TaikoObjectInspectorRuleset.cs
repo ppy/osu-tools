@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Pooling;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
@@ -28,6 +26,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
     public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset
     {
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
+        private TaikoObjectInspectorPlayfield inspectorPlayfield;
 
         [Resolved]
         private ObjectDifficultyValuesContainer difficultyValuesContainer { get; set; }
@@ -42,8 +41,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            ((TaikoObjectInspectorPlayfield)Playfield).SelectedObject.BindValueChanged(
-                value => difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject.StartTime == value.NewValue?.StartTime));
+
+            inspectorPlayfield.SelectedObject.BindValueChanged(value =>
+            {
+                difficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.FirstOrDefault(x => x.BaseObject.StartTime == value.NewValue?.HitObject.StartTime);
+            });
         }
 
         public override bool PropagatePositionalInputSubTree => true;
@@ -52,13 +54,14 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
         public override bool AllowBackwardsSeeks => true;
 
-        protected override PassThroughInputManager CreateInputManager() => new TaikoObjectInspectorInputManager(Ruleset.RulesetInfo);
+        protected override Playfield CreatePlayfield() => inspectorPlayfield = new TaikoObjectInspectorPlayfield();
 
-        protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
+        protected override PassThroughInputManager CreateInputManager() => new TaikoObjectInspectorInputManager(Ruleset.RulesetInfo);
 
         private partial class TaikoObjectInspectorInputManager : TaikoInputManager
         {
-            public TaikoObjectInspectorInputManager(RulesetInfo ruleset) : base(ruleset)
+            public TaikoObjectInspectorInputManager(RulesetInfo ruleset)
+                : base(ruleset)
             {
             }
 
@@ -67,7 +70,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
             private partial class EmptyKeyBindingContainer : RulesetKeyBindingContainer
             {
-                public EmptyKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique) : base(ruleset, variant, unique)
+                public EmptyKeyBindingContainer(RulesetInfo ruleset, int variant, SimultaneousBindingMode unique)
+                    : base(ruleset, variant, unique)
                 {
                 }
 
@@ -81,62 +85,33 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
-            public readonly Bindable<TaikoHitObject> SelectedObject = new Bindable<TaikoHitObject>();
-            private TaikoSelectableHitObject selectedSelectableObject;
+            public readonly Bindable<TaikoSelectableHitObject> SelectedObject = new Bindable<TaikoSelectableHitObject>();
 
             public TaikoObjectInspectorPlayfield()
             {
                 DisplayJudgements.Value = false;
             }
 
-            [BackgroundDependencyLoader]
-            private void load()
-            {
-                AddRangeInternal(new Drawable[]
-                {
-                    strongablesPool = new DrawablePool<TaikoSelectableStrongableHitObject>(1, 200),
-                    normalsPool = new DrawablePool<TaikoSelectableHitObject>(1, 200)
-                });
-            }
-
-            private DrawablePool<TaikoSelectableStrongableHitObject> strongablesPool;
-            private DrawablePool<TaikoSelectableHitObject> normalsPool;
-
             protected override void OnHitObjectAdded(HitObject hitObject)
             {
                 base.OnHitObjectAdded(hitObject);
 
-                // Potential room for pooling here
-                TaikoSelectableHitObject newSelectable = hitObject switch
+                // Potential room for pooling here?
+                HitObjectContainer.Add(new TaikoSelectableHitObject((TaikoHitObject)hitObject)
                 {
-                    TaikoStrongableHitObject => strongablesPool.Get(),
-                    TaikoHitObject => normalsPool.Get(),
-                    _ => null
-                };
-
-                if (newSelectable == null) return;
-
-                newSelectable.UpdateFromHitObject((TaikoHitObject)hitObject);
-                HitObjectContainer.Add(newSelectable);
-
-                newSelectable.Selected += selectNewObject;
+                    PlayfieldSelectedObject = { BindTarget = SelectedObject }
+                });
             }
 
             protected override GameplayCursorContainer CreateCursor() => null;
-
-            private void selectNewObject(TaikoSelectableHitObject newSelectable)
-            {
-                selectedSelectableObject?.Deselect();
-                selectedSelectableObject = newSelectable;
-                SelectedObject.Value = newSelectable?.HitObject;
-            }
 
             protected override bool OnClick(ClickEvent e)
             {
                 if (e.Button == MouseButton.Right)
                     return false;
 
-                selectNewObject(null);
+                SelectedObject.Value?.Deselect();
+                SelectedObject.Value = null;
                 return false;
             }
         }
