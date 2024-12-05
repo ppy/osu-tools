@@ -83,7 +83,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Osu
 
         protected override OsuSelectableHitObject GetDrawable(OsuSelectableObjectLifetimeEntry entry)
         {
-            // Potential room for pooling here
             OsuSelectableHitObject? result = entry.HitObject switch
             {
                 HitCircle => circlesPool.Get(),
