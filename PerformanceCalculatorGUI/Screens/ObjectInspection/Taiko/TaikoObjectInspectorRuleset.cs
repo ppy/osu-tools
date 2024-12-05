@@ -96,7 +96,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection.Taiko
             {
                 base.OnHitObjectAdded(hitObject);
 
-                // Potential room for pooling here?
+                TaikoSelectableHitObject newSelectable = hitObject switch
                 HitObjectContainer.Add(new TaikoSelectableHitObject((TaikoHitObject)hitObject)
                 {
                     PlayfieldSelectedObject = { BindTarget = SelectedObject }
