@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -16,6 +17,7 @@ using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
@@ -23,11 +25,13 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
+using osu.Game.Screens.Edit.Compose.Components.Timeline;
 using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
-    public partial class ObjectInspector : OsuFocusedOverlayContainer
+    [Cached(typeof(IBeatSnapProvider))]
+    public partial class ObjectInspector : OsuFocusedOverlayContainer, IBeatSnapProvider
     {
         private DependencyContainer dependencies;
 
@@ -35,7 +39,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             => dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
 
         [Cached]
-        private BindableBeatDivisor beatDivisor = new BindableBeatDivisor();
+        private BindableBeatDivisor beatDivisor = new BindableBeatDivisor(4);
 
         [Resolved]
         private Bindable<WorkingBeatmap> beatmap { get; set; }
@@ -55,14 +59,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
         private IBeatmap playableBeatmap;
+        private EditorBeatmap editorBeatmap;
 
         protected override bool BlockNonPositionalInput => true;
 
         protected override bool DimMainContent => false;
 
         private const int bottom_bar_height = 50;
-
         private const int side_bar_width = 220;
+        private const int timeline_height = 50;
 
         public ObjectInspector(ProcessorWorkingBeatmap working)
         {
@@ -77,15 +82,18 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
             processorBeatmap.LoadTrack();
+            modifiedMods.OfType<IApplicableToTrack>().ForEach(m => m.ApplyToTrack(processorBeatmap.Track));
 
             clock = new EditorClock(playableBeatmap, beatDivisor);
             clock.ChangeSource(processorBeatmap.Track);
             dependencies.CacheAs(clock);
 
-            var editorBeatmap = new EditorBeatmap(playableBeatmap);
+            editorBeatmap = new EditorBeatmap(playableBeatmap);
             dependencies.CacheAs(editorBeatmap);
 
             beatmap.Value = processorBeatmap;
+
+            Timeline timeline;
 
             AddInternal(new Container
             {
@@ -107,6 +115,22 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         RelativeSizeAxes = Axes.Y,
                         Padding = new MarginPadding { Bottom = bottom_bar_height },
                         Width = side_bar_width
+                    },
+                    new Container
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Padding = new MarginPadding { Left = side_bar_width },
+                        Children = new Drawable[]
+                        {
+                            new Box
+                            {
+                                Colour = colourProvider.Background6,
+                                Alpha = 0.35f,
+                                RelativeSizeAxes = Axes.Both
+                            },
+                            timeline = new Timeline(new TimelineBlueprintContainer())
+                        }
                     },
                     rulesetContainer = new Container
                     {
@@ -154,6 +178,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 }
             });
             dependencies.CacheAs(difficultyValuesContainer);
+
+            timeline.Height = timeline_height;
+            timeline.Children.Last().Height = timeline_height; // set inner container height to 55 to fix centering
 
             rulesetContainer.Add(ruleset.Value.ShortName switch
             {
@@ -269,5 +296,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             return base.OnKeyDown(e);
         }
+
+        public double SnapTime(double time, double? referenceTime) => editorBeatmap.SnapTime(time, referenceTime);
+
+        public double GetBeatLengthAtTime(double referenceTime) => editorBeatmap.GetBeatLengthAtTime(referenceTime);
+
+        public int BeatDivisor => beatDivisor.Value;
     }
 }
