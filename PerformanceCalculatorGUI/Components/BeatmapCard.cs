@@ -1,7 +1,9 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Generic;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -15,6 +17,9 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
+using osu.Game.Rulesets.Mods;
+using osu.Game.Utils;
+using osuTK;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
@@ -31,6 +36,11 @@ namespace PerformanceCalculatorGUI.Components
 
         [Resolved]
         private LargeTextureStore textures { get; set; }
+
+        [Resolved]
+        private Bindable<IReadOnlyList<Mod>> mods { get; set; }
+
+        private OsuSpriteText bpmText = null!;
 
         public BeatmapCard(ProcessorWorkingBeatmap beatmap)
             : base(HoverSampleSet.Button)
@@ -77,10 +87,37 @@ namespace PerformanceCalculatorGUI.Components
                     Font = OsuFont.GetFont(size: 16, weight: FontWeight.Bold),
                     Text = $"[{beatmap.BeatmapInfo.Ruleset.Name}] {beatmap.Metadata.GetDisplayTitle()} [{beatmap.BeatmapInfo.DifficultyName}]",
                     Margin = new MarginPadding(10)
+                },
+                new FillFlowContainer
+                {
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Direction = FillDirection.Horizontal,
+                    AutoSizeAxes = Axes.Both,
+                    Margin = new MarginPadding(10),
+                    Children = new Drawable[]
+                    {
+                        new BeatmapStatisticIcon(BeatmapStatisticsIconType.Bpm)
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Size = new Vector2(16)
+                        },
+                        bpmText = new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Font = OsuFont.GetFont(size: 14)
+                        }
+                    }
                 }
             });
 
             Action = () => { host.OpenUrlExternally($"https://osu.ppy.sh/beatmaps/{beatmap.BeatmapInfo.OnlineID}"); };
+
+            mods.BindValueChanged(_ => updateBpm());
+
+            updateBpm();
         }
 
         protected override bool OnHover(HoverEvent e)
@@ -93,6 +130,21 @@ namespace PerformanceCalculatorGUI.Components
         {
             BorderThickness = 0;
             base.OnHoverLost(e);
+        }
+
+        private void updateBpm()
+        {
+            double rate = ModUtils.CalculateRateWithMods(mods.Value);
+
+            int bpmMax = FormatUtils.RoundBPM(beatmap.Beatmap.ControlPointInfo.BPMMaximum, rate);
+            int bpmMin = FormatUtils.RoundBPM(beatmap.Beatmap.ControlPointInfo.BPMMinimum, rate);
+            int mostCommonBPM = FormatUtils.RoundBPM(60000 / beatmap.Beatmap.GetMostCommonBeatLength(), rate);
+
+            string labelText = bpmMin == bpmMax
+                ? $"{bpmMin}"
+                : $"{bpmMin}-{bpmMax} (mostly {mostCommonBPM})";
+
+            bpmText.Text = labelText;
         }
     }
 }
