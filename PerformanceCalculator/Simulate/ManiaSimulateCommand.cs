@@ -10,6 +10,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Mania.Objects;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 
 namespace PerformanceCalculator.Simulate
@@ -35,7 +36,7 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new ManiaRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, oks, Goods, greats);
+        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, oks, Goods, greats);
 
         private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {

@@ -8,7 +8,9 @@ using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 
@@ -43,9 +45,20 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new OsuRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, largeTickMisses, sliderTailMisses);
+        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods)
+        {
+            // Use lazer info only if score has sliderhead accuracy
+            if (mods.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
+            {
+                return generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, null, null);
+            }
+            else
+            {
+                return generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, Goods, largeTickMisses, sliderTailMisses);
+            }
+        }
 
-        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countGood, int countLargeTickMisses, int countSliderTailMisses)
+        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses, int? countSliderTailMisses)
         {
             int countGreat;
 
@@ -121,15 +134,21 @@ namespace PerformanceCalculator.Simulate
                 countGreat = (int)(totalResultCount - countGood - countMeh - countMiss);
             }
 
-            return new Dictionary<HitResult, int>
+            var result = new Dictionary<HitResult, int>
             {
                 { HitResult.Great, countGreat },
                 { HitResult.Ok, countGood ?? 0 },
                 { HitResult.Meh, countMeh ?? 0 },
-                { HitResult.LargeTickMiss, countLargeTickMisses },
-                { HitResult.SliderTailHit, beatmap.HitObjects.Count(x => x is Slider) - countSliderTailMisses },
                 { HitResult.Miss, countMiss }
             };
+
+            if (countLargeTickMisses != null)
+                result[HitResult.LargeTickMiss] = countLargeTickMisses.Value;
+
+            if (countSliderTailMisses != null)
+                result[HitResult.SliderTailHit] = beatmap.HitObjects.Count(x => x is Slider) - countSliderTailMisses.Value;
+
+            return result;
         }
 
         protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics)
@@ -139,14 +158,28 @@ namespace PerformanceCalculator.Simulate
             var countMeh = statistics[HitResult.Meh];
             var countMiss = statistics[HitResult.Miss];
 
-            var countSliders = beatmap.HitObjects.Count(x => x is Slider);
-            var countSliderTailHit = statistics[HitResult.SliderTailHit];
-            var countLargeTicks = beatmap.HitObjects.Sum(obj => obj.NestedHitObjects.Count(x => x is SliderTick or SliderRepeat));
-            var countLargeTickHit = countLargeTicks - statistics[HitResult.LargeTickMiss];
+            double total = 6 * countGreat + 2 * countGood + countMeh;
+            double max = 6 * (countGreat + countGood + countMeh + countMiss);
 
-            double total = 6 * (countGreat + countGood + countMeh + countMiss) + 3 * countSliders + 0.6 * countLargeTicks;
+            if (statistics.ContainsKey(HitResult.SliderTailHit))
+            {
+                var countSliders = beatmap.HitObjects.Count(x => x is Slider);
+                var countSliderTailHit = statistics[HitResult.SliderTailHit];
 
-            return (6 * countGreat + 2 * countGood + countMeh + 3 * countSliderTailHit + 0.6 * countLargeTickHit) / total;
+                total += 3 * countSliderTailHit;
+                max += 3 * countSliders;
+            }
+
+            if (statistics.ContainsKey(HitResult.LargeTickMiss))
+            {
+                var countLargeTicks = beatmap.HitObjects.Sum(obj => obj.NestedHitObjects.Count(x => x is SliderTick or SliderRepeat));
+                var countLargeTickHit = countLargeTicks - statistics[HitResult.LargeTickMiss];
+
+                total += 0.6 * countLargeTickHit;
+                max += 0.6 * countLargeTicks;
+            }
+
+            return total / max;
         }
     }
 }
