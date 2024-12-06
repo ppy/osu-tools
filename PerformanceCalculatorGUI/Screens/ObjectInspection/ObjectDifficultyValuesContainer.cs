@@ -133,6 +133,10 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             if (hitObject.Angle is not null)
                 flowContainer.Add(new ObjectInspectorDifficultyValue("Angle", double.RadiansToDegrees(hitObject.Angle.Value)));
 
+            flowContainer.Add(new ObjectInspectorDifficultyValue("Lazy Jump Dist", hitObject.LazyJumpDistance));
+            flowContainer.Add(new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance));
+            flowContainer.Add(new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime));
+
             if (hitObject.BaseObject is Slider)
             {
                 flowContainer.AddRange(new Drawable[]
@@ -146,8 +150,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     },
                     new ObjectInspectorDifficultyValue("Travel Time", hitObject.TravelTime),
                     new ObjectInspectorDifficultyValue("Travel Distance", hitObject.TravelDistance),
-                    new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
-                    new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime)
                 });
             }
         }

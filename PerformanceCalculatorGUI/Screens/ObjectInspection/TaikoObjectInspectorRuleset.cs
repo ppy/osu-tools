@@ -26,6 +26,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
                                                        .Cast<TaikoDifficultyHitObject>().ToArray();
+
+            ShowSpeedChanges.Value = true;
         }
 
         public override bool PropagatePositionalInputSubTree => false;

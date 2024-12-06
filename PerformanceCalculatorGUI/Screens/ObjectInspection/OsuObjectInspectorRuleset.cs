@@ -94,7 +94,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
                                 hitObject.Delay(hitObjectDuration)
                                          .FadeTo(0.25f, 200f, Easing.Out)
-                                         .Delay(nextHitObject.StartTime - hitObject.StartTimeBindable.Value - hitObjectDuration)
+                                         .Delay(nextHitObject.StartTimeBindable.Value - hitObject.StartTimeBindable.Value - hitObjectDuration)
                                          .FadeOut(100f, Easing.Out)
                                          .Expire();
                             }
