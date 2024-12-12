@@ -171,7 +171,7 @@ Computes the performance (pp) of a simulated osu! play.
 Usage: dotnet PerformanceCalculator.dll simulate osu <beatmap> [options]
 
 Arguments:
-  beatmap                               Required. Can be either a path to beatmap file (.osu) or beatmap ID.
+  beatmap                             Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
   -?|-h|--help                        Show help information.
