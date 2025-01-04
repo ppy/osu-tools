@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Humanizer;
 using osu.Framework;
@@ -165,11 +166,11 @@ namespace PerformanceCalculatorGUI.Screens
                                             FixedLabelWidth = 100f,
                                             PlaceholderText = "Click to select a beatmap file"
                                         },
-                                        beatmapIdTextBox = new LimitedLabelledNumberBox
+                                        beatmapIdTextBox = new ExtendedLabelledTextBox
                                         {
                                             Label = "Beatmap ID",
                                             FixedLabelWidth = 100f,
-                                            PlaceholderText = "Enter beatmap ID",
+                                            PlaceholderText = "Enter a beatmap ID or link",
                                             CommitOnFocusLoss = false
                                         },
                                         beatmapImportTypeSwitch = new SwitchButton
@@ -618,6 +619,22 @@ namespace PerformanceCalculatorGUI.Screens
                 showError("Empty beatmap path!");
                 resetBeatmap();
                 return;
+            }
+
+            if (!Regex.IsMatch(beatmap, @"\A\d+\z"))
+            {
+                string beatmapLinkPattern = @"osu\.ppy\.sh/b.*/\d+\z";
+
+                if (Regex.IsMatch(beatmap, beatmapLinkPattern))
+                {
+                    beatmap = beatmap.Split('/').Last();
+                }
+                else
+                {
+                    showError("Invalid beatmap ID or link!");
+                    resetBeatmap();
+                    return;
+                }
             }
 
             try
