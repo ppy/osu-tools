@@ -621,7 +621,8 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            if (!Regex.IsMatch(beatmap, @"\A\d+\z"))
+            // Checks if the beatmap string contains only numbers or if it's a file path
+            if (!Regex.IsMatch(beatmap, @"\A\d+\z|\.osu\z"))
             {
                 string beatmapLinkPattern = @"osu\.ppy\.sh/b.*/\d+\z";
 
@@ -631,7 +632,7 @@ namespace PerformanceCalculatorGUI.Screens
                 }
                 else
                 {
-                    showError("Invalid beatmap ID or link!");
+                    showError("Invalid beatmap path!");
                     resetBeatmap();
                     return;
                 }
