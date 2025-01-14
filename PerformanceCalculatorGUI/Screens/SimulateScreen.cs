@@ -579,6 +579,9 @@ namespace PerformanceCalculatorGUI.Screens
 
             updateMissesTextboxes();
 
+            // recreate calculators to update DHOs
+            createCalculators();
+
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += m =>
             {
