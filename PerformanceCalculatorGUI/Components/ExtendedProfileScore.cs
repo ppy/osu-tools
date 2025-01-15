@@ -73,7 +73,7 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class ExtendedProfileScore : CompositeDrawable
     {
-        private const int height = 40;
+        private const int height = 35;
         private const int performance_width = 100;
         private const int rank_difference_width = 35;
         private const int small_text_font_size = 11;
