@@ -579,13 +579,17 @@ namespace PerformanceCalculatorGUI.Screens
 
             updateMissesTextboxes();
 
+            // recreate calculators to update DHOs
+            createCalculators();
+
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += m =>
             {
-                updateMissesTextboxes();
                 debouncedStatisticsUpdate?.Cancel();
                 debouncedStatisticsUpdate = Scheduler.AddDelayed(() =>
                 {
+                    createCalculators();
+                    updateMissesTextboxes();
                     calculateDifficulty();
                     calculatePerformance();
                 }, 100);
