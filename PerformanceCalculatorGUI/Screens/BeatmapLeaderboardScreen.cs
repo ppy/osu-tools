@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework;
@@ -29,7 +30,7 @@ namespace PerformanceCalculatorGUI.Screens
 {
     public partial class BeatmapLeaderboardScreen : PerformanceCalculatorScreen
     {
-        private LimitedLabelledNumberBox beatmapIdTextBox;
+        private ExtendedLabelledTextBox beatmapIdTextBox;
         private StatefulButton calculationButton;
         private VerboseLoadingLayer loadingLayer;
 
@@ -103,20 +104,19 @@ namespace PerformanceCalculatorGUI.Screens
                                 {
                                     new Drawable[]
                                     {
-                                        beatmapIdTextBox = new LimitedLabelledNumberBox
+                                        beatmapIdTextBox = new ExtendedLabelledTextBox
                                         {
                                             RelativeSizeAxes = Axes.X,
                                             Anchor = Anchor.TopLeft,
                                             Label = "Beatmap ID",
-                                            PlaceholderText = "Enter beatmap ID",
-                                            MinValue = 1,
+                                            PlaceholderText = "Enter a beatmap ID or link",
                                             CommitOnFocusLoss = false
                                         },
                                         calculationButton = new StatefulButton("Start calculation")
                                         {
                                             Width = 150,
                                             Height = settings_height,
-                                            Action = calculate
+                                            Action = checkBeatmapIdAndCalculate
                                         }
                                     }
                                 }
@@ -173,14 +173,42 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
-            ruleset.BindValueChanged(_ => { calculate(); });
-            beatmapIdTextBox.OnCommit += (_, _) => { calculate(); };
+            ruleset.BindValueChanged(_ => { checkBeatmapIdAndCalculate(); });
+            beatmapIdTextBox.OnCommit += (_, _) => { checkBeatmapIdAndCalculate(); };
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(calculate);
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(checkBeatmapIdAndCalculate);
         }
 
-        private void calculate()
+        private void checkBeatmapIdAndCalculate()
+        {
+            string beatmapId = beatmapIdTextBox.Current.Value;
+
+            if (string.IsNullOrEmpty(beatmapId))
+            {
+                showError("Empty beatmap ID or link!");
+                return;
+            }
+
+            if (!Regex.IsMatch(beatmapId, @"\A\d+\z"))
+            {
+                string beatmapLinkPattern = @"osu\.ppy\.sh/b.*/\d+\z";
+
+                if (Regex.IsMatch(beatmapId, beatmapLinkPattern))
+                {
+                    beatmapId = beatmapId.Split('/').Last();
+                }
+                else
+                {
+                    showError("Invalid beatmap ID or link!");
+                    return;
+                }
+            }
+
+            calculate(beatmapId);
+        }
+
+        private void calculate(string beatmapId)
         {
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
@@ -196,13 +224,13 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmapIdTextBox.Current.Value}/scores?scope=global&mode={ruleset.Value.ShortName}");
+                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmapId}/scores?scope=global&mode={ruleset.Value.ShortName}");
 
                 var plays = new List<SoloScoreInfo>();
 
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmapIdTextBox.Current.Value, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmapId, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
                 Schedule(() =>
                 {
@@ -262,6 +290,12 @@ namespace PerformanceCalculatorGUI.Screens
                     calculationButton.State.Value = ButtonState.Done;
                 });
             }, token);
+        }
+
+        private void showError(string message)
+        {
+            Logger.Log(message, level: LogLevel.Error);
+            notificationDisplay.Display(new Notification(message));
         }
     }
 }
