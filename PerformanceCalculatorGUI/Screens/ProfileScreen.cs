@@ -14,6 +14,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
@@ -34,6 +35,7 @@ namespace PerformanceCalculatorGUI.Screens
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Plum);
 
         private StatefulButton calculationButton;
+        private OsuCheckbox includePinnedCheckbox;
         private VerboseLoadingLayer loadingLayer;
 
         private GridContainer layout;
@@ -147,6 +149,16 @@ namespace PerformanceCalculatorGUI.Screens
                                 AutoSizeAxes = Axes.Y,
                                 Children = new Drawable[]
                                 {
+                                    includePinnedCheckbox = new OsuCheckbox(nubOnRight: false)
+                                    {
+                                        RelativeSizeAxes = Axes.None,
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft,
+                                        Width = 300,
+                                        Margin = new MarginPadding { Left = 10 },
+                                        Current = { Value = true },
+                                        LabelText = "Include pinned scores"
+                                    },
                                     sortingTabControl = new OverlaySortTabControl<ProfileSortCriteria>
                                     {
                                         Anchor = Anchor.CentreRight,
@@ -181,6 +193,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
+            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfile(currentUser); };
 
             if (RuntimeInfo.IsDesktop)
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(currentUser); });
@@ -246,6 +259,12 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
 
+                if (includePinnedCheckbox.Current.Value)
+                {
+                    var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100");
+                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID))).ToList();
+                }
+
                 foreach (var score in apiScores)
                 {
                     if (token.IsCancellationRequested)
@@ -265,7 +284,7 @@ namespace PerformanceCalculatorGUI.Screens
                     var difficultyAttributes = difficultyCalculator.Calculate(RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods));
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
-                    var livePp = score.PP ?? 0.0;
+                    double? livePp = score.PP;
                     var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
                     score.PP = perfAttributes?.Total ?? 0.0;
 
@@ -279,17 +298,7 @@ namespace PerformanceCalculatorGUI.Screens
                     return;
 
                 var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
-                var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
-
-                Schedule(() =>
-                {
-                    foreach (var play in plays)
-                    {
-                        play.Position.Value = localOrdered.IndexOf(play) + 1;
-                        play.PositionChange.Value = liveOrdered.IndexOf(play) - localOrdered.IndexOf(play);
-                        scores.SetLayoutPosition(scores[liveOrdered.IndexOf(play)], localOrdered.IndexOf(play));
-                    }
-                });
+                var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0).ToList();
 
                 decimal totalLocalPP = 0;
                 for (var i = 0; i < localOrdered.Count; i++)
@@ -299,7 +308,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 decimal nonBonusLivePP = 0;
                 for (var i = 0; i < liveOrdered.Count; i++)
-                    nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP);
+                    nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
 
                 //todo: implement properly. this is pretty damn wrong.
                 var playcountBonusPP = (totalLivePP - nonBonusLivePP);
@@ -324,6 +333,7 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     loadingLayer.Hide();
                     calculationButton.State.Value = ButtonState.Done;
+                    updateSorting(ProfileSortCriteria.Local);
                 });
             }, TaskContinuationOptions.None);
         }
