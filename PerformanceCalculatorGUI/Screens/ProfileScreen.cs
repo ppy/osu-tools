@@ -13,13 +13,16 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Framework.Logging;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
 using PerformanceCalculatorGUI.Components;
@@ -35,7 +38,7 @@ namespace PerformanceCalculatorGUI.Screens
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Plum);
 
         private StatefulButton calculationButton;
-        private OsuCheckbox includePinnedCheckbox;
+        private SwitchButton includePinnedCheckbox;
         private VerboseLoadingLayer loadingLayer;
 
         private GridContainer layout;
@@ -149,15 +152,29 @@ namespace PerformanceCalculatorGUI.Screens
                                 AutoSizeAxes = Axes.Y,
                                 Children = new Drawable[]
                                 {
-                                    includePinnedCheckbox = new OsuCheckbox(nubOnRight: false)
+                                    new FillFlowContainer()
                                     {
-                                        RelativeSizeAxes = Axes.None,
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        Width = 300,
-                                        Margin = new MarginPadding { Left = 10 },
-                                        Current = { Value = true },
-                                        LabelText = "Include pinned scores"
+                                        AutoSizeAxes = Axes.Both,
+                                        Direction = FillDirection.Horizontal,
+                                        Margin = new MarginPadding { Vertical = 2, Left = 10 },
+                                        Spacing = new Vector2(5),
+                                        Children = new Drawable[]
+                                        {
+                                            includePinnedCheckbox = new SwitchButton()
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Current = { Value = true },
+                                            },
+                                            new OsuSpriteText()
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 14),
+                                                UseFullGlyphHeight = false,
+                                                Text = "Include pinned scores"
+                                            }
+                                        }
                                     },
                                     sortingTabControl = new OverlaySortTabControl<ProfileSortCriteria>
                                     {
@@ -299,6 +316,18 @@ namespace PerformanceCalculatorGUI.Screens
 
                 var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
                 var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0).ToList();
+
+                Schedule(() =>
+                {
+                    foreach (var play in plays)
+                    {
+                        if (play.LivePP != null)
+                        {
+                            play.Position.Value = localOrdered.IndexOf(play) + 1;
+                            play.PositionChange.Value = liveOrdered.IndexOf(play) - localOrdered.IndexOf(play);
+                        }
+                    }
+                });
 
                 decimal totalLocalPP = 0;
                 for (var i = 0; i < localOrdered.Count; i++)
