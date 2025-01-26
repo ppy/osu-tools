@@ -16,7 +16,6 @@ using osu.Framework.Logging;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
@@ -152,7 +151,7 @@ namespace PerformanceCalculatorGUI.Screens
                                 AutoSizeAxes = Axes.Y,
                                 Children = new Drawable[]
                                 {
-                                    new FillFlowContainer()
+                                    new FillFlowContainer
                                     {
                                         AutoSizeAxes = Axes.Both,
                                         Direction = FillDirection.Horizontal,
@@ -160,13 +159,13 @@ namespace PerformanceCalculatorGUI.Screens
                                         Spacing = new Vector2(5),
                                         Children = new Drawable[]
                                         {
-                                            includePinnedCheckbox = new SwitchButton()
+                                            includePinnedCheckbox = new SwitchButton
                                             {
                                                 Anchor = Anchor.CentreLeft,
                                                 Origin = Anchor.CentreLeft,
                                                 Current = { Value = true },
                                             },
-                                            new OsuSpriteText()
+                                            new OsuSpriteText
                                             {
                                                 Anchor = Anchor.CentreLeft,
                                                 Origin = Anchor.CentreLeft,
