@@ -33,14 +33,14 @@ namespace PerformanceCalculatorGUI.Components
     public class ExtendedScore
     {
         public SoloScoreInfo SoloScore { get; }
-        public double LivePP { get; }
+        public double? LivePP { get; }
 
         public Bindable<int> Position { get; } = new Bindable<int>();
         public Bindable<int> PositionChange { get; } = new Bindable<int>();
 
         public PerformanceAttributes PerformanceAttributes { get; }
 
-        public ExtendedScore(SoloScoreInfo score, double livePP, PerformanceAttributes attributes)
+        public ExtendedScore(SoloScoreInfo score, double? livePP, PerformanceAttributes attributes)
         {
             SoloScore = score;
             PerformanceAttributes = attributes;
@@ -256,7 +256,7 @@ namespace PerformanceCalculatorGUI.Components
                                                                     Child = new OsuSpriteText
                                                                     {
                                                                         Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                                                        Text = $"{Score.LivePP:0}pp"
+                                                                        Text = Score.LivePP != null ? $"{Score.LivePP:0}pp" : "- pp"
                                                                     },
                                                                 },
                                                                 new OsuSpriteText
@@ -282,7 +282,7 @@ namespace PerformanceCalculatorGUI.Components
                                         {
                                             var ruleset = rulesets.GetRuleset(Score.SoloScore.RulesetID) ?? throw new InvalidOperationException();
 
-                                            return new ModIcon(ruleset.CreateInstance().CreateModFromAcronym(mod.Acronym)!)
+                                            return new ModIcon(mod.ToMod(ruleset.CreateInstance()))
                                             {
                                                 Scale = new Vector2(0.35f)
                                             };
