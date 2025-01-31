@@ -102,10 +102,6 @@ namespace PerformanceCalculatorGUI
                                                 {
                                                     Action = () => setScreen(new ProfileScreen())
                                                 },
-                                                new ScreenSelectionButton("Combined Profile", FontAwesome.Solid.Users)
-                                                {
-                                                    Action = () => setScreen(new CombinedProfileScreen())
-                                                },
                                                 new ScreenSelectionButton("Player Leaderboard", FontAwesome.Solid.List)
                                                 {
                                                     Action = () => setScreen(new LeaderboardScreen())
