@@ -71,7 +71,7 @@ namespace PerformanceCalculator.Difficulty
             {
                 var document = new Document();
 
-                foreach (var error in resultSet.Errors)
+                foreach (string error in resultSet.Errors)
                     document.Children.Add(new Span(error), "\n");
                 if (resultSet.Errors.Count > 0)
                     document.Children.Add("\n");

@@ -97,7 +97,7 @@ namespace PerformanceCalculator.Difficulty
             var availableMods = ruleset.CreateAllMods().ToList();
             var mods = new List<Mod>();
 
-            foreach (var modString in Mods)
+            foreach (string modString in Mods)
             {
                 Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
                 if (newMod == null)

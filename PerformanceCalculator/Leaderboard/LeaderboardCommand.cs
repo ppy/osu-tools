@@ -33,7 +33,7 @@ namespace PerformanceCalculator.Leaderboard
 
         public override void Execute()
         {
-            var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
+            string rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
             var leaderboard = GetJsonFromApi<GetTopUsersResponse>($"rankings/{rulesetApiName}/performance?cursor[page]={LeaderboardPage - 1}");
 
             var calculatedPlayers = new List<LeaderboardPlayerInfo>();
@@ -78,7 +78,7 @@ namespace PerformanceCalculator.Leaderboard
                 double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play);
 
                 //todo: implement properly. this is pretty damn wrong.
-                var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+                double playcountBonusPP = (totalLivePP - nonBonusLivePP);
                 totalLocalPP += playcountBonusPP;
 
                 calculatedPlayers.Add(new LeaderboardPlayerInfo
@@ -94,7 +94,7 @@ namespace PerformanceCalculator.Leaderboard
 
             if (OutputJson)
             {
-                var json = JsonConvert.SerializeObject(calculatedPlayers);
+                string json = JsonConvert.SerializeObject(calculatedPlayers);
 
                 Console.Write(json);
             }

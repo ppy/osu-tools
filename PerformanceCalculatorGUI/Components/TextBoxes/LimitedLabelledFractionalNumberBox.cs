@@ -17,7 +17,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
             {
                 base.OnUserTextAdded(added);
 
-                var textToParse = Text;
+                string textToParse = Text;
 
                 if (string.IsNullOrEmpty(Text))
                 {
@@ -39,7 +39,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
 
             protected override void OnUserTextRemoved(string removed)
             {
-                var textToParse = Text;
+                string textToParse = Text;
 
                 if (string.IsNullOrEmpty(Text))
                 {

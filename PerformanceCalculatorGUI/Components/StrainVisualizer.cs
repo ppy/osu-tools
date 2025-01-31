@@ -76,7 +76,7 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     // this is ugly, but it works
                     var graphToggleBindable = new Bindable<bool>();
-                    var graphNum = i;
+                    int graphNum = i;
                     graphToggleBindable.BindValueChanged(state =>
                     {
                         if (state.NewValue)
@@ -186,7 +186,7 @@ namespace PerformanceCalculatorGUI.Components
 
         private void addStrainBars(Skill[] skills, List<float[]> strainLists)
         {
-            var strainMaxValue = strainLists.Max(list => list.Max());
+            float strainMaxValue = strainLists.Max(list => list.Max());
 
             for (int i = 0; i < skills.Length; i++)
             {
@@ -223,7 +223,7 @@ namespace PerformanceCalculatorGUI.Components
             for (int i = 0; i < nBars; i++)
             {
                 var strainTime = TimeSpan.FromMilliseconds(TimeUntilFirstStrain.Value + lastStrainTime * i / nBars);
-                var tooltipText = $"~{strainTime:mm\\:ss\\.ff}";
+                string tooltipText = $"~{strainTime:mm\\:ss\\.ff}";
                 tooltipList.Add(tooltipText);
             }
 
@@ -248,13 +248,13 @@ namespace PerformanceCalculatorGUI.Components
 
             foreach (var skill in skills)
             {
-                var strains = ((StrainSkill)skill).GetCurrentStrainPeaks().ToArray();
+                double[] strains = ((StrainSkill)skill).GetCurrentStrainPeaks().ToArray();
 
                 var skillStrainList = new List<float>();
 
                 for (int i = 0; i < strains.Length; i++)
                 {
-                    var strain = strains[i];
+                    double strain = strains[i];
                     skillStrainList.Add(((float)strain));
                 }
 
@@ -281,7 +281,7 @@ namespace PerformanceCalculatorGUI.Components
             {
                 Clear();
 
-                foreach (var val in value)
+                foreach (float val in value)
                 {
                     float length = MaxValue ?? value.Max();
                     if (length != 0)
@@ -324,7 +324,7 @@ namespace PerformanceCalculatorGUI.Components
             {
                 Clear();
 
-                foreach (var tooltip in value)
+                foreach (string tooltip in value)
                 {
                     float size = value.Count();
                     if (size != 0)

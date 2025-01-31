@@ -67,7 +67,7 @@ namespace PerformanceCalculator.Difficulty
 
                 foreach (var (settingsSource, propertyInfo) in sourceProperties)
                 {
-                    var bindable = propertyInfo.GetValue(mod);
+                    object? bindable = propertyInfo.GetValue(mod);
 
                     Debug.Assert(bindable != null);
 

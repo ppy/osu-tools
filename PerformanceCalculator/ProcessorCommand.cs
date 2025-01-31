@@ -118,9 +118,9 @@ namespace PerformanceCalculator
             {
                 ConsoleRenderer.RenderDocumentToText(document, new TextRenderTarget(writer), new Rect(0, 0, 250, Size.Infinity));
 
-                var str = writer.GetStringBuilder().ToString();
+                string str = writer.GetStringBuilder().ToString();
 
-                var lines = str.Split('\n');
+                string[] lines = str.Split('\n');
                 for (int i = 0; i < lines.Length; i++)
                     lines[i] = lines[i].TrimEnd();
                 str = string.Join('\n', lines);
@@ -143,7 +143,7 @@ namespace PerformanceCalculator
 
             var mods = new List<Mod>();
 
-            foreach (var acronym in acronyms)
+            foreach (string acronym in acronyms)
             {
                 APIMod mod = new APIMod { Acronym = acronym };
 

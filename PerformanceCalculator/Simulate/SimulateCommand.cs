@@ -66,7 +66,7 @@ namespace PerformanceCalculator.Simulate
             var mods = ParseMods(ruleset, Mods, ModOptions);
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
-            var beatmapMaxCombo = beatmap.GetMaxCombo();
+            int beatmapMaxCombo = beatmap.GetMaxCombo();
             var statistics = GenerateHitResults(beatmap, mods);
             var scoreInfo = new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
             {

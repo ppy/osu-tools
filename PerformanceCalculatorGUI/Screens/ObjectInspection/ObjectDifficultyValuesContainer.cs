@@ -121,7 +121,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private void drawOsuValues(OsuDifficultyHitObject hitObject)
         {
-            var hidden = appliedMods.Value.Any(x => x is ModHidden);
+            bool hidden = appliedMods.Value.Any(x => x is ModHidden);
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),

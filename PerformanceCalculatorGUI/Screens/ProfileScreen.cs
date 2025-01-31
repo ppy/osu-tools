@@ -331,17 +331,17 @@ namespace PerformanceCalculatorGUI.Screens
                 });
 
                 decimal totalLocalPP = 0;
-                for (var i = 0; i < localOrdered.Count; i++)
+                for (int i = 0; i < localOrdered.Count; i++)
                     totalLocalPP += (decimal)(Math.Pow(0.95, i) * (localOrdered[i].SoloScore.PP ?? 0));
 
                 decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 
                 decimal nonBonusLivePP = 0;
-                for (var i = 0; i < liveOrdered.Count; i++)
+                for (int i = 0; i < liveOrdered.Count; i++)
                     nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
 
                 //todo: implement properly. this is pretty damn wrong.
-                var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+                decimal playcountBonusPP = (totalLivePP - nonBonusLivePP);
                 totalLocalPP += playcountBonusPP;
 
                 Schedule(() =>
