@@ -82,8 +82,8 @@ namespace PerformanceCalculatorGUI.Components
         private const float performance_background_shear = 0.45f;
 
         public readonly ExtendedScore Score;
-		
-		public readonly bool ShowAvatar;
+
+        public readonly bool ShowAvatar;
 
         [Resolved]
         private OsuColour colours { get; set; }
@@ -96,7 +96,7 @@ namespace PerformanceCalculatorGUI.Components
         public ExtendedProfileScore(ExtendedScore score, bool showAvatar = false)
         {
             Score = score;
-			ShowAvatar = showAvatar;
+            ShowAvatar = showAvatar;
 
             RelativeSizeAxes = Axes.X;
             Height = height;
@@ -105,20 +105,20 @@ namespace PerformanceCalculatorGUI.Components
         [BackgroundDependencyLoader]
         private void load(RulesetStore rulesets)
         {
-			if (ShowAvatar)
-			{
-				AddInternal(new UpdateableAvatar(Score.SoloScore.User, false)
-				{
-					Size = new Vector2(height)
-				});
-			}
-			
+            if (ShowAvatar)
+            {
+                AddInternal(new UpdateableAvatar(Score.SoloScore.User, false)
+                {
+                    Size = new Vector2(height)
+                });
+            }
+
             AddInternal(new ExtendedProfileItemContainer
             {
-				// Resize to make room for avatar if necessary
-				X = ShowAvatar ? height : 0,
-				Padding = ShowAvatar ? new MarginPadding { Right = height } : new MarginPadding {},
-				
+                // Resize to make room for avatar if necessary
+                X = ShowAvatar ? height : 0,
+                Padding = ShowAvatar ? new MarginPadding { Right = height } : new MarginPadding {},
+
                 OnHoverAction = () =>
                 {
                     positionChangeText.Text = $"#{Score.Position.Value}";
