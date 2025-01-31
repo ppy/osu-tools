@@ -130,7 +130,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         {
                                             Width = 150,
                                             Height = username_container_height,
-                                            Action = () => { calculateProfile(usernameTextBox.Current.Value); }
+                                            Action = () => { calculateProfiles( usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ); }
                                         }
                                     }
                                 }
@@ -222,27 +222,26 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
-            usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
+            usernameTextBox.OnCommit += (_, _) => { calculateProfiles( usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
-            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfile( string.Join(", ", currentUsers) ); };
-            onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfile( string.Join(", ", currentUsers) ); };
+            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
+            onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile( string.Join(",", currentUsers) ); });
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfiles(currentUsers); });
         }
 
-        private void calculateProfile(string usernames)
+        private void calculateProfiles(string[] usernames)
         {
-            if (string.IsNullOrEmpty(usernames))
+            if (usernames.Length < 1)
             {
                 usernameTextBox.FlashColour(Color4.Red, 1);
                 return;
             }
 
-            Array.Clear(currentUsers);
+            currentUsers = [];
 
-            string[] usernameArray = usernames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            bool calculatingSingleProfile = usernameArray.Length <= 1;
+            bool calculatingSingleProfile = usernames.Length <= 1;
 
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
@@ -281,13 +280,15 @@ namespace PerformanceCalculatorGUI.Screens
                 var players = new List<APIUser>();
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                foreach (string username in usernameArray)
+                foreach (string username in usernames)
                 {
                     Schedule(() => loadingLayer.Text.Value = $"Getting {username} user data...");
 
                     var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
                     players.Add(player);
                     currentUsers = currentUsers.Append(player.Username).ToArray();
+					
+					System.Console.WriteLine(player.Username);
 
                     // Add user card if only calculating single profile
                     if (calculatingSingleProfile)
