@@ -117,7 +117,7 @@ namespace PerformanceCalculatorGUI.Components
             {
                 // Resize to make room for avatar if necessary
                 X = ShowAvatar ? height : 0,
-                Padding = ShowAvatar ? new MarginPadding { Right = height } : new MarginPadding {},
+                Padding = ShowAvatar ? new MarginPadding { Right = height } : new MarginPadding(),
 
                 OnHoverAction = () =>
                 {

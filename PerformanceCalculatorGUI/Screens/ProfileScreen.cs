@@ -241,8 +241,8 @@ namespace PerformanceCalculatorGUI.Screens
 
             currentUsers = "";
 
-            string[] Usernames = usernames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            bool calculatingSingleProfile = Usernames.Count() <= 1;
+            string[] usernameArray = usernames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            bool calculatingSingleProfile = usernameArray.Length <= 1;
 
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
@@ -281,7 +281,7 @@ namespace PerformanceCalculatorGUI.Screens
                 var players = new List<APIUser>();
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                foreach (string username in Usernames)
+                foreach (string username in usernameArray)
                 {
                     Schedule(() => loadingLayer.Text.Value = "Getting user data...");
 
@@ -347,16 +347,16 @@ namespace PerformanceCalculatorGUI.Screens
                 // Filter plays if only displaying best score on each beatmap
                 if (onlyDisplayBestCheckbox.Current.Value)
                 {
-                    Schedule(() => loadingLayer.Text.Value = $"Filtering plays");
+                    Schedule(() => loadingLayer.Text.Value = "Filtering plays");
 
                     var filteredPlays = new List<ExtendedScore>();
 
                     // List of all beatmap IDs in plays without duplicates
                     var beatmapIDs = plays.Select(x => x.SoloScore.BeatmapID).Distinct().ToList();
 
-                    foreach (int ID in beatmapIDs)
+                    foreach (int id in beatmapIDs)
                     {
-                        var bestPlayOnBeatmap = plays.Where(x => x.SoloScore.BeatmapID == ID).OrderByDescending(x => x.SoloScore.PP).First();
+                        var bestPlayOnBeatmap = plays.Where(x => x.SoloScore.BeatmapID == id).OrderByDescending(x => x.SoloScore.PP).First();
                         filteredPlays.Add(bestPlayOnBeatmap);
                     }
 
