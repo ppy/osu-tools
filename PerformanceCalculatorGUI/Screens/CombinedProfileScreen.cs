@@ -13,6 +13,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
@@ -44,6 +45,8 @@ namespace PerformanceCalculatorGUI.Screens
         [Resolved]
         private RulesetStore rulesets { get; set; }
 
+        private SwitchButton onlyShowBest;
+
         public CombinedProfileScreen()
         {
             RelativeSizeAxes = Axes.Both;
@@ -54,6 +57,38 @@ namespace PerformanceCalculatorGUI.Screens
         {
             usernameTextBox.Label = "Usernames";
             usernameTextBox.PlaceholderText = "user1, user2, user3";
+
+            checkboxContainer.Children = new Drawable[]
+            {
+                includePinnedCheckbox = new SwitchButton
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Current = { Value = true },
+                },
+                new OsuSpriteText
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 14),
+                    UseFullGlyphHeight = false,
+                    Text = "Include pinned scores"
+                },
+                onlyShowBest = new SwitchButton
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Current = { Value = true },
+                },
+                new OsuSpriteText
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 14),
+                    UseFullGlyphHeight = false,
+                    Text = "Only display best score on each beatmap"
+                },
+            };
         }
 
         protected readonly struct ScoreWithUser
@@ -142,23 +177,25 @@ namespace PerformanceCalculatorGUI.Screens
                 if (token.IsCancellationRequested)
                     return;
 
-                Schedule(() => loadingLayer.Text.Value = "Filtering scores");
-
-                var filteredPlays = new List<ScoreWithUser>();
-
-                // List of every beatmap ID in combined plays without duplicates
-                List<int> beatmapIDs = allPlays.Select(x => x.Score.SoloScore.BeatmapID).Distinct().ToList();
-
-                foreach (int ID in beatmapIDs)
+                if (onlyShowBest.Current.Value)
                 {
-                    List<ScoreWithUser> playsOnBeatmap = allPlays.Where(x => x.Score.SoloScore.BeatmapID == ID).OrderByDescending(x => x.Score.SoloScore.PP).ToList();
-                    ScoreWithUser bestPlayOnBeatmap = playsOnBeatmap.First();
+                    Schedule(() => loadingLayer.Text.Value = "Filtering scores");
 
-                    filteredPlays.Add(bestPlayOnBeatmap);
-                    Schedule(() => scores.Add(new ExtendedCombinedProfileScore(bestPlayOnBeatmap.Score, bestPlayOnBeatmap.User)));
+                    var filteredPlays = new List<ScoreWithUser>();
+
+                    // List of every beatmap ID in combined plays without duplicates
+                    List<int> beatmapIDs = allPlays.Select(x => x.Score.SoloScore.BeatmapID).Distinct().ToList();
+
+                    foreach (int ID in beatmapIDs)
+                    {
+                        List<ScoreWithUser> playsOnBeatmap = allPlays.Where(x => x.Score.SoloScore.BeatmapID == ID).OrderByDescending(x => x.Score.SoloScore.PP).ToList();
+                        ScoreWithUser bestPlayOnBeatmap = playsOnBeatmap.First();
+
+                        filteredPlays.Add(bestPlayOnBeatmap);
+                    }
+
+                    allPlays = filteredPlays;
                 }
-
-                allPlays = filteredPlays;
 
                 if (token.IsCancellationRequested)
                     return;
@@ -170,6 +207,8 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     foreach (var play in allPlays)
                     {
+                        scores.Add(new ExtendedCombinedProfileScore(play.Score, play.User));
+
                         var score = play.Score;
 
                         if (score.LivePP != null)

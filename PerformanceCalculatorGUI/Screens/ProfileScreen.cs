@@ -37,8 +37,10 @@ namespace PerformanceCalculatorGUI.Screens
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Plum);
 
         protected StatefulButton calculationButton;
-        private SwitchButton includePinnedCheckbox;
         protected VerboseLoadingLayer loadingLayer;
+
+        protected FillFlowContainer checkboxContainer;
+        protected SwitchButton includePinnedCheckbox;
 
         protected GridContainer layout;
 
@@ -151,7 +153,7 @@ namespace PerformanceCalculatorGUI.Screens
                                 AutoSizeAxes = Axes.Y,
                                 Children = new Drawable[]
                                 {
-                                    new FillFlowContainer
+                                    checkboxContainer = new FillFlowContainer
                                     {
                                         AutoSizeAxes = Axes.Both,
                                         Direction = FillDirection.Horizontal,
