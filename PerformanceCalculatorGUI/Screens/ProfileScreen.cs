@@ -283,7 +283,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (string username in usernameArray)
                 {
-                    Schedule(() => loadingLayer.Text.Value = "Getting user data...");
+                    Schedule(() => loadingLayer.Text.Value = $"Getting {username} user data...");
 
                     var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
                     players.Add(player);
