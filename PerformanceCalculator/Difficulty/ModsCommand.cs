@@ -11,6 +11,7 @@ using Humanizer;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Game.Configuration;
+using osu.Game.Extensions;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 
@@ -75,7 +76,7 @@ namespace PerformanceCalculator.Difficulty
 
                     yield return new
                     {
-                        Name = propertyInfo.Name.Underscore(),
+                        Name = propertyInfo.Name.ToSnakeCase(),
                         Type = getJsonType(netType),
                         Label = settingsSource.Label.ToString(),
                         Description = settingsSource.Description.ToString(),

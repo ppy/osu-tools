@@ -1022,7 +1022,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 try
                 {
-                    var scoreInfo = await apiManager.GetJsonFromApi<SoloScoreInfo>($"scores/{scoreId}");
+                    var scoreInfo = await apiManager.GetJsonFromApi<SoloScoreInfo>($"scores/{scoreId}").ConfigureAwait(false);
 
                     Schedule(() =>
                     {

@@ -99,7 +99,7 @@ namespace PerformanceCalculator.Difficulty
 
             foreach (var modString in Mods)
             {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
+                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
                 if (newMod == null)
                     throw new ArgumentException($"Invalid mod provided: {modString}");
 

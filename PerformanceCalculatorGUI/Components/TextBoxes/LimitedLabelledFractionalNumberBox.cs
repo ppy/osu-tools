@@ -11,8 +11,6 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
     {
         private partial class FractionalNumberBox : OsuTextBox
         {
-            protected override bool AllowIme => false;
-
             protected override bool CanAddCharacter(char character) => char.IsAsciiDigit(character) || character == CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
 
             protected override void OnUserTextAdded(string added)

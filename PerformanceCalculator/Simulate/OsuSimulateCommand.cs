@@ -161,19 +161,18 @@ namespace PerformanceCalculator.Simulate
             double total = 6 * countGreat + 2 * countGood + countMeh;
             double max = 6 * (countGreat + countGood + countMeh + countMiss);
 
-            if (statistics.ContainsKey(HitResult.SliderTailHit))
+            if (statistics.TryGetValue(HitResult.SliderTailHit, out int countSliderTailHit))
             {
                 var countSliders = beatmap.HitObjects.Count(x => x is Slider);
-                var countSliderTailHit = statistics[HitResult.SliderTailHit];
 
                 total += 3 * countSliderTailHit;
                 max += 3 * countSliders;
             }
 
-            if (statistics.ContainsKey(HitResult.LargeTickMiss))
+            if (statistics.TryGetValue(HitResult.LargeTickMiss, out int countLargeTickMiss))
             {
                 var countLargeTicks = beatmap.HitObjects.Sum(obj => obj.NestedHitObjects.Count(x => x is SliderTick or SliderRepeat));
-                var countLargeTickHit = countLargeTicks - statistics[HitResult.LargeTickMiss];
+                var countLargeTickHit = countLargeTicks - countLargeTickMiss;
 
                 total += 0.6 * countLargeTickHit;
                 max += 0.6 * countLargeTicks;

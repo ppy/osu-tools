@@ -239,7 +239,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}");
+                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}").ConfigureAwait(false);
 
                 var calculatedPlayers = new List<LeaderboardUser>();
                 var calculatedScores = new List<ExtendedScore>();
@@ -253,7 +253,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {player.User.Username} top scores...");
 
-                    var playerData = await calculatePlayer(player, token);
+                    var playerData = await calculatePlayer(player, token).ConfigureAwait(false);
 
                     calculatedPlayers.Add(new LeaderboardUser
                     {
@@ -301,7 +301,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var plays = new List<ExtendedScore>();
 
-            var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+            var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
 
             var rulesetInstance = ruleset.Value.CreateInstance();
 
