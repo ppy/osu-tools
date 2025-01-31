@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -621,8 +622,7 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            // Checks if the beatmap string contains only numbers or if it's a file path
-            if (!Regex.IsMatch(beatmap, @"\A\d+\z|\.osu\z"))
+            if (!Path.Exists(beatmap) && Uri.IsWellFormedUriString(beatmap, UriKind.Absolute))
             {
                 string beatmapLinkPattern = @"osu\.ppy\.sh/b.*/\d+\z";
 
