@@ -36,23 +36,23 @@ namespace PerformanceCalculatorGUI.Screens
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Plum);
 
-        private StatefulButton calculationButton;
+        protected StatefulButton calculationButton;
         private SwitchButton includePinnedCheckbox;
-        private VerboseLoadingLayer loadingLayer;
+        protected VerboseLoadingLayer loadingLayer;
 
-        private GridContainer layout;
+        protected GridContainer layout;
 
-        private FillFlowContainer<ExtendedProfileScore> scores;
+        protected FillFlowContainer<ExtendedProfileScore> scores;
 
-        private LabelledTextBox usernameTextBox;
+        protected LabelledTextBox usernameTextBox;
         private Container userPanelContainer;
         private UserCard userPanel;
 
-        private string currentUser;
+        protected string currentUser;
 
-        private CancellationTokenSource calculationCancellatonToken;
+        protected CancellationTokenSource calculationCancellatonToken;
 
-        private OverlaySortTabControl<ProfileSortCriteria> sortingTabControl;
+        protected OverlaySortTabControl<ProfileSortCriteria> sortingTabControl;
         private readonly Bindable<ProfileSortCriteria> sorting = new Bindable<ProfileSortCriteria>(ProfileSortCriteria.Local);
 
         [Resolved]
@@ -72,7 +72,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
 
-        private const float username_container_height = 40;
+        protected const float username_container_height = 40;
 
         public ProfileScreen()
         {
@@ -215,7 +215,52 @@ namespace PerformanceCalculatorGUI.Screens
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(currentUser); });
         }
 
-        private void calculateProfile(string username)
+        protected async Task<List<ExtendedScore>> GetPlays(APIUser player, CancellationToken token)
+        {
+            var plays = new List<ExtendedScore>();
+            var rulesetInstance = ruleset.Value.CreateInstance();
+
+            Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
+
+            var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+
+            if (includePinnedCheckbox.Current.Value)
+            {
+                var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100");
+                apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID))).ToList();
+            }
+
+            foreach (var score in apiScores)
+            {
+                if (token.IsCancellationRequested)
+                    return new List<ExtendedScore>();
+
+                var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+
+                Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
+
+                Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
+
+                var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
+
+                var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+
+                var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                var difficultyAttributes = difficultyCalculator.Calculate(mods);
+                var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+
+                double? livePp = score.PP;
+                var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
+                score.PP = perfAttributes?.Total ?? 0.0;
+
+                var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                plays.Add(extendedScore);
+            }
+
+            return plays;
+        }
+
+        protected virtual void calculateProfile(string username)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -267,48 +312,7 @@ namespace PerformanceCalculatorGUI.Screens
                 if (token.IsCancellationRequested)
                     return;
 
-                var plays = new List<ExtendedScore>();
-
-                var rulesetInstance = ruleset.Value.CreateInstance();
-
-                Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
-
-                var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
-
-                if (includePinnedCheckbox.Current.Value)
-                {
-                    var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100");
-                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID))).ToList();
-                }
-
-                foreach (var score in apiScores)
-                {
-                    if (token.IsCancellationRequested)
-                        return;
-
-                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
-
-                    Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
-
-                    Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
-
-                    var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
-
-                    var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
-
-                    var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                    var difficultyAttributes = difficultyCalculator.Calculate(mods);
-                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
-
-                    double? livePp = score.PP;
-                    var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
-                    score.PP = perfAttributes?.Total ?? 0.0;
-
-                    var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
-                    plays.Add(extendedScore);
-
-                    Schedule(() => scores.Add(new ExtendedProfileScore(extendedScore)));
-                }
+                var plays = await GetPlays(player, token);
 
                 if (token.IsCancellationRequested)
                     return;
@@ -320,6 +324,8 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     foreach (var play in plays)
                     {
+                        scores.Add(new ExtendedProfileScore(play));
+
                         if (play.LivePP != null)
                         {
                             play.Position.Value = localOrdered.IndexOf(play) + 1;
@@ -385,7 +391,7 @@ namespace PerformanceCalculatorGUI.Screens
             return base.OnKeyDown(e);
         }
 
-        private void updateSorting(ProfileSortCriteria sortCriteria)
+        protected void updateSorting(ProfileSortCriteria sortCriteria)
         {
             if (!scores.Children.Any())
                 return;

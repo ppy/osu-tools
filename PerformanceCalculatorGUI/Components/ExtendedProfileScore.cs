@@ -73,7 +73,7 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class ExtendedProfileScore : CompositeDrawable
     {
-        private const int height = 35;
+        protected const int height = 35;
         private const int performance_width = 100;
         private const int rank_difference_width = 35;
         private const int small_text_font_size = 11;
@@ -88,7 +88,7 @@ namespace PerformanceCalculatorGUI.Components
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; }
 
-        private OsuSpriteText positionChangeText;
+        protected OsuSpriteText positionChangeText;
 
         public ExtendedProfileScore(ExtendedScore score)
         {
@@ -101,8 +101,14 @@ namespace PerformanceCalculatorGUI.Components
         [BackgroundDependencyLoader]
         private void load(RulesetStore rulesets)
         {
-            AddInternal(new ExtendedProfileItemContainer
-            {
+            AddInternal(ProfileScoreItems(rulesets));
+
+            Score.PositionChange.BindValueChanged(v => { positionChangeText.Text = $"{v.NewValue:+0;-0;-}"; });
+        }
+
+        protected virtual ExtendedProfileItemContainer ProfileScoreItems(RulesetStore rulesets)
+        {
+            var items = new ExtendedProfileItemContainer {
                 OnHoverAction = () =>
                 {
                     positionChangeText.Text = $"#{Score.Position.Value}";
@@ -111,257 +117,263 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     positionChangeText.Text = $"{Score.PositionChange.Value:+0;-0;-}";
                 },
-                Children = new Drawable[]
+                Children = ProfileScoreDrawables(rulesets)
+            };
+
+            return items;
+        }
+
+        protected Drawable[] ProfileScoreDrawables(RulesetStore rulesets)
+        {
+            Drawable[] drawables = {
+                new Container
                 {
-                    new Container
+                    Name = "Rank difference",
+                    RelativeSizeAxes = Axes.Y,
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Width = rank_difference_width,
+                    Child = positionChangeText = new OsuSpriteText
                     {
-                        Name = "Rank difference",
-                        RelativeSizeAxes = Axes.Y,
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                        Width = rank_difference_width,
-                        Child = positionChangeText = new OsuSpriteText
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            Colour = colourProvider.Light1,
-                            Text = Score.PositionChange.Value.ToString()
-                        }
-                    },
-                    new Container
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Colour = colourProvider.Light1,
+                        Text = Score.PositionChange.Value.ToString()
+                    }
+                },
+                new Container
+                {
+                    Name = "Score info",
+                    RelativeSizeAxes = Axes.Both,
+                    Padding = new MarginPadding { Left = rank_difference_width, Right = performance_width },
+                    Children = new Drawable[]
                     {
-                        Name = "Score info",
-                        RelativeSizeAxes = Axes.Both,
-                        Padding = new MarginPadding { Left = rank_difference_width, Right = performance_width },
-                        Children = new Drawable[]
+                        new FillFlowContainer
                         {
-                            new FillFlowContainer
+                            Anchor = Anchor.CentreLeft,
+                            Origin = Anchor.CentreLeft,
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Horizontal,
+                            Spacing = new Vector2(10, 0),
+                            Children = new Drawable[]
                             {
-                                Anchor = Anchor.CentreLeft,
-                                Origin = Anchor.CentreLeft,
-                                AutoSizeAxes = Axes.Both,
-                                Direction = FillDirection.Horizontal,
-                                Spacing = new Vector2(10, 0),
-                                Children = new Drawable[]
+                                new UpdateableRank(Score.SoloScore.Rank)
                                 {
-                                    new UpdateableRank(Score.SoloScore.Rank)
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Size = new Vector2(50, 20),
+                                },
+                                new FillFlowContainer
+                                {
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    AutoSizeAxes = Axes.Both,
+                                    Direction = FillDirection.Vertical,
+                                    Spacing = new Vector2(0, 0.5f),
+                                    Children = new Drawable[]
                                     {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        Size = new Vector2(50, 20),
-                                    },
-                                    new FillFlowContainer
-                                    {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        AutoSizeAxes = Axes.Both,
-                                        Direction = FillDirection.Vertical,
-                                        Spacing = new Vector2(0, 0.5f),
-                                        Children = new Drawable[]
+                                        new ScoreBeatmapMetadataContainer(Score.SoloScore.Beatmap),
+                                        new FillFlowContainer
                                         {
-                                            new ScoreBeatmapMetadataContainer(Score.SoloScore.Beatmap),
-                                            new FillFlowContainer
+                                            AutoSizeAxes = Axes.Both,
+                                            Direction = FillDirection.Horizontal,
+                                            Spacing = new Vector2(15, 0),
+                                            Children = new Drawable[]
                                             {
-                                                AutoSizeAxes = Axes.Both,
-                                                Direction = FillDirection.Horizontal,
-                                                Spacing = new Vector2(15, 0),
-                                                Children = new Drawable[]
+                                                new OsuSpriteText
                                                 {
-                                                    new OsuSpriteText
-                                                    {
-                                                        Text = $"{Score.SoloScore.Beatmap?.DifficultyName}",
-                                                        Font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular),
-                                                        Colour = colours.Yellow
-                                                    },
-                                                    new DrawableDate(Score.SoloScore.EndedAt, 12)
-                                                    {
-                                                        Colour = colourProvider.Foreground1
-                                                    }
+                                                    Text = $"{Score.SoloScore.Beatmap?.DifficultyName}",
+                                                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular),
+                                                    Colour = colours.Yellow
+                                                },
+                                                new DrawableDate(Score.SoloScore.EndedAt, 12)
+                                                {
+                                                    Colour = colourProvider.Foreground1
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            },
-                            new FillFlowContainer
+                            }
+                        },
+                        new FillFlowContainer
+                        {
+                            Anchor = Anchor.CentreRight,
+                            Origin = Anchor.CentreRight,
+                            AutoSizeAxes = Axes.X,
+                            RelativeSizeAxes = Axes.Y,
+                            Direction = FillDirection.Horizontal,
+                            Children = new Drawable[]
                             {
-                                Anchor = Anchor.CentreRight,
-                                Origin = Anchor.CentreRight,
-                                AutoSizeAxes = Axes.X,
-                                RelativeSizeAxes = Axes.Y,
-                                Direction = FillDirection.Horizontal,
-                                Children = new Drawable[]
+                                new Container
                                 {
-                                    new Container
+                                    AutoSizeAxes = Axes.X,
+                                    RelativeSizeAxes = Axes.Y,
+                                    Padding = new MarginPadding { Horizontal = 10, Vertical = 5 },
+                                    Anchor = Anchor.CentreRight,
+                                    Origin = Anchor.CentreRight,
+                                    Child = new FillFlowContainer
                                     {
-                                        AutoSizeAxes = Axes.X,
-                                        RelativeSizeAxes = Axes.Y,
-                                        Padding = new MarginPadding { Horizontal = 10, Vertical = 5 },
-                                        Anchor = Anchor.CentreRight,
-                                        Origin = Anchor.CentreRight,
-                                        Child = new FillFlowContainer
+                                        AutoSizeAxes = Axes.Both,
+                                        Direction = FillDirection.Vertical,
+                                        Origin = Anchor.CentreLeft,
+                                        Anchor = Anchor.CentreLeft,
+                                        Children = new Drawable[]
                                         {
-                                            AutoSizeAxes = Axes.Both,
-                                            Direction = FillDirection.Vertical,
-                                            Origin = Anchor.CentreLeft,
-                                            Anchor = Anchor.CentreLeft,
-                                            Children = new Drawable[]
+                                            new FillFlowContainer
                                             {
-                                                new FillFlowContainer
+                                                AutoSizeAxes = Axes.Both,
+                                                Direction = FillDirection.Horizontal,
+                                                Spacing = new Vector2(10, 0),
+                                                Children = new Drawable[]
                                                 {
-                                                    AutoSizeAxes = Axes.Both,
-                                                    Direction = FillDirection.Horizontal,
-                                                    Spacing = new Vector2(10, 0),
-                                                    Children = new Drawable[]
+                                                    new FillFlowContainer
                                                     {
-                                                        new FillFlowContainer
+                                                        Anchor = Anchor.Centre,
+                                                        Origin = Anchor.Centre,
+                                                        Width = 110,
+                                                        RelativeSizeAxes = Axes.Y,
+                                                        Direction = FillDirection.Vertical,
+                                                        Children = new Drawable[]
                                                         {
-                                                            Anchor = Anchor.Centre,
-                                                            Origin = Anchor.Centre,
-                                                            Width = 110,
-                                                            RelativeSizeAxes = Axes.Y,
-                                                            Direction = FillDirection.Vertical,
-                                                            Children = new Drawable[]
+                                                            new OsuSpriteText
                                                             {
-                                                                new OsuSpriteText
-                                                                {
-                                                                    Text = Score.SoloScore.Accuracy.FormatAccuracy(),
-                                                                    Font = OsuFont.GetFont(weight: FontWeight.Bold, italics: true),
-                                                                    Colour = colours.Yellow,
-                                                                    Anchor = Anchor.TopCentre,
-                                                                    Origin = Anchor.TopCentre
-                                                                },
-                                                                new OsuSpriteText
-                                                                {
-                                                                    Text = $"{Score.SoloScore.MaxCombo}x {{ {formatStatistics(Score.SoloScore.Statistics)} }}",
-                                                                    Font = OsuFont.GetFont(size: small_text_font_size, weight: FontWeight.Regular),
-                                                                    Colour = colourProvider.Light2,
-                                                                    Anchor = Anchor.TopCentre,
-                                                                    Origin = Anchor.TopCentre
-                                                                },
-                                                            }
-                                                        },
-                                                        new FillFlowContainer
+                                                                Text = Score.SoloScore.Accuracy.FormatAccuracy(),
+                                                                Font = OsuFont.GetFont(weight: FontWeight.Bold, italics: true),
+                                                                Colour = colours.Yellow,
+                                                                Anchor = Anchor.TopCentre,
+                                                                Origin = Anchor.TopCentre
+                                                            },
+                                                            new OsuSpriteText
+                                                            {
+                                                                Text = $"{Score.SoloScore.MaxCombo}x {{ {formatStatistics(Score.SoloScore.Statistics)} }}",
+                                                                Font = OsuFont.GetFont(size: small_text_font_size, weight: FontWeight.Regular),
+                                                                Colour = colourProvider.Light2,
+                                                                Anchor = Anchor.TopCentre,
+                                                                Origin = Anchor.TopCentre
+                                                            },
+                                                        }
+                                                    },
+                                                    new FillFlowContainer
+                                                    {
+                                                        Anchor = Anchor.Centre,
+                                                        Origin = Anchor.Centre,
+                                                        Width = 60,
+                                                        AutoSizeAxes = Axes.Y,
+                                                        Direction = FillDirection.Vertical,
+                                                        Children = new Drawable[]
                                                         {
-                                                            Anchor = Anchor.Centre,
-                                                            Origin = Anchor.Centre,
-                                                            Width = 60,
-                                                            AutoSizeAxes = Axes.Y,
-                                                            Direction = FillDirection.Vertical,
-                                                            Children = new Drawable[]
+                                                            new Container
                                                             {
-                                                                new Container
+                                                                AutoSizeAxes = Axes.Y,
+                                                                Child = new OsuSpriteText
                                                                 {
-                                                                    AutoSizeAxes = Axes.Y,
-                                                                    Child = new OsuSpriteText
-                                                                    {
-                                                                        Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                                                        Text = Score.LivePP != null ? $"{Score.LivePP:0}pp" : "- pp"
-                                                                    },
+                                                                    Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                                                                    Text = Score.LivePP != null ? $"{Score.LivePP:0}pp" : "- pp"
                                                                 },
-                                                                new OsuSpriteText
-                                                                {
-                                                                    Font = OsuFont.GetFont(size: small_text_font_size),
-                                                                    Text = "live"
-                                                                }
+                                                            },
+                                                            new OsuSpriteText
+                                                            {
+                                                                Font = OsuFont.GetFont(size: small_text_font_size),
+                                                                Text = "live"
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
-                                    },
-                                    new FillFlowContainer
-                                    {
-                                        AutoSizeAxes = Axes.Both,
-                                        Anchor = Anchor.CentreRight,
-                                        Origin = Anchor.CentreRight,
-                                        Direction = FillDirection.Horizontal,
-                                        Spacing = new Vector2(2),
-                                        Children = Score.SoloScore.Mods.Select(mod =>
-                                        {
-                                            var ruleset = rulesets.GetRuleset(Score.SoloScore.RulesetID) ?? throw new InvalidOperationException();
-
-                                            return new ModIcon(mod.ToMod(ruleset.CreateInstance()))
-                                            {
-                                                Scale = new Vector2(0.35f)
-                                            };
-                                        }).ToList(),
                                     }
+                                },
+                                new FillFlowContainer
+                                {
+                                    AutoSizeAxes = Axes.Both,
+                                    Anchor = Anchor.CentreRight,
+                                    Origin = Anchor.CentreRight,
+                                    Direction = FillDirection.Horizontal,
+                                    Spacing = new Vector2(2),
+                                    Children = Score.SoloScore.Mods.Select(mod =>
+                                    {
+                                        var ruleset = rulesets.GetRuleset(Score.SoloScore.RulesetID) ?? throw new InvalidOperationException();
+
+                                        return new ModIcon(mod.ToMod(ruleset.CreateInstance()))
+                                        {
+                                            Scale = new Vector2(0.35f)
+                                        };
+                                    }).ToList(),
                                 }
                             }
                         }
-                    },
-                    new Container
+                    }
+                },
+                new Container
+                {
+                    Name = "Performance",
+                    RelativeSizeAxes = Axes.Y,
+                    Width = performance_width,
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Children = new Drawable[]
                     {
-                        Name = "Performance",
-                        RelativeSizeAxes = Axes.Y,
-                        Width = performance_width,
-                        Anchor = Anchor.CentreRight,
-                        Origin = Anchor.CentreRight,
-                        Children = new Drawable[]
+                        new Box
                         {
-                            new Box
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                            RelativeSizeAxes = Axes.Both,
+                            Height = 0.5f,
+                            Colour = colourProvider.Background4,
+                            Shear = new Vector2(-performance_background_shear, 0),
+                            EdgeSmoothness = new Vector2(2, 0),
+                        },
+                        new Box
+                        {
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                            RelativeSizeAxes = Axes.Both,
+                            RelativePositionAxes = Axes.Y,
+                            Height = -0.5f,
+                            Position = new Vector2(0, 1),
+                            Colour = colourProvider.Background4,
+                            Shear = new Vector2(performance_background_shear, 0),
+                            EdgeSmoothness = new Vector2(2, 0),
+                        },
+                        new FillFlowContainer
+                        {
+                            AutoSizeAxes = Axes.Both,
+                            Padding = new MarginPadding
                             {
-                                Anchor = Anchor.TopRight,
-                                Origin = Anchor.TopRight,
-                                RelativeSizeAxes = Axes.Both,
-                                Height = 0.5f,
-                                Colour = colourProvider.Background4,
-                                Shear = new Vector2(-performance_background_shear, 0),
-                                EdgeSmoothness = new Vector2(2, 0),
+                                Vertical = 5,
+                                Left = 30,
+                                Right = 20
                             },
-                            new Box
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Direction = FillDirection.Vertical,
+                            Children = new Drawable[]
                             {
-                                Anchor = Anchor.TopRight,
-                                Origin = Anchor.TopRight,
-                                RelativeSizeAxes = Axes.Both,
-                                RelativePositionAxes = Axes.Y,
-                                Height = -0.5f,
-                                Position = new Vector2(0, 1),
-                                Colour = colourProvider.Background4,
-                                Shear = new Vector2(performance_background_shear, 0),
-                                EdgeSmoothness = new Vector2(2, 0),
-                            },
-                            new FillFlowContainer
-                            {
-                                AutoSizeAxes = Axes.Both,
-                                Padding = new MarginPadding
+                                new ExtendedOsuSpriteText
                                 {
-                                    Vertical = 5,
-                                    Left = 30,
-                                    Right = 20
+                                    Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                                    Text = $"{Score.SoloScore.PP:0}pp",
+                                    Colour = colourProvider.Highlight1,
+                                    Anchor = Anchor.TopCentre,
+                                    Origin = Anchor.TopCentre,
+                                    TooltipContent = $"{AttributeConversion.ToReadableString(Score.PerformanceAttributes)}"
                                 },
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Direction = FillDirection.Vertical,
-                                Children = new Drawable[]
+                                new OsuSpriteText
                                 {
-                                    new ExtendedOsuSpriteText
-                                    {
-                                        Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                        Text = $"{Score.SoloScore.PP:0}pp",
-                                        Colour = colourProvider.Highlight1,
-                                        Anchor = Anchor.TopCentre,
-                                        Origin = Anchor.TopCentre,
-                                        TooltipContent = $"{AttributeConversion.ToReadableString(Score.PerformanceAttributes)}"
-                                    },
-                                    new OsuSpriteText
-                                    {
-                                        Font = OsuFont.GetFont(size: small_text_font_size),
-                                        Text = $"{Score.SoloScore.PP - Score.LivePP:+0.0;-0.0;-}",
-                                        Colour = colourProvider.Light1,
-                                        Anchor = Anchor.TopCentre,
-                                        Origin = Anchor.TopCentre
-                                    }
+                                    Font = OsuFont.GetFont(size: small_text_font_size),
+                                    Text = $"{Score.SoloScore.PP - Score.LivePP:+0.0;-0.0;-}",
+                                    Colour = colourProvider.Light1,
+                                    Anchor = Anchor.TopCentre,
+                                    Origin = Anchor.TopCentre
                                 }
                             }
                         }
                     }
                 }
-            });
+            };
 
-            Score.PositionChange.BindValueChanged(v => { positionChangeText.Text = $"{v.NewValue:+0;-0;-}"; });
+            return drawables;
         }
 
         private static string formatStatistics(Dictionary<HitResult, int> statistics)
