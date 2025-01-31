@@ -49,7 +49,7 @@ namespace PerformanceCalculatorGUI.Screens
         private Container userPanelContainer;
         private UserCard userPanel;
 
-        private string[] currentUsers = new string[0];
+        private string[] currentUsers = Array.Empty<string>();
 
         private CancellationTokenSource calculationCancellatonToken;
 
