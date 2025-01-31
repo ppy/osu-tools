@@ -49,7 +49,7 @@ namespace PerformanceCalculatorGUI.Screens
         private Container userPanelContainer;
         private UserCard userPanel;
 
-        private string currentUsers;
+        private string[] currentUsers = new string[0];
 
         private CancellationTokenSource calculationCancellatonToken;
 
@@ -224,11 +224,11 @@ namespace PerformanceCalculatorGUI.Screens
 
             usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
-            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfile(currentUsers); };
-            onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfile(currentUsers); };
+            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfile( string.Join(", ", currentUsers) ); };
+            onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfile( string.Join(", ", currentUsers) ); };
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(currentUsers); });
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile( string.Join(",", currentUsers) ); });
         }
 
         private void calculateProfile(string usernames)
@@ -239,7 +239,7 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            currentUsers = "";
+            Array.Clear(currentUsers);
 
             string[] usernameArray = usernames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             bool calculatingSingleProfile = usernameArray.Length <= 1;
@@ -287,9 +287,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                     var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
                     players.Add(player);
-
-                    // Append player username to current user(s) string
-                    currentUsers += (currentUsers == "") ? player.Username : (", " + player.Username);
+                    currentUsers = currentUsers.Append(player.Username).ToArray();
 
                     // Add user card if only calculating single profile
                     if (calculatingSingleProfile)
