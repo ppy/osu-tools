@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Humanizer;
 using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using osu.Game.Configuration;

@@ -10,23 +10,24 @@ using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Difficulty;
 
-namespace PerformanceCalculatorGUI;
-
-public class ExtendedOsuDifficultyCalculator : OsuDifficultyCalculator, IExtendedDifficultyCalculator
+namespace PerformanceCalculatorGUI
 {
-    private Skill[] skills;
-
-    public ExtendedOsuDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
-        : base(ruleset, beatmap)
+    public class ExtendedOsuDifficultyCalculator : OsuDifficultyCalculator, IExtendedDifficultyCalculator
     {
-    }
+        private Skill[] skills;
 
-    public Skill[] GetSkills() => skills;
-    public DifficultyHitObject[] GetDifficultyHitObjects(IBeatmap beatmap, double clockRate) => CreateDifficultyHitObjects(beatmap, clockRate).ToArray();
+        public ExtendedOsuDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
+            : base(ruleset, beatmap)
+        {
+        }
 
-    protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate)
-    {
-        this.skills = skills;
-        return base.CreateDifficultyAttributes(beatmap, mods, skills, clockRate);
+        public Skill[] GetSkills() => skills;
+        public DifficultyHitObject[] GetDifficultyHitObjects(IBeatmap beatmap, double clockRate) => CreateDifficultyHitObjects(beatmap, clockRate).ToArray();
+
+        protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate)
+        {
+            this.skills = skills;
+            return base.CreateDifficultyAttributes(beatmap, mods, skills, clockRate);
+        }
     }
 }

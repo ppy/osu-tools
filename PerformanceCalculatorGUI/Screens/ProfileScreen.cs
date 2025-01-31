@@ -278,7 +278,7 @@ namespace PerformanceCalculatorGUI.Screens
                 if (includePinnedCheckbox.Current.Value)
                 {
                     var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
-                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID))).ToList();
+                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID)).ToArray()).ToList();
                 }
 
                 foreach (var score in apiScores)

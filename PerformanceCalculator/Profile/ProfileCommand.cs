@@ -89,7 +89,7 @@ namespace PerformanceCalculator.Profile
             {
                 string json = JsonConvert.SerializeObject(new
                 {
-                    Username = userData.Username,
+                    userData.Username,
                     LivePp = totalLivePP,
                     LocalPp = totalLocalPP,
                     PlaycountPp = playcountBonusPP,

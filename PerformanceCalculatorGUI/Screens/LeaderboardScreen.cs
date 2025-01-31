@@ -323,7 +323,7 @@ namespace PerformanceCalculatorGUI.Screens
                         var difficultyAttributes = difficultyCalculator.Calculate(mods);
                         var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
-                        double livePp = score.PP ?? 0.0;
+                        double? livePp = score.PP;
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
                         score.PP = perfAttributes?.Total ?? 0.0;
 
@@ -346,14 +346,14 @@ namespace PerformanceCalculatorGUI.Screens
             catch (OperationCanceledException) { }
 
             var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
-            var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
+            var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0.0).ToList();
 
             int index = 0;
             decimal totalLocalPP = (decimal)(localOrdered.Select(x => x.SoloScore.PP).Sum(play => Math.Pow(0.95, index++) * play) ?? 0.0);
             decimal totalLivePP = player.PP ?? (decimal)0.0;
 
             index = 0;
-            decimal nonBonusLivePP = (decimal)liveOrdered.Select(x => x.LivePP).Sum(play => Math.Pow(0.95, index++) * play);
+            decimal nonBonusLivePP = (decimal)liveOrdered.Select(x => x.LivePP ?? 0.0).Sum(play => Math.Pow(0.95, index++) * play);
 
             //todo: implement properly. this is pretty damn wrong.
             decimal playcountBonusPP = (totalLivePP - nonBonusLivePP);

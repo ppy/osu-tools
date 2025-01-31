@@ -332,23 +332,5 @@ namespace PerformanceCalculatorGUI
                    ((6 * (countPerfect + countGreat)) + (4 * countGood) + (2 * countOk) + countMeh) /
                    (6 * total);
         }
-
-        private class EmptyWorkingBeatmap : WorkingBeatmap
-        {
-            public EmptyWorkingBeatmap()
-                : base(new BeatmapInfo(), null)
-            {
-            }
-
-            protected override IBeatmap GetBeatmap() => throw new NotImplementedException();
-
-            public override Texture GetBackground() => throw new NotImplementedException();
-
-            protected override Track GetBeatmapTrack() => throw new NotImplementedException();
-
-            protected override ISkin GetSkin() => throw new NotImplementedException();
-
-            public override Stream GetStream(string storagePath) => throw new NotImplementedException();
-        }
     }
 }
