@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using osu.Framework.Audio.Track;
-using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
@@ -19,7 +16,6 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Rulesets.Taiko.Objects;
-using osu.Game.Skinning;
 
 namespace PerformanceCalculatorGUI
 {
