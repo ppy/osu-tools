@@ -38,6 +38,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private StatefulButton calculationButton;
         private SwitchButton includePinnedCheckbox;
+        private SwitchButton onlyDisplayBestCheckbox;
         private VerboseLoadingLayer loadingLayer;
 
         private GridContainer layout;
@@ -48,7 +49,7 @@ namespace PerformanceCalculatorGUI.Screens
         private Container userPanelContainer;
         private UserCard userPanel;
 
-        private string currentUser;
+        private string[] currentUsers = Array.Empty<string>();
 
         private CancellationTokenSource calculationCancellatonToken;
 
@@ -121,15 +122,15 @@ namespace PerformanceCalculatorGUI.Screens
                                         {
                                             RelativeSizeAxes = Axes.X,
                                             Anchor = Anchor.TopLeft,
-                                            Label = "Username",
-                                            PlaceholderText = "peppy",
+                                            Label = "Username(s)",
+                                            PlaceholderText = "peppy, rloseise, peppy2",
                                             CommitOnFocusLoss = false
                                         },
                                         calculationButton = new StatefulButton("Start calculation")
                                         {
                                             Width = 150,
                                             Height = username_container_height,
-                                            Action = () => { calculateProfile(usernameTextBox.Current.Value); }
+                                            Action = () => { calculateProfiles(usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); }
                                         }
                                     }
                                 }
@@ -172,6 +173,20 @@ namespace PerformanceCalculatorGUI.Screens
                                                 Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 14),
                                                 UseFullGlyphHeight = false,
                                                 Text = "Include pinned scores"
+                                            },
+                                            onlyDisplayBestCheckbox = new SwitchButton
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Current = { Value = true },
+                                            },
+                                            new OsuSpriteText
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 14),
+                                                UseFullGlyphHeight = false,
+                                                Text = "Only display best score on each beatmap"
                                             }
                                         }
                                     },
@@ -207,21 +222,26 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
-            usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
+            usernameTextBox.OnCommit += (_, _) => { calculateProfiles(usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
-            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfile(currentUser); };
+            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
+            onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(currentUser); });
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfiles(currentUsers); });
         }
 
-        private void calculateProfile(string username)
+        private void calculateProfiles(string[] usernames)
         {
-            if (string.IsNullOrEmpty(username))
+            if (usernames.Length < 1)
             {
                 usernameTextBox.FlashColour(Color4.Red, 1);
                 return;
             }
+
+            currentUsers = [];
+
+            bool calculatingSingleProfile = usernames.Length <= 1;
 
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
@@ -236,21 +256,10 @@ namespace PerformanceCalculatorGUI.Screens
 
             Task.Run(async () =>
             {
-                Schedule(() => loadingLayer.Text.Value = "Getting user data...");
-
-                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
-
-                currentUser = player.Username;
-
                 Schedule(() =>
                 {
                     if (userPanel != null)
                         userPanelContainer.Remove(userPanel, true);
-
-                    userPanelContainer.Add(userPanel = new UserCard(player)
-                    {
-                        RelativeSizeAxes = Axes.X
-                    });
 
                     sortingTabControl.Alpha = 1.0f;
                     sortingTabControl.Current.Value = ProfileSortCriteria.Local;
@@ -268,50 +277,88 @@ namespace PerformanceCalculatorGUI.Screens
                     return;
 
                 var plays = new List<ExtendedScore>();
-
+                var players = new List<APIUser>();
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
-
-                var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
-
-                if (includePinnedCheckbox.Current.Value)
+                foreach (string username in usernames)
                 {
-                    var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100");
-                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID))).ToList();
-                }
+                    Schedule(() => loadingLayer.Text.Value = $"Getting {username} user data...");
 
-                foreach (var score in apiScores)
-                {
-                    if (token.IsCancellationRequested)
-                        return;
+                    var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
+                    players.Add(player);
+                    currentUsers = currentUsers.Append(player.Username).ToArray();
 
-                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+                    // Add user card if only calculating single profile
+                    if (calculatingSingleProfile)
+                    {
+                        Schedule(() =>
+                        {
+                            userPanelContainer.Add(userPanel = new UserCard(player)
+                            {
+                                RelativeSizeAxes = Axes.X
+                            });
+                        });
+                    }
 
-                    Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
+                    Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
 
-                    Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
+                    var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
 
-                    var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
+                    if (includePinnedCheckbox.Current.Value)
+                    {
+                        var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100");
+                        apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID))).ToList();
+                    }
 
-                    var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+                    foreach (var score in apiScores)
+                    {
+                        if (token.IsCancellationRequested)
+                            return;
 
-                    var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                    var difficultyAttributes = difficultyCalculator.Calculate(mods);
-                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+                        var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
-                    double? livePp = score.PP;
-                    var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
-                    score.PP = perfAttributes?.Total ?? 0.0;
+                        Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
 
-                    var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
-                    plays.Add(extendedScore);
+                        Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
 
-                    Schedule(() => scores.Add(new ExtendedProfileScore(extendedScore)));
+                        var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
+
+                        var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+
+                        var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                        var difficultyAttributes = difficultyCalculator.Calculate(mods);
+                        var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+
+                        double? livePp = score.PP;
+                        var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
+                        score.PP = perfAttributes?.Total ?? 0.0;
+
+                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                        plays.Add(extendedScore);
+                    }
                 }
 
                 if (token.IsCancellationRequested)
                     return;
+
+                // Filter plays if only displaying best score on each beatmap
+                if (onlyDisplayBestCheckbox.Current.Value)
+                {
+                    Schedule(() => loadingLayer.Text.Value = "Filtering plays");
+
+                    var filteredPlays = new List<ExtendedScore>();
+
+                    // List of all beatmap IDs in plays without duplicates
+                    var beatmapIDs = plays.Select(x => x.SoloScore.BeatmapID).Distinct().ToList();
+
+                    foreach (int id in beatmapIDs)
+                    {
+                        var bestPlayOnBeatmap = plays.Where(x => x.SoloScore.BeatmapID == id).OrderByDescending(x => x.SoloScore.PP).First();
+                        filteredPlays.Add(bestPlayOnBeatmap);
+                    }
+
+                    plays = filteredPlays;
+                }
 
                 var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
                 var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0).ToList();
@@ -320,6 +367,8 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     foreach (var play in plays)
                     {
+                        scores.Add(new ExtendedProfileScore(play, !calculatingSingleProfile));
+
                         if (play.LivePP != null)
                         {
                             play.Position.Value = localOrdered.IndexOf(play) + 1;
@@ -328,29 +377,34 @@ namespace PerformanceCalculatorGUI.Screens
                     }
                 });
 
-                decimal totalLocalPP = 0;
-                for (var i = 0; i < localOrdered.Count; i++)
-                    totalLocalPP += (decimal)(Math.Pow(0.95, i) * (localOrdered[i].SoloScore.PP ?? 0));
-
-                decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
-
-                decimal nonBonusLivePP = 0;
-                for (var i = 0; i < liveOrdered.Count; i++)
-                    nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
-
-                //todo: implement properly. this is pretty damn wrong.
-                var playcountBonusPP = (totalLivePP - nonBonusLivePP);
-                totalLocalPP += playcountBonusPP;
-
-                Schedule(() =>
+                if (calculatingSingleProfile)
                 {
-                    userPanel.Data.Value = new UserCardData
+                    var player = players.First();
+
+                    decimal totalLocalPP = 0;
+                    for (var i = 0; i < localOrdered.Count; i++)
+                        totalLocalPP += (decimal)(Math.Pow(0.95, i) * (localOrdered[i].SoloScore.PP ?? 0));
+
+                    decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
+
+                    decimal nonBonusLivePP = 0;
+                    for (var i = 0; i < liveOrdered.Count; i++)
+                        nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
+
+                    //todo: implement properly. this is pretty damn wrong.
+                    var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+                    totalLocalPP += playcountBonusPP;
+
+                    Schedule(() =>
                     {
-                        LivePP = totalLivePP,
-                        LocalPP = totalLocalPP,
-                        PlaycountPP = playcountBonusPP
-                    };
-                });
+                        userPanel.Data.Value = new UserCardData
+                        {
+                            LivePP = totalLivePP,
+                            LocalPP = totalLocalPP,
+                            PlaycountPP = playcountBonusPP
+                        };
+                    });
+                }
             }, token).ContinueWith(t =>
             {
                 Logger.Log(t.Exception?.ToString(), level: LogLevel.Error);

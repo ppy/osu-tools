@@ -25,6 +25,7 @@ using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
 using osu.Game.Utils;
+using osu.Game.Users.Drawables;
 using osuTK;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 
@@ -82,6 +83,8 @@ namespace PerformanceCalculatorGUI.Components
 
         public readonly ExtendedScore Score;
 
+        public readonly bool ShowAvatar;
+
         [Resolved]
         private OsuColour colours { get; set; }
 
@@ -90,9 +93,10 @@ namespace PerformanceCalculatorGUI.Components
 
         private OsuSpriteText positionChangeText;
 
-        public ExtendedProfileScore(ExtendedScore score)
+        public ExtendedProfileScore(ExtendedScore score, bool showAvatar = false)
         {
             Score = score;
+            ShowAvatar = showAvatar;
 
             RelativeSizeAxes = Axes.X;
             Height = height;
@@ -101,8 +105,20 @@ namespace PerformanceCalculatorGUI.Components
         [BackgroundDependencyLoader]
         private void load(RulesetStore rulesets)
         {
+            if (ShowAvatar)
+            {
+                AddInternal(new UpdateableAvatar(Score.SoloScore.User, false)
+                {
+                    Size = new Vector2(height)
+                });
+            }
+
             AddInternal(new ExtendedProfileItemContainer
             {
+                // Resize to make room for avatar if necessary
+                X = ShowAvatar ? height : 0,
+                Padding = ShowAvatar ? new MarginPadding { Right = height } : new MarginPadding(),
+
                 OnHoverAction = () =>
                 {
                     positionChangeText.Text = $"#{Score.Position.Value}";
