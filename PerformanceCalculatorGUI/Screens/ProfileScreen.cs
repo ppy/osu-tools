@@ -130,7 +130,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         {
                                             Width = 150,
                                             Height = username_container_height,
-                                            Action = () => { calculateProfiles( usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ); }
+                                            Action = () => { calculateProfiles(usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); }
                                         }
                                     }
                                 }
@@ -222,7 +222,7 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
-            usernameTextBox.OnCommit += (_, _) => { calculateProfiles( usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ); };
+            usernameTextBox.OnCommit += (_, _) => { calculateProfiles(usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
             includePinnedCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
             onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
@@ -287,8 +287,6 @@ namespace PerformanceCalculatorGUI.Screens
                     var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
                     players.Add(player);
                     currentUsers = currentUsers.Append(player.Username).ToArray();
-					
-					System.Console.WriteLine(player.Username);
 
                     // Add user card if only calculating single profile
                     if (calculatingSingleProfile)
