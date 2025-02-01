@@ -624,11 +624,12 @@ namespace PerformanceCalculatorGUI.Screens
 
             if (!Path.Exists(beatmap) && Uri.IsWellFormedUriString(beatmap, UriKind.Absolute))
             {
-                string beatmapLinkPattern = @"osu\.ppy\.sh/b.*/\d+\z";
+                string beatmapLinkPattern = @"osu\.ppy\.sh/(b|beatmapsets/\d+#\w+|beatmaps)/(\d+)";
 
-                if (Regex.IsMatch(beatmap, beatmapLinkPattern))
+                if (Regex.IsMatch(beatmap, beatmapLinkPattern, RegexOptions.IgnoreCase))
                 {
-                    beatmap = beatmap.Split('/').Last();
+                    Match beatmapLinkMatch = Regex.Match(beatmap, beatmapLinkPattern, RegexOptions.IgnoreCase);
+                    beatmap = beatmapLinkMatch.Groups[2].ToString();
                 }
                 else
                 {

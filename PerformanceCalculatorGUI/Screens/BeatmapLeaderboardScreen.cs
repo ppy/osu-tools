@@ -193,11 +193,12 @@ namespace PerformanceCalculatorGUI.Screens
 
             if (Uri.IsWellFormedUriString(beatmapId, UriKind.Absolute))
             {
-                string beatmapLinkPattern = @"osu\.ppy\.sh/b.*/\d+\z";
+                string beatmapLinkPattern = @"osu\.ppy\.sh/(b|beatmapsets/\d+#\w+|beatmaps)/(\d+)";
 
-                if (Regex.IsMatch(beatmapId, beatmapLinkPattern))
+                if (Regex.IsMatch(beatmapId, beatmapLinkPattern, RegexOptions.IgnoreCase))
                 {
-                    beatmapId = beatmapId.Split('/').Last();
+                    Match beatmapLinkMatch = Regex.Match(beatmapId, beatmapLinkPattern, RegexOptions.IgnoreCase);
+                    beatmapId = beatmapLinkMatch.Groups[2].ToString();
                 }
                 else
                 {
