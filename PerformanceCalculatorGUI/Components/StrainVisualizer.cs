@@ -111,7 +111,7 @@ namespace PerformanceCalculatorGUI.Components
                                 Width = 200,
                                 Current = { BindTarget = graphToggleBindable, Default = true, Value = true },
                                 LabelText = skills[i].GetType().Name,
-                                TextColour = skillColours[i]
+                                TextColour = skillColours[i % skillColours.Length]
                             }
                         }
                     });
@@ -196,12 +196,12 @@ namespace PerformanceCalculatorGUI.Components
                     {
                         RelativeSizeAxes = Axes.Both,
                         Alpha = graphAlpha,
-                        Colour = skillColours[i],
+                        Colour = skillColours[i % skillColours.Length],
                         Child = new StrainBarGraph
                         {
                             RelativeSizeAxes = Axes.Both,
                             MaxValue = strainMaxValue,
-                            Values = strainLists[i]
+                            Values = strainLists[i % skillColours.Length]
                         }
                     }
                 });
