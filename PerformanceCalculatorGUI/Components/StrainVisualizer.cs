@@ -201,7 +201,7 @@ namespace PerformanceCalculatorGUI.Components
                         {
                             RelativeSizeAxes = Axes.Both,
                             MaxValue = strainMaxValue,
-                            Values = strainLists[i % skillColours.Length]
+                            Values = strainLists[i]
                         }
                     }
                 });
