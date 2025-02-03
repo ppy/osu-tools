@@ -41,7 +41,7 @@ namespace PerformanceCalculator.Simulate
         private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {
             // One judgement per normal note. Two judgements per hold note (head + tail).
-            var totalHits = beatmap.HitObjects.Count + beatmap.HitObjects.Count(ho => ho is HoldNote);
+            int totalHits = beatmap.HitObjects.Count + beatmap.HitObjects.Count(ho => ho is HoldNote);
 
             if (countMeh != null || countOk != null || countGood != null || countGreat != null)
             {
@@ -59,7 +59,7 @@ namespace PerformanceCalculator.Simulate
             }
 
             // Let Great=Perfect=6, Good=4, Ok=2, Meh=1, Miss=0. The total should be this.
-            var targetTotal = (int)Math.Round(accuracy * totalHits * 6);
+            int targetTotal = (int)Math.Round(accuracy * totalHits * 6);
 
             // Start by assuming every non miss is a meh
             // This is how much increase is needed by the rest

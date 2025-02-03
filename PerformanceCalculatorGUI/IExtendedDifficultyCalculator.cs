@@ -5,10 +5,11 @@ using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 
-namespace PerformanceCalculatorGUI;
-
-public interface IExtendedDifficultyCalculator
+namespace PerformanceCalculatorGUI
 {
-    Skill[] GetSkills();
-    DifficultyHitObject[] GetDifficultyHitObjects(IBeatmap beatmap, double clockRate);
+    public interface IExtendedDifficultyCalculator
+    {
+        Skill[] GetSkills();
+        DifficultyHitObject[] GetDifficultyHitObjects(IBeatmap beatmap, double clockRate);
+    }
 }

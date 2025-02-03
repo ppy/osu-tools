@@ -10,6 +10,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
@@ -72,7 +73,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             Colour = colors.Background6,
                             RelativeSizeAxes = Axes.Both
                         },
-                        hitObjectTypeText = new SpriteText
+                        hitObjectTypeText = new OsuSpriteText
                         {
                             Font = new FontUsage(size: 30),
                             Padding = new MarginPadding(10)
@@ -120,7 +121,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private void drawOsuValues(OsuDifficultyHitObject hitObject)
         {
-            var hidden = appliedMods.Value.Any(x => x is ModHidden);
+            bool hidden = appliedMods.Value.Any(x => x is ModHidden);
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),

@@ -90,7 +90,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
                             using (hitObject.BeginAbsoluteSequence(hitObject.StartTimeBindable.Value))
                             {
-                                var hitObjectDuration = hitObject.HitObject.GetEndTime() - hitObject.StartTimeBindable.Value;
+                                double hitObjectDuration = hitObject.HitObject.GetEndTime() - hitObject.StartTimeBindable.Value;
 
                                 hitObject.Delay(hitObjectDuration)
                                          .FadeTo(0.25f, 200f, Easing.Out)

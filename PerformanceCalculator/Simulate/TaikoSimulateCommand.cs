@@ -34,7 +34,7 @@ namespace PerformanceCalculator.Simulate
 
         private static Dictionary<HitResult, int> generateHitResults(double accuracy, IBeatmap beatmap, int countMiss, int? countGood)
         {
-            var totalResultCount = beatmap.GetMaxCombo();
+            int totalResultCount = beatmap.GetMaxCombo();
 
             int countGreat;
 
@@ -45,7 +45,7 @@ namespace PerformanceCalculator.Simulate
             else
             {
                 // Let Great=2, Good=1, Miss=0. The total should be this.
-                var targetTotal = (int)Math.Round(accuracy * totalResultCount * 2);
+                int targetTotal = (int)Math.Round(accuracy * totalResultCount * 2);
 
                 countGreat = targetTotal - (totalResultCount - countMiss);
                 countGood = totalResultCount - countGreat - countMiss;
@@ -62,10 +62,10 @@ namespace PerformanceCalculator.Simulate
 
         protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics)
         {
-            var countGreat = statistics[HitResult.Great];
-            var countGood = statistics[HitResult.Ok];
-            var countMiss = statistics[HitResult.Miss];
-            var total = countGreat + countGood + countMiss;
+            int countGreat = statistics[HitResult.Great];
+            int countGood = statistics[HitResult.Ok];
+            int countMiss = statistics[HitResult.Miss];
+            int total = countGreat + countGood + countMiss;
 
             return (double)((2 * countGreat) + countGood) / (2 * total);
         }

@@ -58,7 +58,7 @@ namespace PerformanceCalculator
                 return new ProcessorWorkingBeatmap(fileOrId);
             }
 
-            if (!int.TryParse(fileOrId, out var beatmapId))
+            if (!int.TryParse(fileOrId, out int beatmapId))
                 throw new ArgumentException("Could not parse provided beatmap ID.");
 
             string cachePath = Path.Combine("cache", $"{beatmapId}.osu");

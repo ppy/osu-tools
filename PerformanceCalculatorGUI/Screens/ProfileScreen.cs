@@ -238,7 +238,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting user data...");
 
-                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
+                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}").ConfigureAwait(false);
 
                 currentUser = player.Username;
 
@@ -273,12 +273,12 @@ namespace PerformanceCalculatorGUI.Screens
 
                 Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
 
-                var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+                var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
 
                 if (includePinnedCheckbox.Current.Value)
                 {
-                    var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100");
-                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID))).ToList();
+                    var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
+                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID)).ToArray()).ToList();
                 }
 
                 foreach (var score in apiScores)
@@ -299,10 +299,12 @@ namespace PerformanceCalculatorGUI.Screens
                     var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
                     var difficultyAttributes = difficultyCalculator.Calculate(mods);
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+                    if (performanceCalculator == null)
+                        continue;
 
                     double? livePp = score.PP;
-                    var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
-                    score.PP = perfAttributes?.Total ?? 0.0;
+                    var perfAttributes = await performanceCalculator.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token).ConfigureAwait(false);
+                    score.PP = perfAttributes.Total;
 
                     var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
                     plays.Add(extendedScore);
@@ -329,17 +331,17 @@ namespace PerformanceCalculatorGUI.Screens
                 });
 
                 decimal totalLocalPP = 0;
-                for (var i = 0; i < localOrdered.Count; i++)
+                for (int i = 0; i < localOrdered.Count; i++)
                     totalLocalPP += (decimal)(Math.Pow(0.95, i) * (localOrdered[i].SoloScore.PP ?? 0));
 
                 decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 
                 decimal nonBonusLivePP = 0;
-                for (var i = 0; i < liveOrdered.Count; i++)
+                for (int i = 0; i < liveOrdered.Count; i++)
                     nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
 
                 //todo: implement properly. this is pretty damn wrong.
-                var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+                decimal playcountBonusPP = (totalLivePP - nonBonusLivePP);
                 totalLocalPP += playcountBonusPP;
 
                 Schedule(() =>

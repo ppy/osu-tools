@@ -35,14 +35,14 @@ namespace PerformanceCalculatorGUI
         {
             if (token == null)
             {
-                await getAccessToken();
+                await getAccessToken().ConfigureAwait(false);
                 Debug.Assert(token != null);
             }
 
             using var req = new JsonWebRequest<T>($"{ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
             req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
             req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {token.AccessToken}");
-            await req.PerformAsync();
+            await req.PerformAsync().ConfigureAwait(false);
 
             return req.ResponseObject;
         }
@@ -58,7 +58,7 @@ namespace PerformanceCalculatorGUI
             req.AddParameter("client_secret", clientSecretBindable.Value);
             req.AddParameter("grant_type", "client_credentials");
             req.AddParameter("scope", "public");
-            await req.PerformAsync();
+            await req.PerformAsync().ConfigureAwait(false);
 
             token = req.ResponseObject;
         }

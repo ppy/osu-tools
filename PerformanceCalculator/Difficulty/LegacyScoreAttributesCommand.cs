@@ -67,7 +67,7 @@ namespace PerformanceCalculator.Difficulty
             {
                 var document = new Document();
 
-                foreach (var error in resultSet.Errors)
+                foreach (string error in resultSet.Errors)
                     document.Children.Add(new Span(error), "\n");
                 if (resultSet.Errors.Count > 0)
                     document.Children.Add("\n");
@@ -85,7 +85,7 @@ namespace PerformanceCalculator.Difficulty
                         // Headers
                         if (firstResult)
                         {
-                            foreach (var column in new[] { "Beatmap", "Mods", "Accuracy score", "Combo score", "Bonus score ratio", "Mod multiplier" })
+                            foreach (string column in new[] { "Beatmap", "Mods", "Accuracy score", "Combo score", "Bonus score ratio", "Mod multiplier" })
                             {
                                 grid.Columns.Add(GridLength.Auto);
                                 grid.Children.Add(new Cell(column));
@@ -121,7 +121,7 @@ namespace PerformanceCalculator.Difficulty
             var attributes = simulator.Simulate(beatmap, playableBeatmap);
 
             var conversionInfo = LegacyBeatmapConversionDifficultyInfo.FromBeatmap(playableBeatmap);
-            var modMultiplier = simulator.GetLegacyScoreMultiplier(mods, conversionInfo);
+            double modMultiplier = simulator.GetLegacyScoreMultiplier(mods, conversionInfo);
 
             return new Result
             {
@@ -142,9 +142,9 @@ namespace PerformanceCalculator.Difficulty
 
             var availableMods = ruleset.CreateAllMods().ToList();
 
-            foreach (var modString in Mods)
+            foreach (string modString in Mods)
             {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
+                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
                 if (newMod == null)
                     throw new ArgumentException($"Invalid mod provided: {modString}");
 
