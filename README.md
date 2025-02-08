@@ -13,7 +13,7 @@ This is part of a group of projects which are used in live deployments where the
 # Requirements
 
 - A desktop platform with the [.NET 8.0 SDK](https://dotnet.microsoft.com/download) installed.
-- When working with the codebase, we recommend using an IDE with intelligent code completion and syntax highlighting, such as the latest version of [Visual Studio](https://visualstudio.microsoft.com/vs/), [JetBrains Rider](https://www.jetbrains.com/rider/) or [Visual Studio Code](https://code.visualstudio.com/).
+- When working with the codebase, we recommend using an IDE with intelligent code completion and syntax highlighting, such as the latest version of [Visual Studio](https://visualstudio.microsoft.com/vs/), [JetBrains Rider](https://www.jetbrains.com/rider/) or [Visual Studio Code](https://code.visualstudio.com/) with the [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig) and [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) plugin installed.
 - These instructions assume you have the the [CLI git client](https://git-scm.com/) installed, but any other GUI client such as GitKraken will suffice.
 
 # Getting Started
@@ -32,7 +32,20 @@ Most relevant code is in the main [ppy/osu](https://github.com/ppy/osu) reposito
 git clone https://github.com/ppy/osu-tools
 git clone https://github.com/ppy/osu
 ```
+- If you're planning to work on the difficulty and/or performance calculation changes you will need to use the `pp-dev` branch of the `osu` repository
+```shell
+cd osu
+git checkout -b pp-dev origin/pp-dev
+```
 - Run the `./UseLocalOsu.ps1` powershell script (or `./UseLocalOsu.sh`) to use your local copy of ppy/osu
+
+### Code analysis
+
+Before committing your code, please run a code formatter. This can be achieved by running `dotnet format` in the command line, or using the `Format code` command in your IDE.
+
+We have adopted some cross-platform, compiler integrated analyzers. They can provide warnings when you are editing, building inside IDE or from command line, as-if they are provided by the compiler itself.
+
+JetBrains ReSharper InspectCode is also used for wider rule sets. You can run it from PowerShell with `.\InspectCode.ps1`. Alternatively, you can install ReSharper or use Rider to get inline support in your IDE of choice.
 
 ## I want to run someone else's changes
 
@@ -53,11 +66,9 @@ git checkout -b branch_name smoogi/branch_name
 
 # Contributing
 
-When it comes to contributing to the project, the two main things you can do to help out are reporting issues and submitting pull requests. 
+When it comes to contributing to the project, the two main things you can do to help out are reporting issues and submitting pull requests. You might want to refer to the [contributing guidelines](https://github.com/ppy/osu/blob/master/CONTRIBUTING.md) in the main osu! repository to understand how to help in the most effective way possible.
 
-Note that while we already have certain standards in place, nothing is set in stone. If you have an issue with the way code is structured, with any libraries we are using, or with any processes involved with contributing, *please* bring it up. We welcome all feedback so we can make contributing to this project as painless as possible.
-
-For those interested, we love to reward quality contributions via [bounties](https://docs.google.com/spreadsheets/d/1jNXfj_S3Pb5PErA-czDdC9DUu4IgUbe1Lt8E7CYUJuE/view?&rm=minimal#gid=523803337), paid out via PayPal or osu!supporter tags. Don't hesitate to [request a bounty](https://docs.google.com/forms/d/e/1FAIpQLSet_8iFAgPMG526pBZ2Kic6HSh7XPM3fE8xPcnWNkMzINDdYg/viewform) for your work on this project.
+We love to reward quality contributions. If you have made a large contribution, or are a regular contributor, you are welcome to [submit an expense via opencollective](https://opencollective.com/ppy/expenses/new). If you have any questions, feel free to [reach out to peppy](mailto:pe@ppy.sh) before doing so.
 
 # Licence
 
