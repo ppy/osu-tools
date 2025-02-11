@@ -622,7 +622,7 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            if (!Path.Exists(beatmap) && Uri.IsWellFormedUriString(beatmap, UriKind.Absolute))
+            if (!int.TryParse(beatmap, out int result) && !Path.Exists(beatmap))
             {
                 string beatmapLinkPattern = @"osu\.ppy\.sh/(b|beatmapsets/\d+#\w+|beatmaps)/(\d+)";
 
