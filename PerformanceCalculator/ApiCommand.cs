@@ -36,7 +36,7 @@ namespace PerformanceCalculator
 
         protected T GetJsonFromApi<T>(string request, HttpMethod method = null, Dictionary<string, string> parameters = null)
         {
-            using var req = new JsonWebRequest<T>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/api/v2/{request}");
+            using var req = new JsonWebRequest<T>($"{Program.ENDPOINT_CONFIGURATION.APIUrl}/api/v2/{request}");
             req.Method = method ?? HttpMethod.Get;
             req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
             req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {apiAccessToken}");
@@ -54,7 +54,7 @@ namespace PerformanceCalculator
 
         private void getAccessToken()
         {
-            using var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIEndpointUrl}/oauth/token")
+            using var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIUrl}/oauth/token")
             {
                 Method = HttpMethod.Post
             };

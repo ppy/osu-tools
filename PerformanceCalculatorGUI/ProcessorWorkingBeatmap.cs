@@ -77,7 +77,7 @@ namespace PerformanceCalculatorGUI
 
                 try
                 {
-                    new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
+                    new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteUrl}/osu/{beatmapId}").Perform();
                 }
                 catch (WebException)
                 {
