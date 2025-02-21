@@ -10,6 +10,7 @@ using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Mania.Objects;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Objects;
@@ -61,14 +62,14 @@ namespace PerformanceCalculatorGUI
             return (int)Math.Round(1000000 * scoreMultiplier);
         }
 
-        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses, int? countSliderTailMisses)
+        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, Mod[] mods, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses, int? countSliderTailMisses)
         {
             return ruleset.OnlineID switch
             {
                 0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood, countLargeTickMisses, countSliderTailMisses),
                 1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
                 2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
-                3 => generateManiaHitResults(accuracy, beatmap, countMiss),
+                3 => generateManiaHitResults(accuracy, beatmap, mods, countMiss),
                 _ => throw new ArgumentException("Invalid ruleset ID provided.")
             };
         }
@@ -225,9 +226,11 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, int countMiss)
+        private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, Mod[] mods, int countMiss)
         {
             int totalResultCount = beatmap.HitObjects.Count;
+            if (!mods.Any(m => m.Acronym == "CL"))
+                totalResultCount += beatmap.HitObjects.Count(ho => ho is HoldNote);
 
             // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
             int targetTotal = (int)Math.Round(accuracy * totalResultCount * 6);
@@ -254,14 +257,14 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        public static double GetAccuracyForRuleset(RulesetInfo ruleset, IBeatmap beatmap, Dictionary<HitResult, int> statistics)
+        public static double GetAccuracyForRuleset(RulesetInfo ruleset, IBeatmap beatmap, Dictionary<HitResult, int> statistics, Mod[] mods)
         {
             return ruleset.OnlineID switch
             {
                 0 => getOsuAccuracy(beatmap, statistics),
                 1 => getTaikoAccuracy(statistics),
                 2 => getCatchAccuracy(statistics),
-                3 => getManiaAccuracy(statistics),
+                3 => getManiaAccuracy(statistics, mods),
                 _ => 0.0
             };
         }
@@ -314,7 +317,7 @@ namespace PerformanceCalculatorGUI
             return hits / total;
         }
 
-        private static double getManiaAccuracy(Dictionary<HitResult, int> statistics)
+        private static double getManiaAccuracy(Dictionary<HitResult, int> statistics, Mod[] mods)
         {
             int countPerfect = statistics[HitResult.Perfect];
             int countGreat = statistics[HitResult.Great];
@@ -322,11 +325,13 @@ namespace PerformanceCalculatorGUI
             int countOk = statistics[HitResult.Ok];
             int countMeh = statistics[HitResult.Meh];
             int countMiss = statistics[HitResult.Miss];
-            int total = countPerfect + countGreat + countGood + countOk + countMeh + countMiss;
 
-            return (double)
-                   ((6 * (countPerfect + countGreat)) + (4 * countGood) + (2 * countOk) + countMeh) /
-                   (6 * total);
+            int perfectWeight = mods.Any(m => m.Acronym == "CL") ? 300 : 305;
+
+            double total = perfectWeight * countPerfect + 300 * countGreat + 200 * countGood + 100 * countOk + 50 * countMeh;
+            double max = perfectWeight * (countPerfect + countGreat + countGood + countOk + countMeh + countMiss);
+
+            return total / max;
         }
     }
 }

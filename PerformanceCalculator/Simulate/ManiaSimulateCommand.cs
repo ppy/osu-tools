@@ -108,7 +108,7 @@ namespace PerformanceCalculator.Simulate
             int countMeh = statistics[HitResult.Meh];
             int countMiss = statistics[HitResult.Miss];
 
-            double perfectWeight = Mods != null && Mods.Any(m => m == "CL") ? 300 : 305;
+            int perfectWeight = Mods != null && Mods.Any(m => m == "CL") ? 300 : 305;
 
             double total = perfectWeight * countPerfect + 300 * countGreat + 200 * countGood + 100 * countOk + 50 * countMeh;
             double max = perfectWeight * (countPerfect + countGreat + countGood + countOk + countMeh + countMiss);
