@@ -42,7 +42,7 @@ namespace PerformanceCalculator.Simulate
         {
             // One judgement per normal note. Two judgements per hold note (head + tail).
             int totalHits = beatmap.HitObjects.Count;
-            if (!mods.Any(m => m.Acronym == "CL"))
+            if (!mods.Any(m => m is ModClassic))
                 totalHits += beatmap.HitObjects.Count(ho => ho is HoldNote);
 
             if (countMeh != null || countOk != null || countGood != null || countGreat != null)
@@ -99,7 +99,7 @@ namespace PerformanceCalculator.Simulate
             };
         }
 
-        protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics)
+        protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics, Mod[] mods)
         {
             int countPerfect = statistics[HitResult.Perfect];
             int countGreat = statistics[HitResult.Great];
@@ -108,7 +108,7 @@ namespace PerformanceCalculator.Simulate
             int countMeh = statistics[HitResult.Meh];
             int countMiss = statistics[HitResult.Miss];
 
-            int perfectWeight = Mods != null && Mods.Any(m => m == "CL") ? 300 : 305;
+            int perfectWeight = mods.Any(m => m is ModClassic) ? 300 : 305;
 
             double total = perfectWeight * countPerfect + 300 * countGreat + 200 * countGood + 100 * countOk + 50 * countMeh;
             double max = perfectWeight * (countPerfect + countGreat + countGood + countOk + countMeh + countMiss);

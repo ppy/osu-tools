@@ -70,7 +70,7 @@ namespace PerformanceCalculator.Simulate
             var statistics = GenerateHitResults(beatmap, mods);
             var scoreInfo = new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
             {
-                Accuracy = GetAccuracy(beatmap, statistics),
+                Accuracy = GetAccuracy(beatmap, statistics, mods),
                 MaxCombo = Combo ?? (int)Math.Round(PercentCombo / 100 * beatmapMaxCombo),
                 Statistics = statistics,
                 Mods = mods
@@ -86,6 +86,6 @@ namespace PerformanceCalculator.Simulate
 
         protected abstract Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods);
 
-        protected virtual double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics) => 0;
+        protected virtual double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics, Mod[] mods) => 0;
     }
 }
