@@ -36,12 +36,14 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new ManiaRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, oks, Goods, greats);
+        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods) => generateHitResults(beatmap, mods, Accuracy / 100, Misses, Mehs, oks, Goods, greats);
 
-        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
+        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, Mod[] mods, double accuracy, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {
             // One judgement per normal note. Two judgements per hold note (head + tail).
-            int totalHits = beatmap.HitObjects.Count + beatmap.HitObjects.Count(ho => ho is HoldNote);
+            int totalHits = beatmap.HitObjects.Count;
+            if (!mods.Any(m => m.Acronym == "CL"))
+                totalHits += beatmap.HitObjects.Count(ho => ho is HoldNote);
 
             if (countMeh != null || countOk != null || countGood != null || countGreat != null)
             {
