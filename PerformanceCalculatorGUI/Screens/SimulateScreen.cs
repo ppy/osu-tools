@@ -733,16 +733,16 @@ namespace PerformanceCalculatorGUI.Screens
                     // official rulesets can generate more precise hits from accuracy
                     if (appliedMods.Value.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
                     {
-                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood,
+                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, appliedMods.Value.ToArray(), missesTextBox.Value.Value, countMeh, countGood,
                             null, null);
                     }
                     else
                     {
-                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood,
+                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, appliedMods.Value.ToArray(), missesTextBox.Value.Value, countMeh, countGood,
                             largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
                     }
 
-                    accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, beatmap, statistics);
+                    accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, beatmap, statistics, appliedMods.Value.ToArray());
                 }
 
                 var ppAttributes = performanceCalculator?.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.Value)
