@@ -229,7 +229,7 @@ namespace PerformanceCalculatorGUI
         private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, Mod[] mods, int countMiss)
         {
             int totalResultCount = beatmap.HitObjects.Count;
-            if (!mods.Any(m => m.Acronym == "CL"))
+            if (!mods.Any(m => m is ModClassic))
                 totalResultCount += beatmap.HitObjects.Count(ho => ho is HoldNote);
 
             // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
@@ -326,7 +326,7 @@ namespace PerformanceCalculatorGUI
             int countMeh = statistics[HitResult.Meh];
             int countMiss = statistics[HitResult.Miss];
 
-            int perfectWeight = mods.Any(m => m.Acronym == "CL") ? 300 : 305;
+            int perfectWeight = mods.Any(m => m is ModClassic) ? 300 : 305;
 
             double total = perfectWeight * countPerfect + 300 * countGreat + 200 * countGood + 100 * countOk + 50 * countMeh;
             double max = perfectWeight * (countPerfect + countGreat + countGood + countOk + countMeh + countMiss);
