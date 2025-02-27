@@ -166,7 +166,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private void drawTaikoValues(TaikoDifficultyHitObject hitObject)
         {
-            var rhythmDifficulty =
+            double rhythmDifficulty =
                 osu.Game.Rulesets.Taiko.Difficulty.Evaluators.RhythmEvaluator.EvaluateDifficultyOf(hitObject, 2 * hitObject.BaseObject.HitWindows.WindowFor(HitResult.Great) / track.Rate);
 
             flowContainer.AddRange(new[]
