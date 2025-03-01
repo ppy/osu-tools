@@ -328,7 +328,7 @@ namespace PerformanceCalculatorGUI
 
             int perfectWeight = mods.Any(m => m is ModClassic) ? 300 : 305;
 
-            double total = perfectWeight * countPerfect + 300 * countGreat + 200 * countGood + 100 * countOk + 50 * countMeh;
+            double total = (perfectWeight * countPerfect) + (300 * countGreat) + (200 * countGood) + (100 * countOk) + (50 * countMeh);
             double max = perfectWeight * (countPerfect + countGreat + countGood + countOk + countMeh + countMiss);
 
             return total / max;
