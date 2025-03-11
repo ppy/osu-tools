@@ -239,7 +239,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}");
+                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}").ConfigureAwait(false);
 
                 var calculatedPlayers = new List<LeaderboardUser>();
                 var calculatedScores = new List<ExtendedScore>();
@@ -253,7 +253,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {player.User.Username} top scores...");
 
-                    var playerData = await calculatePlayer(player, token);
+                    var playerData = await calculatePlayer(player, token).ConfigureAwait(false);
 
                     calculatedPlayers.Add(new LeaderboardUser
                     {
@@ -301,7 +301,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             var plays = new List<ExtendedScore>();
 
-            var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+            var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.User.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
 
             var rulesetInstance = ruleset.Value.CreateInstance();
 
@@ -320,10 +320,10 @@ namespace PerformanceCalculatorGUI.Screens
                         var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                         var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                        var difficultyAttributes = difficultyCalculator.Calculate(RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods));
+                        var difficultyAttributes = difficultyCalculator.Calculate(mods);
                         var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
-                        var livePp = score.PP ?? 0.0;
+                        double? livePp = score.PP;
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
                         score.PP = perfAttributes?.Total ?? 0.0;
 
@@ -346,17 +346,17 @@ namespace PerformanceCalculatorGUI.Screens
             catch (OperationCanceledException) { }
 
             var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
-            var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
+            var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0.0).ToList();
 
             int index = 0;
             decimal totalLocalPP = (decimal)(localOrdered.Select(x => x.SoloScore.PP).Sum(play => Math.Pow(0.95, index++) * play) ?? 0.0);
             decimal totalLivePP = player.PP ?? (decimal)0.0;
 
             index = 0;
-            decimal nonBonusLivePP = (decimal)liveOrdered.Select(x => x.LivePP).Sum(play => Math.Pow(0.95, index++) * play);
+            decimal nonBonusLivePP = (decimal)liveOrdered.Select(x => x.LivePP ?? 0.0).Sum(play => Math.Pow(0.95, index++) * play);
 
             //todo: implement properly. this is pretty damn wrong.
-            var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+            decimal playcountBonusPP = (totalLivePP - nonBonusLivePP);
             totalLocalPP += playcountBonusPP;
 
             return new UserLeaderboardData

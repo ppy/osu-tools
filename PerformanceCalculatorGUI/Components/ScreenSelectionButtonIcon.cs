@@ -5,14 +5,15 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps.Drawables.Cards;
 
-namespace PerformanceCalculatorGUI.Components;
-
-public partial class ScreenSelectionButtonIcon : IconPill
+namespace PerformanceCalculatorGUI.Components
 {
-    public ScreenSelectionButtonIcon(IconUsage? icon = null)
-        : base(icon ?? FontAwesome.Solid.List)
+    public partial class ScreenSelectionButtonIcon : IconPill
     {
-    }
+        public ScreenSelectionButtonIcon(IconUsage? icon = null)
+            : base(icon ?? FontAwesome.Solid.List)
+        {
+        }
 
-    public override LocalisableString TooltipText => string.Empty;
+        public override LocalisableString TooltipText => string.Empty;
+    }
 }

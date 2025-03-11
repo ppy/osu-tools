@@ -62,12 +62,6 @@ namespace PerformanceCalculatorGUI.Components
             Action = () => { host.OpenUrlExternally($"https://osu.ppy.sh/u/{User.Id}"); };
         }
 
-        protected override void LoadComplete()
-        {
-            Status.UnbindAll();
-            Activity.UnbindAll();
-        }
-
         protected override Drawable CreateLayout()
         {
             var layout = new Container
@@ -163,7 +157,14 @@ namespace PerformanceCalculatorGUI.Components
                                 }
                             }
                         }
-                    }
+                    },
+                    // this is like COMPLETELY screwed but is required to have this not die of death because `ExtendedUserPanel` expects `LastVisitMessage` to not be null
+                    // and that is created and assigned to by `CreateStatusMessage()`.
+                    // the card API is SHOCKING and needs to be taken behind the barn and old yeller'd five years ago.
+                    // it is NOT A GOOD IDEA to have A PROTECTED OVERRIDABLE METHOD THAT CAN MAKE READING OTHER PROTECTED MEMBERS DANGEROUS!!!!
+                    // or that A PROTECTED METHOD which you can FORGET TO CALL should be RESPONSIBLE FOR SETTING UP A PROTECTED FIELD!!!!
+                    CreateStatusMessage(false).With(wtf => wtf.Alpha = 0),
+                    CreateStatusIcon().With(wtf => wtf.Alpha = 0),
                 }
             };
 

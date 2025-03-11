@@ -13,12 +13,15 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Framework.Logging;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
 using PerformanceCalculatorGUI.Components;
@@ -34,6 +37,7 @@ namespace PerformanceCalculatorGUI.Screens
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Plum);
 
         private StatefulButton calculationButton;
+        private SwitchButton includePinnedCheckbox;
         private VerboseLoadingLayer loadingLayer;
 
         private GridContainer layout;
@@ -147,6 +151,30 @@ namespace PerformanceCalculatorGUI.Screens
                                 AutoSizeAxes = Axes.Y,
                                 Children = new Drawable[]
                                 {
+                                    new FillFlowContainer
+                                    {
+                                        AutoSizeAxes = Axes.Both,
+                                        Direction = FillDirection.Horizontal,
+                                        Margin = new MarginPadding { Vertical = 2, Left = 10 },
+                                        Spacing = new Vector2(5),
+                                        Children = new Drawable[]
+                                        {
+                                            includePinnedCheckbox = new SwitchButton
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Current = { Value = true },
+                                            },
+                                            new OsuSpriteText
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 14),
+                                                UseFullGlyphHeight = false,
+                                                Text = "Include pinned scores"
+                                            }
+                                        }
+                                    },
                                     sortingTabControl = new OverlaySortTabControl<ProfileSortCriteria>
                                     {
                                         Anchor = Anchor.CentreRight,
@@ -181,6 +209,7 @@ namespace PerformanceCalculatorGUI.Screens
 
             usernameTextBox.OnCommit += (_, _) => { calculateProfile(usernameTextBox.Current.Value); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
+            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfile(currentUser); };
 
             if (RuntimeInfo.IsDesktop)
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfile(currentUser); });
@@ -209,7 +238,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting user data...");
 
-                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}");
+                var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}").ConfigureAwait(false);
 
                 currentUser = player.Username;
 
@@ -244,7 +273,13 @@ namespace PerformanceCalculatorGUI.Screens
 
                 Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
 
-                var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100");
+                var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
+
+                if (includePinnedCheckbox.Current.Value)
+                {
+                    var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
+                    apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID)).ToArray()).ToList();
+                }
 
                 foreach (var score in apiScores)
                 {
@@ -262,12 +297,14 @@ namespace PerformanceCalculatorGUI.Screens
                     var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                     var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                    var difficultyAttributes = difficultyCalculator.Calculate(RulesetHelper.ConvertToLegacyDifficultyAdjustmentMods(rulesetInstance, mods));
+                    var difficultyAttributes = difficultyCalculator.Calculate(mods);
                     var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+                    if (performanceCalculator == null)
+                        continue;
 
-                    var livePp = score.PP ?? 0.0;
-                    var perfAttributes = await performanceCalculator?.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token)!;
-                    score.PP = perfAttributes?.Total ?? 0.0;
+                    double? livePp = score.PP;
+                    var perfAttributes = await performanceCalculator.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token).ConfigureAwait(false);
+                    score.PP = perfAttributes.Total;
 
                     var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
                     plays.Add(extendedScore);
@@ -279,30 +316,32 @@ namespace PerformanceCalculatorGUI.Screens
                     return;
 
                 var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
-                var liveOrdered = plays.OrderByDescending(x => x.LivePP).ToList();
+                var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0).ToList();
 
                 Schedule(() =>
                 {
                     foreach (var play in plays)
                     {
-                        play.Position.Value = localOrdered.IndexOf(play) + 1;
-                        play.PositionChange.Value = liveOrdered.IndexOf(play) - localOrdered.IndexOf(play);
-                        scores.SetLayoutPosition(scores[liveOrdered.IndexOf(play)], localOrdered.IndexOf(play));
+                        if (play.LivePP != null)
+                        {
+                            play.Position.Value = localOrdered.IndexOf(play) + 1;
+                            play.PositionChange.Value = liveOrdered.IndexOf(play) - localOrdered.IndexOf(play);
+                        }
                     }
                 });
 
                 decimal totalLocalPP = 0;
-                for (var i = 0; i < localOrdered.Count; i++)
+                for (int i = 0; i < localOrdered.Count; i++)
                     totalLocalPP += (decimal)(Math.Pow(0.95, i) * (localOrdered[i].SoloScore.PP ?? 0));
 
                 decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 
                 decimal nonBonusLivePP = 0;
-                for (var i = 0; i < liveOrdered.Count; i++)
-                    nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP);
+                for (int i = 0; i < liveOrdered.Count; i++)
+                    nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
 
                 //todo: implement properly. this is pretty damn wrong.
-                var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+                decimal playcountBonusPP = (totalLivePP - nonBonusLivePP);
                 totalLocalPP += playcountBonusPP;
 
                 Schedule(() =>
@@ -324,6 +363,7 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     loadingLayer.Hide();
                     calculationButton.State.Value = ButtonState.Done;
+                    updateSorting(ProfileSortCriteria.Local);
                 });
             }, TaskContinuationOptions.None);
         }

@@ -87,6 +87,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             clock = new EditorClock(playableBeatmap, beatDivisor);
             clock.ChangeSource(processorBeatmap.Track);
             dependencies.CacheAs(clock);
+            dependencies.CacheAs(processorBeatmap.Track);
 
             editorBeatmap = new EditorBeatmap(playableBeatmap);
             dependencies.CacheAs(editorBeatmap);

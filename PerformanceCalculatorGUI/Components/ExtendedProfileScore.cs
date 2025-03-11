@@ -33,14 +33,14 @@ namespace PerformanceCalculatorGUI.Components
     public class ExtendedScore
     {
         public SoloScoreInfo SoloScore { get; }
-        public double LivePP { get; }
+        public double? LivePP { get; }
 
         public Bindable<int> Position { get; } = new Bindable<int>();
         public Bindable<int> PositionChange { get; } = new Bindable<int>();
 
         public PerformanceAttributes PerformanceAttributes { get; }
 
-        public ExtendedScore(SoloScoreInfo score, double livePP, PerformanceAttributes attributes)
+        public ExtendedScore(SoloScoreInfo score, double? livePP, PerformanceAttributes attributes)
         {
             SoloScore = score;
             PerformanceAttributes = attributes;
@@ -73,7 +73,7 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class ExtendedProfileScore : CompositeDrawable
     {
-        private const int height = 40;
+        private const int height = 35;
         private const int performance_width = 100;
         private const int rank_difference_width = 35;
         private const int small_text_font_size = 11;
@@ -125,7 +125,7 @@ namespace PerformanceCalculatorGUI.Components
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Colour = colourProvider.Light1,
-                            Text = Score.PositionChange.Value.ToString()
+                            Text = $"{Score.PositionChange.Value:+0;-0;-}"
                         }
                     },
                     new Container
@@ -256,7 +256,7 @@ namespace PerformanceCalculatorGUI.Components
                                                                     Child = new OsuSpriteText
                                                                     {
                                                                         Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                                                        Text = $"{Score.LivePP:0}pp"
+                                                                        Text = Score.LivePP != null ? $"{Score.LivePP:0}pp" : "- pp"
                                                                     },
                                                                 },
                                                                 new OsuSpriteText
@@ -282,7 +282,7 @@ namespace PerformanceCalculatorGUI.Components
                                         {
                                             var ruleset = rulesets.GetRuleset(Score.SoloScore.RulesetID) ?? throw new InvalidOperationException();
 
-                                            return new ModIcon(ruleset.CreateInstance().CreateModFromAcronym(mod.Acronym)!)
+                                            return new ModIcon(mod.ToMod(ruleset.CreateInstance()))
                                             {
                                                 Scale = new Vector2(0.35f)
                                             };
