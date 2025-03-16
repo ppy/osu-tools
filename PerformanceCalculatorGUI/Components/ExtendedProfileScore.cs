@@ -75,6 +75,7 @@ namespace PerformanceCalculatorGUI.Components
     public partial class ExtendedProfileScore : CompositeDrawable
     {
         private const int height = 35;
+        private const int avatar_size = 35;
         private const int performance_width = 100;
         private const int rank_difference_width = 35;
         private const int small_text_font_size = 11;
@@ -103,22 +104,12 @@ namespace PerformanceCalculatorGUI.Components
         }
 
         [BackgroundDependencyLoader]
-        private void load(RulesetStore rulesets)
+        private void load(GameHost host, RulesetStore rulesets)
         {
-            if (ShowAvatar)
-            {
-                AddInternal(new UpdateableAvatar(Score.SoloScore.User, false)
-                {
-                    Size = new Vector2(height)
-                });
-            }
+            int avatarPadding = ShowAvatar ? avatar_size : 0;
 
             AddInternal(new ExtendedProfileItemContainer
             {
-                // Resize to make room for avatar if necessary
-                X = ShowAvatar ? height : 0,
-                Padding = ShowAvatar ? new MarginPadding { Right = height } : new MarginPadding(),
-
                 OnHoverAction = () =>
                 {
                     positionChangeText.Text = $"#{Score.Position.Value}";
@@ -129,6 +120,15 @@ namespace PerformanceCalculatorGUI.Components
                 },
                 Children = new Drawable[]
                 {
+                    ShowAvatar
+                        ? new ClickableAvatar(Score.SoloScore.User, true)
+                        {
+                            Masking = true,
+                            CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS,
+                            Size = new Vector2(avatar_size),
+                            Action = () => { host.OpenUrlExternally($"https://osu.ppy.sh/u/{Score.SoloScore.User?.Id}"); }
+                        }
+                        : Empty(),
                     new Container
                     {
                         Name = "Rank difference",
@@ -136,6 +136,7 @@ namespace PerformanceCalculatorGUI.Components
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                         Width = rank_difference_width,
+                        Margin = new MarginPadding { Left = avatarPadding },
                         Child = positionChangeText = new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
@@ -148,7 +149,7 @@ namespace PerformanceCalculatorGUI.Components
                     {
                         Name = "Score info",
                         RelativeSizeAxes = Axes.Both,
-                        Padding = new MarginPadding { Left = rank_difference_width, Right = performance_width },
+                        Padding = new MarginPadding { Left = rank_difference_width + avatarPadding, Right = performance_width },
                         Children = new Drawable[]
                         {
                             new FillFlowContainer
