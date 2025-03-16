@@ -118,7 +118,7 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     positionChangeText.Text = $"{Score.PositionChange.Value:+0;-0;-}";
                 },
-                Children = new Drawable[]
+                Children = new[]
                 {
                     ShowAvatar
                         ? new ClickableAvatar(Score.SoloScore.User, true)
