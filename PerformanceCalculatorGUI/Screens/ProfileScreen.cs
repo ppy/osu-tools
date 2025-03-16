@@ -222,7 +222,7 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
-            usernameTextBox.OnCommit += (_, _) => { calculateProfiles(usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); };
+            usernameTextBox.OnCommit += (_, _) => { calculateProfiles(usernameTextBox.Current.Value.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
             includePinnedCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
             onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
