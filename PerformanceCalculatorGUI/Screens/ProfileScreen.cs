@@ -241,8 +241,6 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            bool calculatingSingleProfile = currentUsers.Length == 1;
-
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
 
@@ -282,66 +280,76 @@ namespace PerformanceCalculatorGUI.Screens
 
                 foreach (string username in currentUsers)
                 {
-                    Schedule(() => loadingLayer.Text.Value = $"Getting {username} user data...");
-
-                    var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}").ConfigureAwait(false);
-                    players.Add(player);
-
-                    // Add user card if only calculating single profile
-                    if (calculatingSingleProfile)
+                    try
                     {
-                        Schedule(() =>
+                        Schedule(() => loadingLayer.Text.Value = $"Getting {username} user data...");
+
+                        var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}").ConfigureAwait(false);
+                        players.Add(player);
+
+                        Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
+
+                        var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
+
+                        if (includePinnedCheckbox.Current.Value)
                         {
-                            userPanelContainer.Add(userPanel = new UserCard(player)
-                            {
-                                RelativeSizeAxes = Axes.X
-                            });
-                        });
+                            var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100")
+                                                               .ConfigureAwait(false);
+                            apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID)).ToArray()).ToList();
+                        }
+
+                        foreach (var score in apiScores)
+                        {
+                            if (token.IsCancellationRequested)
+                                return;
+
+                            var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+
+                            Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
+
+                            Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
+
+                            var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
+
+                            var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+
+                            var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                            var difficultyAttributes = difficultyCalculator.Calculate(mods);
+                            var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+                            if (performanceCalculator == null)
+                                continue;
+
+                            double? livePp = score.PP;
+                            var perfAttributes = await performanceCalculator.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token).ConfigureAwait(false);
+                            score.PP = perfAttributes.Total;
+
+                            var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                            plays.Add(extendedScore);
+                        }
                     }
-
-                    Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
-
-                    var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
-
-                    if (includePinnedCheckbox.Current.Value)
+                    catch (Exception ex)
                     {
-                        var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100")
-                                                           .ConfigureAwait(false);
-                        apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID)).ToArray()).ToList();
-                    }
-
-                    foreach (var score in apiScores)
-                    {
-                        if (token.IsCancellationRequested)
-                            return;
-
-                        var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
-
-                        Schedule(() => loadingLayer.Text.Value = $"Calculating {working.Metadata}");
-
-                        Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
-
-                        var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
-
-                        var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
-
-                        var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                        var difficultyAttributes = difficultyCalculator.Calculate(mods);
-                        var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
-                        if (performanceCalculator == null)
-                            continue;
-
-                        double? livePp = score.PP;
-                        var perfAttributes = await performanceCalculator.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token).ConfigureAwait(false);
-                        score.PP = perfAttributes.Total;
-
-                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
-                        plays.Add(extendedScore);
+                        Logger.Log(ex.ToString(), level: LogLevel.Error);
+                        notificationDisplay.Display(new Notification($"Failed to calculate {username}: {ex.Message}"));
                     }
                 }
 
                 if (token.IsCancellationRequested)
                     return;
+
+                bool calculatingSingleProfile = players.Count == 1;
+
+                // Add user card if only calculating single profile
+                if (calculatingSingleProfile)
+                {
+                    Schedule(() =>
+                    {
+                        userPanelContainer.Add(userPanel = new UserCard(players[0])
+                        {
+                            RelativeSizeAxes = Axes.X
+                        });
+                    });
+                }
 
                 // Filter plays if only displaying best score on each beatmap
                 if (onlyDisplayBestCheckbox.Current.Value)
