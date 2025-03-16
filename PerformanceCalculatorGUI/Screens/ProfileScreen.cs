@@ -233,15 +233,15 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void calculateProfiles(string[] usernames)
         {
+            currentUsers = usernames.Distinct().ToArray();
+
             if (usernames.Length < 1)
             {
                 usernameTextBox.FlashColour(Color4.Red, 1);
                 return;
             }
 
-            currentUsers = [];
-
-            bool calculatingSingleProfile = usernames.Length <= 1;
+            bool calculatingSingleProfile = currentUsers.Length == 1;
 
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
@@ -280,13 +280,12 @@ namespace PerformanceCalculatorGUI.Screens
                 var players = new List<APIUser>();
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                foreach (string username in usernames)
+                foreach (string username in currentUsers)
                 {
                     Schedule(() => loadingLayer.Text.Value = $"Getting {username} user data...");
 
                     var player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}").ConfigureAwait(false);
                     players.Add(player);
-                    currentUsers = currentUsers.Append(player.Username).ToArray();
 
                     // Add user card if only calculating single profile
                     if (calculatingSingleProfile)
