@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Humanizer;
 using osu.Framework;
@@ -165,11 +167,11 @@ namespace PerformanceCalculatorGUI.Screens
                                             FixedLabelWidth = 100f,
                                             PlaceholderText = "Click to select a beatmap file"
                                         },
-                                        beatmapIdTextBox = new LimitedLabelledNumberBox
+                                        beatmapIdTextBox = new ExtendedLabelledTextBox
                                         {
                                             Label = "Beatmap ID",
                                             FixedLabelWidth = 100f,
-                                            PlaceholderText = "Enter beatmap ID",
+                                            PlaceholderText = "Enter a beatmap ID or link",
                                             CommitOnFocusLoss = false
                                         },
                                         beatmapImportTypeSwitch = new SwitchButton
@@ -622,6 +624,23 @@ namespace PerformanceCalculatorGUI.Screens
                 showError("Empty beatmap path!");
                 resetBeatmap();
                 return;
+            }
+
+            if (!int.TryParse(beatmap, out int result) && !Path.Exists(beatmap))
+            {
+                string beatmapLinkPattern = @"osu\.ppy\.sh/(b|beatmapsets/\d+#\w+|beatmaps)/(\d+)";
+
+                if (Regex.IsMatch(beatmap, beatmapLinkPattern, RegexOptions.IgnoreCase))
+                {
+                    Match beatmapLinkMatch = Regex.Match(beatmap, beatmapLinkPattern, RegexOptions.IgnoreCase);
+                    beatmap = beatmapLinkMatch.Groups[2].ToString();
+                }
+                else
+                {
+                    showError("Invalid beatmap path!");
+                    resetBeatmap();
+                    return;
+                }
             }
 
             try
