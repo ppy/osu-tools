@@ -126,7 +126,7 @@ namespace PerformanceCalculatorGUI.Components
                             Masking = true,
                             CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS,
                             Size = new Vector2(avatar_size),
-                            Action = () => { host.OpenUrlExternally($"https://osu.ppy.sh/u/{Score.SoloScore.User?.Id}"); }
+                            Action = () => { host.OpenUrlExternally($"https://osu.ppy.sh/users/{Score.SoloScore.User?.Id}"); }
                         }
                         : Empty(),
                     new Container
