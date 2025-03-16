@@ -78,7 +78,7 @@ namespace PerformanceCalculatorGUI.Components
 
         protected sealed override CountryCode GetCountryCode(LeaderboardUser item) => item.User.CountryCode;
 
-        protected sealed override Drawable CreateFlagContent(LeaderboardUser item)
+        protected sealed override Drawable[] CreateFlagContent(LeaderboardUser item)
         {
             var username = new LinkFlowContainer(t => t.Font = OsuFont.GetFont(size: TEXT_SIZE, italics: true))
             {
@@ -87,7 +87,7 @@ namespace PerformanceCalculatorGUI.Components
                 TextAnchor = Anchor.CentreLeft
             };
             username.AddUserLink(item.User);
-            return username;
+            return [username];
         }
 
         private partial class DifferenceText : OsuSpriteText

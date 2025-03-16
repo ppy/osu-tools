@@ -141,7 +141,7 @@ namespace PerformanceCalculatorGUI.Components
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Colour = colourProvider.Light1,
-                            Text = Score.PositionChange.Value.ToString()
+                            Text = $"{Score.PositionChange.Value:+0;-0;-}"
                         }
                     },
                     new Container

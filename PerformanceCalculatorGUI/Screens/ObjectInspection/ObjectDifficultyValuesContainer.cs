@@ -4,12 +4,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
@@ -17,8 +19,10 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.Taiko.Difficulty.Evaluators;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Taiko.Objects;
 using osuTK;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -27,6 +31,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     {
         [Resolved]
         private Bindable<IReadOnlyList<Mod>> appliedMods { get; set; }
+
+        [Resolved]
+        private Track track { get; set; }
 
         private SpriteText hitObjectTypeText;
 
@@ -72,7 +79,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             Colour = colors.Background6,
                             RelativeSizeAxes = Axes.Both
                         },
-                        hitObjectTypeText = new SpriteText
+                        hitObjectTypeText = new OsuSpriteText
                         {
                             Font = new FontUsage(size: 30),
                             Padding = new MarginPadding(10)
@@ -120,24 +127,25 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private void drawOsuValues(OsuDifficultyHitObject hitObject)
         {
-            var hidden = appliedMods.Value.Any(x => x is ModHidden);
+            bool hidden = appliedMods.Value.Any(x => x is ModHidden);
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),
                 new ObjectInspectorDifficultyValue("Strain Time", hitObject.StrainTime),
+                new ObjectInspectorDifficultyValue("Doubletapness", hitObject.GetDoubletapness((OsuDifficultyHitObject)hitObject.Next(0))),
+                new ObjectInspectorDifficultyValue("Lazy Jump Dist", hitObject.LazyJumpDistance),
+                new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
+                new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime),
+
                 new ObjectInspectorDifficultyValue("Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(hitObject, true)),
                 new ObjectInspectorDifficultyValue("Aim Difficulty (w/o sliders)", AimEvaluator.EvaluateDifficultyOf(hitObject, false)),
-                new ObjectInspectorDifficultyValue("Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(hitObject)),
-                new ObjectInspectorDifficultyValue("Rhythm Diff", RhythmEvaluator.EvaluateDifficultyOf(hitObject)),
+                new ObjectInspectorDifficultyValue("Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(hitObject, appliedMods.Value)),
+                new ObjectInspectorDifficultyValue("Rhythm Diff", osu.Game.Rulesets.Osu.Difficulty.Evaluators.RhythmEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue(hidden ? "FLHD Difficulty" : "Flashlight Diff", FlashlightEvaluator.EvaluateDifficultyOf(hitObject, hidden)),
             });
 
             if (hitObject.Angle is not null)
                 flowContainer.Add(new ObjectInspectorDifficultyValue("Angle", double.RadiansToDegrees(hitObject.Angle.Value)));
-
-            flowContainer.Add(new ObjectInspectorDifficultyValue("Lazy Jump Dist", hitObject.LazyJumpDistance));
-            flowContainer.Add(new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance));
-            flowContainer.Add(new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime));
 
             if (hitObject.BaseObject is Slider)
             {
@@ -158,14 +166,27 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private void drawTaikoValues(TaikoDifficultyHitObject hitObject)
         {
+            double rhythmDifficulty =
+                osu.Game.Rulesets.Taiko.Difficulty.Evaluators.RhythmEvaluator.EvaluateDifficultyOf(hitObject, 2 * hitObject.BaseObject.HitWindows.WindowFor(HitResult.Great) / track.Rate);
+
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Delta Time", hitObject.DeltaTime),
+                new ObjectInspectorDifficultyValue("Effective BPM", hitObject.EffectiveBPM),
+                new ObjectInspectorDifficultyValue("Rhythm Ratio", hitObject.RhythmData.Ratio),
                 new ObjectInspectorDifficultyValue("Colour Difficulty", ColourEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Stamina Difficulty", StaminaEvaluator.EvaluateDifficultyOf(hitObject)),
-                new ObjectInspectorDifficultyValue("Rhythm Difficulty", hitObject.Rhythm.Difficulty),
-                new ObjectInspectorDifficultyValue("Rhythm Ratio", hitObject.Rhythm.Ratio),
+                new ObjectInspectorDifficultyValue("Rhythm Difficulty", rhythmDifficulty),
             });
+
+            if (hitObject.BaseObject is Hit hit)
+            {
+                flowContainer.AddRange(new[]
+                {
+                    new ObjectInspectorDifficultyValue($"Mono ({hit.Type}) Index", hitObject.MonoIndex),
+                    new ObjectInspectorDifficultyValue("Note Index", hitObject.NoteIndex),
+                });
+            }
         }
 
         private void drawCatchValues(CatchDifficultyHitObject hitObject)

@@ -32,7 +32,7 @@ namespace PerformanceCalculator.Profile
             var displayPlays = new List<UserPlayInfo>();
 
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset ?? 0);
-            var rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
+            string rulesetApiName = LegacyHelper.GetRulesetShortNameFromId(Ruleset ?? 0);
 
             Console.WriteLine("Getting user data...");
             var userData = GetJsonFromApi<APIUser>($"users/{ProfileName}/{ruleset.ShortName}");
@@ -81,15 +81,15 @@ namespace PerformanceCalculator.Profile
             double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);
 
             //todo: implement properly. this is pretty damn wrong.
-            var playcountBonusPP = (totalLivePP - nonBonusLivePP);
+            double playcountBonusPP = (totalLivePP - nonBonusLivePP);
             totalLocalPP += playcountBonusPP;
             double totalDiffPP = totalLocalPP - totalLivePP;
 
             if (OutputJson)
             {
-                var json = JsonConvert.SerializeObject(new
+                string json = JsonConvert.SerializeObject(new
                 {
-                    Username = userData.Username,
+                    userData.Username,
                     LivePp = totalLivePP,
                     LocalPp = totalLocalPP,
                     PlaycountPp = playcountBonusPP,

@@ -66,7 +66,7 @@ namespace PerformanceCalculatorGUI
                 return new ProcessorWorkingBeatmap(fileOrId, null, audioManager);
             }
 
-            if (!int.TryParse(fileOrId, out var beatmapId))
+            if (!int.TryParse(fileOrId, out int beatmapId))
                 throw new ArgumentException("Could not parse provided beatmap ID.");
 
             cachePath = Path.Combine(cachePath, $"{beatmapId}.osu");
@@ -77,7 +77,7 @@ namespace PerformanceCalculatorGUI
 
                 try
                 {
-                    new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteRootUrl}/osu/{beatmapId}").Perform();
+                    new FileWebRequest(cachePath, $"{APIManager.ENDPOINT_CONFIGURATION.WebsiteUrl}/osu/{beatmapId}").Perform();
                 }
                 catch (WebException)
                 {

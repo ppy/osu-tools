@@ -60,9 +60,9 @@ namespace PerformanceCalculatorGUI.Components
 
             currentData = data;
 
-            var split = data.Split('\n');
+            string[] split = data.Split('\n');
 
-            foreach (var line in split)
+            foreach (string line in split)
                 textContainer.Add(new OsuSpriteText { Text = line });
         }
 
