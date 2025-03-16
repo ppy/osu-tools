@@ -25,6 +25,7 @@ using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
 using osu.Game.Utils;
+using osu.Game.Users.Drawables;
 using osuTK;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 
@@ -74,6 +75,7 @@ namespace PerformanceCalculatorGUI.Components
     public partial class ExtendedProfileScore : CompositeDrawable
     {
         private const int height = 35;
+        private const int avatar_size = 35;
         private const int performance_width = 100;
         private const int rank_difference_width = 35;
         private const int small_text_font_size = 11;
@@ -81,6 +83,8 @@ namespace PerformanceCalculatorGUI.Components
         private const float performance_background_shear = 0.45f;
 
         public readonly ExtendedScore Score;
+
+        public readonly bool ShowAvatar;
 
         [Resolved]
         private OsuColour colours { get; set; }
@@ -90,17 +94,20 @@ namespace PerformanceCalculatorGUI.Components
 
         private OsuSpriteText positionChangeText;
 
-        public ExtendedProfileScore(ExtendedScore score)
+        public ExtendedProfileScore(ExtendedScore score, bool showAvatar = false)
         {
             Score = score;
+            ShowAvatar = showAvatar;
 
             RelativeSizeAxes = Axes.X;
             Height = height;
         }
 
         [BackgroundDependencyLoader]
-        private void load(RulesetStore rulesets)
+        private void load(GameHost host, RulesetStore rulesets)
         {
+            int avatarPadding = ShowAvatar ? avatar_size : 0;
+
             AddInternal(new ExtendedProfileItemContainer
             {
                 OnHoverAction = () =>
@@ -111,8 +118,17 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     positionChangeText.Text = $"{Score.PositionChange.Value:+0;-0;-}";
                 },
-                Children = new Drawable[]
+                Children = new[]
                 {
+                    ShowAvatar
+                        ? new ClickableAvatar(Score.SoloScore.User, true)
+                        {
+                            Masking = true,
+                            CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS,
+                            Size = new Vector2(avatar_size),
+                            Action = () => { host.OpenUrlExternally($"https://osu.ppy.sh/users/{Score.SoloScore.User?.Id}"); }
+                        }
+                        : Empty(),
                     new Container
                     {
                         Name = "Rank difference",
@@ -120,6 +136,7 @@ namespace PerformanceCalculatorGUI.Components
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                         Width = rank_difference_width,
+                        Margin = new MarginPadding { Left = avatarPadding },
                         Child = positionChangeText = new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
@@ -132,7 +149,7 @@ namespace PerformanceCalculatorGUI.Components
                     {
                         Name = "Score info",
                         RelativeSizeAxes = Axes.Both,
-                        Padding = new MarginPadding { Left = rank_difference_width, Right = performance_width },
+                        Padding = new MarginPadding { Left = rank_difference_width + avatarPadding, Right = performance_width },
                         Children = new Drawable[]
                         {
                             new FillFlowContainer
