@@ -582,6 +582,7 @@ namespace PerformanceCalculatorGUI.Screens
             // recreate calculators to update DHOs
             createCalculators();
 
+            modSettingChangeTracker?.Dispose();
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += m =>
             {
@@ -592,7 +593,7 @@ namespace PerformanceCalculatorGUI.Screens
                     updateMissesTextboxes();
                     calculateDifficulty();
                     calculatePerformance();
-                }, 100);
+                }, 300);
             };
 
             calculateDifficulty();
@@ -647,6 +648,7 @@ namespace PerformanceCalculatorGUI.Screens
                 resetCalculations();
             }
 
+            beatmapTitle.Clear();
             beatmapTitle.Add(new BeatmapCard(working));
 
             loadBackground();
