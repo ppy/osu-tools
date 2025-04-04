@@ -426,7 +426,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                 difficultyAttributesContainer = new AttributesTable(),
                                                 new OsuSpriteText
                                                 {
-                                                    Margin = new MarginPadding() { Left = 10f, Vertical = 5f },
+                                                    Margin = new MarginPadding { Left = 10f, Vertical = 5f },
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
                                                     Text = "Performance Attributes"
@@ -434,7 +434,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                 performanceAttributesContainer = new AttributesTable(),
                                                 new OsuSpriteText
                                                 {
-                                                    Margin = new MarginPadding() { Left = 10f, Vertical = 5f },
+                                                    Margin = new MarginPadding { Left = 10f, Vertical = 5f },
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
                                                     Text = "Strain graph (alt+scroll to zoom)"

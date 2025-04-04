@@ -40,13 +40,13 @@ namespace PerformanceCalculatorGUI.Screens.Simulate
 
             AddRangeInternal(new Drawable[]
             {
-                backgroundFlow = new FillFlowContainer()
+                backgroundFlow = new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
                     Direction = FillDirection.Vertical
                 },
-                grid = new GridContainer()
+                grid = new GridContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
