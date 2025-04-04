@@ -36,12 +36,14 @@ namespace PerformanceCalculator.Simulate
 
         public override Ruleset Ruleset => new ManiaRuleset();
 
-        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods) => generateHitResults(beatmap, Accuracy / 100, Misses, Mehs, oks, Goods, greats);
+        protected override Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods) => generateHitResults(beatmap, mods, Accuracy / 100, Misses, Mehs, oks, Goods, greats);
 
-        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, double accuracy, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
+        private static Dictionary<HitResult, int> generateHitResults(IBeatmap beatmap, Mod[] mods, double accuracy, int countMiss, int? countMeh, int? countOk, int? countGood, int? countGreat)
         {
             // One judgement per normal note. Two judgements per hold note (head + tail).
-            int totalHits = beatmap.HitObjects.Count + beatmap.HitObjects.Count(ho => ho is HoldNote);
+            int totalHits = beatmap.HitObjects.Count;
+            if (!mods.Any(m => m is ModClassic))
+                totalHits += beatmap.HitObjects.Count(ho => ho is HoldNote);
 
             if (countMeh != null || countOk != null || countGood != null || countGreat != null)
             {
@@ -95,6 +97,23 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.Meh, countMeh.Value },
                 { HitResult.Miss, countMiss }
             };
+        }
+
+        protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics, Mod[] mods)
+        {
+            int countPerfect = statistics[HitResult.Perfect];
+            int countGreat = statistics[HitResult.Great];
+            int countGood = statistics[HitResult.Good];
+            int countOk = statistics[HitResult.Ok];
+            int countMeh = statistics[HitResult.Meh];
+            int countMiss = statistics[HitResult.Miss];
+
+            int perfectWeight = mods.Any(m => m is ModClassic) ? 300 : 305;
+
+            double total = (perfectWeight * countPerfect) + (300 * countGreat) + (200 * countGood) + (100 * countOk) + (50 * countMeh);
+            double max = perfectWeight * (countPerfect + countGreat + countGood + countOk + countMeh + countMiss);
+
+            return total / max;
         }
     }
 }
