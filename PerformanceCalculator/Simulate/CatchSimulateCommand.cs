@@ -68,7 +68,7 @@ namespace PerformanceCalculator.Simulate
             };
         }
 
-        protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics)
+        protected override double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics, Mod[] mods)
         {
             double hits = statistics[HitResult.Great] + statistics[HitResult.LargeTickHit] + statistics[HitResult.SmallTickHit];
             double total = hits + statistics[HitResult.Miss] + statistics[HitResult.SmallTickMiss];
