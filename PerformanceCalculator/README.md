@@ -168,24 +168,29 @@ Computes the performance of a simulated play on a beatmap. The provided output i
 
 Computes the performance (pp) of a simulated osu! play.
 
-Usage: dotnet PerformanceCalculator.dll simulate osu <beatmap> [options]
+Usage: dotnet PerformanceCalculator.dll simulate osu [options] <beatmap>
 
 Arguments:
-  beatmap                             Required. Can be either a path to beatmap file (.osu) or beatmap ID.
+  beatmap                           Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
-  -?|-h|--help                        Show help information.
-  -a|--accuracy <accuracy>            Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
-  -c|--combo <combo>                  Maximum combo during play. Defaults to beatmap maximum.
-  -C|--percent-combo <combo>          Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
-  -m|--mod <mod>                      One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
-  -L|--large-tick-misses <misses>"    Number of large tick misses. Defaults to 0.
-  -S|--slider-tail-misses <misses>"   Number of slider tail misses. Defaults to 0.
-  -X|--misses <misses>                Number of misses. Defaults to 0.
-  -M|--mehs <mehs>                    Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.
-  -G|--goods <goods>                  Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
-  -j|--json                           Output results as JSON.
-  -o|--output <file.txt>              Output results to text file.
+  -?|-h|--help                      Show help information.
+  -M|--mehs <mehs>                  Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.
+  -G|--goods <goods>                Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+  -c|--combo <combo>                Maximum combo during play. Defaults to beatmap maximum.
+  -C|--percent-combo <combo>        Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
+                                    Default value is: 100.
+  -L|--large-tick-misses <misses>   Number of large tick misses. Defaults to 0.
+                                    Default value is: 0.
+  -S|--slider-tail-misses <misses>  Number of slider tail misses. Defaults to 0.
+                                    Default value is: 0.
+  -a|--accuracy <accuracy>          Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
+                                    Default value is: 100.
+  -m|--mod <mod>                    One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...
+  -o|--mod-option <option>          The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35
+  -X|--misses <misses>              Number of misses. Defaults to 0.
+                                    Default value is: 0.
+  -j|--json                         Output results as JSON.
 ```
 
 #### osu!taiko
@@ -194,21 +199,24 @@ Options:
 
 Computes the performance (pp) of a simulated osu!taiko play.
 
-Usage: dotnet PerformanceCalculator.dll simulate taiko <beatmap> [options]
+Usage: dotnet PerformanceCalculator.dll simulate taiko [options] <beatmap>
 
 Arguments:
   beatmap                     Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
-  -?|-h|--help                Show help information.
-  -a|--accuracy <accuracy>    Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
-  -c|--combo <combo>          Maximum combo during play. Defaults to beatmap maximum.
-  -C|--percent-combo <combo>  Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
-  -m|--mod <mod>              One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
-  -X|--misses <misses>        Number of misses. Defaults to 0.
-  -G|--goods <goods>          Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
-  -j|--json                   Output results as JSON.
-  -o|--output <file.txt>      Output results to text file.
+  -?|-h|--help                      Show help information.
+  -G|--goods <goods>                Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+  -c|--combo <combo>                Maximum combo during play. Defaults to beatmap maximum.
+  -C|--percent-combo <combo>        Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
+                                    Default value is: 100.
+  -a|--accuracy <accuracy>          Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
+                                    Default value is: 100.
+  -m|--mod <mod>                    One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...
+  -o|--mod-option <option>          The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35
+  -X|--misses <misses>              Number of misses. Defaults to 0.
+                                    Default value is: 0.
+  -j|--json                         Output results as JSON.
 ```
 
 #### osu!catch
@@ -217,22 +225,25 @@ Options:
 
 Computes the performance (pp) of a simulated osu!catch play.
 
-Usage: dotnet PerformanceCalculator.dll simulate catch <beatmap> [options]
+Usage: dotnet PerformanceCalculator.dll simulate catch [options] <beatmap>
 
 Arguments:
-  beatmap                     Required. Can be either a path to beatmap file (.osu) or beatmap ID.
+  beatmap                           Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
-  -?|-h|--help                Show help information.
-  -a|--accuracy <accuracy>    Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
-  -c|--combo <combo>          Maximum combo during play. Defaults to beatmap maximum.
-  -C|--percent-combo <combo>  Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
-  -m|--mod <mod>              One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, ez, etc...
-  -X|--misses <misses>        Number of misses. Defaults to 0.
-  -T|--tiny-droplets <tinys>  Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.
-  -D|--droplets <droplets>    Number of droplets hit. Will override accuracy if used. Otherwise is automatically calculated.
-  -j|--json                   Output results as JSON.
-  -o|--output <file.txt>      Output results to text file.
+  -?|-h|--help                      Show help information.
+  -c|--combo <combo>                Maximum combo during play. Defaults to beatmap maximum.
+  -C|--percent-combo <combo>        Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.
+                                    Default value is: 100.
+  -T|--tiny-droplets <tinys>        Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.
+  -D|--droplets <droplets>          Number of droplets hit. Will override accuracy if used. Otherwise is automatically calculated.
+  -a|--accuracy <accuracy>          Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
+                                    Default value is: 100.
+  -m|--mod <mod>                    One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...
+  -o|--mod-option <option>          The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35
+  -X|--misses <misses>              Number of misses. Defaults to 0.
+                                    Default value is: 0.
+  -j|--json                         Output results as JSON.
 ```
 
 
@@ -242,17 +253,24 @@ Options:
 
 Computes the performance (pp) of a simulated osu!mania play.
 
-Usage: dotnet PerformanceCalculator.dll simulate mania <beatmap> [options]
+Usage: dotnet PerformanceCalculator.dll simulate mania [options] <beatmap>
 
 Arguments:
-  beatmap                 Required. Can be either a path to beatmap file (.osu) or beatmap ID.
+  beatmap                           Required. Can be either a path to beatmap file (.osu) or beatmap ID.
 
 Options:
-  -?|-h|--help            Show help information.
-  -s|--score <score>      Score. An integer 0-1000000.
-  -m|--mod <mod>          One for each mod. The mods to compute the performance with. Values: hr, dt, fl, 4k, 5k, etc...
-  -j|--json               Output results as JSON.
-  -o|--output <file.txt>  Output results to text file.
+  -?|-h|--help                      Show help information.
+  -M|--mehs <mehs>                  Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.
+  -G|--goods <goods>                Number of goods. Will override accuracy if used. Otherwise is automatically calculated.
+  -O|--oks <oks>                    Number of oks. Will override accuracy if used. Otherwise is automatically calculated.
+  -T|--greats <greats>              Number of greats. Will override accuracy if used. Otherwise is automatically calculated.
+  -a|--accuracy <accuracy>          Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.
+                                    Default value is: 100.
+  -m|--mod <mod>                    One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...
+  -o|--mod-option <option>          The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35
+  -X|--misses <misses>              Number of misses. Defaults to 0.
+                                    Default value is: 0.
+  -j|--json                         Output results as JSON.
 ```
 
 ### Leaderboard
