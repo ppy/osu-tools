@@ -47,7 +47,7 @@ namespace PerformanceCalculator.Difficulty
                 mod.RequiresConfiguration,
                 mod.UserPlayable,
                 mod.ValidForMultiplayer,
-                mod.ValidForFreestyle,
+                mod.ValidForFreestyleAsRequiredMod,
                 mod.ValidForMultiplayerAsFreeMod,
                 mod.AlwaysValidForSubmission,
             });
