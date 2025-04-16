@@ -74,6 +74,8 @@ namespace PerformanceCalculatorGUI.Screens
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
 
         private const float username_container_height = 40;
+        private const int max_api_scores = 200;
+        private const int max_api_scores_in_one_query = 100;
 
         public ProfileScreen()
         {
@@ -289,11 +291,17 @@ namespace PerformanceCalculatorGUI.Screens
 
                         Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
 
-                        var apiScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit=100").ConfigureAwait(false);
+                        var apiScores = new List<SoloScoreInfo>();
+
+                        for (int i = 0; i < max_api_scores; i += max_api_scores_in_one_query)
+                        {
+                            apiScores.AddRange(await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/best?mode={ruleset.Value.ShortName}&limit={max_api_scores_in_one_query}&offset={i}").ConfigureAwait(false));
+                            await Task.Delay(200, token).ConfigureAwait(false);
+                        }
 
                         if (includePinnedCheckbox.Current.Value)
                         {
-                            var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit=100")
+                            var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit={max_api_scores_in_one_query}")
                                                                .ConfigureAwait(false);
                             apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID)).ToArray()).ToList();
                         }
