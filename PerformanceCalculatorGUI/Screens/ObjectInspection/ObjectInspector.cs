@@ -26,6 +26,7 @@ using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
 using osu.Game.Screens.Edit.Compose.Components.Timeline;
+using osu.Game.Skinning;
 using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -133,7 +134,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             timeline = new Timeline(new TimelineBlueprintContainer())
                         }
                     },
-                    rulesetContainer = new Container
+                    rulesetContainer = new RulesetSkinProvidingContainer(rulesetInstance, playableBeatmap, null)
                     {
                         Origin = Anchor.TopRight,
                         Anchor = Anchor.TopRight,
