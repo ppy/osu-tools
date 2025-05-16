@@ -895,7 +895,10 @@ namespace PerformanceCalculatorGUI.Screens
         private void resetCalculations()
         {
             createCalculators();
+
             resetMods();
+            legacyTotalScore = null;
+
             calculateDifficulty();
             calculatePerformance();
             populateScoreParams();
