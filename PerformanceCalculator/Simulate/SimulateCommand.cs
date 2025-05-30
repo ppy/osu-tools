@@ -40,6 +40,10 @@ namespace PerformanceCalculator.Simulate
         [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
         public int Misses { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-l|--legacy-total-score <score>", Description = "Amount of legacy total score.")]
+        public long? LegacyTotalScore { get; }
+
         //
         // Options implemented in the ruleset-specific commands
         // -> Catch renames Mehs/Goods to (tiny-)droplets
@@ -73,6 +77,7 @@ namespace PerformanceCalculator.Simulate
                 Accuracy = GetAccuracy(beatmap, statistics),
                 MaxCombo = Combo ?? (int)Math.Round(PercentCombo / 100 * beatmapMaxCombo),
                 Statistics = statistics,
+                LegacyTotalScore = LegacyTotalScore,
                 Mods = mods
             };
 
