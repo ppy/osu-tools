@@ -1044,6 +1044,21 @@ namespace PerformanceCalculatorGUI.Screens
                             mehsTextBox.Text = mehs.ToString();
                         }
 
+                        if (ruleset.Value?.ShortName == "fruits")
+                        {
+                            if (scoreInfo.Statistics.TryGetValue(HitResult.LargeTickHit, out int largeTickHits))
+                            {
+                                goodsTextBox.Value.Value = largeTickHits;
+                                goodsTextBox.Text = largeTickHits.ToString();
+                            }
+
+                            if (scoreInfo.Statistics.TryGetValue(HitResult.SmallTickHit, out int smallTickHits))
+                            {
+                                mehsTextBox.Value.Value = smallTickHits;
+                                mehsTextBox.Text = smallTickHits.ToString();
+                            }
+                        }
+
                         if (scoreInfo.Statistics.TryGetValue(HitResult.LargeTickMiss, out int largeTickMisses))
                         {
                             largeTickMissesTextBox.Value.Value = largeTickMisses;
