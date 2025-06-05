@@ -68,7 +68,7 @@ namespace PerformanceCalculator.Simulate
             // Start by assuming every non miss is a meh
             // This is how much increase is needed by the rest
             int remainingHits = totalHits - countMiss;
-            int delta = targetTotal - (10 * remainingHits);
+            int delta = Math.Max(targetTotal - (10 * remainingHits), 0);
 
             // Each perfect increases total by 50 (CL) or 51 (no CL) (perfect - meh = 50 or 51)
             int perfects = Math.Min(delta / (perfectValue - 10), remainingHits);
@@ -86,7 +86,7 @@ namespace PerformanceCalculator.Simulate
             remainingHits -= countGood.Value;
 
             // Each ok increases total by 10 (ok - meh = 10)
-            int oks = delta / 10;
+            int oks = Math.Min(delta / 10, remainingHits);
             remainingHits -= oks;
 
             // Everything else is a meh, as initially assumed
