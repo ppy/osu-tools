@@ -60,32 +60,36 @@ namespace PerformanceCalculator.Simulate
                 };
             }
 
-            // Let Great=Perfect=6, Good=4, Ok=2, Meh=1, Miss=0. The total should be this.
-            int targetTotal = (int)Math.Round(accuracy * totalHits * 6);
+            int perfectValue = mods.Any(m => m is ModClassic) ? 60 : 61;
+
+            // Let Great = 60, Good = 40, Ok = 20, Meh = 10, Miss = 0, Perfect = 61 or 60 depending on CL. The total should be this.
+            int targetTotal = (int)Math.Round(accuracy * totalHits * perfectValue);
 
             // Start by assuming every non miss is a meh
             // This is how much increase is needed by the rest
             int remainingHits = totalHits - countMiss;
-            int delta = targetTotal - remainingHits;
+            int delta = targetTotal - 10 * remainingHits;
 
-            // Each great and perfect increases total by 5 (great-meh=5)
-            // There is no difference in accuracy between them, so just halve arbitrarily (favouring perfects for an odd number).
-            int greatsAndPerfects = Math.Min(delta / 5, remainingHits);
-            int greats = greatsAndPerfects / 2;
-            int perfects = greatsAndPerfects - greats;
-            delta -= (greats + perfects) * 5;
-            remainingHits -= greats + perfects;
+            // Each perfect increases total by 50 (CL) or 51 (no CL) (perfect - meh = 50 or 51)
+            int perfects = Math.Min(delta / (perfectValue - 10), remainingHits);
+            delta -= perfects * (perfectValue - 10);
+            remainingHits -= perfects;
 
-            // Each good increases total by 3 (good-meh=3).
-            countGood = Math.Min(delta / 3, remainingHits);
-            delta -= countGood.Value * 3;
+            // Each great increases total by 50 (great - meh = 50)
+            int greats = Math.Min(delta / 50, remainingHits);
+            delta -= greats * 50;
+            remainingHits -= greats;
+
+            // Each good increases total by 30 (good - meh = 30)
+            countGood = Math.Min(delta / 30, remainingHits);
+            delta -= countGood.Value * 30;
             remainingHits -= countGood.Value;
 
-            // Each ok increases total by 1 (ok-meh=1).
-            int oks = delta;
+            // Each ok increases total by 10 (ok - meh = 10)
+            int oks = delta / 10;
             remainingHits -= oks;
 
-            // Everything else is a meh, as initially assumed.
+            // Everything else is a meh, as initially assumed
             countMeh = remainingHits;
 
             return new Dictionary<HitResult, int>
