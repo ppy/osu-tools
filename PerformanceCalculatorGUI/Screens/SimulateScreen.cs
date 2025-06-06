@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Humanizer;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -40,6 +39,7 @@ using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
 using PerformanceCalculatorGUI.Screens.ObjectInspection;
+using PerformanceCalculatorGUI.Screens.Simulate;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -71,10 +71,10 @@ namespace PerformanceCalculatorGUI.Screens
         private SwitchButton fullScoreDataSwitch;
 
         private DifficultyAttributes difficultyAttributes;
-        private FillFlowContainer difficultyAttributesContainer;
-        private FillFlowContainer performanceAttributesContainer;
+        private AttributesTable difficultyAttributesContainer;
 
         private PerformanceCalculator performanceCalculator;
+        private AttributesTable performanceAttributesContainer;
 
         [Cached]
         private Bindable<DifficultyCalculator> difficultyCalculator = new Bindable<DifficultyCalculator>();
@@ -418,37 +418,23 @@ namespace PerformanceCalculatorGUI.Screens
                                             {
                                                 new OsuSpriteText
                                                 {
-                                                    Margin = new MarginPadding { Left = 10f, Top = 5f, Bottom = 10.0f },
+                                                    Margin = new MarginPadding { Left = 10f, Vertical = 5f },
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
                                                     Text = "Difficulty Attributes"
                                                 },
-                                                difficultyAttributesContainer = new FillFlowContainer
-                                                {
-                                                    Direction = FillDirection.Vertical,
-                                                    RelativeSizeAxes = Axes.X,
-                                                    Anchor = Anchor.TopLeft,
-                                                    AutoSizeAxes = Axes.Y,
-                                                    Spacing = new Vector2(0, 2f)
-                                                },
+                                                difficultyAttributesContainer = new AttributesTable(),
                                                 new OsuSpriteText
                                                 {
-                                                    Margin = new MarginPadding(10.0f),
+                                                    Margin = new MarginPadding { Left = 10f, Vertical = 5f },
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
                                                     Text = "Performance Attributes"
                                                 },
-                                                performanceAttributesContainer = new FillFlowContainer
-                                                {
-                                                    Direction = FillDirection.Vertical,
-                                                    RelativeSizeAxes = Axes.X,
-                                                    Anchor = Anchor.TopLeft,
-                                                    AutoSizeAxes = Axes.Y,
-                                                    Spacing = new Vector2(0, 2f)
-                                                },
+                                                performanceAttributesContainer = new AttributesTable(),
                                                 new OsuSpriteText
                                                 {
-                                                    Margin = new MarginPadding(10.0f),
+                                                    Margin = new MarginPadding { Left = 10f, Vertical = 5f },
                                                     Origin = Anchor.TopLeft,
                                                     Height = 20,
                                                     Text = "Strain graph (alt+scroll to zoom)"
@@ -582,6 +568,7 @@ namespace PerformanceCalculatorGUI.Screens
             // recreate calculators to update DHOs
             createCalculators();
 
+            modSettingChangeTracker?.Dispose();
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += m =>
             {
@@ -592,7 +579,7 @@ namespace PerformanceCalculatorGUI.Screens
                     updateMissesTextboxes();
                     calculateDifficulty();
                     calculatePerformance();
-                }, 100);
+                }, 300);
             };
 
             calculateDifficulty();
@@ -647,6 +634,7 @@ namespace PerformanceCalculatorGUI.Screens
                 resetCalculations();
             }
 
+            beatmapTitle.Clear();
             beatmapTitle.Add(new BeatmapCard(working));
 
             loadBackground();
@@ -672,14 +660,7 @@ namespace PerformanceCalculatorGUI.Screens
             try
             {
                 difficultyAttributes = difficultyCalculator.Value.Calculate(appliedMods.Value);
-                difficultyAttributesContainer.Children = AttributeConversion.ToDictionary(difficultyAttributes).Select(x =>
-                    new ExtendedLabelledTextBox
-                    {
-                        ReadOnly = true,
-                        Label = x.Key.Humanize().ToLowerInvariant(),
-                        Text = FormattableString.Invariant($"{x.Value:N2}")
-                    }
-                ).ToArray();
+                difficultyAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(difficultyAttributes);
             }
             catch (Exception e)
             {
@@ -752,17 +733,11 @@ namespace PerformanceCalculatorGUI.Screens
                     Statistics = statistics,
                     Mods = appliedMods.Value.ToArray(),
                     TotalScore = score,
-                    Ruleset = ruleset.Value
+                    Ruleset = ruleset.Value,
+                    LegacyTotalScore = legacyTotalScore,
                 }, difficultyAttributes);
 
-                performanceAttributesContainer.Children = AttributeConversion.ToDictionary(ppAttributes).Select(x =>
-                    new ExtendedLabelledTextBox
-                    {
-                        ReadOnly = true,
-                        Label = x.Key.Humanize().ToLowerInvariant(),
-                        Text = FormattableString.Invariant($"{x.Value:N2}")
-                    }
-                ).ToArray();
+                performanceAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(ppAttributes);
             }
             catch (Exception e)
             {
@@ -920,7 +895,10 @@ namespace PerformanceCalculatorGUI.Screens
         private void resetCalculations()
         {
             createCalculators();
+
             resetMods();
+            legacyTotalScore = null;
+
             calculateDifficulty();
             calculatePerformance();
             populateScoreParams();
@@ -1011,6 +989,8 @@ namespace PerformanceCalculatorGUI.Screens
             notificationDisplay.Display(new Notification(message));
         }
 
+        private long? legacyTotalScore;
+
         private void populateSettingsFromScore(long scoreId)
         {
             if (scoreIdPopulateButton.State.Value == ButtonState.Loading)
@@ -1034,6 +1014,8 @@ namespace PerformanceCalculatorGUI.Screens
 
                         ruleset.Value = rulesets.GetRuleset(scoreInfo.RulesetID);
                         appliedMods.Value = scoreInfo.Mods.Select(x => x.ToMod(ruleset.Value.CreateInstance())).ToList();
+
+                        legacyTotalScore = scoreInfo.LegacyTotalScore;
 
                         fullScoreDataSwitch.Current.Value = true;
 
@@ -1060,6 +1042,21 @@ namespace PerformanceCalculatorGUI.Screens
                         {
                             mehsTextBox.Value.Value = mehs;
                             mehsTextBox.Text = mehs.ToString();
+                        }
+
+                        if (ruleset.Value?.ShortName == "fruits")
+                        {
+                            if (scoreInfo.Statistics.TryGetValue(HitResult.LargeTickHit, out int largeTickHits))
+                            {
+                                goodsTextBox.Value.Value = largeTickHits;
+                                goodsTextBox.Text = largeTickHits.ToString();
+                            }
+
+                            if (scoreInfo.Statistics.TryGetValue(HitResult.SmallTickHit, out int smallTickHits))
+                            {
+                                mehsTextBox.Value.Value = smallTickHits;
+                                mehsTextBox.Text = smallTickHits.ToString();
+                            }
                         }
 
                         if (scoreInfo.Statistics.TryGetValue(HitResult.LargeTickMiss, out int largeTickMisses))
