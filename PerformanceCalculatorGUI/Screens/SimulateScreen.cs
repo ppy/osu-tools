@@ -61,7 +61,7 @@ namespace PerformanceCalculatorGUI.Screens
         private LimitedLabelledNumberBox comboTextBox;
         private LimitedLabelledNumberBox scoreTextBox;
 
-        private LabelledNumberBox scoreIdTextBox;
+        private LabelledTextBox scoreIdTextBox;
         private StatefulButton scoreIdPopulateButton;
 
         private GridContainer accuracyContainer;
@@ -226,12 +226,12 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Direction = FillDirection.Horizontal,
                                                     Children = new Drawable[]
                                                     {
-                                                        scoreIdTextBox = new LabelledNumberBox
+                                                        scoreIdTextBox = new LabelledTextBox
                                                         {
                                                             RelativeSizeAxes = Axes.X,
                                                             Width = 0.7f,
                                                             Label = "Score ID",
-                                                            PlaceholderText = "0",
+                                                            PlaceholderText = "0 or osu/0",
                                                         },
                                                         scoreIdPopulateButton = new StatefulButton("Populate from score")
                                                         {
@@ -241,7 +241,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                             {
                                                                 if (!string.IsNullOrEmpty(scoreIdTextBox.Current.Value))
                                                                 {
-                                                                    populateSettingsFromScore(long.Parse(scoreIdTextBox.Current.Value));
+                                                                    populateSettingsFromScore(scoreIdTextBox.Current.Value);
                                                                 }
                                                                 else
                                                                 {
@@ -991,7 +991,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private long? legacyTotalScore;
 
-        private void populateSettingsFromScore(long scoreId)
+        private void populateSettingsFromScore(string scoreId)
         {
             if (scoreIdPopulateButton.State.Value == ButtonState.Loading)
                 return;
