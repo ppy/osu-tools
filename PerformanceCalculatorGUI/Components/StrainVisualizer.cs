@@ -218,11 +218,11 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     new BufferedContainer(cachedFrameBuffer: true)
                     {
-                    RelativeSizeAxes = Axes.Both,
-                    Alpha = graphAlpha,
-                    Colour = skillColours[i % skillColours.Length],
-                    Child = graphs[i]
-                }
+                        RelativeSizeAxes = Axes.Both,
+                        Alpha = graphAlpha,
+                        Colour = skillColours[i % skillColours.Length],
+                        Child = graphs[i]
+                    }
                 });
             }
 
