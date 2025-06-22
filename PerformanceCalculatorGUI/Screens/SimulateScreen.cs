@@ -534,7 +534,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() =>
                 {
-                    calculateDifficultyAsync().ContinueWith((t) => calculatePerformance());
+                    calculateDifficultyAsync().ContinueWith(_ => calculatePerformance());
                 });
             }
         }
@@ -580,11 +580,11 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     createCalculators();
                     updateMissesTextboxes();
-                    calculateDifficultyAsync().ContinueWith((t) => calculatePerformance());
+                    calculateDifficultyAsync().ContinueWith(_ => calculatePerformance());
                 }, 300);
             };
 
-            calculateDifficultyAsync().ContinueWith((t) =>
+            calculateDifficultyAsync().ContinueWith(_ =>
             {
                 updateCombo(false);
                 calculatePerformance();
@@ -910,7 +910,7 @@ namespace PerformanceCalculatorGUI.Screens
             resetMods();
             legacyTotalScore = null;
 
-            calculateDifficultyAsync().ContinueWith((t) =>
+            calculateDifficultyAsync().ContinueWith(_ =>
             {
                 calculatePerformance();
                 Schedule(() => populateScoreParams());
@@ -1085,7 +1085,7 @@ namespace PerformanceCalculatorGUI.Screens
                             sliderTailMissesTextBox.Text = sliderTailMisses.ToString();
                         }
 
-                        calculateDifficultyAsync().ContinueWith((t) =>
+                        calculateDifficultyAsync().ContinueWith(_ =>
                         {
                             calculatePerformance();
                             Schedule(() => scoreIdPopulateButton.State.Value = ButtonState.Done);
