@@ -1088,8 +1088,7 @@ namespace PerformanceCalculatorGUI.Screens
                         calculateDifficultyAsync().ContinueWith((t) =>
                         {
                             calculatePerformance();
-                            scoreIdPopulateButton.State.Value = ButtonState.Done;
-
+                            Schedule(() => scoreIdPopulateButton.State.Value = ButtonState.Done);
                         });
                     });
                 }
