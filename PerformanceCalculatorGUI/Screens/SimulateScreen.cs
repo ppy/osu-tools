@@ -913,7 +913,7 @@ namespace PerformanceCalculatorGUI.Screens
             calculateDifficultyAsync().ContinueWith(_ =>
             {
                 calculatePerformance();
-                Schedule(() => populateScoreParams());
+                Schedule(populateScoreParams);
             });
         }
 
