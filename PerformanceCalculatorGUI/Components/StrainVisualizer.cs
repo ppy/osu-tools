@@ -64,7 +64,7 @@ namespace PerformanceCalculatorGUI.Components
             graphAlpha = Math.Min(1.5f / skills.Length, 0.9f);
             var strainLists = getStrainLists(skills);
 
-            createStrainBars(skills, strainLists).ContinueWith(_ => Schedule(() =>
+            createStrainBars(skills, strainLists).ContinueWith(t => Schedule(() =>
             {
                 graphsContainer.Clear();
                 addStrainBars(t.GetResultSafely(), skills, strainLists);
