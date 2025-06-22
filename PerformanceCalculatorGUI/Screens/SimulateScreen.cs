@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework;
 using osu.Framework.Allocation;
@@ -118,6 +119,8 @@ namespace PerformanceCalculatorGUI.Screens
 
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
+
+        private CancellationTokenSource cancellationTokenSource;
 
         public override bool ShouldShowConfirmationDialogOnSwitch => working != null;
 
@@ -531,14 +534,14 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() =>
                 {
-                    calculateDifficulty();
-                    calculatePerformance();
+                    calculateDifficultyAsync().ContinueWith((t) => calculatePerformance());
                 });
             }
         }
 
         protected override void Dispose(bool isDisposing)
         {
+            cancellationTokenSource?.Cancel();
             modSettingChangeTracker?.Dispose();
 
             appliedMods.UnbindAll();
@@ -577,20 +580,18 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     createCalculators();
                     updateMissesTextboxes();
-                    calculateDifficulty();
-                    calculatePerformance();
+                    calculateDifficultyAsync().ContinueWith((t) => calculatePerformance());
                 }, 300);
             };
 
-            calculateDifficulty();
-            updateCombo(false);
-            calculatePerformance();
+            calculateDifficultyAsync().ContinueWith((t) => { updateCombo(false); calculatePerformance(); });
         }
 
         private void resetBeatmap()
         {
             working = null;
             beatmapTitle.Clear();
+            cancellationTokenSource?.Cancel();
             resetMods();
             beatmapDataContainer.Hide();
 
@@ -652,33 +653,40 @@ namespace PerformanceCalculatorGUI.Screens
             performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
         }
 
-        private void calculateDifficulty()
+        private Task calculateDifficultyAsync()
         {
             if (working == null || difficultyCalculator.Value == null)
-                return;
+                return Task.CompletedTask;
 
-            try
-            {
-                difficultyAttributes = difficultyCalculator.Value.Calculate(appliedMods.Value);
-                difficultyAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(difficultyAttributes);
-            }
-            catch (Exception e)
-            {
-                showError(e);
-                resetBeatmap();
-                return;
-            }
+            cancellationTokenSource?.Cancel();
+            cancellationTokenSource = new CancellationTokenSource();
 
-            if (difficultyCalculator.Value is IExtendedDifficultyCalculator extendedDifficultyCalculator)
+            return Task.Run(() =>
             {
-                // StrainSkill always skips the first object
-                if (working.Beatmap?.HitObjects.Count > 1)
-                    strainVisualizer.TimeUntilFirstStrain.Value = (int)working.Beatmap.HitObjects[1].StartTime;
+                difficultyAttributes = difficultyCalculator.Value.Calculate(appliedMods.Value, cancellationTokenSource.Token);
 
-                strainVisualizer.Skills.Value = extendedDifficultyCalculator.GetSkills();
-            }
-            else
-                strainVisualizer.Skills.Value = Array.Empty<Skill>();
+                if (cancellationTokenSource.IsCancellationRequested)
+                    return;
+
+                Schedule(() =>
+                {
+                    difficultyAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(difficultyAttributes);
+
+                    if (difficultyCalculator.Value is IExtendedDifficultyCalculator extendedDifficultyCalculator)
+                    {
+                        // StrainSkill always skips the first object
+                        if (working.Beatmap?.HitObjects.Count > 1)
+                            strainVisualizer.TimeUntilFirstStrain.Value = (int)working.Beatmap.HitObjects[1].StartTime;
+
+                        strainVisualizer.Skills.Value = extendedDifficultyCalculator.GetSkills();
+                    }
+                    else
+                        strainVisualizer.Skills.Value = Array.Empty<Skill>();
+                });
+            }).ContinueWith(t =>
+            {
+                Schedule(() => showError(t.Exception));
+            }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void debouncedCalculatePerformance()
@@ -689,7 +697,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void calculatePerformance()
         {
-            if (working == null || difficultyAttributes == null)
+            if (working == null || difficultyAttributes == null || cancellationTokenSource.IsCancellationRequested)
                 return;
 
             int? countGood = null, countMeh = null;
@@ -737,12 +745,11 @@ namespace PerformanceCalculatorGUI.Screens
                     LegacyTotalScore = legacyTotalScore,
                 }, difficultyAttributes);
 
-                performanceAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(ppAttributes);
+                Schedule(() => performanceAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(ppAttributes));
             }
             catch (Exception e)
             {
-                showError(e);
-                resetBeatmap();
+                Schedule(() => showError(e));
             }
         }
 
@@ -899,7 +906,7 @@ namespace PerformanceCalculatorGUI.Screens
             resetMods();
             legacyTotalScore = null;
 
-            calculateDifficulty();
+            calculateDifficultyAsync();
             calculatePerformance();
             populateScoreParams();
         }
@@ -1072,7 +1079,7 @@ namespace PerformanceCalculatorGUI.Screens
                             sliderTailMissesTextBox.Text = sliderTailMisses.ToString();
                         }
 
-                        calculateDifficulty();
+                        calculateDifficultyAsync();
                         calculatePerformance();
 
                         scoreIdPopulateButton.State.Value = ButtonState.Done;
