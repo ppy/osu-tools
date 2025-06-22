@@ -584,7 +584,11 @@ namespace PerformanceCalculatorGUI.Screens
                 }, 300);
             };
 
-            calculateDifficultyAsync().ContinueWith((t) => { updateCombo(false); calculatePerformance(); });
+            calculateDifficultyAsync().ContinueWith((t) =>
+            {
+                updateCombo(false);
+                calculatePerformance();
+            });
         }
 
         private void resetBeatmap()
@@ -906,9 +910,11 @@ namespace PerformanceCalculatorGUI.Screens
             resetMods();
             legacyTotalScore = null;
 
-            calculateDifficultyAsync();
-            calculatePerformance();
-            populateScoreParams();
+            calculateDifficultyAsync().ContinueWith((t) =>
+            {
+                calculatePerformance();
+                Schedule(() => populateScoreParams());
+            });
         }
 
         // This is to make sure combo resets when classic mod is applied
@@ -1079,10 +1085,12 @@ namespace PerformanceCalculatorGUI.Screens
                             sliderTailMissesTextBox.Text = sliderTailMisses.ToString();
                         }
 
-                        calculateDifficultyAsync();
-                        calculatePerformance();
+                        calculateDifficultyAsync().ContinueWith((t) =>
+                        {
+                            calculatePerformance();
+                            scoreIdPopulateButton.State.Value = ButtonState.Done;
 
-                        scoreIdPopulateButton.State.Value = ButtonState.Done;
+                        });
                     });
                 }
                 catch (Exception e)
