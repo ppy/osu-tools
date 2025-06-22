@@ -64,7 +64,7 @@ namespace PerformanceCalculatorGUI.Components
             graphAlpha = Math.Min(1.5f / skills.Length, 0.9f);
             var strainLists = getStrainLists(skills);
 
-            createStrainBars(skills, strainLists).ContinueWith((t) => Schedule(() =>
+            createStrainBars(skills, strainLists).ContinueWith(_ => Schedule(() =>
             {
                 graphsContainer.Clear();
                 addStrainBars(t.GetResultSafely(), skills, strainLists);
@@ -137,11 +137,11 @@ namespace PerformanceCalculatorGUI.Components
         {
             List<StrainBarGraph> graphs = [];
 
-            var strainMaxValue = strainLists.Max(list => list.Max());
+            float strainMaxValue = strainLists.Max(list => list.Max());
 
             for (int i = 0; i < skills.Length; i++)
             {
-                graphs.Add(new StrainBarGraph()
+                graphs.Add(new StrainBarGraph
                 {
                     RelativeSizeAxes = Axes.Both,
                     MaxValue = strainMaxValue,
