@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
@@ -49,8 +51,6 @@ namespace PerformanceCalculatorGUI.Components
 
         private void updateGraphs(ValueChangedEvent<Skill[]> val)
         {
-            graphsContainer.Clear();
-
             var skills = val.NewValue.Where(x => x is StrainSkill or StrainDecaySkill).ToArray();
 
             // dont bother if there are no strain skills to draw
@@ -63,69 +63,93 @@ namespace PerformanceCalculatorGUI.Components
 
             graphAlpha = Math.Min(1.5f / skills.Length, 0.9f);
             var strainLists = getStrainLists(skills);
-            addStrainBars(skills, strainLists);
-            addTooltipBars(strainLists);
 
-            if (val.OldValue == null || !val.NewValue.All(x => val.OldValue.Any(y => y.GetType().Name == x.GetType().Name)))
+            createStrainBars(skills, strainLists).ContinueWith((t) => Schedule(() =>
             {
-                // skill list changed - recreate toggles
-                legendContainer.Clear();
-                graphToggles.Clear();
+                graphsContainer.Clear();
+                addStrainBars(t.GetResultSafely(), skills, strainLists);
+                addTooltipBars(strainLists);
 
-                for (int i = 0; i < skills.Length; i++)
+                if (val.OldValue == null || !val.NewValue.All(x => val.OldValue.Any(y => y.GetType().Name == x.GetType().Name)))
                 {
-                    // this is ugly, but it works
-                    var graphToggleBindable = new Bindable<bool>();
-                    int graphNum = i;
-                    graphToggleBindable.BindValueChanged(state =>
-                    {
-                        if (state.NewValue)
-                        {
-                            graphsContainer[graphNum].FadeTo(graphAlpha);
-                        }
-                        else
-                        {
-                            graphsContainer[graphNum].Hide();
-                        }
-                    });
-                    graphToggles.Add(graphToggleBindable);
+                    // skill list changed - recreate toggles
+                    legendContainer.Clear();
+                    graphToggles.Clear();
 
-                    legendContainer.Add(new Container
+                    for (int i = 0; i < skills.Length; i++)
                     {
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        Masking = true,
-                        CornerRadius = 10,
-                        AutoSizeAxes = Axes.Both,
-                        Children = new Drawable[]
+                        // this is ugly, but it works
+                        var graphToggleBindable = new Bindable<bool>();
+                        int graphNum = i;
+                        graphToggleBindable.BindValueChanged(state =>
                         {
-                            new Box
+                            if (state.NewValue)
                             {
-                                RelativeSizeAxes = Axes.Both,
-                                Colour = colourProvider.Background5
-                            },
-                            new ExtendedOsuCheckbox
-                            {
-                                Padding = new MarginPadding(10),
-                                RelativeSizeAxes = Axes.None,
-                                Width = 200,
-                                Current = { BindTarget = graphToggleBindable, Default = true, Value = true },
-                                LabelText = skills[i].GetType().Name,
-                                TextColour = skillColours[i % skillColours.Length]
+                                graphsContainer[graphNum].FadeTo(graphAlpha);
                             }
-                        }
-                    });
+                            else
+                            {
+                                graphsContainer[graphNum].Hide();
+                            }
+                        });
+                        graphToggles.Add(graphToggleBindable);
+
+                        legendContainer.Add(new Container
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Masking = true,
+                            CornerRadius = 10,
+                            AutoSizeAxes = Axes.Both,
+                            Children = new Drawable[]
+                            {
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = colourProvider.Background5
+                                },
+                                new ExtendedOsuCheckbox
+                                {
+                                    Padding = new MarginPadding(10),
+                                    RelativeSizeAxes = Axes.None,
+                                    Width = 200,
+                                    Current = { BindTarget = graphToggleBindable, Default = true, Value = true },
+                                    LabelText = skills[i].GetType().Name,
+                                    TextColour = skillColours[i % skillColours.Length]
+                                }
+                            }
+                        });
+                    }
                 }
-            }
-            else
-            {
-                for (int i = 0; i < skills.Length; i++)
+                else
                 {
-                    // graphs are visible by default, we want to hide ones that were disabled before
-                    if (!graphToggles[i].Value)
-                        graphsContainer[i].Hide();
+                    for (int i = 0; i < skills.Length; i++)
+                    {
+                        // graphs are visible by default, we want to hide ones that were disabled before
+                        if (!graphToggles[i].Value)
+                            graphsContainer[i].Hide();
+                    }
                 }
+            }));
+        }
+
+        private Task<List<StrainBarGraph>> createStrainBars(Skill[] skills, List<float[]> strainLists)
+        {
+            List<StrainBarGraph> graphs = [];
+
+            var strainMaxValue = strainLists.Max(list => list.Max());
+
+            for (int i = 0; i < skills.Length; i++)
+            {
+                graphs.Add(new StrainBarGraph()
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    MaxValue = strainMaxValue,
+                    Values = strainLists[i]
+                });
             }
+
+            return LoadComponentsAsync(graphs).ContinueWith(_ => graphs);
         }
 
         [BackgroundDependencyLoader]
@@ -184,7 +208,7 @@ namespace PerformanceCalculatorGUI.Components
             Skills.BindValueChanged(updateGraphs);
         }
 
-        private void addStrainBars(Skill[] skills, List<float[]> strainLists)
+        private void addStrainBars(List<StrainBarGraph> graphs, Skill[] skills, List<float[]> strainLists)
         {
             float strainMaxValue = strainLists.Max(list => list.Max());
 
@@ -194,16 +218,11 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     new BufferedContainer(cachedFrameBuffer: true)
                     {
-                        RelativeSizeAxes = Axes.Both,
-                        Alpha = graphAlpha,
-                        Colour = skillColours[i % skillColours.Length],
-                        Child = new StrainBarGraph
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            MaxValue = strainMaxValue,
-                            Values = strainLists[i]
-                        }
-                    }
+                    RelativeSizeAxes = Axes.Both,
+                    Alpha = graphAlpha,
+                    Colour = skillColours[i % skillColours.Length],
+                    Child = graphs[i]
+                }
                 });
             }
 
