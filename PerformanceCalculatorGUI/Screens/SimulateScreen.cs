@@ -714,16 +714,16 @@ namespace PerformanceCalculatorGUI.Screens
                     // official rulesets can generate more precise hits from accuracy
                     if (appliedMods.Value.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
                     {
-                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood,
+                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, appliedMods.Value.ToArray(), missesTextBox.Value.Value, countMeh, countGood,
                             null, null);
                     }
                     else
                     {
-                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, missesTextBox.Value.Value, countMeh, countGood,
+                        statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracyTextBox.Value.Value / 100.0, beatmap, appliedMods.Value.ToArray(), missesTextBox.Value.Value, countMeh, countGood,
                             largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
                     }
 
-                    accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, beatmap, statistics);
+                    accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, beatmap, statistics, appliedMods.Value.ToArray());
                 }
 
                 var ppAttributes = performanceCalculator?.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.Value)
@@ -733,7 +733,8 @@ namespace PerformanceCalculatorGUI.Screens
                     Statistics = statistics,
                     Mods = appliedMods.Value.ToArray(),
                     TotalScore = score,
-                    Ruleset = ruleset.Value
+                    Ruleset = ruleset.Value,
+                    LegacyTotalScore = legacyTotalScore,
                 }, difficultyAttributes);
 
                 performanceAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(ppAttributes);
@@ -894,7 +895,10 @@ namespace PerformanceCalculatorGUI.Screens
         private void resetCalculations()
         {
             createCalculators();
+
             resetMods();
+            legacyTotalScore = null;
+
             calculateDifficulty();
             calculatePerformance();
             populateScoreParams();
@@ -985,6 +989,8 @@ namespace PerformanceCalculatorGUI.Screens
             notificationDisplay.Display(new Notification(message));
         }
 
+        private long? legacyTotalScore;
+
         private void populateSettingsFromScore(long scoreId)
         {
             if (scoreIdPopulateButton.State.Value == ButtonState.Loading)
@@ -1008,6 +1014,8 @@ namespace PerformanceCalculatorGUI.Screens
 
                         ruleset.Value = rulesets.GetRuleset(scoreInfo.RulesetID);
                         appliedMods.Value = scoreInfo.Mods.Select(x => x.ToMod(ruleset.Value.CreateInstance())).ToList();
+
+                        legacyTotalScore = scoreInfo.LegacyTotalScore;
 
                         fullScoreDataSwitch.Current.Value = true;
 
@@ -1034,6 +1042,21 @@ namespace PerformanceCalculatorGUI.Screens
                         {
                             mehsTextBox.Value.Value = mehs;
                             mehsTextBox.Text = mehs.ToString();
+                        }
+
+                        if (ruleset.Value?.ShortName == "fruits")
+                        {
+                            if (scoreInfo.Statistics.TryGetValue(HitResult.LargeTickHit, out int largeTickHits))
+                            {
+                                goodsTextBox.Value.Value = largeTickHits;
+                                goodsTextBox.Text = largeTickHits.ToString();
+                            }
+
+                            if (scoreInfo.Statistics.TryGetValue(HitResult.SmallTickHit, out int smallTickHits))
+                            {
+                                mehsTextBox.Value.Value = smallTickHits;
+                                mehsTextBox.Text = smallTickHits.ToString();
+                            }
                         }
 
                         if (scoreInfo.Statistics.TryGetValue(HitResult.LargeTickMiss, out int largeTickMisses))
