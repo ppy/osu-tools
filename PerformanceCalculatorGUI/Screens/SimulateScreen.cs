@@ -1077,8 +1077,7 @@ namespace PerformanceCalculatorGUI.Screens
                 });
             }).ContinueWith(t =>
             {
-                Logger.Log(t.Exception?.ToString(), level: LogLevel.Error);
-                notificationDisplay.Display(new Notification(t.Exception?.Flatten().Message));
+                showError(t.Exception);
             }, TaskContinuationOptions.OnlyOnFaulted).ContinueWith(t =>
             {
                 Schedule(() =>
