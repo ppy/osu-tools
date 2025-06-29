@@ -239,7 +239,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                             Width = 0.3f,
                                                             Action = () =>
                                                             {
-                                                                if (!string.IsNullOrEmpty(scoreIdTextBox.Current.Value))
+                                                                if (validateScoreId(scoreIdTextBox.Current.Value))
                                                                 {
                                                                     populateSettingsFromScore(scoreIdTextBox.Current.Value);
                                                                 }
@@ -1117,6 +1117,31 @@ namespace PerformanceCalculatorGUI.Screens
 
                 fixupTextBox(missesTextBox);
             }
+        }
+
+        private bool validateScoreId(string scoreId)
+        {
+            string[] validRulesetNames = { "osu", "taiko", "fruits", "mania" };
+
+            if (string.IsNullOrWhiteSpace(scoreId))
+                return false;
+
+            // Check if it's just a numeric id from lazer leaderboard
+            if (long.TryParse(scoreId, out _))
+                return true;
+
+            // Check if it's valid legacy database score id
+            string[] parts = scoreId.Split('/');
+            if (parts.Length == 2)
+            {
+                string ruleset = parts[0];
+                string idPart = parts[1];
+
+                if (validRulesetNames.Contains(ruleset) && long.TryParse(idPart, out _))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
