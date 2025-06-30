@@ -175,17 +175,10 @@ namespace PerformanceCalculator.Simulate
                 { HitResult.Miss, countMiss }
             };
 
-            if (countLargeTickMisses != null)
-            {
-                result[HitResult.LargeTickHit] = countLargeTicks - (int)countLargeTickMisses;
-                result[HitResult.LargeTickMiss] = (int)countLargeTickMisses;
-            }
-
-            if (countSliderTailMisses != null)
-            {
-                result[usingClassicSliderAccuracy ? HitResult.SmallTickHit : HitResult.SliderTailHit] = countSmallTicks - (int)countSliderTailMisses;
-                if (usingClassicSliderAccuracy) result[HitResult.SmallTickMiss] = (int)countSliderTailMisses;
-            }
+            result[HitResult.LargeTickHit] = countLargeTicks - (int)countLargeTickMisses;
+            result[HitResult.LargeTickMiss] = (int)countLargeTickMisses;
+            result[usingClassicSliderAccuracy ? HitResult.SmallTickHit : HitResult.SliderTailHit] = countSmallTicks - (int)countSliderTailMisses;
+            if (usingClassicSliderAccuracy) result[HitResult.SmallTickMiss] = (int)countSliderTailMisses;
 
             return result;
         }
