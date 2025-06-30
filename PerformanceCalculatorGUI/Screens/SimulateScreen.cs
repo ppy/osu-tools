@@ -874,6 +874,7 @@ namespace PerformanceCalculatorGUI.Screens
             // This is a hack around TextBox's way of updating layout and positioning of text
             // It can only be triggered by a couple of input events and there's no way to invalidate it from the outside
             // See: https://github.com/ppy/osu-framework/blob/fd5615732033c5ea650aa5cabc8595883a2b63f5/osu.Framework/Graphics/UserInterface/TextBox.cs#L528
+            if (textbox.Parent == null) return;
             textbox.TriggerEvent(new FocusEvent(new InputState(), this));
         }
 
