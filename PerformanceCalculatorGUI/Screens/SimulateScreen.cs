@@ -63,6 +63,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private LabelledNumberBox scoreIdTextBox;
         private StatefulButton scoreIdPopulateButton;
+        private LabelledSwitchButton legacyScoreSwitchButton;
 
         private GridContainer accuracyContainer;
         private LimitedLabelledFractionalNumberBox accuracyTextBox;
@@ -229,7 +230,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                         scoreIdTextBox = new LabelledNumberBox
                                                         {
                                                             RelativeSizeAxes = Axes.X,
-                                                            Width = 0.7f,
+                                                            Width = 0.45f,
                                                             Label = "Score ID",
                                                             PlaceholderText = "0",
                                                         },
@@ -248,6 +249,13 @@ namespace PerformanceCalculatorGUI.Screens
                                                                     notificationDisplay.Display(new Notification("Incorrect score id"));
                                                                 }
                                                             }
+                                                        },
+                                                        legacyScoreSwitchButton = new LabelledSwitchButton
+                                                        {
+                                                            RelativeSizeAxes = Axes.X,
+                                                            Width = 0.25f,
+                                                            Anchor = Anchor.TopLeft,
+                                                            Label = "Is legacy score?",
                                                         }
                                                     }
                                                 },
@@ -356,10 +364,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                     RelativeSizeAxes = Axes.X,
                                                     Anchor = Anchor.TopLeft,
                                                     Label = "Score",
-                                                    PlaceholderText = "1000000",
                                                     MinValue = 0,
-                                                    MaxValue = 1000000,
-                                                    Value = { Value = 1000000 }
                                                 },
                                                 new OsuSpriteText
                                                 {
@@ -516,6 +521,7 @@ namespace PerformanceCalculatorGUI.Screens
             sliderTailMissesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             comboTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             scoreTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
+            legacyScoreSwitchButton.Current.BindValueChanged(_ => updateScoreTextBox());
 
             fullScoreDataSwitch.Current.BindValueChanged(val => updateAccuracyParams(val.NewValue));
 
@@ -734,7 +740,8 @@ namespace PerformanceCalculatorGUI.Screens
                     Mods = appliedMods.Value.ToArray(),
                     TotalScore = score,
                     Ruleset = ruleset.Value,
-                    LegacyTotalScore = legacyTotalScore,
+                    IsLegacyScore = legacyScoreSwitchButton.Current.Value,
+                    LegacyTotalScore = scoreTextBox.Value.Value,
                 }, difficultyAttributes);
 
                 performanceAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(ppAttributes);
@@ -754,6 +761,7 @@ namespace PerformanceCalculatorGUI.Screens
             largeTickMissesTextBox.Hide();
             sliderTailMissesTextBox.Hide();
             scoreTextBox.Hide();
+            legacyScoreSwitchButton.Hide();
 
             if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
             {
@@ -768,6 +776,10 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     largeTickMissesTextBox.Show();
                     sliderTailMissesTextBox.Show();
+                    legacyScoreSwitchButton.Show();
+
+                    scoreTextBox.Value.Value = 0;
+                    scoreTextBox.Text = string.Empty;
                 }
             }
             else if (ruleset.Value.ShortName == "mania")
@@ -777,8 +789,8 @@ namespace PerformanceCalculatorGUI.Screens
 
                 missesTextBox.Show();
 
+                scoreTextBox.Value.Value = 1000000;
                 scoreTextBox.Text = string.Empty;
-                scoreTextBox.Show();
             }
             else
             {
@@ -795,6 +807,8 @@ namespace PerformanceCalculatorGUI.Screens
                 scoreTextBox.Text = string.Empty;
                 scoreTextBox.Show();
             }
+
+            updateScoreTextBox();
         }
 
         private void updateAccuracyParams(bool useFullScoreData)
@@ -869,6 +883,26 @@ namespace PerformanceCalculatorGUI.Screens
             }
         }
 
+        private void updateScoreTextBox()
+        {
+            if (ruleset.Value.ShortName == "osu" && legacyScoreSwitchButton.Current.Value)
+            {
+                scoreTextBox.PlaceholderText = "0";
+                scoreTextBox.MaxValue = int.MaxValue;
+                scoreTextBox.Show();
+            }
+            else if (ruleset.Value.ShortName == "mania")
+            {
+                scoreTextBox.PlaceholderText = "1000000";
+                scoreTextBox.MaxValue = 1000000;
+                scoreTextBox.Show();
+            }
+            else
+            {
+                scoreTextBox.Hide();
+            }
+        }
+
         private void fixupTextBox(LabelledTextBox textbox)
         {
             // This is a hack around TextBox's way of updating layout and positioning of text
@@ -897,7 +931,6 @@ namespace PerformanceCalculatorGUI.Screens
             createCalculators();
 
             resetMods();
-            legacyTotalScore = null;
 
             calculateDifficulty();
             calculatePerformance();
@@ -989,8 +1022,6 @@ namespace PerformanceCalculatorGUI.Screens
             notificationDisplay.Display(new Notification(message));
         }
 
-        private long? legacyTotalScore;
-
         private void populateSettingsFromScore(long scoreId)
         {
             if (scoreIdPopulateButton.State.Value == ButtonState.Loading)
@@ -1010,10 +1041,16 @@ namespace PerformanceCalculatorGUI.Screens
                         changeBeatmap(scoreInfo.BeatmapID.ToString());
                     }
 
+                    legacyScoreSwitchButton.Current.Value = scoreInfo.IsLegacyScore;
+
                     ruleset.Value = rulesets.GetRuleset(scoreInfo.RulesetID);
                     appliedMods.Value = scoreInfo.Mods.Select(x => x.ToMod(ruleset.Value.CreateInstance())).ToList();
 
-                    legacyTotalScore = scoreInfo.LegacyTotalScore;
+                    if (scoreInfo.LegacyTotalScore != null)
+                    {
+                        scoreTextBox.Value.Value = (int)scoreInfo.LegacyTotalScore;
+                        scoreTextBox.Text = scoreInfo.LegacyTotalScore.ToString();
+                    }
 
                     fullScoreDataSwitch.Current.Value = true;
 
