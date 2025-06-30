@@ -207,6 +207,7 @@ namespace PerformanceCalculatorGUI.Components
 
             return LoadComponentsAsync(graphs).ContinueWith(_ => graphs);
         }
+
         private void addStrainBars(List<StrainBarGraph> graphs, Skill[] skills, List<float[]> strainLists)
         {
             float strainMaxValue = strainLists.Max(list => list.Max());
