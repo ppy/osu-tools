@@ -133,25 +133,6 @@ namespace PerformanceCalculatorGUI.Components
             }));
         }
 
-        private Task<List<StrainBarGraph>> createStrainBars(Skill[] skills, List<float[]> strainLists)
-        {
-            List<StrainBarGraph> graphs = [];
-
-            float strainMaxValue = strainLists.Max(list => list.Max());
-
-            for (int i = 0; i < skills.Length; i++)
-            {
-                graphs.Add(new StrainBarGraph
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    MaxValue = strainMaxValue,
-                    Values = strainLists[i]
-                });
-            }
-
-            return LoadComponentsAsync(graphs).ContinueWith(_ => graphs);
-        }
-
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
@@ -208,6 +189,24 @@ namespace PerformanceCalculatorGUI.Components
             Skills.BindValueChanged(updateGraphs);
         }
 
+        private Task<List<StrainBarGraph>> createStrainBars(Skill[] skills, List<float[]> strainLists)
+        {
+            List<StrainBarGraph> graphs = [];
+
+            float strainMaxValue = strainLists.Max(list => list.Max());
+
+            for (int i = 0; i < skills.Length; i++)
+            {
+                graphs.Add(new StrainBarGraph
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    MaxValue = strainMaxValue,
+                    Values = strainLists[i]
+                });
+            }
+
+            return LoadComponentsAsync(graphs).ContinueWith(_ => graphs);
+        }
         private void addStrainBars(List<StrainBarGraph> graphs, Skill[] skills, List<float[]> strainLists)
         {
             float strainMaxValue = strainLists.Max(list => list.Max());
