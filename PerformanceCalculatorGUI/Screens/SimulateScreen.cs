@@ -521,7 +521,11 @@ namespace PerformanceCalculatorGUI.Screens
             sliderTailMissesTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             comboTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
             scoreTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
-            legacyScoreSwitchButton.Current.BindValueChanged(_ => updateScoreTextBox());
+            legacyScoreSwitchButton.Current.BindValueChanged(_ =>
+            {
+                updateMissesTextboxes();
+                updateScoreTextBox();
+            });
 
             fullScoreDataSwitch.Current.BindValueChanged(val => updateAccuracyParams(val.NewValue));
 
@@ -1141,7 +1145,7 @@ namespace PerformanceCalculatorGUI.Screens
             if (ruleset.Value.ShortName == "osu")
             {
                 // Large tick misses and slider tail misses are only relevant in PP if slider head accuracy exists
-                if (appliedMods.Value.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
+                if (legacyScoreSwitchButton.Current.Value)
                 {
                     missesContainer.Content = new[] { new[] { missesTextBox } };
                     missesContainer.ColumnDimensions = [new Dimension()];
