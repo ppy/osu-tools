@@ -573,6 +573,10 @@ namespace PerformanceCalculatorGUI.Screens
             if (working is null)
                 return;
 
+            // We expect that if user have added CL mod - they want to calculate legacy score
+            if (!mods.OldValue.OfType<ModClassic>().Any() && mods.NewValue.OfType<ModClassic>().Any(m => m.UsesDefaultConfiguration))
+                legacyScoreSwitchButton.Current.Value = true;
+
             updateScoreTextBox();
             updateMissesTextboxes();
 
