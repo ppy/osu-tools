@@ -573,6 +573,7 @@ namespace PerformanceCalculatorGUI.Screens
             if (working is null)
                 return;
 
+            updateScoreTextBox();
             updateMissesTextboxes();
 
             // recreate calculators to update DHOs
@@ -765,7 +766,6 @@ namespace PerformanceCalculatorGUI.Screens
             largeTickMissesTextBox.Hide();
             sliderTailMissesTextBox.Hide();
             scoreTextBox.Hide();
-            legacyScoreSwitchButton.Hide();
 
             if (ruleset.Value.ShortName == "osu" || ruleset.Value.ShortName == "taiko" || ruleset.Value.ShortName == "fruits")
             {
@@ -780,7 +780,6 @@ namespace PerformanceCalculatorGUI.Screens
                 {
                     largeTickMissesTextBox.Show();
                     sliderTailMissesTextBox.Show();
-                    legacyScoreSwitchButton.Show();
 
                     scoreTextBox.Value.Value = 0;
                     scoreTextBox.Text = string.Empty;
@@ -889,6 +888,16 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void updateScoreTextBox()
         {
+            if (!appliedMods.Value.OfType<ModClassic>().Any(m => m.UsesDefaultConfiguration))
+            {
+                legacyScoreSwitchButton.Current.Value = false;
+                legacyScoreSwitchButton.Hide();
+            }
+            else if (ruleset.Value.ShortName == "osu")
+            {
+                legacyScoreSwitchButton.Show();
+            }
+
             if (ruleset.Value.ShortName == "osu" && legacyScoreSwitchButton.Current.Value)
             {
                 scoreTextBox.PlaceholderText = "0";
