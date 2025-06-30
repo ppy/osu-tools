@@ -908,13 +908,10 @@ namespace PerformanceCalculatorGUI.Screens
             createCalculators();
 
             resetMods();
+            populateScoreParams();
             legacyTotalScore = null;
 
-            calculateDifficultyAsync().ContinueWith(_ =>
-            {
-                calculatePerformance();
-                Schedule(populateScoreParams);
-            });
+            calculateDifficultyAsync().ContinueWith(_ => calculatePerformance());
         }
 
         // This is to make sure combo resets when classic mod is applied
