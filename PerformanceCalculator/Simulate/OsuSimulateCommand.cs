@@ -82,12 +82,12 @@ namespace PerformanceCalculator.Simulate
             }
             else
             {
-                // If there's no classic slider accuracy - we need to weight circle judgements accordingly
-                double normalJudgementWeight = 1.0;
-
-                // Relevant result count without misses (normal misses and slider-related misses
+                // Relevant result count without misses (normal misses and slider-related misses)
                 // We need to exclude them from judgement count so total value will be equal to desired after misses are accounted for
                 double relevantResultCount;
+
+                // If there's no classic slider accuracy - we need to weight circle judgements accordingly
+                double normalJudgementWeight = 1.0;
 
                 if (usingClassicSliderAccuracy)
                 {
