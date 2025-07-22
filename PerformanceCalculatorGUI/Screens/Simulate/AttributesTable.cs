@@ -91,6 +91,6 @@ namespace PerformanceCalculatorGUI.Screens.Simulate
                 FontSize = 18,
                 CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS
             },
-        }.ToArray();
+        };
     }
 }
