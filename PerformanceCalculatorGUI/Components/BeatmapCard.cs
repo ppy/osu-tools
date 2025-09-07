@@ -180,11 +180,7 @@ namespace PerformanceCalculatorGUI.Components
 
             private ProcessorWorkingBeatmap beatmap;
 
-            private VerticalAttributeDisplay keyCountDisplay = null!;
-            private VerticalAttributeDisplay circleSizeDisplay = null!;
-            private VerticalAttributeDisplay drainRateDisplay = null!;
-            private VerticalAttributeDisplay approachRateDisplay = null!;
-            private VerticalAttributeDisplay overallDifficultyDisplay = null!;
+            private FillFlowContainer<VerticalAttributeDisplay> attributeContainer = null!;
 
             [Resolved]
             private Bindable<IReadOnlyList<Mod>> mods { get; set; }
@@ -220,56 +216,20 @@ namespace PerformanceCalculatorGUI.Components
                 if (beatmap?.BeatmapInfo == null)
                     return;
 
-                double rate = ModUtils.CalculateRateWithMods(mods.Value);
-
-                BeatmapDifficulty originalDifficulty = new BeatmapDifficulty(beatmap.BeatmapInfo.Difficulty);
-                BeatmapDifficulty adjustedDifficulty = new BeatmapDifficulty(originalDifficulty);
-
-                foreach (var mod in mods.Value.OfType<IApplicableToDifficulty>())
-                    mod.ApplyToDifficulty(adjustedDifficulty);
-
                 Ruleset rulesetInstance = ruleset.Value.CreateInstance();
-                adjustedDifficulty = rulesetInstance.GetRateAdjustedDisplayDifficulty(adjustedDifficulty, rate);
+                var displayAttributes = rulesetInstance.GetBeatmapAttributesForDisplay(beatmap.BeatmapInfo, mods.Value).ToList();
 
-                if (ruleset.Value.OnlineID >= 0)
-                {
-                    if (ruleset.Value.ShortName is "osu" or "fruits")
-                    {
-                        circleSizeDisplay.Show();
-                        circleSizeDisplay.AdjustType.Value = VerticalAttributeDisplay.CalculateEffect(originalDifficulty.CircleSize, adjustedDifficulty.CircleSize);
-                        circleSizeDisplay.Current.Value = adjustedDifficulty.CircleSize;
+                // make sure we have enough displays
+                for (int i = attributeContainer.Count; i < displayAttributes.Count; i++)
+                    attributeContainer.Add(new VerticalAttributeDisplay());
 
-                        approachRateDisplay.Show();
-                        approachRateDisplay.AdjustType.Value = VerticalAttributeDisplay.CalculateEffect(originalDifficulty.ApproachRate, adjustedDifficulty.ApproachRate);
-                        approachRateDisplay.Current.Value = adjustedDifficulty.ApproachRate;
-                    }
-                    else
-                    {
-                        circleSizeDisplay.Hide();
-                        approachRateDisplay.Hide();
-                    }
+                // populate all visible attribute displays
+                for (int i = 0; i < displayAttributes.Count; i++)
+                    attributeContainer[i].SetAttribute(displayAttributes[i]);
 
-                    if (ruleset.Value.ShortName == "mania")
-                    {
-                        ILegacyRuleset legacyRuleset = (ILegacyRuleset)ruleset.Value.CreateInstance();
-                        int keyCount = legacyRuleset.GetKeyCount(beatmap.BeatmapInfo, mods.Value);
-                        int keyCountOriginal = legacyRuleset.GetKeyCount(beatmap.BeatmapInfo, []);
-
-                        keyCountDisplay.Show();
-                        keyCountDisplay.AdjustType.Value = VerticalAttributeDisplay.CalculateEffect(keyCountOriginal, keyCount);
-                        keyCountDisplay.Current.Value = keyCount;
-                    }
-                    else
-                    {
-                        keyCountDisplay.Hide();
-                    }
-                }
-
-                drainRateDisplay.AdjustType.Value = VerticalAttributeDisplay.CalculateEffect(originalDifficulty.DrainRate, adjustedDifficulty.DrainRate);
-                overallDifficultyDisplay.AdjustType.Value = VerticalAttributeDisplay.CalculateEffect(originalDifficulty.OverallDifficulty, adjustedDifficulty.OverallDifficulty);
-
-                drainRateDisplay.Current.Value = adjustedDifficulty.DrainRate;
-                overallDifficultyDisplay.Current.Value = adjustedDifficulty.OverallDifficulty;
+                // and hide any extra ones
+                for (int i = displayAttributes.Count; i < attributeContainer.Count; i++)
+                    attributeContainer[i].SetAttribute(null);
             });
 
             public void SetContent(ProcessorWorkingBeatmap content)
@@ -286,19 +246,11 @@ namespace PerformanceCalculatorGUI.Components
                         RelativeSizeAxes = Axes.Both,
                         Colour = colourProvider.Background6
                     },
-                    new FillFlowContainer
+                    attributeContainer = new FillFlowContainer<VerticalAttributeDisplay>
                     {
-                        Padding = new MarginPadding(8),
+                        Padding = new MarginPadding { Vertical = 24, Horizontal = 8 },
                         AutoSizeAxes = Axes.Both,
-                        Direction = FillDirection.Horizontal,
-                        Children = new Drawable[]
-                        {
-                            keyCountDisplay = new VerticalAttributeDisplay("Keys") { AutoSizeAxes = Axes.Both, Alpha = 0 },
-                            circleSizeDisplay = new VerticalAttributeDisplay("CS") { AutoSizeAxes = Axes.Both, Alpha = 0 },
-                            drainRateDisplay = new VerticalAttributeDisplay("HP") { AutoSizeAxes = Axes.Both },
-                            overallDifficultyDisplay = new VerticalAttributeDisplay("OD") { AutoSizeAxes = Axes.Both },
-                            approachRateDisplay = new VerticalAttributeDisplay("AR") { AutoSizeAxes = Axes.Both, Alpha = 0 },
-                        }
+                        Direction = FillDirection.Horizontal
                     }
                 };
             }

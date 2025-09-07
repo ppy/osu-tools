@@ -34,8 +34,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
-        public override bool AllowBackwardsSeeks => true;
-
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
 
         protected override void Update()
