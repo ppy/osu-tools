@@ -15,10 +15,13 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch.Beatmaps;
+using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
@@ -61,6 +64,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
         private IBeatmap playableBeatmap;
         private EditorBeatmap editorBeatmap;
+        private IReadOnlyList<HitObject> hitObjects;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -94,6 +98,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             dependencies.CacheAs(editorBeatmap);
 
             beatmap.Value = processorBeatmap;
+
+            hitObjects = ruleset.Value.ShortName switch
+            {
+                "fruits" => CatchBeatmap.GetPalpableObjects(playableBeatmap.HitObjects).Where(o => o is not (Banana or TinyDroplet)).ToList(),
+                _ => playableBeatmap.HitObjects,
+            };
 
             Timeline timeline;
 
@@ -277,9 +287,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (e.Key == Key.Left)
             {
-                seekTo = playableBeatmap.HitObjects
-                                        .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
-                                        .StartTime;
+                seekTo = hitObjects
+                         .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
+                         .StartTime;
 
                 // slight leeway to make going back beyond just one object possible when the clock is running
                 if (clock.IsRunning)
@@ -288,9 +298,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (e.Key == Key.Right)
             {
-                seekTo = playableBeatmap.HitObjects
-                                        .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
-                                        .StartTime;
+                seekTo = hitObjects
+                         .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
+                         .StartTime;
             }
 
             if (seekTo != null)
