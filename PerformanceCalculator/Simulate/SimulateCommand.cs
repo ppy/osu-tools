@@ -40,6 +40,10 @@ namespace PerformanceCalculator.Simulate
         [Option(Template = "-X|--misses <misses>", Description = "Number of misses. Defaults to 0.")]
         public int Misses { get; }
 
+        [UsedImplicitly]
+        [Option(Template = "-l|--legacy-total-score <score>", Description = "Amount of legacy total score.")]
+        public long? LegacyTotalScore { get; }
+
         //
         // Options implemented in the ruleset-specific commands
         // -> Catch renames Mehs/Goods to (tiny-)droplets
@@ -70,9 +74,10 @@ namespace PerformanceCalculator.Simulate
             var statistics = GenerateHitResults(beatmap, mods);
             var scoreInfo = new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
             {
-                Accuracy = GetAccuracy(beatmap, statistics),
+                Accuracy = GetAccuracy(beatmap, statistics, mods),
                 MaxCombo = Combo ?? (int)Math.Round(PercentCombo / 100 * beatmapMaxCombo),
                 Statistics = statistics,
+                LegacyTotalScore = LegacyTotalScore,
                 Mods = mods
             };
 
@@ -86,6 +91,6 @@ namespace PerformanceCalculator.Simulate
 
         protected abstract Dictionary<HitResult, int> GenerateHitResults(IBeatmap beatmap, Mod[] mods);
 
-        protected virtual double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics) => 0;
+        protected virtual double GetAccuracy(IBeatmap beatmap, Dictionary<HitResult, int> statistics, Mod[] mods) => 0;
     }
 }

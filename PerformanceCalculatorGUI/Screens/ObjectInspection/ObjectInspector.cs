@@ -15,10 +15,13 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch.Beatmaps;
+using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
@@ -26,6 +29,7 @@ using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Timelines.Summary;
 using osu.Game.Screens.Edit.Compose.Components.Timeline;
+using osu.Game.Skinning;
 using osuTK.Input;
 
 namespace PerformanceCalculatorGUI.Screens.ObjectInspection
@@ -58,8 +62,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private Container rulesetContainer;
 
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
-        private IBeatmap playableBeatmap;
         private EditorBeatmap editorBeatmap;
+        private IReadOnlyList<HitObject> hitObjects;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -79,8 +83,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             var rulesetInstance = ruleset.Value.CreateInstance();
             var modifiedMods = mods.Value.Append(rulesetInstance.GetAutoplayMod()).ToList();
+            var playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
 
-            playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
             processorBeatmap.LoadTrack();
             modifiedMods.OfType<IApplicableToTrack>().ForEach(m => m.ApplyToTrack(processorBeatmap.Track));
 
@@ -93,6 +97,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             dependencies.CacheAs(editorBeatmap);
 
             beatmap.Value = processorBeatmap;
+
+            hitObjects = ruleset.Value.ShortName switch
+            {
+                "fruits" => CatchBeatmap.GetPalpableObjects(playableBeatmap.HitObjects).Where(o => o is not (Banana or TinyDroplet)).ToList(),
+                _ => playableBeatmap.HitObjects,
+            };
 
             Timeline timeline;
 
@@ -133,7 +143,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             timeline = new Timeline(new TimelineBlueprintContainer())
                         }
                     },
-                    rulesetContainer = new Container
+                    rulesetContainer = new RulesetSkinProvidingContainer(rulesetInstance, playableBeatmap, null)
                     {
                         Origin = Anchor.TopRight,
                         Anchor = Anchor.TopRight,
@@ -276,9 +286,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (e.Key == Key.Left)
             {
-                seekTo = playableBeatmap.HitObjects
-                                        .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
-                                        .StartTime;
+                seekTo = hitObjects
+                         .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
+                         .StartTime;
 
                 // slight leeway to make going back beyond just one object possible when the clock is running
                 if (clock.IsRunning)
@@ -287,9 +297,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (e.Key == Key.Right)
             {
-                seekTo = playableBeatmap.HitObjects
-                                        .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
-                                        .StartTime;
+                seekTo = hitObjects
+                         .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
+                         .StartTime;
             }
 
             if (seekTo != null)

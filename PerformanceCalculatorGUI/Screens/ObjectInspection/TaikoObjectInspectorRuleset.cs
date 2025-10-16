@@ -34,14 +34,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
-        public override bool AllowBackwardsSeeks => true;
-
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
 
         protected override void Update()
         {
             base.Update();
-            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.StartTime <= Clock.CurrentTime);
+            objectDifficultyValuesContainer.CurrentDifficultyHitObject.Value = difficultyHitObjects.LastOrDefault(x => x.BaseObject.StartTime <= Clock.CurrentTime);
         }
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield

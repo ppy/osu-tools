@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Alba.CsConsoleFormat;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
@@ -27,6 +28,9 @@ namespace PerformanceCalculator.Profile
         [AllowedValues("0", "1", "2", "3")]
         public int? Ruleset { get; }
 
+        private const int max_api_scores = 200;
+        private const int max_api_scores_in_one_query = 100;
+
         public override void Execute()
         {
             var displayPlays = new List<UserPlayInfo>();
@@ -39,22 +43,28 @@ namespace PerformanceCalculator.Profile
 
             Console.WriteLine("Getting user top scores...");
 
-            foreach (var play in GetJsonFromApi<List<SoloScoreInfo>>($"users/{userData.Id}/scores/best?mode={rulesetApiName}&limit=100"))
+            var apiScores = new List<SoloScoreInfo>();
+
+            for (int i = 0; i < max_api_scores; i += max_api_scores_in_one_query)
+            {
+                apiScores.AddRange(GetJsonFromApi<List<SoloScoreInfo>>($"users/{userData.Id}/scores/best?mode={rulesetApiName}&limit={max_api_scores_in_one_query}&offset={i}"));
+                Thread.Sleep(200);
+            }
+
+            foreach (var play in apiScores)
             {
                 var working = ProcessorWorkingBeatmap.FromFileOrId(play.BeatmapID.ToString());
 
                 Mod[] mods = play.Mods.Select(x => x.ToMod(ruleset)).ToArray();
 
-                var scoreInfo = play.ToScoreInfo(mods);
+                var scoreInfo = play.ToScoreInfo(mods, working.BeatmapInfo);
                 scoreInfo.Ruleset = ruleset.RulesetInfo;
-
-                var score = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
                 var difficultyCalculator = ruleset.CreateDifficultyCalculator(working);
                 var difficultyAttributes = difficultyCalculator.Calculate(scoreInfo.Mods);
                 var performanceCalculator = ruleset.CreatePerformanceCalculator();
 
-                var ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes);
+                var ppAttributes = performanceCalculator?.Calculate(scoreInfo, difficultyAttributes);
                 var thisPlay = new UserPlayInfo
                 {
                     Beatmap = working.BeatmapInfo,

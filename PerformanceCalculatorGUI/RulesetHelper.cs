@@ -10,6 +10,7 @@ using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Mania.Objects;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Objects;
@@ -61,14 +62,14 @@ namespace PerformanceCalculatorGUI
             return (int)Math.Round(1000000 * scoreMultiplier);
         }
 
-        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses, int? countSliderTailMisses)
+        public static Dictionary<HitResult, int> GenerateHitResultsForRuleset(RulesetInfo ruleset, double accuracy, IBeatmap beatmap, Mod[] mods, int countMiss, int? countMeh, int? countGood, int? countLargeTickMisses, int? countSliderTailMisses)
         {
             return ruleset.OnlineID switch
             {
                 0 => generateOsuHitResults(accuracy, beatmap, countMiss, countMeh, countGood, countLargeTickMisses, countSliderTailMisses),
                 1 => generateTaikoHitResults(accuracy, beatmap, countMiss, countGood),
                 2 => generateCatchHitResults(accuracy, beatmap, countMiss, countMeh, countGood),
-                3 => generateManiaHitResults(accuracy, beatmap, countMiss),
+                3 => generateManiaHitResults(accuracy, beatmap, mods, countMiss),
                 _ => throw new ArgumentException("Invalid ruleset ID provided.")
             };
         }
@@ -225,43 +226,63 @@ namespace PerformanceCalculatorGUI
             };
         }
 
-        private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, int countMiss)
+        private static Dictionary<HitResult, int> generateManiaHitResults(double accuracy, IBeatmap beatmap, Mod[] mods, int countMiss)
         {
-            int totalResultCount = beatmap.HitObjects.Count;
+            int totalHits = beatmap.HitObjects.Count;
+            if (!mods.Any(m => m is ModClassic))
+                totalHits += beatmap.HitObjects.Count(ho => ho is HoldNote);
 
-            // Let Great=6, Good=2, Meh=1, Miss=0. The total should be this.
-            int targetTotal = (int)Math.Round(accuracy * totalResultCount * 6);
+            int perfectValue = mods.Any(m => m is ModClassic) ? 60 : 61;
+
+            // Let Great = 60, Good = 40, Ok = 20, Meh = 10, Miss = 0, Perfect = 61 or 60 depending on CL. The total should be this.
+            int targetTotal = (int)Math.Round(accuracy * totalHits * perfectValue);
 
             // Start by assuming every non miss is a meh
-            // This is how much increase is needed by greats and goods
-            int delta = targetTotal - (totalResultCount - countMiss);
+            // This is how much increase is needed by the rest
+            int remainingHits = totalHits - countMiss;
+            int delta = Math.Max(targetTotal - (10 * remainingHits), 0);
 
-            // Each great increases total by 5 (great-meh=5)
-            int countGreat = delta / 5;
-            // Each good increases total by 1 (good-meh=1). Covers remaining difference.
-            int countGood = delta % 5;
-            // Mehs are left over. Could be negative if impossible value of amountMiss chosen
-            int countMeh = totalResultCount - countGreat - countGood - countMiss;
+            // Each perfect increases total by 50 (CL) or 51 (no CL) (perfect - meh = 50 or 51)
+            int perfects = Math.Min(delta / (perfectValue - 10), remainingHits);
+            delta -= perfects * (perfectValue - 10);
+            remainingHits -= perfects;
+
+            // Each great increases total by 50 (great - meh = 50)
+            int greats = Math.Min(delta / 50, remainingHits);
+            delta -= greats * 50;
+            remainingHits -= greats;
+
+            // Each good increases total by 30 (good - meh = 30)
+            int goods = Math.Min(delta / 30, remainingHits);
+            delta -= goods * 30;
+            remainingHits -= goods;
+
+            // Each ok increases total by 10 (ok - meh = 10)
+            int oks = Math.Min(delta / 10, remainingHits);
+            remainingHits -= oks;
+
+            // Everything else is a meh, as initially assumed
+            int mehs = remainingHits;
 
             return new Dictionary<HitResult, int>
             {
-                { HitResult.Perfect, countGreat },
-                { HitResult.Great, 0 },
-                { HitResult.Good, countGood },
-                { HitResult.Ok, 0 },
-                { HitResult.Meh, countMeh },
+                { HitResult.Perfect, perfects },
+                { HitResult.Great, greats },
+                { HitResult.Ok, oks },
+                { HitResult.Good, goods },
+                { HitResult.Meh, mehs },
                 { HitResult.Miss, countMiss }
             };
         }
 
-        public static double GetAccuracyForRuleset(RulesetInfo ruleset, IBeatmap beatmap, Dictionary<HitResult, int> statistics)
+        public static double GetAccuracyForRuleset(RulesetInfo ruleset, IBeatmap beatmap, Dictionary<HitResult, int> statistics, Mod[] mods)
         {
             return ruleset.OnlineID switch
             {
                 0 => getOsuAccuracy(beatmap, statistics),
                 1 => getTaikoAccuracy(statistics),
                 2 => getCatchAccuracy(statistics),
-                3 => getManiaAccuracy(statistics),
+                3 => getManiaAccuracy(statistics, mods),
                 _ => 0.0
             };
         }
@@ -314,7 +335,7 @@ namespace PerformanceCalculatorGUI
             return hits / total;
         }
 
-        private static double getManiaAccuracy(Dictionary<HitResult, int> statistics)
+        private static double getManiaAccuracy(Dictionary<HitResult, int> statistics, Mod[] mods)
         {
             int countPerfect = statistics[HitResult.Perfect];
             int countGreat = statistics[HitResult.Great];
@@ -322,11 +343,13 @@ namespace PerformanceCalculatorGUI
             int countOk = statistics[HitResult.Ok];
             int countMeh = statistics[HitResult.Meh];
             int countMiss = statistics[HitResult.Miss];
-            int total = countPerfect + countGreat + countGood + countOk + countMeh + countMiss;
 
-            return (double)
-                   ((6 * (countPerfect + countGreat)) + (4 * countGood) + (2 * countOk) + countMeh) /
-                   (6 * total);
+            int perfectWeight = mods.Any(m => m is ModClassic) ? 300 : 305;
+
+            double total = (perfectWeight * countPerfect) + (300 * countGreat) + (200 * countGood) + (100 * countOk) + (50 * countMeh);
+            double max = perfectWeight * (countPerfect + countGreat + countGood + countOk + countMeh + countMiss);
+
+            return total / max;
         }
     }
 }
