@@ -276,11 +276,5 @@ namespace PerformanceCalculatorGUI.Screens
                 });
             }, token);
         }
-
-        private void showError(string message)
-        {
-            Logger.Log(message, level: LogLevel.Error);
-            notificationDisplay.Display(new Notification(message));
-        }
     }
 }
