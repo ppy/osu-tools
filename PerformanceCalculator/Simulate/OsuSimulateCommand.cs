@@ -84,14 +84,16 @@ namespace PerformanceCalculator.Simulate
             {
                 // Relevant result count without misses (normal misses and slider-related misses)
                 // We need to exclude them from judgement count so total value will be equal to desired after misses are accounted for
-                double relevantResultCount;
+                double countSuccessfulHits;
 
-                // If there's no classic slider accuracy - we need to weight circle judgements accordingly
+                // If there's no classic slider accuracy - we need to weight normal judgements accordingly.
+                // Normal judgements in this context are 300s, 100s, 50s and misses.
+                // Slider-related judgements are large tick hits/misses and slider tail hits/misses.
                 double normalJudgementWeight = 1.0;
 
                 if (usingClassicSliderAccuracy)
                 {
-                    relevantResultCount = totalResultCount - countMiss;
+                    countSuccessfulHits = totalResultCount - countMiss;
                 }
                 else
                 {
@@ -99,12 +101,12 @@ namespace PerformanceCalculator.Simulate
                     normalJudgementWeight = (totalResultCount + maxSliderPortion) / totalResultCount;
 
                     double missedSliderPortion = (double)countSliderTailMisses * 0.5 + (double)countLargeTickMisses * 0.1;
-                    relevantResultCount = totalResultCount - (countMiss + missedSliderPortion) / normalJudgementWeight;
+                    countSuccessfulHits = totalResultCount - (countMiss + missedSliderPortion) / normalJudgementWeight;
                 }
 
                 // Accuracy excluding countMiss. We need that because we're trying to achieve target accuracy without touching countMiss
                 // So it's better to pretened that there were 0 misses in the 1st place
-                double relevantAccuracy = accuracy * totalResultCount / relevantResultCount;
+                double relevantAccuracy = accuracy * totalResultCount / countSuccessfulHits;
 
                 // Clamp accuracy to account for user trying to break the algorithm by inputting impossible values
                 relevantAccuracy = Math.Clamp(relevantAccuracy, 0, 1);
@@ -116,7 +118,7 @@ namespace PerformanceCalculator.Simulate
                     double ratio50To100 = Math.Pow(1 - (relevantAccuracy - 0.25) / 0.75, 2);
 
                     // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c50 = c100 * ratio50to100
-                    double count100Estimate = 6 * relevantResultCount * (1 - relevantAccuracy) / (5 * ratio50To100 + 4) * normalJudgementWeight;
+                    double count100Estimate = 6 * countSuccessfulHits * (1 - relevantAccuracy) / (5 * ratio50To100 + 4) * normalJudgementWeight;
 
                     // Get count50 according to c50 = c100 * ratio50to100
                     double count50Estimate = count100Estimate * ratio50To100;
@@ -131,10 +133,10 @@ namespace PerformanceCalculator.Simulate
                 else if (relevantAccuracy >= 1.0 / 6)
                 {
                     // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c300 = 0
-                    double count100Estimate = 6 * relevantResultCount * relevantAccuracy - relevantResultCount;
+                    double count100Estimate = 6 * countSuccessfulHits * relevantAccuracy - countSuccessfulHits;
 
                     // We only had 100s and 50s in that scenario so rest of the hits are 50s
-                    double count50Estimate = relevantResultCount - count100Estimate;
+                    double count50Estimate = countSuccessfulHits - count100Estimate;
 
                     // Round it to get int number of 100s
                     countGood = (int?)Math.Round(count100Estimate * normalJudgementWeight);
