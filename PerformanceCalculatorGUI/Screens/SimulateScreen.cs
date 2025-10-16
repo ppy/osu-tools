@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -120,6 +119,9 @@ namespace PerformanceCalculatorGUI.Screens
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
 
         public override bool ShouldShowConfirmationDialogOnSwitch => working != null;
+
+        [GeneratedRegex(@"osu\.ppy\.sh/(?:b|beatmapsets/\d+#\w+|beatmaps)/(\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private partial Regex beatmapLinkRegex();
 
         private const int file_selection_container_height = 40;
         private const int map_title_container_height = 40;
@@ -609,21 +611,11 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            if (!int.TryParse(beatmap, out int result) && !Path.Exists(beatmap))
-            {
-                string beatmapLinkPattern = @"osu\.ppy\.sh/(b|beatmapsets/\d+#\w+|beatmaps)/(\d+)";
+            var beatmapLinkMatch = beatmapLinkRegex().Match(beatmap);
 
-                if (Regex.IsMatch(beatmap, beatmapLinkPattern, RegexOptions.IgnoreCase))
-                {
-                    Match beatmapLinkMatch = Regex.Match(beatmap, beatmapLinkPattern, RegexOptions.IgnoreCase);
-                    beatmap = beatmapLinkMatch.Groups[2].ToString();
-                }
-                else
-                {
-                    showError("Invalid beatmap path!");
-                    resetBeatmap();
-                    return;
-                }
+            if (beatmapLinkMatch.Success && beatmapLinkMatch.Groups.Count == 2)
+            {
+                beatmap = beatmapLinkMatch.Groups[1].ToString();
             }
 
             try

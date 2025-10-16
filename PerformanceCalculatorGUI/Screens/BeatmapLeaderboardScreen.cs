@@ -1,7 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -64,6 +63,9 @@ namespace PerformanceCalculatorGUI.Screens
 
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
 
+        [GeneratedRegex(@"osu\.ppy\.sh/(?:b|beatmapsets/\d+#\w+|beatmaps)/(\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private partial Regex beatmapLinkRegex();
+
         private const int settings_height = 40;
         private const int generate_score_amount = 50;
         private const int generate_score_max_mod_amount = 4;
@@ -117,7 +119,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         {
                                             Width = 150,
                                             Height = settings_height,
-                                            Action = checkBeatmapIdAndCalculate
+                                            Action = calculate
                                         }
                                     }
                                 }
@@ -174,43 +176,14 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
-            ruleset.BindValueChanged(_ => { checkBeatmapIdAndCalculate(); });
-            beatmapIdTextBox.OnCommit += (_, _) => { checkBeatmapIdAndCalculate(); };
+            ruleset.BindValueChanged(_ => { calculate(); });
+            beatmapIdTextBox.OnCommit += (_, _) => { calculate(); };
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(checkBeatmapIdAndCalculate);
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(calculate);
         }
 
-        private void checkBeatmapIdAndCalculate()
-        {
-            string beatmapId = beatmapIdTextBox.Current.Value;
-
-            if (string.IsNullOrEmpty(beatmapId))
-            {
-                showError("Empty beatmap ID or link!");
-                return;
-            }
-
-            if (!int.TryParse(beatmapId, out int result))
-            {
-                string beatmapLinkPattern = @"osu\.ppy\.sh/(b|beatmapsets/\d+#\w+|beatmaps)/(\d+)";
-
-                if (Regex.IsMatch(beatmapId, beatmapLinkPattern, RegexOptions.IgnoreCase))
-                {
-                    Match beatmapLinkMatch = Regex.Match(beatmapId, beatmapLinkPattern, RegexOptions.IgnoreCase);
-                    beatmapId = beatmapLinkMatch.Groups[2].ToString();
-                }
-                else
-                {
-                    showError("Invalid beatmap ID or link!");
-                    return;
-                }
-            }
-
-            calculate(beatmapId);
-        }
-
-        private void calculate(string beatmapId)
+        private void calculate()
         {
             calculationCancellatonToken?.Cancel();
             calculationCancellatonToken?.Dispose();
@@ -222,17 +195,25 @@ namespace PerformanceCalculatorGUI.Screens
             calculationCancellatonToken = new CancellationTokenSource();
             var token = calculationCancellatonToken.Token;
 
+            string beatmap = beatmapIdTextBox.Current.Value;
+            var beatmapLinkMatch = beatmapLinkRegex().Match(beatmap);
+
+            if (beatmapLinkMatch.Success && beatmapLinkMatch.Groups.Count == 2)
+            {
+                beatmap = beatmapLinkMatch.Groups[1].ToString();
+            }
+
             Task.Run(async () =>
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmapId}/scores?scope=global&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
+                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmap}/scores?scope=global&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
 
                 var plays = new List<SoloScoreInfo>();
 
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmapId, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
                 Schedule(() =>
                 {
