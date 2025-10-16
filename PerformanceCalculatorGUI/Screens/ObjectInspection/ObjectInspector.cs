@@ -62,7 +62,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private Container rulesetContainer;
 
         private ObjectDifficultyValuesContainer difficultyValuesContainer;
-        private IBeatmap playableBeatmap;
         private EditorBeatmap editorBeatmap;
         private IReadOnlyList<HitObject> hitObjects;
 
@@ -84,8 +83,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             var rulesetInstance = ruleset.Value.CreateInstance();
             var modifiedMods = mods.Value.Append(rulesetInstance.GetAutoplayMod()).ToList();
+            var playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
 
-            playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
             processorBeatmap.LoadTrack();
             modifiedMods.OfType<IApplicableToTrack>().ForEach(m => m.ApplyToTrack(processorBeatmap.Track));
 
