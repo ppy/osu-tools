@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -12,6 +13,7 @@ using osu.Framework.Utils;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
+using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
@@ -42,7 +44,22 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             base.LoadComplete();
 
             foreach (var obj in Beatmap.HitObjects)
-                AddBlueprintFor(obj);
+            {
+                switch (obj)
+                {
+                    case BananaShower:
+                        continue;
+
+                    case JuiceStream:
+                        foreach (var nestedObj in obj.NestedHitObjects.Where(o => o is not TinyDroplet))
+                            AddBlueprintFor(nestedObj);
+                        break;
+
+                    default:
+                        AddBlueprintFor(obj);
+                        break;
+                }
+            }
         }
 
         protected override SelectionBlueprintContainer CreateSelectionBlueprintContainer() => new TimelineSelectionBlueprintContainer { RelativeSizeAxes = Axes.Both };
