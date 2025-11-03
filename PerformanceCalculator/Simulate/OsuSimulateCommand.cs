@@ -205,10 +205,10 @@ namespace PerformanceCalculator.Simulate
                 max += 3 * countSliders;
             }
 
-            if (!usingClassicSliderAccuracy && statistics.TryGetValue(HitResult.LargeTickMiss, out int countLargeTicksMiss))
+            if (!usingClassicSliderAccuracy && statistics.TryGetValue(HitResult.LargeTickMiss, out int countLargeTickMiss))
             {
                 int countLargeTicks = beatmap.HitObjects.Sum(obj => obj.NestedHitObjects.Count(x => x is SliderTick or SliderRepeat));
-                int countLargeTickHit = countLargeTicks - countLargeTicksMiss;
+                int countLargeTickHit = countLargeTicks - countLargeTickMiss;
 
                 total += 0.6 * countLargeTickHit;
                 max += 0.6 * countLargeTicks;
