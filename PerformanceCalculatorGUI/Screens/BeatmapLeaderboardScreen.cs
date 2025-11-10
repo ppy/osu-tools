@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework;
@@ -29,7 +30,7 @@ namespace PerformanceCalculatorGUI.Screens
 {
     public partial class BeatmapLeaderboardScreen : PerformanceCalculatorScreen
     {
-        private LimitedLabelledNumberBox beatmapIdTextBox;
+        private ExtendedLabelledTextBox beatmapIdTextBox;
         private StatefulButton calculationButton;
         private VerboseLoadingLayer loadingLayer;
 
@@ -61,6 +62,9 @@ namespace PerformanceCalculatorGUI.Screens
         private SettingsManager configManager { get; set; }
 
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
+
+        [GeneratedRegex(@"osu\.ppy\.sh/(?:b|beatmapsets/\d+#\w+|beatmaps)/(\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private partial Regex beatmapLinkRegex();
 
         private const int settings_height = 40;
         private const int generate_score_amount = 50;
@@ -103,13 +107,12 @@ namespace PerformanceCalculatorGUI.Screens
                                 {
                                     new Drawable[]
                                     {
-                                        beatmapIdTextBox = new LimitedLabelledNumberBox
+                                        beatmapIdTextBox = new ExtendedLabelledTextBox
                                         {
                                             RelativeSizeAxes = Axes.X,
                                             Anchor = Anchor.TopLeft,
                                             Label = "Beatmap ID",
-                                            PlaceholderText = "Enter beatmap ID",
-                                            MinValue = 1,
+                                            PlaceholderText = "Enter a beatmap ID or link",
                                             CommitOnFocusLoss = false
                                         },
                                         calculationButton = new StatefulButton("Start calculation")
@@ -192,17 +195,25 @@ namespace PerformanceCalculatorGUI.Screens
             calculationCancellatonToken = new CancellationTokenSource();
             var token = calculationCancellatonToken.Token;
 
+            string beatmap = beatmapIdTextBox.Current.Value;
+            var beatmapLinkMatch = beatmapLinkRegex().Match(beatmap);
+
+            if (beatmapLinkMatch.Success && beatmapLinkMatch.Groups.Count == 2)
+            {
+                beatmap = beatmapLinkMatch.Groups[1].ToString();
+            }
+
             Task.Run(async () =>
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmapIdTextBox.Current.Value}/scores?scope=global&limit=100&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
+                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmap}/scores?scope=global&limit=100&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
 
                 var plays = new List<SoloScoreInfo>();
 
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmapIdTextBox.Current.Value, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
                 Schedule(() =>
                 {
