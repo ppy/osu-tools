@@ -197,7 +197,10 @@ namespace PerformanceCalculatorGUI
             result[HitResult.LargeTickHit] = countLargeTicks - (int)countLargeTickMisses;
             result[HitResult.LargeTickMiss] = (int)countLargeTickMisses;
             result[usingClassicSliderAccuracy ? HitResult.SmallTickHit : HitResult.SliderTailHit] = countSmallTicks - (int)countSliderTailMisses;
-            if (usingClassicSliderAccuracy) result[HitResult.SmallTickMiss] = (int)countSliderTailMisses;
+
+            // Only classic slider accuracy scores has small tick misses
+            if (usingClassicSliderAccuracy)
+                result[HitResult.SmallTickMiss] = (int)countSliderTailMisses;
 
             return result;
         }
