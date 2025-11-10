@@ -207,7 +207,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmap}/scores?scope=global&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
+                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmap}/scores?scope=global&limit=100&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
 
                 var plays = new List<SoloScoreInfo>();
 
