@@ -277,7 +277,7 @@ namespace PerformanceCalculatorGUI.Screens
 
                     foreach (var calculatedScore in calculatedScores.OrderByDescending(x => x.PerformanceAttributes.Total))
                     {
-                        scores.Add(new ExtendedProfileScore(calculatedScore));
+                        scores.Add(new ExtendedProfileScore(calculatedScore, true));
                     }
                 });
             }, token).ContinueWith(t =>
@@ -323,11 +323,8 @@ namespace PerformanceCalculatorGUI.Screens
                         var difficultyAttributes = difficultyCalculator.Calculate(mods);
                         var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
-                        double? livePp = score.PP;
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
-                        score.PP = perfAttributes?.Total ?? 0.0;
-
-                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                        var extendedScore = new ExtendedScore(score, perfAttributes);
                         plays.Add(extendedScore);
                     }
                     catch (Exception e)
@@ -345,11 +342,11 @@ namespace PerformanceCalculatorGUI.Screens
             }
             catch (OperationCanceledException) { }
 
-            var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
+            var localOrdered = plays.OrderByDescending(x => x.PerformanceAttributes.Total).ToList();
             var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0.0).ToList();
 
             int index = 0;
-            decimal totalLocalPP = (decimal)(localOrdered.Select(x => x.SoloScore.PP).Sum(play => Math.Pow(0.95, index++) * play) ?? 0.0);
+            decimal totalLocalPP = (decimal)localOrdered.Select(x => x.PerformanceAttributes.Total).Sum(play => Math.Pow(0.95, index++) * play);
             decimal totalLivePP = player.PP ?? (decimal)0.0;
 
             index = 0;

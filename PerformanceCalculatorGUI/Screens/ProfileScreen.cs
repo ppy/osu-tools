@@ -327,11 +327,8 @@ namespace PerformanceCalculatorGUI.Screens
                             if (performanceCalculator == null)
                                 continue;
 
-                            double? livePp = score.PP;
                             var perfAttributes = await performanceCalculator.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token).ConfigureAwait(false);
-                            score.PP = perfAttributes.Total;
-
-                            var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                            var extendedScore = new ExtendedScore(score, perfAttributes);
                             plays.Add(extendedScore);
                         }
                     }
@@ -371,14 +368,14 @@ namespace PerformanceCalculatorGUI.Screens
 
                     foreach (int id in beatmapIDs)
                     {
-                        var bestPlayOnBeatmap = plays.Where(x => x.SoloScore.BeatmapID == id).OrderByDescending(x => x.SoloScore.PP).First();
+                        var bestPlayOnBeatmap = plays.Where(x => x.SoloScore.BeatmapID == id).OrderByDescending(x => x.PerformanceAttributes.Total).First();
                         filteredPlays.Add(bestPlayOnBeatmap);
                     }
 
                     plays = filteredPlays;
                 }
 
-                var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
+                var localOrdered = plays.OrderByDescending(x => x.PerformanceAttributes.Total).ToList();
                 var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0).ToList();
 
                 Schedule(() =>
@@ -400,8 +397,9 @@ namespace PerformanceCalculatorGUI.Screens
                     var player = players.First();
 
                     decimal totalLocalPP = 0;
+
                     for (int i = 0; i < localOrdered.Count; i++)
-                        totalLocalPP += (decimal)(Math.Pow(0.95, i) * (localOrdered[i].SoloScore.PP ?? 0));
+                        totalLocalPP += (decimal)(Math.Pow(0.95, i) * localOrdered[i].PerformanceAttributes.Total);
 
                     decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 

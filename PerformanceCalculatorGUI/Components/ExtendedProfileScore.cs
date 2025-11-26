@@ -41,11 +41,11 @@ namespace PerformanceCalculatorGUI.Components
 
         public PerformanceAttributes PerformanceAttributes { get; }
 
-        public ExtendedScore(SoloScoreInfo score, double? livePP, PerformanceAttributes attributes)
+        public ExtendedScore(SoloScoreInfo score, PerformanceAttributes attributes)
         {
             SoloScore = score;
             PerformanceAttributes = attributes;
-            LivePP = livePP;
+            LivePP = score.PP;
         }
     }
 
@@ -62,7 +62,8 @@ namespace PerformanceCalculatorGUI.Components
         protected override bool OnHover(HoverEvent e)
         {
             OnHoverAction?.Invoke();
-            return base.OnHover(e);
+            base.OnHover(e);
+            return false;
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
@@ -107,6 +108,7 @@ namespace PerformanceCalculatorGUI.Components
         private void load(GameHost host, RulesetStore rulesets)
         {
             int avatarPadding = ShowAvatar ? avatar_size : 0;
+            int rankDifferenceWidth = ShowAvatar ? 8 : rank_difference_width;
 
             AddInternal(new ExtendedProfileItemContainer
             {
@@ -135,7 +137,8 @@ namespace PerformanceCalculatorGUI.Components
                         RelativeSizeAxes = Axes.Y,
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
-                        Width = rank_difference_width,
+                        Alpha = ShowAvatar ? 0 : 1,
+                        Width = rankDifferenceWidth,
                         Margin = new MarginPadding { Left = avatarPadding },
                         Child = positionChangeText = new OsuSpriteText
                         {
@@ -149,7 +152,7 @@ namespace PerformanceCalculatorGUI.Components
                     {
                         Name = "Score info",
                         RelativeSizeAxes = Axes.Both,
-                        Padding = new MarginPadding { Left = rank_difference_width + avatarPadding, Right = performance_width },
+                        Padding = new MarginPadding { Left = rankDifferenceWidth + avatarPadding, Right = performance_width },
                         Children = new Drawable[]
                         {
                             new FillFlowContainer
@@ -357,7 +360,7 @@ namespace PerformanceCalculatorGUI.Components
                                     new ExtendedOsuSpriteText
                                     {
                                         Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                        Text = $"{Score.SoloScore.PP:0}pp",
+                                        Text = $"{Score.PerformanceAttributes.Total:0}pp",
                                         Colour = colourProvider.Highlight1,
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre,
@@ -366,7 +369,7 @@ namespace PerformanceCalculatorGUI.Components
                                     new OsuSpriteText
                                     {
                                         Font = OsuFont.GetFont(size: small_text_font_size),
-                                        Text = $"{Score.SoloScore.PP - Score.LivePP:+0.0;-0.0;-}",
+                                        Text = $"{Score.PerformanceAttributes.Total - Score.LivePP:+0.0;-0.0;-}",
                                         Colour = colourProvider.Light1,
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre

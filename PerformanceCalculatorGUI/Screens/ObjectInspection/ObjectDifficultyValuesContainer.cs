@@ -127,7 +127,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         }
 
         private void drawOsuValues(OsuDifficultyHitObject hitObject)
-        {
+        {/*
             bool hidden = appliedMods.Value.Any(x => x is ModHidden);
             flowContainer.AddRange(new[]
             {
@@ -168,7 +168,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
                 if (hitObject.LazyEndPosition != null)
                     flowContainer.Add(new ObjectInspectorDifficultyValue("Lazy End Position", hitObject.LazyEndPosition!.Value));
-            }
+            }*/
         }
 
         private void drawTaikoValues(TaikoDifficultyHitObject hitObject)
