@@ -15,7 +15,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
     {
         public ExtendedScore Score { get; }
 
-        private IconButton deleteButton;
+        private readonly IconButton deleteButton;
 
         public delegate void OnDeleteHandler(long scoreId);
 

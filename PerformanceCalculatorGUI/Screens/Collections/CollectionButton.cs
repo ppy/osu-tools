@@ -17,7 +17,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
     {
         public Collection Collection { get; }
 
-        private RoundedButton deleteButton;
+        private readonly RoundedButton deleteButton;
 
         public delegate void OnDeleteHandler(Collection collection);
 

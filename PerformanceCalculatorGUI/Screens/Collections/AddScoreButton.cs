@@ -12,9 +12,9 @@ namespace PerformanceCalculatorGUI.Screens.Collections
 {
     public partial class AddScoreButton : Container
     {
-        private RoundedButton addButton;
-        private GridContainer creationContainer;
-        private OsuTextBox scoreIdTextBox;
+        private readonly RoundedButton addButton;
+        private readonly GridContainer creationContainer;
+        private readonly OsuTextBox scoreIdTextBox;
 
         public delegate void OnAddHandler(long scoreId);
 

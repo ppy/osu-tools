@@ -63,7 +63,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private VerboseLoadingLayer loadingLayer = null!;
 
-        private Bindable<Collection?> currentCollection = new Bindable<Collection?>();
+        private readonly Bindable<Collection?> currentCollection = new Bindable<Collection?>();
 
         private const string collections_directory = "collections";
 
