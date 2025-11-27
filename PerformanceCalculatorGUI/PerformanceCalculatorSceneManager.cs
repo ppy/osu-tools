@@ -110,6 +110,10 @@ namespace PerformanceCalculatorGUI
                                                 {
                                                     Action = () => setScreen(new BeatmapLeaderboardScreen())
                                                 },
+                                                new ScreenSelectionButton("Collections", FontAwesome.Solid.BoxOpen)
+                                                {
+                                                    Action = () => setScreen(new CollectionsScreen())
+                                                },
                                             }
                                         },
                                         new FillFlowContainer
