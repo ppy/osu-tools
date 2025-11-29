@@ -403,12 +403,8 @@ namespace PerformanceCalculatorGUI.Screens
 
                     decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 
-                    decimal nonBonusLivePP = 0;
-                    for (int i = 0; i < liveOrdered.Count; i++)
-                        nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
-
-                    //todo: implement properly. this is pretty damn wrong.
-                    decimal playcountBonusPP = (totalLivePP - nonBonusLivePP);
+                    // https://osu.ppy.sh/wiki/en/Performance_points#how-much-bonus-pp-is-awarded-for-having-scores-on-ranked-maps?
+                    decimal playcountBonusPP = (decimal)(416.6667 * (1 - Math.Pow(0.995, Math.Min(player.BeatmapPlayCountsCount, 1000))));
                     totalLocalPP += playcountBonusPP;
 
                     Schedule(() =>
