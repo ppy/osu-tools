@@ -40,11 +40,13 @@ namespace PerformanceCalculatorGUI.Components
         public Bindable<int> PositionChange { get; } = new Bindable<int>();
 
         public PerformanceAttributes PerformanceAttributes { get; }
+        public DifficultyAttributes DifficultyAttributes { get; }
 
-        public ExtendedScore(SoloScoreInfo score, PerformanceAttributes attributes)
+        public ExtendedScore(SoloScoreInfo score, DifficultyAttributes difficultyAttributes, PerformanceAttributes performanceAttributes)
         {
             SoloScore = score;
-            PerformanceAttributes = attributes;
+            PerformanceAttributes = performanceAttributes;
+            DifficultyAttributes = difficultyAttributes;
             LivePP = score.PP;
         }
     }
@@ -164,11 +166,28 @@ namespace PerformanceCalculatorGUI.Components
                                 Spacing = new Vector2(10, 0),
                                 Children = new Drawable[]
                                 {
-                                    new UpdateableRank(Score.SoloScore.Rank)
+                                    new FillFlowContainer
                                     {
                                         Anchor = Anchor.CentreLeft,
                                         Origin = Anchor.CentreLeft,
-                                        Size = new Vector2(50, 20),
+                                        AutoSizeAxes = Axes.Both,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(0, 2),
+                                        Padding = new MarginPadding { Top = 2 },
+                                        Children = new Drawable[]
+                                        {
+                                            new UpdateableRank(Score.SoloScore.Rank)
+                                            {
+                                                Anchor = Anchor.TopCentre,
+                                                Origin = Anchor.TopCentre,
+                                                Size = new Vector2(40, 12),
+                                            },
+                                            new TinyStarRatingDisplay(Score.DifficultyAttributes)
+                                            {
+                                                Anchor = Anchor.TopCentre,
+                                                Origin = Anchor.TopCentre,
+                                            },
+                                        }
                                     },
                                     new FillFlowContainer
                                     {
