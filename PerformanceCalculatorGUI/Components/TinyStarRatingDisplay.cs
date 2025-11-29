@@ -52,6 +52,7 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     background = new Box
                     {
+                        Alpha = 0.75f,
                         RelativeSizeAxes = Axes.Both,
                     },
                     new GridContainer
