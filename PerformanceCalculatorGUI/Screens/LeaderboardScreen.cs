@@ -324,7 +324,7 @@ namespace PerformanceCalculatorGUI.Screens
                         var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
-                        var extendedScore = new ExtendedScore(score, perfAttributes);
+                        var extendedScore = new ExtendedScore(score, difficultyAttributes, perfAttributes);
                         plays.Add(extendedScore);
                     }
                     catch (Exception e)

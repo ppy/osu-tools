@@ -328,7 +328,7 @@ namespace PerformanceCalculatorGUI.Screens
                                 continue;
 
                             var perfAttributes = await performanceCalculator.CalculateAsync(parsedScore.ScoreInfo, difficultyAttributes, token).ConfigureAwait(false);
-                            var extendedScore = new ExtendedScore(score, perfAttributes);
+                            var extendedScore = new ExtendedScore(score, difficultyAttributes, perfAttributes);
                             plays.Add(extendedScore);
                         }
                     }
