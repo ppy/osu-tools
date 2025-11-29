@@ -87,12 +87,10 @@ namespace PerformanceCalculator.Profile
             double totalLocalPP = localOrdered.Sum(play => Math.Pow(0.95, index++) * play.LocalPP);
             double totalLivePP = (double)(userData.Statistics.PP ?? 0);
 
-            index = 0;
-            double nonBonusLivePP = liveOrdered.Sum(play => Math.Pow(0.95, index++) * play.LivePP);
-
-            //todo: implement properly. this is pretty damn wrong.
-            double playcountBonusPP = (totalLivePP - nonBonusLivePP);
+            // https://osu.ppy.sh/wiki/en/Performance_points#how-much-bonus-pp-is-awarded-for-having-scores-on-ranked-maps?
+            double playcountBonusPP = 416.6667 * (1 - Math.Pow(0.995, Math.Min(userData.BeatmapPlayCountsCount, 1000)));
             totalLocalPP += playcountBonusPP;
+
             double totalDiffPP = totalLocalPP - totalLivePP;
 
             if (OutputJson)
