@@ -137,6 +137,11 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colourProvider.Background6
+                },
                 new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,

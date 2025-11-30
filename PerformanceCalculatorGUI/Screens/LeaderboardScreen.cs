@@ -11,6 +11,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
@@ -86,6 +87,11 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colourProvider.Background6
+                },
                 new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
