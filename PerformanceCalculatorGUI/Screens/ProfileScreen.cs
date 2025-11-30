@@ -403,8 +403,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                     decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 
-                    // https://osu.ppy.sh/wiki/en/Performance_points#how-much-bonus-pp-is-awarded-for-having-scores-on-ranked-maps?
-                    decimal playcountBonusPP = (decimal)(416.6667 * (1 - Math.Pow(0.995, Math.Min(player.BeatmapPlayCountsCount, 1000))));
+                    // https://github.com/ppy/osu-queue-score-statistics/blob/842653412d66eef527f7b7067b7cf50e886de954/osu.Server.Queues.ScoreStatisticsProcessor/Helpers/UserTotalPerformanceAggregateHelper.cs#L36-L38
+                    // this might be slightly incorrect for some profiles due to the deduplication happening on the osu-queue-score-statistics side which we can't account for here
+                    decimal playcountBonusPP = (decimal)((417.0 - 1.0 / 3.0) * (1.0 - Math.Pow(0.995, Math.Min(player.BeatmapPlayCountsCount, 1000))));
                     totalLocalPP += playcountBonusPP;
 
                     Schedule(() =>
