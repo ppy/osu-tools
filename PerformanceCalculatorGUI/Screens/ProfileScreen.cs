@@ -409,12 +409,9 @@ namespace PerformanceCalculatorGUI.Screens
 
                     decimal totalLivePP = player.Statistics.PP ?? (decimal)0.0;
 
-                    decimal nonBonusLivePP = 0;
-                    for (int i = 0; i < liveOrdered.Count; i++)
-                        nonBonusLivePP += (decimal)(Math.Pow(0.95, i) * liveOrdered[i].LivePP ?? 0);
-
-                    //todo: implement properly. this is pretty damn wrong.
-                    decimal playcountBonusPP = (totalLivePP - nonBonusLivePP);
+                    // https://github.com/ppy/osu-queue-score-statistics/blob/842653412d66eef527f7b7067b7cf50e886de954/osu.Server.Queues.ScoreStatisticsProcessor/Helpers/UserTotalPerformanceAggregateHelper.cs#L36-L38
+                    // this might be slightly incorrect for some profiles due to the deduplication happening on the osu-queue-score-statistics side which we can't account for here
+                    decimal playcountBonusPP = (decimal)((417.0 - 1.0 / 3.0) * (1.0 - Math.Pow(0.995, Math.Min(player.BeatmapPlayCountsCount, 1000))));
                     totalLocalPP += playcountBonusPP;
 
                     Schedule(() =>
