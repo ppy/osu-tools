@@ -137,6 +137,12 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colourProvider.Background6,
+                    Alpha = 0.85f
+                },
                 new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -949,12 +955,6 @@ namespace PerformanceCalculatorGUI.Screens
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             FillMode = FillMode.Fill
-                        },
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = OsuColour.Gray(0),
-                            Alpha = 0.85f
                         },
                     }
                 }).ContinueWith(_ =>

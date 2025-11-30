@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -91,6 +92,11 @@ namespace PerformanceCalculatorGUI.Screens
                                 RelativeSizeAxes = Axes.Both,
                                 Children = new Drawable[]
                                 {
+                                    new Box
+                                    {
+                                        RelativeSizeAxes = Axes.Both,
+                                        Colour = colourProvider.Background6.Darken(0.2f)
+                                    },
                                     new OsuScrollContainer(Direction.Vertical)
                                     {
                                         Name = "Collection List",
