@@ -28,10 +28,10 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class UserCard : UserListPanel
     {
-        private OsuSpriteText liveLabel;
-        private OsuSpriteText localLabel;
-        private OsuSpriteText differenceLabel;
-        private OsuSpriteText playcountLabel;
+        private OsuSpriteText liveLabel = null!;
+        private OsuSpriteText localLabel = null!;
+        private OsuSpriteText differenceLabel = null!;
+        private OsuSpriteText playcountLabel = null!;
 
         public Bindable<UserCardData> Data = new Bindable<UserCardData>();
 

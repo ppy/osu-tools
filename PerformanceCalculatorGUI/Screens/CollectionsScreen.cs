@@ -1,7 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable enable
 using System;
 using System.IO;
 using System.Linq;
@@ -396,11 +395,11 @@ namespace PerformanceCalculatorGUI.Screens
                     break;
 
                 case CollectionSortCriteria.Local:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total).ToArray();
                     break;
 
                 case CollectionSortCriteria.Difference:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes.Total - x.Score.LivePP).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total - x.Score.LivePP).ToArray();
                     break;
 
                 default:

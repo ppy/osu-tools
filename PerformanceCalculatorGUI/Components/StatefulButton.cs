@@ -20,10 +20,10 @@ namespace PerformanceCalculatorGUI.Components
     public partial class StatefulButton : RoundedButton
     {
         [Resolved]
-        private OverlayColourProvider colourProvider { get; set; }
+        private OverlayColourProvider? colourProvider { get; set; }
 
         [Resolved]
-        private OsuColour colours { get; set; }
+        private OsuColour colours { get; set; } = null!;
 
         public readonly Bindable<ButtonState> State = new Bindable<ButtonState>();
 
@@ -37,7 +37,7 @@ namespace PerformanceCalculatorGUI.Components
         [BackgroundDependencyLoader]
         private void load()
         {
-            Background.Colour = colourProvider.Background1;
+            Background.Colour = colourProvider?.Background1 ?? colours.Blue;
             State.BindValueChanged(updateState, true);
         }
 
@@ -46,7 +46,7 @@ namespace PerformanceCalculatorGUI.Components
             switch (state.NewValue)
             {
                 case ButtonState.Initial:
-                    Background.FadeColour(colourProvider.Background1, 500, Easing.InOutExpo);
+                    Background.FadeColour(colourProvider?.Background1 ?? colours.Blue, 500, Easing.InOutExpo);
                     Text = initialText;
                     break;
 

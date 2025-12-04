@@ -25,19 +25,19 @@ namespace PerformanceCalculatorGUI.Components
 {
     public partial class StrainVisualizer : Container
     {
-        public readonly Bindable<Skill[]> Skills = new Bindable<Skill[]>();
+        public readonly Bindable<Skill[]?> Skills = new Bindable<Skill[]?>();
 
         private readonly List<Bindable<bool>> graphToggles = new List<Bindable<bool>>();
 
         public readonly Bindable<int> TimeUntilFirstStrain = new Bindable<int>();
 
-        private ZoomableScrollContainer graphsContainer;
-        private FillFlowContainer legendContainer;
+        private ZoomableScrollContainer graphsContainer = null!;
+        private FillFlowContainer legendContainer = null!;
 
-        private ColourInfo[] skillColours;
+        private ColourInfo[] skillColours = [];
 
         [Resolved]
-        private OverlayColourProvider colourProvider { get; set; }
+        private OverlayColourProvider colourProvider { get; set; } = null!;
 
         public StrainVisualizer()
         {
@@ -47,11 +47,11 @@ namespace PerformanceCalculatorGUI.Components
 
         private float graphAlpha;
 
-        private void updateGraphs(ValueChangedEvent<Skill[]> val)
+        private void updateGraphs(ValueChangedEvent<Skill[]?> val)
         {
             graphsContainer.Clear();
 
-            var skills = val.NewValue.Where(x => x is StrainSkill or StrainDecaySkill).ToArray();
+            var skills = val.NewValue?.Where(x => x is StrainSkill or StrainDecaySkill).ToArray() ?? [];
 
             // dont bother if there are no strain skills to draw
             if (skills.Length == 0)
@@ -66,7 +66,7 @@ namespace PerformanceCalculatorGUI.Components
             addStrainBars(skills, strainLists);
             addTooltipBars(strainLists);
 
-            if (val.OldValue == null || !val.NewValue.All(x => val.OldValue.Any(y => y.GetType().Name == x.GetType().Name)))
+            if (val.OldValue == null || !val.NewValue!.All(x => val.OldValue.Any(y => y.GetType().Name == x.GetType().Name)))
             {
                 // skill list changed - recreate toggles
                 legendContainer.Clear();
