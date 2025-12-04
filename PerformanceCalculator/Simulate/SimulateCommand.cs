@@ -21,7 +21,7 @@ namespace PerformanceCalculator.Simulate
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
-        public string Beatmap { get; }
+        public string Beatmap { get; } = null!;
 
         [UsedImplicitly]
         [Option(Template = "-a|--accuracy <accuracy>", Description = "Accuracy. Enter as decimal 0-100. Defaults to 100. Scales hit results as well and is rounded to the nearest possible value for the beatmap.")]
@@ -29,7 +29,7 @@ namespace PerformanceCalculator.Simulate
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--mod <mod>", Description = "One for each mod. The mods to compute the performance with. Values: hr, dt, hd, fl, etc...")]
-        public string[] Mods { get; }
+        public string[]? Mods { get; }
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-o|--mod-option <option>",
