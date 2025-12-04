@@ -118,7 +118,8 @@ namespace PerformanceCalculatorGUI.Screens
                                             Anchor = Anchor.TopLeft,
                                             Label = "Beatmap ID",
                                             PlaceholderText = "Enter a beatmap ID or link",
-                                            CommitOnFocusLoss = false
+                                            CommitOnFocusLoss = false,
+                                            SelectAllOnFocus = true
                                         },
                                         calculationButton = new StatefulButton("Start calculation")
                                         {
