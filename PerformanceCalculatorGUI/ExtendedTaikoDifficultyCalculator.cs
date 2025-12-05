@@ -14,7 +14,7 @@ namespace PerformanceCalculatorGUI
 {
     public class ExtendedTaikoDifficultyCalculator : TaikoDifficultyCalculator, IExtendedDifficultyCalculator
     {
-        private Skill[] skills;
+        private Skill[] skills = [];
 
         public ExtendedTaikoDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
             : base(ruleset, beatmap)

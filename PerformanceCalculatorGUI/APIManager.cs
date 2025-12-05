@@ -20,7 +20,7 @@ namespace PerformanceCalculatorGUI
         private readonly Bindable<string> clientIdBindable;
         private readonly Bindable<string> clientSecretBindable;
 
-        private OAuthToken token;
+        private OAuthToken? token;
 
         // WARN: keep in sync with /osu.Game/Online/API/APIAccess.cs APIVersion
         private const int api_version = 20220705;

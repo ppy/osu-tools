@@ -17,7 +17,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private readonly CatchDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
+        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; } = null!;
 
         public CatchObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedCatchDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)

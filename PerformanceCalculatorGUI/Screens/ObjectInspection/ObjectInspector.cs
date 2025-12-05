@@ -37,7 +37,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     [Cached(typeof(IBeatSnapProvider))]
     public partial class ObjectInspector : OsuFocusedOverlayContainer, IBeatSnapProvider
     {
-        private DependencyContainer dependencies;
+        private DependencyContainer dependencies = null!;
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
             => dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
@@ -46,24 +46,24 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private BindableBeatDivisor beatDivisor = new BindableBeatDivisor(4);
 
         [Resolved]
-        private Bindable<WorkingBeatmap> beatmap { get; set; }
+        private Bindable<WorkingBeatmap> beatmap { get; set; } = null!;
 
         [Resolved]
-        private Bindable<IReadOnlyList<Mod>> mods { get; set; }
+        private Bindable<IReadOnlyList<Mod>> mods { get; set; } = null!;
 
         [Resolved]
-        private Bindable<RulesetInfo> ruleset { get; set; }
+        private Bindable<RulesetInfo> ruleset { get; set; } = null!;
 
         [Resolved]
-        private Bindable<DifficultyCalculator> difficultyCalculator { get; set; }
+        private Bindable<DifficultyCalculator> difficultyCalculator { get; set; } = null!;
 
         private readonly ProcessorWorkingBeatmap processorBeatmap;
-        private EditorClock clock;
-        private Container rulesetContainer;
+        private EditorClock clock = null!;
+        private Container rulesetContainer = null!;
 
-        private ObjectDifficultyValuesContainer difficultyValuesContainer;
-        private EditorBeatmap editorBeatmap;
-        private IReadOnlyList<HitObject> hitObjects;
+        private ObjectDifficultyValuesContainer difficultyValuesContainer = null!;
+        private EditorBeatmap editorBeatmap = null!;
+        private IReadOnlyList<HitObject> hitObjects = null!;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -205,7 +205,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             RelativeSizeAxes = Axes.Both,
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
-                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
+                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!, (difficultyCalculator.Value as ExtendedOsuDifficultyCalculator)!,
                             processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,
@@ -216,7 +216,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 },
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
-                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
+                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!, (difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator)!,
                         processorBeatmap.Track.Rate)
                     {
                         RelativeSizeAxes = Axes.Both,
@@ -230,7 +230,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Y = 100,
                     Children = new Drawable[]
                     {
-                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
+                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!, (difficultyCalculator.Value as ExtendedCatchDifficultyCalculator)!,
                             processorBeatmap.Track.Rate)
                         {
                             RelativeSizeAxes = Axes.Both,

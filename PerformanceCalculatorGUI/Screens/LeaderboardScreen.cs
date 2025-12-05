@@ -32,7 +32,7 @@ namespace PerformanceCalculatorGUI.Screens
         public decimal LivePP { get; set; }
         public decimal LocalPP { get; set; }
 
-        public List<ExtendedScore> Scores { get; set; }
+        public List<ExtendedScore> Scores { get; set; } = new List<ExtendedScore>();
     }
 
     public partial class LeaderboardScreen : PerformanceCalculatorScreen
@@ -46,33 +46,33 @@ namespace PerformanceCalculatorGUI.Screens
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Green);
 
-        private LimitedLabelledNumberBox playerAmountTextBox;
-        private LimitedLabelledNumberBox pageTextBox;
-        private StatefulButton calculationButton;
-        private VerboseLoadingLayer loadingLayer;
+        private LimitedLabelledNumberBox playerAmountTextBox = null!;
+        private LimitedLabelledNumberBox pageTextBox = null!;
+        private StatefulButton calculationButton = null!;
+        private VerboseLoadingLayer loadingLayer = null!;
 
-        private Container players;
-        private FillFlowContainer scores;
-        private OsuTabControl<Tabs> tabs;
+        private Container players = null!;
+        private FillFlowContainer scores = null!;
+        private OsuTabControl<Tabs> tabs = null!;
 
-        private CancellationTokenSource calculationCancellatonToken;
+        private CancellationTokenSource? calculationCancellatonToken;
 
         public override bool ShouldShowConfirmationDialogOnSwitch => players.Count > 0;
 
         [Resolved]
-        private NotificationDisplay notificationDisplay { get; set; }
+        private NotificationDisplay notificationDisplay { get; set; } = null!;
 
         [Resolved]
-        private APIManager apiManager { get; set; }
+        private APIManager apiManager { get; set; } = null!;
 
         [Resolved]
-        private Bindable<RulesetInfo> ruleset { get; set; }
+        private Bindable<RulesetInfo> ruleset { get; set; } = null!;
 
         [Resolved]
-        private RulesetStore rulesets { get; set; }
+        private RulesetStore rulesets { get; set; } = null!;
 
         [Resolved]
-        private SettingsManager configManager { get; set; }
+        private SettingsManager configManager { get; set; } = null!;
 
         private const int settings_height = 40;
         private const int tabs_height = 20;
@@ -281,7 +281,7 @@ namespace PerformanceCalculatorGUI.Screens
                     LoadComponent(leaderboardTable);
                     players.Add(leaderboardTable);
 
-                    foreach (var calculatedScore in calculatedScores.OrderByDescending(x => x.PerformanceAttributes.Total))
+                    foreach (var calculatedScore in calculatedScores.OrderByDescending(x => x.PerformanceAttributes?.Total))
                     {
                         scores.Add(new ExtendedProfileScore(calculatedScore, true));
                     }
@@ -348,11 +348,11 @@ namespace PerformanceCalculatorGUI.Screens
             }
             catch (OperationCanceledException) { }
 
-            var localOrdered = plays.OrderByDescending(x => x.PerformanceAttributes.Total).ToList();
+            var localOrdered = plays.OrderByDescending(x => x.PerformanceAttributes?.Total).ToList();
             var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0.0).ToList();
 
             int index = 0;
-            decimal totalLocalPP = (decimal)localOrdered.Select(x => x.PerformanceAttributes.Total).Sum(play => Math.Pow(0.95, index++) * play);
+            decimal totalLocalPP = (decimal)localOrdered.Select(x => x.PerformanceAttributes?.Total ?? 0).Sum(play => Math.Pow(0.95, index++) * play);
             decimal totalLivePP = player.PP ?? (decimal)0.0;
 
             index = 0;

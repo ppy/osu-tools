@@ -11,28 +11,28 @@ namespace PerformanceCalculatorGUI
 {
     internal static class AttributeConversion
     {
-        public static Dictionary<string, object> ToDictionary(DifficultyAttributes attributes)
+        public static Dictionary<string, object> ToDictionary(DifficultyAttributes? attributes)
         {
             var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(attributes)) ?? new Dictionary<string, object>();
 
             return attributeValues.Select(x => new KeyValuePair<string, object>(x.Key.Humanize().ToLowerInvariant(), x.Value)).ToDictionary(x => x.Key, y => y.Value);
         }
 
-        public static Dictionary<string, object> ToDictionary(PerformanceAttributes attributes)
+        public static Dictionary<string, object> ToDictionary(PerformanceAttributes? attributes)
         {
             var attributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(attributes)) ?? new Dictionary<string, object>();
 
             return attributeValues.Select(x => new KeyValuePair<string, object>(x.Key.Humanize().ToLowerInvariant(), x.Value)).ToDictionary(x => x.Key, y => y.Value);
         }
 
-        public static string ToReadableString(DifficultyAttributes attributes)
+        public static string ToReadableString(DifficultyAttributes? attributes)
         {
             var dictionary = ToDictionary(attributes);
 
             return string.Join("\n", dictionary.Select(x => $"{x.Key}: {x.Value:N2}"));
         }
 
-        public static string ToReadableString(PerformanceAttributes attributes)
+        public static string ToReadableString(PerformanceAttributes? attributes)
         {
             var dictionary = ToDictionary(attributes);
 

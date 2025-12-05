@@ -19,7 +19,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
+        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; } = null!;
 
         public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
@@ -44,7 +44,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
-            protected override GameplayCursorContainer CreateCursor() => null;
+            protected override GameplayCursorContainer? CreateCursor() => null;
 
             public TaikoObjectInspectorPlayfield()
             {

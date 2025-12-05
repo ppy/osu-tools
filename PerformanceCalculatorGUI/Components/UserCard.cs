@@ -21,17 +21,17 @@ namespace PerformanceCalculatorGUI.Components
 {
     public struct UserCardData
     {
-        public decimal LivePP { get; set; }
-        public decimal LocalPP { get; set; }
-        public decimal PlaycountPP { get; set; }
+        public required decimal LivePP { get; set; }
+        public required decimal LocalPP { get; set; }
+        public required decimal PlaycountPP { get; set; }
     }
 
     public partial class UserCard : UserListPanel
     {
-        private OsuSpriteText liveLabel;
-        private OsuSpriteText localLabel;
-        private OsuSpriteText differenceLabel;
-        private OsuSpriteText playcountLabel;
+        private OsuSpriteText liveLabel = null!;
+        private OsuSpriteText localLabel = null!;
+        private OsuSpriteText differenceLabel = null!;
+        private OsuSpriteText playcountLabel = null!;
 
         public Bindable<UserCardData> Data = new Bindable<UserCardData>();
 

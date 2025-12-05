@@ -16,14 +16,14 @@ namespace PerformanceCalculator
         [UsedImplicitly]
         [Required]
         [Argument(98, Name = "client id", Description = "API Client ID, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
-        public string ClientId { get; }
+        public string ClientId { get; } = null!;
 
         [UsedImplicitly]
         [Required]
         [Argument(99, Name = "client secret", Description = "API Client Secret, which you can get from here: https://osu.ppy.sh/home/account/edit#new-oauth-application")]
-        public string ClientSecret { get; }
+        public string ClientSecret { get; } = null!;
 
-        private string apiAccessToken;
+        private string? apiAccessToken;
 
         // WARN: keep in sync with /osu.Game/Online/API/APIAccess.cs APIVersion
         private const int api_version = 20220705;
@@ -34,7 +34,7 @@ namespace PerformanceCalculator
             base.OnExecute(app, console);
         }
 
-        protected T GetJsonFromApi<T>(string request, HttpMethod method = null, Dictionary<string, string> parameters = null)
+        protected T GetJsonFromApi<T>(string request, HttpMethod? method = null, Dictionary<string, string>? parameters = null)
         {
             using var req = new JsonWebRequest<T>($"{Program.ENDPOINT_CONFIGURATION.APIUrl}/api/v2/{request}");
             req.Method = method ?? HttpMethod.Get;
