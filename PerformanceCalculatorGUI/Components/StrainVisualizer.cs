@@ -19,13 +19,14 @@ using osu.Game.Overlays;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Screens.Edit.Compose.Components.Timeline;
 using osuTK;
+using osuTK.Graphics;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {
     public partial class StrainVisualizer : Container
     {
-        public readonly Bindable<Skill[]?> Skills = new Bindable<Skill[]?>();
+        public readonly Bindable<Skill[]> Skills = new Bindable<Skill[]>([]);
 
         private readonly List<Bindable<bool>> graphToggles = new List<Bindable<bool>>();
 
@@ -37,7 +38,7 @@ namespace PerformanceCalculatorGUI.Components
         private ColourInfo[] skillColours = [];
 
         [Resolved]
-        private OverlayColourProvider colourProvider { get; set; } = null!;
+        private OverlayColourProvider? colourProvider { get; set; }
 
         public StrainVisualizer()
         {
@@ -47,11 +48,11 @@ namespace PerformanceCalculatorGUI.Components
 
         private float graphAlpha;
 
-        private void updateGraphs(ValueChangedEvent<Skill[]?> val)
+        private void updateGraphs(ValueChangedEvent<Skill[]> val)
         {
             graphsContainer.Clear();
 
-            var skills = val.NewValue?.Where(x => x is StrainSkill or StrainDecaySkill).ToArray() ?? [];
+            var skills = val.NewValue.Where(x => x is StrainSkill or StrainDecaySkill).ToArray();
 
             // dont bother if there are no strain skills to draw
             if (skills.Length == 0)
@@ -66,7 +67,7 @@ namespace PerformanceCalculatorGUI.Components
             addStrainBars(skills, strainLists);
             addTooltipBars(strainLists);
 
-            if (val.OldValue == null || !val.NewValue!.All(x => val.OldValue.Any(y => y.GetType().Name == x.GetType().Name)))
+            if (val.OldValue.Length == 0 || !val.NewValue.All(x => val.OldValue.Any(y => y.GetType().Name == x.GetType().Name)))
             {
                 // skill list changed - recreate toggles
                 legendContainer.Clear();
@@ -102,7 +103,7 @@ namespace PerformanceCalculatorGUI.Components
                             new Box
                             {
                                 RelativeSizeAxes = Axes.Both,
-                                Colour = colourProvider.Background4
+                                Colour = colourProvider?.Background4 ?? Color4.Gray
                             },
                             new ExtendedOsuCheckbox
                             {
@@ -152,7 +153,7 @@ namespace PerformanceCalculatorGUI.Components
                     new Box
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Colour = colourProvider.Background5,
+                        Colour = colourProvider?.Background5 ?? Color4.Gray,
                         Alpha = 0.6f
                     },
                     new FillFlowContainer

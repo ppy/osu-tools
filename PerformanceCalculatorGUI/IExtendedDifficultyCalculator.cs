@@ -9,7 +9,7 @@ namespace PerformanceCalculatorGUI
 {
     public interface IExtendedDifficultyCalculator
     {
-        Skill[]? GetSkills();
+        Skill[] GetSkills();
         DifficultyHitObject[] GetDifficultyHitObjects(IBeatmap beatmap, double clockRate);
     }
 }

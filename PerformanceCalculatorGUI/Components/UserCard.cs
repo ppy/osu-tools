@@ -21,9 +21,9 @@ namespace PerformanceCalculatorGUI.Components
 {
     public struct UserCardData
     {
-        public decimal LivePP { get; set; }
-        public decimal LocalPP { get; set; }
-        public decimal PlaycountPP { get; set; }
+        public required decimal LivePP { get; set; }
+        public required decimal LocalPP { get; set; }
+        public required decimal PlaycountPP { get; set; }
     }
 
     public partial class UserCard : UserListPanel
