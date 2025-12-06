@@ -3,6 +3,7 @@
 
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -340,17 +341,24 @@ namespace PerformanceCalculatorGUI.Screens
 
             collectionList.Clear();
 
+            var collections = new List<Collection>();
+
             foreach (string collectionFile in Directory.EnumerateFiles(collections_directory))
             {
                 var deserializedCollection = JsonConvert.DeserializeObject<Collection>(File.ReadAllText(collectionFile));
 
                 if (deserializedCollection != null)
                 {
-                    var collectionButton = new CollectionButton(deserializedCollection, currentCollection);
-                    collectionList.Add(collectionButton);
-
-                    collectionButton.OnDelete += onCollectionDelete;
+                    collections.Add(deserializedCollection);
                 }
+            }
+
+            foreach (var collection in collections.OrderBy(x => x.Name))
+            {
+                var collectionButton = new CollectionButton(collection, currentCollection);
+                collectionList.Add(collectionButton);
+
+                collectionButton.OnDelete += onCollectionDelete;
             }
         }
 
