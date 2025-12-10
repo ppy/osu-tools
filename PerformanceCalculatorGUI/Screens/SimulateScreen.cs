@@ -60,7 +60,7 @@ namespace PerformanceCalculatorGUI.Screens
         private LimitedLabelledNumberBox comboTextBox;
         private LimitedLabelledNumberBox scoreTextBox;
 
-        private LabelledNumberBox scoreIdTextBox;
+        private LabelledTextBox scoreIdTextBox;
         private StatefulButton scoreIdPopulateButton;
 
         private GridContainer accuracyContainer;
@@ -235,12 +235,12 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Direction = FillDirection.Horizontal,
                                                     Children = new Drawable[]
                                                     {
-                                                        scoreIdTextBox = new LabelledNumberBox
+                                                        scoreIdTextBox = new LabelledTextBox
                                                         {
                                                             RelativeSizeAxes = Axes.X,
                                                             Width = 0.7f,
                                                             Label = "Score ID",
-                                                            PlaceholderText = "0",
+                                                            PlaceholderText = "0 or osu/0",
                                                         },
                                                         scoreIdPopulateButton = new StatefulButton("Populate from score")
                                                         {
@@ -248,9 +248,9 @@ namespace PerformanceCalculatorGUI.Screens
                                                             Width = 0.3f,
                                                             Action = () =>
                                                             {
-                                                                if (!string.IsNullOrEmpty(scoreIdTextBox.Current.Value))
+                                                                if (validateScoreId(scoreIdTextBox.Current.Value))
                                                                 {
-                                                                    populateSettingsFromScore(long.Parse(scoreIdTextBox.Current.Value));
+                                                                    populateSettingsFromScore(scoreIdTextBox.Current.Value);
                                                                 }
                                                                 else
                                                                 {
@@ -986,7 +986,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private long? legacyTotalScore;
 
-        private void populateSettingsFromScore(long scoreId)
+        private void populateSettingsFromScore(string scoreId)
         {
             if (scoreIdPopulateButton.State.Value == ButtonState.Loading)
                 return;
@@ -1110,6 +1110,32 @@ namespace PerformanceCalculatorGUI.Screens
                     missesContainer.ColumnDimensions = [new Dimension(), new Dimension(), new Dimension()];
                 }
             }
+        }
+
+        private static bool validateScoreId(string scoreId)
+        {
+            string[] validRulesetNames = { "osu", "taiko", "fruits", "mania" };
+
+            if (string.IsNullOrWhiteSpace(scoreId))
+                return false;
+
+            // Check if it's just a numeric id from lazer leaderboard
+            if (long.TryParse(scoreId, out _))
+                return true;
+
+            // Check if it's valid legacy database score id
+            string[] parts = scoreId.Split('/');
+
+            if (parts.Length == 2)
+            {
+                string rulesetPart = parts[0];
+                string idPart = parts[1];
+
+                if (validRulesetNames.Contains(rulesetPart) && long.TryParse(idPart, out _))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
