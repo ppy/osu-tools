@@ -21,15 +21,21 @@ namespace PerformanceCalculatorGUI.Components
         private void load()
         {
             var method = typeof(ModSelectOverlay).GetMethod("createModColumnContent", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (method == null) return;
 
             object systemColumn = method.Invoke(this, new object[] { ModType.System });
+            if (systemColumn == null) return;
 
             var flowField = typeof(ModSelectOverlay).GetField("columnFlow",
                 BindingFlags.NonPublic | BindingFlags.Instance);
+            if (flowField == null) return;
 
             object columnFlow = flowField.GetValue(this);
+            if (columnFlow == null) return;
 
             var addMethod = columnFlow.GetType().GetMethod("Add");
+            if (addMethod == null) return;
+
             addMethod.Invoke(columnFlow, new[] { systemColumn });
         }
 
