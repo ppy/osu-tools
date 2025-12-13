@@ -34,7 +34,7 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
-        public string[]? Mods { get; }
+        public string[] Mods { get; } = [];
 
         [Option(CommandOptionType.SingleValue, Template = "-T|--greats", Description = "Number of greats.")]
         public int Greats { get; set; }

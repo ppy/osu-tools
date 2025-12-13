@@ -32,12 +32,12 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
-        public string[]? Mods { get; }
+        public string[] Mods { get; } = [];
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-o|--mod-option <option>",
             Description = "The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35")]
-        public string[]? ModOptions { get; }
+        public string[] ModOptions { get; } = [];
 
         public override void Execute()
         {
