@@ -10,15 +10,15 @@ namespace PerformanceCalculator.Profile
     /// </summary>
     public class UserPlayInfo
     {
-        public double LocalPP;
-        public double LivePP;
-        public double MissCount;
-        public double Accuracy;
+        public required double LocalPP;
+        public required double LivePP;
+        public required double MissCount;
+        public required double Accuracy;
 
-        public BeatmapInfo Beatmap;
+        public required BeatmapInfo Beatmap;
 
-        public string[] Mods;
-        public int Combo;
-        public int MaxCombo;
+        public required string[] Mods;
+        public required int Combo;
+        public required int MaxCombo;
     }
 }

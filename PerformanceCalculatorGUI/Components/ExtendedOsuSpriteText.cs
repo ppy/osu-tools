@@ -15,7 +15,7 @@ namespace PerformanceCalculatorGUI.Components
     {
         public override bool HandlePositionalInput => true;
 
-        public string TooltipContent { get; set; }
+        public string? TooltipContent { get; set; }
 
         public ITooltip<string> GetCustomTooltip() => new MultilineTooltip();
     }
@@ -23,7 +23,7 @@ namespace PerformanceCalculatorGUI.Components
     public partial class MultilineTooltip : VisibilityContainer, ITooltip<string>
     {
         private readonly FillFlowContainer textContainer;
-        private string currentData;
+        private string? currentData;
 
         public MultilineTooltip()
         {

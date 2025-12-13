@@ -22,7 +22,7 @@ namespace PerformanceCalculator.Difficulty
     {
         [UsedImplicitly]
         [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
-        public string Path { get; }
+        public string Path { get; } = null!;
 
         [UsedImplicitly]
         [Option(CommandOptionType.SingleOrNoValue, Template = "-r|--ruleset:<ruleset-id>", Description = "Optional. The ruleset to compute the beatmap difficulty for, if it's a convertible beatmap.\n"
@@ -33,7 +33,7 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
-        public string[] Mods { get; }
+        public string[] Mods { get; } = [];
 
         public override void Execute()
         {
@@ -136,15 +136,15 @@ namespace PerformanceCalculator.Difficulty
 
         private Mod[] getMods(Ruleset ruleset)
         {
-            var mods = new List<Mod>();
-            if (Mods == null)
+            if (Mods.Length == 0)
                 return Array.Empty<Mod>();
 
             var availableMods = ruleset.CreateAllMods().ToList();
+            var mods = new List<Mod>();
 
             foreach (string modString in Mods)
             {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
+                Mod? newMod = availableMods?.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
                 if (newMod == null)
                     throw new ArgumentException($"Invalid mod provided: {modString}");
 
@@ -166,22 +166,22 @@ namespace PerformanceCalculator.Difficulty
         private class Result
         {
             [JsonProperty("ruleset_id")]
-            public int RulesetId { get; set; }
+            public required int RulesetId { get; set; }
 
             [JsonProperty("beatmap_id")]
-            public int BeatmapId { get; set; }
+            public required int BeatmapId { get; set; }
 
             [JsonProperty("beatmap")]
-            public string Beatmap { get; set; }
+            public required string Beatmap { get; set; }
 
             [JsonProperty("mods")]
-            public List<APIMod> Mods { get; set; }
+            public required List<APIMod> Mods { get; set; }
 
             [JsonProperty("score_attributes")]
-            public LegacyScoreAttributes ScoreAttributes { get; set; }
+            public required LegacyScoreAttributes ScoreAttributes { get; set; }
 
             [JsonProperty("mod_multiplier")]
-            public double ModMultiplier { get; set; }
+            public required double ModMultiplier { get; set; }
         }
     }
 }

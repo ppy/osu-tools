@@ -26,7 +26,7 @@ namespace PerformanceCalculator
         /// <summary>
         /// The console.
         /// </summary>
-        public IConsole Console { get; private set; }
+        public IConsole Console { get; private set; } = null!;
 
         [UsedImplicitly]
         [Option(Template = "-j|--json", Description = "Output results as JSON.")]
@@ -38,7 +38,7 @@ namespace PerformanceCalculator
             Execute();
         }
 
-        public void OutputPerformance(ScoreInfo score, PerformanceAttributes performanceAttributes, DifficultyAttributes difficultyAttributes)
+        public void OutputPerformance(ScoreInfo score, PerformanceAttributes? performanceAttributes, DifficultyAttributes difficultyAttributes)
         {
             var result = new Result
             {
@@ -133,7 +133,7 @@ namespace PerformanceCalculator
         {
         }
 
-        public static Mod[] ParseMods(Ruleset ruleset, string[] acronyms, string[] options)
+        public static Mod[] ParseMods(Ruleset ruleset, string[]? acronyms, string[]? options)
         {
             acronyms ??= [];
             options ??= [];
@@ -167,13 +167,13 @@ namespace PerformanceCalculator
         private class Result
         {
             [JsonProperty("score")]
-            public ScoreStatistics Score { get; set; }
+            public required ScoreStatistics Score { get; set; }
 
             [JsonProperty("performance_attributes")]
-            public PerformanceAttributes PerformanceAttributes { get; set; }
+            public required PerformanceAttributes? PerformanceAttributes { get; set; }
 
             [JsonProperty("difficulty_attributes")]
-            public DifficultyAttributes DifficultyAttributes { get; set; }
+            public required DifficultyAttributes DifficultyAttributes { get; set; }
         }
 
         /// <summary>
@@ -182,31 +182,31 @@ namespace PerformanceCalculator
         private class ScoreStatistics
         {
             [JsonProperty("ruleset_id")]
-            public int RulesetId { get; set; }
+            public required int RulesetId { get; set; }
 
             [JsonProperty("beatmap_id")]
-            public int BeatmapId { get; set; }
+            public required int BeatmapId { get; set; }
 
             [JsonProperty("beatmap")]
-            public string Beatmap { get; set; }
+            public required string Beatmap { get; set; }
 
             [JsonProperty("mods")]
-            public List<APIMod> Mods { get; set; }
+            public required List<APIMod> Mods { get; set; }
 
             [JsonProperty("total_score")]
-            public long TotalScore { get; set; }
+            public required long TotalScore { get; set; }
 
             [JsonProperty("legacy_total_score")]
-            public long LegacyTotalScore { get; set; }
+            public required long LegacyTotalScore { get; set; }
 
             [JsonProperty("accuracy")]
-            public double Accuracy { get; set; }
+            public required double Accuracy { get; set; }
 
             [JsonProperty("combo")]
-            public int Combo { get; set; }
+            public required int Combo { get; set; }
 
             [JsonProperty("statistics")]
-            public Dictionary<HitResult, int> Statistics { get; set; }
+            public required Dictionary<HitResult, int> Statistics { get; set; }
         }
     }
 }

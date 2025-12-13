@@ -23,7 +23,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private readonly OsuDifficultyHitObject[] difficultyHitObjects;
 
         [Resolved]
-        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
+        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; } = null!;
 
         public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
             : base(ruleset, beatmap, mods)
@@ -46,7 +46,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
-            protected override GameplayCursorContainer CreateCursor() => null;
+            protected override GameplayCursorContainer? CreateCursor() => null;
 
             public OsuObjectInspectorPlayfield(IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects)
             {

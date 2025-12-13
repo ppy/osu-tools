@@ -4,7 +4,6 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK.Graphics;
@@ -13,7 +12,7 @@ namespace PerformanceCalculatorGUI.Components
 {
     public partial class Notification : Container
     {
-        public Notification(LocalisableString text)
+        public Notification(string? text)
         {
             Anchor = Anchor.BottomCentre;
             Origin = Anchor.BottomCentre;
@@ -40,7 +39,7 @@ namespace PerformanceCalculatorGUI.Components
                     Font = OsuFont.GetFont(size: 16, weight: FontWeight.Bold),
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
-                    Text = text
+                    Text = text ?? string.Empty
                 }
             };
         }
