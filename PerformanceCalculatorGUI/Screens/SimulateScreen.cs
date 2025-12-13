@@ -178,7 +178,8 @@ namespace PerformanceCalculatorGUI.Screens
                                             Label = "Beatmap ID",
                                             FixedLabelWidth = 100f,
                                             PlaceholderText = "Enter a beatmap ID or link",
-                                            CommitOnFocusLoss = false
+                                            CommitOnFocusLoss = false,
+                                            SelectAllOnFocus = true
                                         },
                                         beatmapImportTypeSwitch = new SwitchButton
                                         {

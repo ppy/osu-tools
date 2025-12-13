@@ -74,7 +74,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     case DrawableSlider:
                     case DrawableHitCircle:
-                        var nextHitObject = difficultyHitObjects.FirstOrDefault(x => x.StartTime > hitObject.StartTimeBindable.Value)?.BaseObject;
+                        var nextHitObject = difficultyHitObjects.FirstOrDefault(x => x.BaseObject.StartTime > hitObject.StartTimeBindable.Value)?.BaseObject;
 
                         if (nextHitObject != null)
                         {
