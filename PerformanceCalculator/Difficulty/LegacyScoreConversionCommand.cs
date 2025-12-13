@@ -22,7 +22,7 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
-        public string Beatmap { get; }
+        public string Beatmap { get; } = null!;
 
         [UsedImplicitly]
         [Required]
@@ -34,7 +34,7 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
-        public string[] Mods { get; }
+        public string[] Mods { get; } = [];
 
         [Option(CommandOptionType.SingleValue, Template = "-T|--greats", Description = "Number of greats.")]
         public int Greats { get; set; }
@@ -66,7 +66,7 @@ namespace PerformanceCalculator.Difficulty
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset);
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
-            Mod[] mods = [ruleset.CreateMod<ModClassic>(), .. getMods(ruleset)];
+            Mod[] mods = [ruleset.CreateMod<ModClassic>()!, .. getMods(ruleset)];
 
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
@@ -91,7 +91,7 @@ namespace PerformanceCalculator.Difficulty
 
         private Mod[] getMods(Ruleset ruleset)
         {
-            if (Mods == null)
+            if (Mods.Length == 0)
                 return Array.Empty<Mod>();
 
             var availableMods = ruleset.CreateAllMods().ToList();
@@ -99,7 +99,7 @@ namespace PerformanceCalculator.Difficulty
 
             foreach (string modString in Mods)
             {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
+                Mod? newMod = availableMods?.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
                 if (newMod == null)
                     throw new ArgumentException($"Invalid mod provided: {modString}");
 

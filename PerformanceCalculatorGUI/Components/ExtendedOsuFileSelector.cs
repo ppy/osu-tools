@@ -24,7 +24,7 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class ExtendedOsuFileSelector : OsuFileSelector
     {
-        public ExtendedOsuFileSelector(string initialPath = null, string[] validFileExtensions = null)
+        public ExtendedOsuFileSelector(string? initialPath = null, string[]? validFileExtensions = null)
             : base(initialPath, validFileExtensions)
         {
         }

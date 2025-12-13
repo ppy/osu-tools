@@ -14,7 +14,7 @@ namespace PerformanceCalculatorGUI
 {
     public class ExtendedOsuDifficultyCalculator : OsuDifficultyCalculator, IExtendedDifficultyCalculator
     {
-        private Skill[] skills;
+        private Skill[] skills = [];
 
         public ExtendedOsuDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
             : base(ruleset, beatmap)

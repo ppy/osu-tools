@@ -20,7 +20,7 @@ namespace PerformanceCalculator.Profile
     {
         [UsedImplicitly]
         [Argument(0, Name = "user", Description = "User ID is preferred, but username should also work.")]
-        public string ProfileName { get; }
+        public string ProfileName { get; } = null!;
 
         [UsedImplicitly]
         [Option(Template = "-r|--ruleset:<ruleset-id>", Description = "The ruleset to compute the profile for.\n"

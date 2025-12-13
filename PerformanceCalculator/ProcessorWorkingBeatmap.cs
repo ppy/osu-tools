@@ -73,9 +73,9 @@ namespace PerformanceCalculator
         }
 
         protected override IBeatmap GetBeatmap() => beatmap;
-        public override Texture GetBackground() => null;
-        protected override Track GetBeatmapTrack() => null;
-        protected override ISkin GetSkin() => null;
-        public override Stream GetStream(string storagePath) => null;
+        public override Texture GetBackground() => throw new NotImplementedException();
+        protected override Track GetBeatmapTrack() => throw new NotImplementedException();
+        protected override ISkin GetSkin() => throw new NotImplementedException();
+        public override Stream GetStream(string storagePath) => throw new NotImplementedException();
     }
 }

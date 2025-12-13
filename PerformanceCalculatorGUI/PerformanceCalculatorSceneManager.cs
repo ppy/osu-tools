@@ -28,19 +28,19 @@ namespace PerformanceCalculatorGUI
 {
     public partial class PerformanceCalculatorSceneManager : CompositeDrawable
     {
-        private ScreenStack screenStack;
+        private ScreenStack screenStack = null!;
 
-        private ToolbarRulesetSelector rulesetSelector;
+        private ToolbarRulesetSelector rulesetSelector = null!;
 
-        private Box hoverGradientBox;
+        private Box hoverGradientBox = null!;
 
         public const float CONTROL_AREA_HEIGHT = 45;
 
         [Resolved]
-        private Bindable<RulesetInfo> ruleset { get; set; }
+        private Bindable<RulesetInfo> ruleset { get; set; } = null!;
 
         [Resolved]
-        private DialogOverlay dialogOverlay { get; set; }
+        private DialogOverlay dialogOverlay { get; set; } = null!;
 
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);

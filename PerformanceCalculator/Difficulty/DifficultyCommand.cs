@@ -21,7 +21,7 @@ namespace PerformanceCalculator.Difficulty
     {
         [UsedImplicitly]
         [Argument(0, Name = "path", Description = "Required. A beatmap file (.osu), beatmap ID, or a folder containing .osu files to compute the difficulty for.")]
-        public string Path { get; }
+        public string Path { get; } = null!;
 
         [UsedImplicitly]
         [Option(CommandOptionType.SingleOrNoValue, Template = "-r|--ruleset:<ruleset-id>", Description = "Optional. The ruleset to compute the beatmap difficulty for, if it's a convertible beatmap.\n"
@@ -32,12 +32,12 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
                                                                                           + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
-        public string[] Mods { get; }
+        public string[] Mods { get; } = [];
 
         [UsedImplicitly]
         [Option(CommandOptionType.MultipleValue, Template = "-o|--mod-option <option>",
             Description = "The options of mods, with one for each setting. Specified as acryonym_settingkey=value. Example: DT_speed_change=1.35")]
-        public string[] ModOptions { get; set; } = [];
+        public string[] ModOptions { get; } = [];
 
         public override void Execute()
         {
@@ -145,19 +145,19 @@ namespace PerformanceCalculator.Difficulty
         private class Result
         {
             [JsonProperty("ruleset_id")]
-            public int RulesetId { get; set; }
+            public required int RulesetId { get; set; }
 
             [JsonProperty("beatmap_id")]
-            public int BeatmapId { get; set; }
+            public required int BeatmapId { get; set; }
 
             [JsonProperty("beatmap")]
-            public string Beatmap { get; set; }
+            public required string Beatmap { get; set; }
 
             [JsonProperty("mods")]
-            public List<APIMod> Mods { get; set; }
+            public required List<APIMod> Mods { get; set; }
 
             [JsonProperty("attributes")]
-            public DifficultyAttributes Attributes { get; set; }
+            public required DifficultyAttributes Attributes { get; set; }
         }
     }
 }

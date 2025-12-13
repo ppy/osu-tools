@@ -21,7 +21,7 @@ namespace PerformanceCalculator.Performance
         [UsedImplicitly]
         [FileExists]
         [Argument(0, "replay", "The replay file to process.")]
-        public string Replay { get; }
+        public string Replay { get; } = null!;
 
         public override void Execute()
         {

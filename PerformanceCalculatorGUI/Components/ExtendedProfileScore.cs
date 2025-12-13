@@ -42,10 +42,10 @@ namespace PerformanceCalculatorGUI.Components
         public Bindable<int> Position { get; } = new Bindable<int>();
         public Bindable<int> PositionChange { get; } = new Bindable<int>();
 
-        public PerformanceAttributes PerformanceAttributes { get; }
+        public PerformanceAttributes? PerformanceAttributes { get; }
         public DifficultyAttributes DifficultyAttributes { get; }
 
-        public ExtendedScore(SoloScoreInfo score, DifficultyAttributes difficultyAttributes, PerformanceAttributes performanceAttributes)
+        public ExtendedScore(SoloScoreInfo score, DifficultyAttributes difficultyAttributes, PerformanceAttributes? performanceAttributes)
         {
             SoloScore = score;
             PerformanceAttributes = performanceAttributes;
@@ -56,8 +56,8 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class ExtendedProfileItemContainer : ProfileItemContainer
     {
-        public Action OnHoverAction { get; set; }
-        public Action OnUnhoverAction { get; set; }
+        public Action? OnHoverAction { get; set; }
+        public Action? OnUnhoverAction { get; set; }
 
         public ExtendedProfileItemContainer()
         {
@@ -93,12 +93,12 @@ namespace PerformanceCalculatorGUI.Components
         public readonly bool ShowAvatar;
 
         [Resolved]
-        private OsuColour colours { get; set; }
+        private OsuColour colours { get; set; } = null!;
 
         [Resolved]
-        private OverlayColourProvider colourProvider { get; set; }
+        private OverlayColourProvider colourProvider { get; set; } = null!;
 
-        private OsuSpriteText positionChangeText;
+        private OsuSpriteText positionChangeText = null!;
 
         public ExtendedProfileScore(ExtendedScore score, bool showAvatar = false)
         {
@@ -389,7 +389,7 @@ namespace PerformanceCalculatorGUI.Components
                                     new ExtendedOsuSpriteText
                                     {
                                         Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                        Text = $"{Score.PerformanceAttributes.Total:0}pp",
+                                        Text = $"{Score.PerformanceAttributes?.Total:0}pp",
                                         Colour = colourProvider.Highlight1,
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre,
@@ -398,7 +398,7 @@ namespace PerformanceCalculatorGUI.Components
                                     new OsuSpriteText
                                     {
                                         Font = OsuFont.GetFont(size: small_text_font_size),
-                                        Text = $"{Score.PerformanceAttributes.Total - Score.LivePP:+0.0;-0.0;-}",
+                                        Text = $"{Score.PerformanceAttributes?.Total - Score.LivePP:+0.0;-0.0;-}",
                                         Colour = getPpDifferenceColor(),
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre
@@ -415,7 +415,7 @@ namespace PerformanceCalculatorGUI.Components
 
         private Color4 getPpDifferenceColor()
         {
-            double difference = Score.PerformanceAttributes.Total - Score.LivePP ?? 0;
+            double difference = Score.PerformanceAttributes?.Total - Score.LivePP ?? 0;
             var baseColor = colourProvider.Light1;
 
             return difference switch
@@ -467,9 +467,9 @@ namespace PerformanceCalculatorGUI.Components
 
         private partial class ScoreBeatmapMetadataContainer : OsuHoverContainer
         {
-            private readonly IBeatmapInfo beatmapInfo;
+            private readonly IBeatmapInfo? beatmapInfo;
 
-            public ScoreBeatmapMetadataContainer(IBeatmapInfo beatmapInfo)
+            public ScoreBeatmapMetadataContainer(IBeatmapInfo? beatmapInfo)
             {
                 this.beatmapInfo = beatmapInfo;
                 AutoSizeAxes = Axes.Both;
@@ -480,7 +480,7 @@ namespace PerformanceCalculatorGUI.Components
             {
                 Action = () =>
                 {
-                    host.OpenUrlExternally($"https://osu.ppy.sh/b/{beatmapInfo.OnlineID}");
+                    host.OpenUrlExternally($"https://osu.ppy.sh/b/{beatmapInfo?.OnlineID}");
                 };
 
                 Child = new FillFlowContainer
@@ -492,7 +492,7 @@ namespace PerformanceCalculatorGUI.Components
                         {
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
-                            Text = new RomanisableString(beatmapInfo.Metadata.TitleUnicode, beatmapInfo.Metadata.Title),
+                            Text = new RomanisableString(beatmapInfo?.Metadata.TitleUnicode, beatmapInfo?.Metadata.Title),
                             Font = OsuFont.GetFont(size: 14, weight: FontWeight.SemiBold, italics: true)
                         },
                         new OsuSpriteText
@@ -506,7 +506,7 @@ namespace PerformanceCalculatorGUI.Components
                         {
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
-                            Text = new RomanisableString(beatmapInfo.Metadata.ArtistUnicode, beatmapInfo.Metadata.Artist),
+                            Text = new RomanisableString(beatmapInfo?.Metadata.ArtistUnicode, beatmapInfo?.Metadata.Artist),
                             Font = OsuFont.GetFont(size: 12, italics: true)
                         },
                     }

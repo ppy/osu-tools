@@ -23,11 +23,11 @@ namespace PerformanceCalculatorGUI.Screens.Simulate
         public readonly Bindable<Dictionary<string, object>> Attributes = new Bindable<Dictionary<string, object>>();
         private const float row_height = 35;
 
-        private FillFlowContainer backgroundFlow;
-        private GridContainer grid;
+        private FillFlowContainer backgroundFlow = null!;
+        private GridContainer grid = null!;
 
         [Resolved]
-        private OverlayColourProvider colourProvider { get; set; }
+        private OverlayColourProvider colourProvider { get; set; } = null!;
 
         [BackgroundDependencyLoader]
         private void load()
