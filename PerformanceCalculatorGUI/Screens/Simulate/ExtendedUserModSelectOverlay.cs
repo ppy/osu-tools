@@ -5,7 +5,7 @@ using osu.Framework.Graphics;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Mods;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Screens.Simulate
 {
     public partial class ExtendedUserModSelectOverlay : UserModSelectOverlay
     {
