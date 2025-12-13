@@ -91,7 +91,7 @@ namespace PerformanceCalculator.Difficulty
 
         private Mod[] getMods(Ruleset ruleset)
         {
-            if (Mods == null)
+            if (Mods.Length == 0)
                 return Array.Empty<Mod>();
 
             var availableMods = ruleset.CreateAllMods().ToList();

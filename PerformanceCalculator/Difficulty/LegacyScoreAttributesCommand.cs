@@ -136,11 +136,11 @@ namespace PerformanceCalculator.Difficulty
 
         private Mod[] getMods(Ruleset ruleset)
         {
-            var mods = new List<Mod>();
-            if (Mods == null)
+            if (Mods.Length == 0)
                 return Array.Empty<Mod>();
 
             var availableMods = ruleset.CreateAllMods().ToList();
+            var mods = new List<Mod>();
 
             foreach (string modString in Mods)
             {
