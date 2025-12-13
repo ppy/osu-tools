@@ -17,7 +17,7 @@ using osu.Game.Users;
 using osu.Game.Users.Drawables;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Screens.Profile
 {
     public struct UserCardData
     {

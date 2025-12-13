@@ -28,6 +28,7 @@ using osuTK.Input;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
+using PerformanceCalculatorGUI.Screens.Profile;
 using ButtonState = PerformanceCalculatorGUI.Components.ButtonState;
 
 namespace PerformanceCalculatorGUI.Screens

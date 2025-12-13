@@ -24,6 +24,7 @@ using osu.Game.Users;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
+using PerformanceCalculatorGUI.Screens.Leaderboard;
 
 namespace PerformanceCalculatorGUI.Screens
 {

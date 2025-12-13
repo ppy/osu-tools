@@ -13,7 +13,7 @@ using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.Rankings.Tables;
 using osu.Game.Users;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Screens.Leaderboard
 {
     public class LeaderboardUser
     {
