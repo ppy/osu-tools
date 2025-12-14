@@ -20,9 +20,10 @@ using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Screens.Edit.Compose.Components.Timeline;
 using osuTK;
 using osuTK.Graphics;
+using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Screens.Simulate
 {
     public partial class StrainVisualizer : Container
     {
@@ -245,7 +246,7 @@ namespace PerformanceCalculatorGUI.Components
 
         private static List<float[]> getStrainLists(Skill[] skills)
         {
-            List<float[]> strainLists = new List<float[]>();
+            var strainLists = new List<float[]>();
 
             foreach (var skill in skills)
             {
@@ -256,7 +257,7 @@ namespace PerformanceCalculatorGUI.Components
                 for (int i = 0; i < strains.Length; i++)
                 {
                     double strain = strains[i];
-                    skillStrainList.Add(((float)strain));
+                    skillStrainList.Add((float)strain);
                 }
 
                 strainLists.Add(skillStrainList.ToArray());
