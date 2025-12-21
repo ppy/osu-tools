@@ -26,6 +26,7 @@ using PerformanceCalculatorGUI.Screens;
 
 namespace PerformanceCalculatorGUI
 {
+    [Cached]
     public partial class PerformanceCalculatorSceneManager : CompositeDrawable
     {
         private ScreenStack screenStack = null!;
@@ -187,6 +188,16 @@ namespace PerformanceCalculatorGUI
             }
 
             screenStack.Push(screen);
+        }
+
+        public void SwitchToSimulate(int beatmapId, ulong? scoreId = null)
+        {
+            setScreen(new SimulateScreen(beatmapId, scoreId));
+        }
+
+        public void SwitchToBeatmapLeaderboard(int beatmapId)
+        {
+            setScreen(new BeatmapLeaderboardScreen(beatmapId));
         }
     }
 }

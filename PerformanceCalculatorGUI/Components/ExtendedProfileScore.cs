@@ -26,8 +26,8 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
-using osu.Game.Utils;
 using osu.Game.Users.Drawables;
+using osu.Game.Utils;
 using osuTK;
 using osuTK.Graphics;
 using PerformanceCalculatorGUI.Components.TextBoxes;
@@ -97,6 +97,9 @@ namespace PerformanceCalculatorGUI.Components
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
+
+        [Resolved]
+        private PerformanceCalculatorSceneManager sceneManager { get; set; } = null!;
 
         private OsuSpriteText positionChangeText = null!;
 
@@ -372,58 +375,13 @@ namespace PerformanceCalculatorGUI.Components
                                 Shear = new Vector2(performance_background_shear, 0),
                                 EdgeSmoothness = new Vector2(2, 0),
                             },
-                            new FillFlowContainer
-                            {
-                                AutoSizeAxes = Axes.Both,
-                                Padding = new MarginPadding
-                                {
-                                    Vertical = 5,
-                                    Left = 30,
-                                    Right = 20
-                                },
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Direction = FillDirection.Vertical,
-                                Children = new Drawable[]
-                                {
-                                    new ExtendedOsuSpriteText
-                                    {
-                                        Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                        Text = $"{Score.PerformanceAttributes?.Total:0}pp",
-                                        Colour = colourProvider.Highlight1,
-                                        Anchor = Anchor.TopCentre,
-                                        Origin = Anchor.TopCentre,
-                                        TooltipContent = $"{AttributeConversion.ToReadableString(Score.PerformanceAttributes)}"
-                                    },
-                                    new OsuSpriteText
-                                    {
-                                        Font = OsuFont.GetFont(size: small_text_font_size),
-                                        Text = $"{Score.PerformanceAttributes?.Total - Score.LivePP:+0.0;-0.0;-}",
-                                        Colour = getPpDifferenceColor(),
-                                        Anchor = Anchor.TopCentre,
-                                        Origin = Anchor.TopCentre
-                                    }
-                                }
-                            }
+                            new ScorePerformanceContainer(Score)
                         }
                     }
                 }
             });
 
             Score.PositionChange.BindValueChanged(v => { positionChangeText.Text = $"{v.NewValue:+0;-0;-}"; });
-        }
-
-        private Color4 getPpDifferenceColor()
-        {
-            double difference = Score.PerformanceAttributes?.Total - Score.LivePP ?? 0;
-            var baseColor = colourProvider.Light1;
-
-            return difference switch
-            {
-                < 0 => Interpolation.ValueAt(difference, baseColor, Color4.OrangeRed, 0, -200),
-                > 0 => Interpolation.ValueAt(difference, baseColor, Color4.Lime, 0, 200),
-                _ => baseColor
-            };
         }
 
         private OsuSpriteText formatCombo()
@@ -510,6 +468,76 @@ namespace PerformanceCalculatorGUI.Components
                             Font = OsuFont.GetFont(size: 12, italics: true)
                         },
                     }
+                };
+            }
+        }
+
+        private partial class ScorePerformanceContainer : OsuHoverContainer
+        {
+            private readonly ExtendedScore score;
+
+            [Resolved]
+            private OverlayColourProvider colourProvider { get; set; } = null!;
+
+            public ScorePerformanceContainer(ExtendedScore score)
+            {
+                this.score = score;
+                RelativeSizeAxes = Axes.Both;
+                Padding = new MarginPadding
+                {
+                    Vertical = 5,
+                    Left = 30,
+                    Right = 20
+                };
+            }
+
+            [BackgroundDependencyLoader(true)]
+            private void load(PerformanceCalculatorSceneManager sceneManager)
+            {
+                Action = () =>
+                {
+                    sceneManager.SwitchToSimulate(score.SoloScore.BeatmapID, score.SoloScore.ID);
+                };
+
+                Child = new FillFlowContainer
+                {
+                    AutoSizeAxes = Axes.Both,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Direction = FillDirection.Vertical,
+                    Children = new Drawable[]
+                    {
+                        new ExtendedOsuSpriteText
+                        {
+                            Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                            Text = $"{score.PerformanceAttributes?.Total:0}pp",
+                            Colour = colourProvider.Highlight1,
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            TooltipContent = $"{AttributeConversion.ToReadableString(score.PerformanceAttributes)}"
+                        },
+                        new OsuSpriteText
+                        {
+                            Font = OsuFont.GetFont(size: small_text_font_size),
+                            Text = $"{score.PerformanceAttributes?.Total - score.LivePP:+0.0;-0.0;-}",
+                            Colour = getPpDifferenceColor(),
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre
+                        }
+                    }
+                };
+            }
+
+            private Color4 getPpDifferenceColor()
+            {
+                double difference = score.PerformanceAttributes?.Total - score.LivePP ?? 0;
+                var baseColor = colourProvider.Light1;
+
+                return difference switch
+                {
+                    < 0 => Interpolation.ValueAt(difference, baseColor, Color4.OrangeRed, 0, -200),
+                    > 0 => Interpolation.ValueAt(difference, baseColor, Color4.Lime, 0, 200),
+                    _ => baseColor
                 };
             }
         }
