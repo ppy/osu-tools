@@ -261,7 +261,7 @@ namespace PerformanceCalculatorGUI.Components
             }
         }
 
-        public MenuItem[]? ContextMenuItems => beatmap.BeatmapInfo.OnlineID > 0
+        public MenuItem[] ContextMenuItems => beatmap.BeatmapInfo.OnlineID > 0
             ? [new OsuMenuItem("Open leaderboard", MenuItemType.Standard, () => sceneManager.SwitchToBeatmapLeaderboard(beatmap.BeatmapInfo.OnlineID))]
             : [];
     }

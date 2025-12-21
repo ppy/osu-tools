@@ -98,9 +98,6 @@ namespace PerformanceCalculatorGUI.Components
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
-        [Resolved]
-        private PerformanceCalculatorSceneManager sceneManager { get; set; } = null!;
-
         private OsuSpriteText positionChangeText = null!;
 
         public ExtendedProfileScore(ExtendedScore score, bool showAvatar = false)
