@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
@@ -30,7 +31,7 @@ using PerformanceCalculatorGUI.Components.TextBoxes;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    public partial class BeatmapCard : OsuClickableContainer, IHasCustomTooltip<ProcessorWorkingBeatmap>
+    public partial class BeatmapCard : OsuClickableContainer, IHasCustomTooltip<ProcessorWorkingBeatmap>, IHasContextMenu
     {
         private readonly ProcessorWorkingBeatmap beatmap;
 
@@ -45,6 +46,9 @@ namespace PerformanceCalculatorGUI.Components
 
         [Resolved]
         private Bindable<IReadOnlyList<Mod>> mods { get; set; } = null!;
+
+        [Resolved]
+        private PerformanceCalculatorSceneManager sceneManager { get; set; } = null!;
 
         public ITooltip<ProcessorWorkingBeatmap> GetCustomTooltip() => new BeatmapCardTooltip(colourProvider);
         public ProcessorWorkingBeatmap TooltipContent { get; }
@@ -256,5 +260,9 @@ namespace PerformanceCalculatorGUI.Components
                 };
             }
         }
+
+        public MenuItem[] ContextMenuItems => beatmap.BeatmapInfo.OnlineID > 0
+            ? [new OsuMenuItem("Open leaderboard", MenuItemType.Standard, () => sceneManager.SwitchToBeatmapLeaderboard(beatmap.BeatmapInfo.OnlineID))]
+            : [];
     }
 }

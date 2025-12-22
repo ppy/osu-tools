@@ -123,6 +123,9 @@ namespace PerformanceCalculatorGUI.Screens
         [GeneratedRegex(@"osu\.ppy\.sh/(?:b|beatmapsets/\d+#\w+|beatmaps)/(\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private partial Regex beatmapLinkRegex();
 
+        private int? queuedBeatmap;
+        private ulong? queuedScore;
+
         private const int file_selection_container_height = 40;
         private const int map_title_container_height = 40;
         private const float mod_selection_container_scale = 0.7f;
@@ -130,6 +133,13 @@ namespace PerformanceCalculatorGUI.Screens
         public SimulateScreen()
         {
             RelativeSizeAxes = Axes.Both;
+        }
+
+        public SimulateScreen(int beatmapId, ulong? scoreId = null)
+        {
+            RelativeSizeAxes = Axes.Both;
+            queuedBeatmap = beatmapId;
+            queuedScore = scoreId;
         }
 
         [BackgroundDependencyLoader]
@@ -250,7 +260,7 @@ namespace PerformanceCalculatorGUI.Screens
                                                             {
                                                                 if (!string.IsNullOrEmpty(scoreIdTextBox.Current.Value))
                                                                 {
-                                                                    populateSettingsFromScore(long.Parse(scoreIdTextBox.Current.Value));
+                                                                    populateSettingsFromScore(ulong.Parse(scoreIdTextBox.Current.Value));
                                                                 }
                                                                 else
                                                                 {
@@ -545,6 +555,25 @@ namespace PerformanceCalculatorGUI.Screens
                     calculatePerformance();
                 });
             }
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            if (queuedScore != null)
+            {
+                populateSettingsFromScore(queuedScore.Value);
+                scoreIdTextBox.Text = queuedScore.Value.ToString();
+            }
+            else if (queuedBeatmap != null)
+            {
+                changeBeatmap(queuedBeatmap.Value.ToString());
+                beatmapIdTextBox.Text = queuedBeatmap.Value.ToString();
+            }
+
+            queuedScore = null;
+            queuedBeatmap = null;
         }
 
         protected override void Dispose(bool isDisposing)
@@ -989,7 +1018,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private long? legacyTotalScore;
 
-        private void populateSettingsFromScore(long scoreId)
+        private void populateSettingsFromScore(ulong scoreId)
         {
             if (scoreIdPopulateButton.State.Value == ButtonState.Loading)
                 return;

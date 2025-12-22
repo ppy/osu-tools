@@ -66,6 +66,8 @@ namespace PerformanceCalculatorGUI.Screens
         [GeneratedRegex(@"osu\.ppy\.sh/(?:b|beatmapsets/\d+#\w+|beatmaps)/(\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private partial Regex beatmapLinkRegex();
 
+        private int? queuedBeatmap;
+
         private const int settings_height = 40;
         private const int generate_score_amount = 50;
         private const int generate_score_max_mod_amount = 4;
@@ -73,6 +75,12 @@ namespace PerformanceCalculatorGUI.Screens
         public BeatmapLeaderboardScreen()
         {
             RelativeSizeAxes = Axes.Both;
+        }
+
+        public BeatmapLeaderboardScreen(int beatmapId)
+        {
+            RelativeSizeAxes = Axes.Both;
+            queuedBeatmap = beatmapId;
         }
 
         [BackgroundDependencyLoader]
@@ -187,6 +195,19 @@ namespace PerformanceCalculatorGUI.Screens
 
             if (RuntimeInfo.IsDesktop)
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(calculate);
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            if (queuedBeatmap != null)
+            {
+                beatmapIdTextBox.Current.Value = queuedBeatmap.Value.ToString();
+                calculate();
+            }
+
+            queuedBeatmap = null;
         }
 
         private void calculate()
