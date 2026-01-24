@@ -261,83 +261,95 @@ namespace PerformanceCalculatorGUI.Screens.Simulate
 
             foreach (var skill in skills)
             {
-                if (skill is StrainSkill strainSkill)
+                switch (skill)
                 {
-                    double[] strains = strainSkill.GetCurrentStrainPeaks().ToArray();
+                    case StrainSkill strainSkill:
+                        strainLists.Add(getStrainSkillStrainList(strainSkill));
+                        break;
 
-                    var skillStrainList = new List<Strain>();
-
-                    for (int i = 0; i < strains.Length; i++)
-                    {
-                        double strain = strains[i];
-                        skillStrainList.Add(new Strain
-                        {
-                            Difficulty = strain,
-                            StartTime = strain_length * i, // todo: use actual strain length
-                            EndTime = (strain_length * i) + strain_length
-                        });
-                    }
-
-                    strainLists.Add(skillStrainList.ToArray());
-                }
-                else
-                {
-                    var difficultyObjects = (difficultyCalculator.Value as IExtendedDifficultyCalculator)!.GetDifficultyHitObjects();
-
-                    var difficulties = skill.GetObjectDifficulties();
-
-                    var skillStrainList = new List<Strain>();
-
-                    for (int i = 0; i < difficulties.Count - 1; i++)
-                    {
-                        double strain = difficulties[i];
-                        var difficultyObject = difficultyObjects[i];
-                        var nextDifficultyObject = i < difficulties.Count - 1 ? difficultyObjects[i + 1] : null;
-
-                        double startTime = difficultyObject.StartTime;
-                        double endTime = difficultyObject.EndTime;
-
-                        if (nextDifficultyObject != null)
-                        {
-                            // cap length to object_length + strain_length to make map breaks display 0 difficulty instead of the last-object-before-break difficulty
-                            endTime = Math.Min(endTime + strain_length, nextDifficultyObject.StartTime);
-                        }
-
-                        skillStrainList.Add(new Strain
-                        {
-                            Difficulty = strain,
-                            StartTime = startTime,
-                            EndTime = endTime
-                        });
-
-                        // add blank bars between objects to make the graph consistent timescale-wise
-                        if (nextDifficultyObject != null && nextDifficultyObject.StartTime - endTime > 0)
-                        {
-                            skillStrainList.Add(new Strain
-                            {
-                                Difficulty = 0,
-                                StartTime = endTime,
-                                EndTime = nextDifficultyObject.StartTime
-                            });
-                        }
-
-                        // add blank strain_length bar in the end to make the object difficulties graph consistent with strain-based graphs
-                        if (nextDifficultyObject == null)
-                        {
-                            skillStrainList.Add(new Strain
-                            {
-                                Difficulty = 0,
-                                StartTime = endTime,
-                                EndTime = endTime + strain_length
-                            });
-                        }
-                    }
-
-                    strainLists.Add(skillStrainList.ToArray());
+                    default:
+                        strainLists.Add(getStrainList(skill));
+                        break;
                 }
             }
 
             return strainLists;
+        }
+
+        private Strain[] getStrainSkillStrainList(StrainSkill strainSkill)
+        {
+            double[] strains = strainSkill.GetCurrentStrainPeaks().ToArray();
+
+            var skillStrainList = new List<Strain>();
+
+            for (int i = 0; i < strains.Length; i++)
+            {
+                double strain = strains[i];
+                skillStrainList.Add(new Strain
+                {
+                    Difficulty = strain,
+                    StartTime = strain_length * i, // todo: use actual strain length
+                    EndTime = (strain_length * i) + strain_length
+                });
+            }
+
+            return skillStrainList.ToArray();
+        }
+
+        private Strain[] getStrainList(Skill skill)
+        {
+            var difficultyObjects = (difficultyCalculator.Value as IExtendedDifficultyCalculator)!.GetDifficultyHitObjects();
+
+            var difficulties = skill.GetObjectDifficulties();
+
+            var skillStrainList = new List<Strain>();
+
+            for (int i = 0; i < difficulties.Count - 1; i++)
+            {
+                double strain = difficulties[i];
+                var difficultyObject = difficultyObjects[i];
+                var nextDifficultyObject = i < difficulties.Count - 1 ? difficultyObjects[i + 1] : null;
+
+                double startTime = difficultyObject.StartTime;
+                double endTime = difficultyObject.EndTime;
+
+                if (nextDifficultyObject != null)
+                {
+                    // cap length to object_length + strain_length to make map breaks display 0 difficulty instead of the last-object-before-break difficulty
+                    endTime = Math.Min(endTime + strain_length, nextDifficultyObject.StartTime);
+                }
+
+                skillStrainList.Add(new Strain
+                {
+                    Difficulty = strain,
+                    StartTime = startTime,
+                    EndTime = endTime
+                });
+
+                // add blank bars between objects to make the graph consistent timescale-wise
+                if (nextDifficultyObject != null && nextDifficultyObject.StartTime - endTime > 0)
+                {
+                    skillStrainList.Add(new Strain
+                    {
+                        Difficulty = 0,
+                        StartTime = endTime,
+                        EndTime = nextDifficultyObject.StartTime
+                    });
+                }
+
+                // add blank strain_length bar in the end to make the object difficulties graph consistent with strain-based graphs
+                if (nextDifficultyObject == null)
+                {
+                    skillStrainList.Add(new Strain
+                    {
+                        Difficulty = 0,
+                        StartTime = endTime,
+                        EndTime = endTime + strain_length
+                    });
+                }
+            }
+
+            return skillStrainList.ToArray();
         }
     }
 
