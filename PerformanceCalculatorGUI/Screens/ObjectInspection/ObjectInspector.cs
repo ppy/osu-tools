@@ -18,7 +18,6 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch.Beatmaps;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Catch.UI;
-using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
@@ -53,9 +52,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         [Resolved]
         private Bindable<RulesetInfo> ruleset { get; set; } = null!;
-
-        [Resolved]
-        private Bindable<DifficultyCalculator> difficultyCalculator { get; set; } = null!;
 
         private readonly ProcessorWorkingBeatmap processorBeatmap;
         private EditorClock clock = null!;
@@ -205,8 +201,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             RelativeSizeAxes = Axes.Both,
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
-                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!, (difficultyCalculator.Value as ExtendedOsuDifficultyCalculator)!,
-                            processorBeatmap.Track.Rate)
+                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -216,8 +211,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 },
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
-                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!, (difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator)!,
-                        processorBeatmap.Track.Rate)
+                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!)
                     {
                         RelativeSizeAxes = Axes.Both,
                         Clock = clock,
@@ -230,8 +224,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Y = 100,
                     Children = new Drawable[]
                     {
-                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!, (difficultyCalculator.Value as ExtendedCatchDifficultyCalculator)!,
-                            processorBeatmap.Track.Rate)
+                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
