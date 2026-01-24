@@ -26,7 +26,6 @@ using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
-using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
@@ -604,9 +603,6 @@ namespace PerformanceCalculatorGUI.Screens
 
             updateMissesTextboxes();
 
-            // recreate calculators to update DHOs
-            createCalculators();
-
             modSettingChangeTracker?.Dispose();
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += m =>
@@ -614,7 +610,6 @@ namespace PerformanceCalculatorGUI.Screens
                 debouncedStatisticsUpdate?.Cancel();
                 debouncedStatisticsUpdate = Scheduler.AddDelayed(() =>
                 {
-                    createCalculators();
                     updateMissesTextboxes();
                     calculateDifficulty();
                     calculatePerformance();
@@ -688,25 +683,21 @@ namespace PerformanceCalculatorGUI.Screens
             beatmapDataContainer.Show();
         }
 
-        private void createCalculators()
-        {
-            if (working is null)
-                return;
-
-            var rulesetInstance = ruleset.Value.CreateInstance();
-            difficultyCalculator.Value = RulesetHelper.GetExtendedDifficultyCalculator(ruleset.Value, working);
-            performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
-        }
-
         private void calculateDifficulty()
         {
-            if (working == null || difficultyCalculator.Value == null)
+            if (working == null)
                 return;
 
             try
             {
-                difficultyAttributes = difficultyCalculator.Value.Calculate(appliedMods.Value);
+                var rulesetInstance = ruleset.Value.CreateInstance();
+                var extendedDifficultyCalculator = RulesetHelper.GetExtendedDifficultyCalculator(ruleset.Value, working);
+                performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+
+                difficultyAttributes = extendedDifficultyCalculator.Calculate(appliedMods.Value);
                 difficultyAttributesContainer.Attributes.Value = AttributeConversion.ToDictionary(difficultyAttributes);
+
+                difficultyCalculator.Value = extendedDifficultyCalculator;
             }
             catch (Exception e)
             {
@@ -715,16 +706,8 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            if (difficultyCalculator.Value is IExtendedDifficultyCalculator extendedDifficultyCalculator)
-            {
-                // StrainSkill always skips the first object
-                if (working.Beatmap?.HitObjects.Count > 1)
-                    strainVisualizer.TimeUntilFirstStrain.Value = (int)working.Beatmap.HitObjects[1].StartTime;
-
-                strainVisualizer.Skills.Value = extendedDifficultyCalculator.GetSkills();
-            }
-            else
-                strainVisualizer.Skills.Value = Array.Empty<Skill>();
+            if (working.Beatmap?.HitObjects.Count > 1)
+                strainVisualizer.TimeUntilFirstStrain.Value = (int)working.Beatmap.HitObjects[1].StartTime;
         }
 
         private void debouncedCalculatePerformance()
@@ -927,8 +910,6 @@ namespace PerformanceCalculatorGUI.Screens
 
         private void resetCalculations()
         {
-            createCalculators();
-
             resetMods();
             legacyTotalScore = null;
 
