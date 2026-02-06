@@ -45,12 +45,16 @@ namespace PerformanceCalculatorGUI.Components
         public PerformanceAttributes? PerformanceAttributes { get; }
         public DifficultyAttributes DifficultyAttributes { get; }
 
-        public ExtendedScore(SoloScoreInfo score, DifficultyAttributes difficultyAttributes, PerformanceAttributes? performanceAttributes)
+        public string? StoredScoreId { get; }
+        public bool IsStoredScore => StoredScoreId != null;
+
+        public ExtendedScore(SoloScoreInfo score, DifficultyAttributes difficultyAttributes, PerformanceAttributes? performanceAttributes, string? storedScoreId = null)
         {
             SoloScore = score;
             PerformanceAttributes = performanceAttributes;
             DifficultyAttributes = difficultyAttributes;
             LivePP = score.PP;
+            StoredScoreId = storedScoreId;
         }
     }
 
