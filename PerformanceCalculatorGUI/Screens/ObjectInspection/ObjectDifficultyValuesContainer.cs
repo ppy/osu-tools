@@ -173,9 +173,6 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private void drawTaikoValues(TaikoDifficultyHitObject hitObject)
         {
-            double rhythmDifficulty =
-                osu.Game.Rulesets.Taiko.Difficulty.Evaluators.RhythmEvaluator.EvaluateDifficultyOf(hitObject, 2 * hitObject.BaseObject.HitWindows.WindowFor(HitResult.Great) / track.Rate);
-
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Delta Time", hitObject.DeltaTime),
@@ -183,7 +180,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 new ObjectInspectorDifficultyValue("Rhythm Ratio", hitObject.RhythmData.Ratio),
                 new ObjectInspectorDifficultyValue("Colour Difficulty", ColourEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Stamina Difficulty", StaminaEvaluator.EvaluateDifficultyOf(hitObject)),
-                new ObjectInspectorDifficultyValue("Rhythm Difficulty", rhythmDifficulty),
+                new ObjectInspectorDifficultyValue("Rhythm Difficulty", osu.Game.Rulesets.Taiko.Difficulty.Evaluators.RhythmEvaluator.EvaluateDifficultyOf(hitObject)),
             });
 
             if (hitObject.BaseObject is Hit hit)
@@ -207,9 +204,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 new ObjectInspectorDifficultyValue("Last Player Position", hitObject.LastPlayerPosition),
                 new ObjectInspectorDifficultyValue("Distance Moved", hitObject.DistanceMoved),
                 new ObjectInspectorDifficultyValue("Exact Distance Moved", hitObject.ExactDistanceMoved),
-
-                // see https://github.com/ppy/osu/blob/a08f7327b11977f1de57b8a177bf26918ebfacda/osu.Game.Rulesets.Catch/Difficulty/Skills/Movement.cs#L36
-                new ObjectInspectorDifficultyValue("Movement Difficulty", MovementEvaluator.EvaluateDifficultyOf(hitObject, track.Rate)),
+                new ObjectInspectorDifficultyValue("Movement Difficulty", MovementEvaluator.EvaluateDifficultyOf(hitObject)),
             });
         }
     }
