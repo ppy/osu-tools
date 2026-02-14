@@ -371,11 +371,11 @@ namespace PerformanceCalculatorGUI.Screens
                     var filteredPlays = new List<ExtendedScore>();
 
                     // List of all beatmap IDs in plays without duplicates
-                    var beatmapIDs = plays.Select(x => x.SoloScore.BeatmapID).Distinct().ToList();
+                    var beatmapIDs = plays.Select(x => x.Score.Beatmap.OnlineID).Distinct().ToList();
 
                     foreach (int id in beatmapIDs)
                     {
-                        var bestPlayOnBeatmap = plays.Where(x => x.SoloScore.BeatmapID == id).OrderByDescending(x => x.PerformanceAttributes?.Total).First();
+                        var bestPlayOnBeatmap = plays.Where(x => x.Score.Beatmap.OnlineID == id).OrderByDescending(x => x.PerformanceAttributes?.Total).First();
                         filteredPlays.Add(bestPlayOnBeatmap);
                     }
 
@@ -472,15 +472,15 @@ namespace PerformanceCalculatorGUI.Screens
             switch (sortCriteria)
             {
                 case ProfileSortCriteria.Live:
-                    sortedScores = scores.Children.OrderByDescending(x => x.Score.LivePP).ToArray();
+                    sortedScores = scores.Children.OrderByDescending(x => x.ExtScore.LivePP).ToArray();
                     break;
 
                 case ProfileSortCriteria.Local:
-                    sortedScores = scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total).ToArray();
+                    sortedScores = scores.Children.OrderByDescending(x => x.ExtScore.PerformanceAttributes?.Total).ToArray();
                     break;
 
                 case ProfileSortCriteria.Difference:
-                    sortedScores = scores.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total - x.Score.LivePP).ToArray();
+                    sortedScores = scores.Children.OrderByDescending(x => x.ExtScore.PerformanceAttributes?.Total - x.ExtScore.LivePP).ToArray();
                     break;
 
                 default:
