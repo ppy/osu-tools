@@ -300,17 +300,18 @@ namespace PerformanceCalculatorGUI.Screens
                     Schedule(() => loadingLayer.Text.Value = $"Getting {username} user data...");
 
                     player = await apiManager.GetJsonFromApi<APIUser>($"users/{username}/{ruleset.Value.ShortName}").ConfigureAwait(false);
-                    playerUsernames = [player.Username, .. player.PreviousUsernames, player.Id.ToString()]; // double check player id
+                    playerUsernames = [player.Username, .. player.PreviousUsernames, player.Id.ToString()];
 
                     Schedule(() => loadingLayer.Text.Value = $"Calculating {player.Username} top scores...");
 
-                    var realmScores = realmAccess.Run(r => r.All<ScoreInfo>().Detach()) // ideally work out how to use Live<>
-                                                 .Where(x => playerUsernames.Any(name => name.Equals(x.User.Username, StringComparison.OrdinalIgnoreCase)) &&
-                                                             x.BeatmapInfo != null &&
-                                                             x.Passed == true && x.Rank != ScoreRank.F &&
-                                                             x.Ruleset.OnlineID == ruleset.Value.OnlineID &&
-                                                             x.BeatmapInfo.OnlineID != -1)
+                    var realmScores = realmAccess.Run(r => r.All<ScoreInfo>().Detach())
+                                                 .Where(x => playerUsernames.Any(name => name.Equals(x.User.Username, StringComparison.OrdinalIgnoreCase)) && // scores from the correct user
+                                                             x.BeatmapInfo != null && // map exists
+                                                             x.Passed == true && x.Rank != ScoreRank.F && // exclude failed scores
+                                                             x.Ruleset.OnlineID == ruleset.Value.OnlineID && // exclude other rulesets
+                                                             x.BeatmapInfo.OnlineID != -1) // exclude unsubmitted maps
                                                  .ToList();
+                    // remove unranked maps and mods if toggled off
                     if (!includeUnrankedMaps.Current.Value)
                         realmScores.RemoveAll(x => x.BeatmapInfo.Status != BeatmapOnlineStatus.Ranked);
                     if (!includeUnrankedMods.Current.Value)
