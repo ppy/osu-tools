@@ -56,23 +56,31 @@ namespace PerformanceCalculatorGUI.Components
             LivePP = score.PP;
         }
 
-        public Dictionary<HitResult, int>? Statistics()
+        // IScoreInfo is missing statistics right now, but both SoloScoreInfo and ScoreInfo have it (and I believe it's planned for future)
+        // I think handling conversion at this level is the most elegant, although it means supporting any additional types that inherit from IScoreInfo will need to be manually added here
+        public Dictionary<HitResult, int>? Statistics
         {
-            if (Score is SoloScoreInfo soloScore)
-                return soloScore.Statistics;
-            if (Score is ScoreInfo scoreInfo)
-                return scoreInfo.Statistics;
-            return null;
-        }
-        public APIMod[]? Mods()
-        {
-            if (Score is ScoreInfo scoreInfo)
-                return scoreInfo.Mods.Select(m => new APIMod(m)).ToArray();
-            if (Score is SoloScoreInfo soloScoreInfo)
+            get
             {
-                return soloScoreInfo.Mods;
+                if (Score is SoloScoreInfo soloScore)
+                    return soloScore.Statistics;
+                if (Score is ScoreInfo scoreInfo)
+                    return scoreInfo.Statistics;
+                return null;
             }
-            return null;
+        }
+        // Exists for largely the same reasoning as Statistics, except rather than a missing field it's because APIMod doesn't inherit from IMod at all
+        // This returns APIMod[]? instead of Mod[]? because it means ruleset handling isn't necessary
+        public APIMod[]? Mods
+        {
+            get
+            {
+                if (Score is ScoreInfo scoreInfo)
+                    return scoreInfo.Mods.Select(m => new APIMod(m)).ToArray();
+                if (Score is SoloScoreInfo soloScoreInfo)
+                    return soloScoreInfo.Mods;
+                return null;
+            }
         }
     }
 
@@ -307,7 +315,7 @@ namespace PerformanceCalculatorGUI.Components
                                                                         formatCombo(),
                                                                         new OsuSpriteText
                                                                         {
-                                                                            Text = $"{{ {formatStatistics(ExtScore.Statistics(), scoreRuleset)} }}",
+                                                                            Text = $"{{ {formatStatistics(ExtScore.Statistics, scoreRuleset)} }}",
                                                                             Font = OsuFont.GetFont(size: small_text_font_size, weight: FontWeight.Regular),
                                                                             Colour = colourProvider.Light2,
                                                                             Anchor = Anchor.TopCentre,
@@ -354,7 +362,7 @@ namespace PerformanceCalculatorGUI.Components
                                         Origin = Anchor.CentreRight,
                                         Direction = FillDirection.Horizontal,
                                         Spacing = new Vector2(2),
-                                        Children = ExtScore.Mods().Select(mod => new ModIcon(mod.ToMod(scoreRuleset))
+                                        Children = ExtScore.Mods.Select(mod => new ModIcon(mod.ToMod(scoreRuleset))
                                         {
                                             Scale = new Vector2(0.35f)
                                         }).ToList(),
