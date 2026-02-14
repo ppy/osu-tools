@@ -28,6 +28,7 @@ namespace PerformanceCalculatorGUI.Components
         private Bindable<string> clientSecretBindable = null!;
         private Bindable<string> pathBindable = null!;
         private Bindable<string> cacheBindable = null!;
+        private Bindable<string> realmBindable = null!;
         private Bindable<float> scaleBindable = null!;
 
         private const string api_key_link = "https://osu.ppy.sh/home/account/edit#new-oauth-application";
@@ -40,6 +41,7 @@ namespace PerformanceCalculatorGUI.Components
             clientSecretBindable = configManager.GetBindable<string>(Settings.ClientSecret);
             pathBindable = configManager.GetBindable<string>(Settings.DefaultPath);
             cacheBindable = configManager.GetBindable<string>(Settings.CachePath);
+            realmBindable = configManager.GetBindable<string>(Settings.RealmPath);
             scaleBindable = osuConfig.GetBindable<float>(OsuSetting.UIScale);
 
             Add(new Container
@@ -94,6 +96,12 @@ namespace PerformanceCalculatorGUI.Components
                                 RelativeSizeAxes = Axes.X,
                                 Label = "Beatmap cache path",
                                 Current = { BindTarget = cacheBindable }
+                            },
+                            new LabelledTextBox
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Label = "Realm path",
+                                Current = { BindTarget = realmBindable}
                             },
                             new Box
                             {
