@@ -32,9 +32,11 @@ Most relevant code is in the main [ppy/osu](https://github.com/ppy/osu) reposito
 git clone https://github.com/ppy/osu-tools
 git clone https://github.com/ppy/osu
 ```
-- If you're planning to work on the difficulty and/or performance calculation changes you will need to use the `pp-dev` branch of the `osu` repository
+- If you're planning to work on the difficulty and/or performance calculation changes you will need to use the `pp-dev` branch of the `osu` and `osu-tools` repositories
 ```shell
 cd osu
+git checkout -b pp-dev origin/pp-dev
+cd ../osu-tools
 git checkout -b pp-dev origin/pp-dev
 ```
 - Run the `./UseLocalOsu.ps1` powershell script (or `./UseLocalOsu.sh`) to use your local copy of ppy/osu
