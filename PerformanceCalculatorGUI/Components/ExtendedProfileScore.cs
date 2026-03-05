@@ -398,20 +398,20 @@ namespace PerformanceCalculatorGUI.Components
 
         private static int getStatisticsWidth(Ruleset ruleset)
         {
-            var rulesetHitResults = ruleset.GetHitResults().Where(x => x.result.IsBasic()).ToArray();
+            var rulesetHitResults = ruleset.GetValidHitResults().Where(x => x.IsBasic()).ToArray();
 
             return Math.Max(80, rulesetHitResults.Length * 15 + 50); // 50px are reserved for the combo
         }
 
         private static string formatStatistics(Dictionary<HitResult, int> statistics, Ruleset ruleset)
         {
-            var rulesetHitResults = ruleset.GetHitResults().Where(x => x.result.IsBasic()).ToArray();
+            var rulesetHitResults = ruleset.GetValidHitResults().Where(x => x.IsBasic()).ToArray();
 
             var statisticsBuilder = new StringBuilder();
 
             for (int i = 0; i < rulesetHitResults.Length; i++)
             {
-                statisticsBuilder.Append(statistics.GetValueOrDefault(rulesetHitResults[i].result));
+                statisticsBuilder.Append(statistics.GetValueOrDefault(rulesetHitResults[i]));
 
                 if (i < rulesetHitResults.Length - 1)
                     statisticsBuilder.Append(" / ");
