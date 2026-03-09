@@ -141,9 +141,11 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
                 new ObjectInspectorDifficultyValue("Min Jump Time", hitObject.MinimumJumpTime),
 
-                new ObjectInspectorDifficultyValue("Aim Difficulty", AimEvaluator.EvaluateDifficultyOf(hitObject, true)),
-                new ObjectInspectorDifficultyValue("Aim Difficulty (w/o sliders)", AimEvaluator.EvaluateDifficultyOf(hitObject, false)),
-                new ObjectInspectorDifficultyValue("Speed Aim Difficulty", SpeedAimEvaluator.EvaluateDifficultyOf(hitObject)),
+                new ObjectInspectorDifficultyValue("Snap Aim Difficulty", SnapAimEvaluator.EvaluateDifficultyOf(hitObject, true)),
+                new ObjectInspectorDifficultyValue("Snap Aim Difficulty (w/o sliders)", SnapAimEvaluator.EvaluateDifficultyOf(hitObject, false)),
+                new ObjectInspectorDifficultyValue("Flow Aim Difficulty", FlowAimEvaluator.EvaluateDifficultyOf(hitObject, true)),
+                new ObjectInspectorDifficultyValue("Flow Aim Difficulty (w/o sliders)", FlowAimEvaluator.EvaluateDifficultyOf(hitObject, false)),
+                new ObjectInspectorDifficultyValue("Agility Difficulty", AgilityEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Speed Difficulty", SpeedEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Rhythm Difficulty", osu.Game.Rulesets.Osu.Difficulty.Evaluators.RhythmEvaluator.EvaluateDifficultyOf(hitObject)),
                 new ObjectInspectorDifficultyValue("Reading Difficulty", osu.Game.Rulesets.Osu.Difficulty.Evaluators.ReadingEvaluator.EvaluateDifficultyOf(hitObject, hidden)),
@@ -152,6 +154,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (hitObject.Angle is not null)
                 flowContainer.Add(new ObjectInspectorDifficultyValue("Angle", double.RadiansToDegrees(hitObject.Angle.Value)));
+
+            if (hitObject.AngularVelocity is not null)
+                flowContainer.Add(new ObjectInspectorDifficultyValue("Angular Velocity", hitObject.AngularVelocity.Value));
 
             if (hitObject.BaseObject is Slider)
             {
