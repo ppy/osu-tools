@@ -190,10 +190,19 @@ namespace PerformanceCalculatorGUI.Screens
                                             CommitOnFocusLoss = false,
                                             SelectAllOnFocus = true
                                         },
-                                        beatmapImportTypeSwitch = new SwitchButton
+                                        new Container
                                         {
-                                            Width = 80,
-                                            Height = file_selection_container_height
+                                            Width = 70,
+                                            Height = file_selection_container_height,
+                                            Children = new Drawable[]
+                                            {
+                                                new FormControlBackground(),
+                                                beatmapImportTypeSwitch = new SwitchButton
+                                                {
+                                                    Anchor = Anchor.Centre,
+                                                    Origin = Anchor.Centre
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -311,10 +320,19 @@ namespace PerformanceCalculatorGUI.Screens
                                                                 PlaceholderText = "0",
                                                                 MinValue = 0
                                                             },
-                                                            fullScoreDataSwitch = new SwitchButton
+                                                            new Container
                                                             {
-                                                                Width = 80,
-                                                                Height = 40
+                                                                Width = 70,
+                                                                Height = 40,
+                                                                Children = new Drawable[]
+                                                                {
+                                                                    new FormControlBackground(),
+                                                                    fullScoreDataSwitch = new SwitchButton
+                                                                    {
+                                                                        Anchor = Anchor.Centre,
+                                                                        Origin = Anchor.Centre
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
