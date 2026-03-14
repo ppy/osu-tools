@@ -25,15 +25,15 @@ namespace PerformanceCalculatorGUI
         public Skill[] GetSkills() => skills;
         public DifficultyHitObject[] GetDifficultyHitObjects() => difficultyHitObjects;
 
-        protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
+        protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, Mod[] mods)
         {
-            difficultyHitObjects = base.CreateDifficultyHitObjects(beatmap, clockRate).ToArray();
+            difficultyHitObjects = base.CreateDifficultyHitObjects(beatmap, mods).ToArray();
             return difficultyHitObjects;
         }
 
-        protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate)
+        protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods)
         {
-            skills = base.CreateSkills(beatmap, mods, clockRate);
+            skills = base.CreateSkills(beatmap, mods);
             return skills;
         }
     }
