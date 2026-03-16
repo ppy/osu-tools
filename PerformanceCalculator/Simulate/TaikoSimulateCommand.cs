@@ -17,15 +17,15 @@ namespace PerformanceCalculator.Simulate
     public class TaikoSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]
-        [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Goods { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
+        [Option(Template = "--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
         public override int? Combo { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
+        [Option(Template = "--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
         public override double PercentCombo { get; } = 100;
 
         public override Ruleset Ruleset => new TaikoRuleset();

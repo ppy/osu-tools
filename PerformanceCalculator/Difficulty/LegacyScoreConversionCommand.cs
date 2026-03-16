@@ -32,32 +32,32 @@ namespace PerformanceCalculator.Difficulty
         public int Ruleset { get; }
 
         [UsedImplicitly]
-        [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
-                                                                                          + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
+        [Option(CommandOptionType.MultipleValue, Template = "-m|--mods <mod>", Description = "One for each mod. The mods to compute the difficulty with."
+                                                                                             + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
         public string[] Mods { get; } = [];
 
-        [Option(CommandOptionType.SingleValue, Template = "-T|--greats", Description = "Number of greats.")]
+        [Option(CommandOptionType.SingleValue, Template = "--greats", Description = "Number of greats.")]
         public int Greats { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-D|--goods", Description = "Number of goods.")]
+        [Option(CommandOptionType.SingleValue, Template = "--goods", Description = "Number of goods.")]
         public int Goods { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-M|--mehs", Description = "Number of mehs.")]
+        [Option(CommandOptionType.SingleValue, Template = "--mehs", Description = "Number of mehs.")]
         public int Mehs { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-X|--misses", Description = "Number of misses.")]
+        [Option(CommandOptionType.SingleValue, Template = "--misses", Description = "Number of misses.")]
         public int Misses { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-G|--geki", Description = "Number of gekis.")]
+        [Option(CommandOptionType.SingleValue, Template = "--geki", Description = "Number of gekis.")]
         public int Gekis { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-K|--katu", Description = "Number of katus.")]
+        [Option(CommandOptionType.SingleValue, Template = "--katu", Description = "Number of katus.")]
         public int Katus { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-c|--max-combo", Description = "Max combo achieved by user.")]
+        [Option(CommandOptionType.SingleValue, Template = "--max-combo", Description = "Max combo achieved by user.")]
         public int MaxCombo { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-s|--score", Description = "Total score achieved by user.")]
+        [Option(CommandOptionType.SingleValue, Template = "--score", Description = "Total score achieved by user.")]
         public int TotalScore { get; set; }
 
         [UsedImplicitly]
