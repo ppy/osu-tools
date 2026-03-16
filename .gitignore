@@ -344,5 +344,6 @@ FodyWeavers.xsd
 
 .idea/.idea.osu.Desktop/.idea/misc.xml
 .idea/.idea.osu.Android/.idea/deploymentTargetDropDown.xml
-
-PerformanceCalculator/cache/
+/.idea/.idea.osu.Tools/.idea/indexLayout.xml
+/.idea/.idea.osu.Tools/.idea/vcs.xml
+/PerformanceCalculator/cache
