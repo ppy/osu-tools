@@ -7,10 +7,10 @@
   <ItemGroup>
     <PackageReference Include="Alba.CsConsoleFormat" Version="1.0.0" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="5.0.1" />
-    <PackageReference Include="ppy.osu.Game" Version="2026.315.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2026.315.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2026.315.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2026.315.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2026.315.0" />
+    <PackageReference Include="ppy.osu.Game" Version="2026.317.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2026.317.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2026.317.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2026.317.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2026.317.0" />
   </ItemGroup>
 </Project>
