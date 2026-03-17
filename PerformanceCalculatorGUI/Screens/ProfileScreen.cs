@@ -310,7 +310,7 @@ namespace PerformanceCalculatorGUI.Screens
                         {
                             var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit={max_api_scores_in_one_query}")
                                                                .ConfigureAwait(false);
-                            apiScores = apiScores.Concat(pinnedScores.Where(p => !apiScores.Any(b => b.ID == p.ID)).ToArray()).ToList();
+                            apiScores = apiScores.Concat(pinnedScores.Where(p => apiScores.All(b => b.ID != p.ID)).ToArray()).ToList();
                         }
 
                         foreach (var score in apiScores)

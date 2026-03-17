@@ -19,19 +19,19 @@ namespace PerformanceCalculator.Simulate
     public class ManiaSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]
-        [Option(Template = "-M|--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Mehs { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Goods { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-O|--oks <oks>", Description = "Number of oks. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--oks <oks>", Description = "Number of oks. Will override accuracy if used. Otherwise is automatically calculated.")]
         private int? oks { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-T|--greats <greats>", Description = "Number of greats. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--greats <greats>", Description = "Number of greats. Will override accuracy if used. Otherwise is automatically calculated.")]
         private int? greats { get; }
 
         public override Ruleset Ruleset => new ManiaRuleset();
