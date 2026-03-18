@@ -52,7 +52,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
                     return;
                 }
 
-                Value.Value = default;
+                Value.Value = 0;
             }
 
             public double MaxValue { get; set; }
