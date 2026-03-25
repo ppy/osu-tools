@@ -40,6 +40,7 @@ namespace PerformanceCalculatorGUI.Screens
 
         private StatefulButton calculationButton = null!;
         private SwitchButton includePinnedCheckbox = null!;
+        private SwitchButton includeFirstsCheckbox = null!;
         private SwitchButton onlyDisplayBestCheckbox = null!;
         private VerboseLoadingLayer loadingLayer = null!;
 
@@ -183,6 +184,20 @@ namespace PerformanceCalculatorGUI.Screens
                                                 UseFullGlyphHeight = false,
                                                 Text = "Include pinned scores"
                                             },
+                                            includeFirstsCheckbox = new SwitchButton
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Current = { Value = false },
+                                            },
+                                            new OsuSpriteText
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 14),
+                                                UseFullGlyphHeight = false,
+                                                Text = "Include first place scores"
+                                            },
                                             onlyDisplayBestCheckbox = new SwitchButton
                                             {
                                                 Anchor = Anchor.CentreLeft,
@@ -233,8 +248,6 @@ namespace PerformanceCalculatorGUI.Screens
 
             usernameTextBox.OnCommit += (_, _) => { calculateProfiles(usernameTextBox.Current.Value.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
-            includePinnedCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
-            onlyDisplayBestCheckbox.Current.ValueChanged += e => { calculateProfiles(currentUsers); };
 
             if (RuntimeInfo.IsDesktop)
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfiles(currentUsers); });
@@ -311,6 +324,13 @@ namespace PerformanceCalculatorGUI.Screens
                             var pinnedScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/pinned?mode={ruleset.Value.ShortName}&limit={max_api_scores_in_one_query}")
                                                                .ConfigureAwait(false);
                             apiScores = apiScores.Concat(pinnedScores.Where(p => apiScores.All(b => b.ID != p.ID)).ToArray()).ToList();
+                        }
+
+                        if (includeFirstsCheckbox.Current.Value)
+                        {
+                            var firstScores = await apiManager.GetJsonFromApi<List<SoloScoreInfo>>($"users/{player.OnlineID}/scores/firsts?mode={ruleset.Value.ShortName}&limit={max_api_scores_in_one_query}")
+                                                              .ConfigureAwait(false);
+                            apiScores = apiScores.Concat(firstScores.Where(p => apiScores.All(b => b.ID != p.ID)).ToArray()).ToList();
                         }
 
                         foreach (var score in apiScores)
