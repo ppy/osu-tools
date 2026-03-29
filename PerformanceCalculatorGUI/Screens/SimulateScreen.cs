@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -22,6 +24,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
@@ -37,6 +40,7 @@ using osuTK;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
+using PerformanceCalculatorGUI.Screens.Collections;
 using PerformanceCalculatorGUI.Screens.ObjectInspection;
 using PerformanceCalculatorGUI.Screens.Simulate;
 
@@ -68,6 +72,8 @@ namespace PerformanceCalculatorGUI.Screens
         private LimitedLabelledNumberBox goodsTextBox = null!;
         private LimitedLabelledNumberBox mehsTextBox = null!;
         private SwitchButton fullScoreDataSwitch = null!;
+
+        private AddToCollectionButton addToCollectionButton = null!;
 
         private DifficultyAttributes? difficultyAttributes;
         private AttributesTable difficultyAttributesContainer = null!;
@@ -435,7 +441,8 @@ namespace PerformanceCalculatorGUI.Screens
                                                     Scale = new Vector2(mod_selection_container_scale),
                                                     IsValidMod = mod => mod.HasImplementation && ModUtils.FlattenMod(mod).All(m => m.UserPlayable),
                                                     SelectedMods = { BindTarget = appliedMods }
-                                                }
+                                                },
+                                                addToCollectionButton = new AddToCollectionButton()
                                             }
                                         }
                                     },
@@ -556,6 +563,8 @@ namespace PerformanceCalculatorGUI.Screens
             scoreTextBox.Value.BindValueChanged(_ => debouncedCalculatePerformance());
 
             fullScoreDataSwitch.Current.BindValueChanged(val => updateAccuracyParams(val.NewValue));
+
+            addToCollectionButton.OnAdd += onAddToCollection;
 
             appliedMods.BindValueChanged(modsChanged);
             modDisplay.Current.BindTo(appliedMods);
@@ -1130,6 +1139,74 @@ namespace PerformanceCalculatorGUI.Screens
                     scoreIdPopulateButton.State.Value = ButtonState.Done;
                 });
             }, TaskContinuationOptions.None);
+        }
+
+        private void onAddToCollection(Collection collection)
+        {
+            if (working == null)
+            {
+                notificationDisplay.Display(new Notification("No beatmap loaded"));
+                return;
+            }
+
+            var storedScore = buildStoredScore();
+            if (storedScore == null)
+                return;
+
+            collection.StoredScores = [.. collection.StoredScores ?? [], storedScore];
+
+            string path = Path.Combine("collections", collection.FileName);
+            File.WriteAllText(path, JsonConvert.SerializeObject(collection));
+
+            notificationDisplay.Display(new Notification($"Score added to {collection.Name}"));
+        }
+
+        private StoredScore? buildStoredScore()
+        {
+            if (working == null)
+                return null;
+
+            int? countGood = null, countMeh = null;
+
+            if (fullScoreDataSwitch.Current.Value)
+            {
+                countGood = goodsTextBox.Value.Value;
+                countMeh = mehsTextBox.Value.Value;
+            }
+
+            int score = RulesetHelper.AdjustManiaScore(scoreTextBox.Value.Value, appliedMods.Value);
+
+            var beatmap = working.GetPlayableBeatmap(ruleset.Value, appliedMods.Value);
+
+            double accuracy = accuracyTextBox.Value.Value / 100.0;
+            var statistics = new Dictionary<HitResult, int>();
+
+            if (ruleset.Value.OnlineID != -1)
+            {
+                if (appliedMods.Value.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value))
+                {
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracy, beatmap, appliedMods.Value.ToArray(), missesTextBox.Value.Value, countMeh, countGood,
+                        null, null);
+                }
+                else
+                {
+                    statistics = RulesetHelper.GenerateHitResultsForRuleset(ruleset.Value, accuracy, beatmap, appliedMods.Value.ToArray(), missesTextBox.Value.Value, countMeh, countGood,
+                        largeTickMissesTextBox.Value.Value, sliderTailMissesTextBox.Value.Value);
+                }
+
+                accuracy = RulesetHelper.GetAccuracyForRuleset(ruleset.Value, beatmap, statistics, appliedMods.Value.ToArray());
+            }
+
+            return new StoredScore
+            {
+                BeatmapID = working.BeatmapInfo.OnlineID,
+                RulesetID = ruleset.Value.OnlineID,
+                Accuracy = accuracy,
+                MaxCombo = comboTextBox.Value.Value,
+                Statistics = statistics,
+                Mods = appliedMods.Value.Select(m => new APIMod(m)).ToArray(),
+                TotalScore = score
+            };
         }
 
         private void resetMisses()
