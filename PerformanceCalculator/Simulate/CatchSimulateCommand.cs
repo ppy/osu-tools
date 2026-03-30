@@ -19,19 +19,19 @@ namespace PerformanceCalculator.Simulate
     public class CatchSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]
-        [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
+        [Option(Template = "--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
         public override int? Combo { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
+        [Option(Template = "--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
         public override double PercentCombo { get; } = 100;
 
         [UsedImplicitly]
-        [Option(Template = "-T|--tiny-droplets <tinys>", Description = "Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--tiny-droplets <tinys>", Description = "Number of tiny droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Mehs { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-D|--droplets <droplets>", Description = "Number of droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--droplets <droplets>", Description = "Number of droplets hit. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Goods { get; }
 
         public override Ruleset Ruleset => new CatchRuleset();

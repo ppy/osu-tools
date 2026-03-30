@@ -39,7 +39,7 @@ namespace PerformanceCalculator
             using var req = new JsonWebRequest<T>($"{Program.ENDPOINT_CONFIGURATION.APIUrl}/api/v2/{request}");
             req.Method = method ?? HttpMethod.Get;
             req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
-            req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {apiAccessToken}");
+            req.AddHeader(nameof(System.Net.HttpRequestHeader.Authorization), $"Bearer {apiAccessToken}");
 
             if (parameters != null)
             {

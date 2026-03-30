@@ -20,27 +20,27 @@ namespace PerformanceCalculator.Simulate
     public class OsuSimulateCommand : SimulateCommand
     {
         [UsedImplicitly]
-        [Option(Template = "-M|--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--mehs <mehs>", Description = "Number of mehs. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Mehs { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-G|--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
+        [Option(Template = "--goods <goods>", Description = "Number of goods. Will override accuracy if used. Otherwise is automatically calculated.")]
         public override int? Goods { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-c|--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
+        [Option(Template = "--combo <combo>", Description = "Maximum combo during play. Defaults to beatmap maximum.")]
         public override int? Combo { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-C|--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
+        [Option(Template = "--percent-combo <combo>", Description = "Percentage of beatmap maximum combo achieved. Alternative to combo option. Enter as decimal 0-100.")]
         public override double PercentCombo { get; } = 100;
 
         [UsedImplicitly]
-        [Option(Template = "-L|--large-tick-misses <misses>", Description = "Number of large tick misses. Defaults to 0.")]
+        [Option(Template = "--large-tick-misses <misses>", Description = "Number of large tick misses. Defaults to 0.")]
         private int largeTickMisses { get; }
 
         [UsedImplicitly]
-        [Option(Template = "-S|--slider-tail-misses <misses>", Description = "Number of slider tail misses. Defaults to 0.")]
+        [Option(Template = "--slider-tail-misses <misses>", Description = "Number of slider tail misses. Defaults to 0.")]
         private int sliderTailMisses { get; }
 
         public override Ruleset Ruleset => new OsuRuleset();

@@ -103,8 +103,8 @@ namespace PerformanceCalculatorGUI.Components
 
             background.Colour = colours.ForStarDifficulty(difficultyAttributes.StarRating).Darken(0.1f);
 
-            starIcon.Colour = difficultyAttributes.StarRating >= OsuColour.STAR_DIFFICULTY_DEFINED_COLOUR_CUTOFF ? colours.Orange1 : colourProvider?.Background5 ?? Color4Extensions.FromHex("303d47");
-            starsText.Colour = difficultyAttributes.StarRating >= OsuColour.STAR_DIFFICULTY_DEFINED_COLOUR_CUTOFF ? colours.Orange1 : colourProvider?.Background5 ?? Color4.Black.Opacity(0.75f);
+            starIcon.Colour = colours.ForStarDifficultyText(difficultyAttributes.StarRating);
+            starsText.Colour = colours.ForStarDifficultyText(difficultyAttributes.StarRating);
         }
 
         public string TooltipContent => AttributeConversion.ToReadableString(difficultyAttributes);
