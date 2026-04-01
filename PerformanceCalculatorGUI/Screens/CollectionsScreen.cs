@@ -388,7 +388,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 for (int i = 0; i < scoresList.Count; i++)
                 {
-                    scoresList.SetLayoutPosition(scoresList[i], Array.IndexOf(currentCollection.Value!.Scores, scoresList[i].Score.SoloScore.ID));
+                    scoresList.SetLayoutPosition(scoresList[i], Array.IndexOf(currentCollection.Value!.Scores, scoresList[i].ExtScore.Score.OnlineID));
                 }
 
                 return;
@@ -399,15 +399,15 @@ namespace PerformanceCalculatorGUI.Screens
             switch (sortCriteria)
             {
                 case CollectionSortCriteria.Live:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.LivePP).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.ExtScore.LivePP).ToArray();
                     break;
 
                 case CollectionSortCriteria.Local:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.ExtScore.PerformanceAttributes?.Total).ToArray();
                     break;
 
                 case CollectionSortCriteria.Difference:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total - x.Score.LivePP).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.ExtScore.PerformanceAttributes?.Total - x.ExtScore.LivePP).ToArray();
                     break;
 
                 default:
