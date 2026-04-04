@@ -106,7 +106,7 @@ namespace PerformanceCalculatorGUI
                 // If there's no classic slider accuracy - we need to weight normal judgements accordingly.
                 // Normal judgements in this context are 300s, 100s, 50s and misses.
                 // Slider-related judgements are large tick hits/misses and slider tail hits/misses.
-                double normalJudgementWeight = 1.0;
+                double nonSliderJudgementWeight = 1.0;
 
                 if (usingClassicSliderAccuracy)
                 {
@@ -115,10 +115,10 @@ namespace PerformanceCalculatorGUI
                 else
                 {
                     double maxSliderPortion = countSmallTicks * 0.5 + countLargeTicks * 0.1;
-                    normalJudgementWeight = (totalResultCount + maxSliderPortion) / totalResultCount;
+                    nonSliderJudgementWeight = (totalResultCount + maxSliderPortion) / totalResultCount;
 
                     double missedSliderPortion = (double)countSliderTailMisses * 0.5 + (double)countLargeTickMisses * 0.1;
-                    countSuccessfulHits = totalResultCount - (countMiss + missedSliderPortion) / normalJudgementWeight;
+                    countSuccessfulHits = totalResultCount - (countMiss + missedSliderPortion) / nonSliderJudgementWeight;
                 }
 
                 // Accuracy excluding countMiss. We need that because we're trying to achieve target accuracy without touching countMiss
@@ -135,7 +135,7 @@ namespace PerformanceCalculatorGUI
                     double ratio50To100 = Math.Pow(1 - (relevantAccuracy - 0.25) / 0.75, 2);
 
                     // Derived from the formula: Accuracy = (6 * c300 + 2 * c100 + c50) / (6 * totalHits), assuming that c50 = c100 * ratio50to100
-                    double count100Estimate = 6 * countSuccessfulHits * (1 - relevantAccuracy) / (5 * ratio50To100 + 4) * normalJudgementWeight;
+                    double count100Estimate = 6 * countSuccessfulHits * (1 - relevantAccuracy) / (5 * ratio50To100 + 4) * nonSliderJudgementWeight;
 
                     // Get count50 according to c50 = c100 * ratio50to100
                     double count50Estimate = count100Estimate * ratio50To100;
@@ -156,10 +156,10 @@ namespace PerformanceCalculatorGUI
                     double count50Estimate = countSuccessfulHits - count100Estimate;
 
                     // Round it to get int number of 100s
-                    countGood = (int?)Math.Round(count100Estimate * normalJudgementWeight);
+                    countGood = (int?)Math.Round(count100Estimate * nonSliderJudgementWeight);
 
                     // Get number of 50s as difference between total mistimed hits and count100
-                    countMeh = (int?)(Math.Round((count100Estimate + count50Estimate) * normalJudgementWeight) - countGood);
+                    countMeh = (int?)(Math.Round((count100Estimate + count50Estimate) * nonSliderJudgementWeight) - countGood);
                 }
                 // If accuracy is less than 16.67% - it means that we have only 50s or misses
                 // Assuming that we removed misses in the 1st place - that means that we need to add additional misses to achieve target accuracy
