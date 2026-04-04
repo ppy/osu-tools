@@ -13,6 +13,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
+using osu.Game.Rulesets.Catch.Difficulty.Evaluators;
 using osu.Game.Rulesets.Catch.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
@@ -30,16 +31,16 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     public partial class ObjectDifficultyValuesContainer : Container
     {
         [Resolved]
-        private Bindable<IReadOnlyList<Mod>> appliedMods { get; set; }
+        private Bindable<IReadOnlyList<Mod>> appliedMods { get; set; } = null!;
 
         [Resolved]
-        private Track track { get; set; }
+        private Track track { get; set; } = null!;
 
-        private SpriteText hitObjectTypeText;
+        private SpriteText hitObjectTypeText = null!;
 
-        private FillFlowContainer flowContainer;
+        private FillFlowContainer flowContainer = null!;
 
-        public Bindable<DifficultyHitObject> CurrentDifficultyHitObject { get; } = new Bindable<DifficultyHitObject>();
+        public Bindable<DifficultyHitObject?> CurrentDifficultyHitObject { get; } = new Bindable<DifficultyHitObject?>();
 
         private const int hit_object_type_container_height = 50;
 
@@ -91,7 +92,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             CurrentDifficultyHitObject.ValueChanged += h => updateValues(h.NewValue);
         }
 
-        private void updateValues(DifficultyHitObject hitObject)
+        private void updateValues(DifficultyHitObject? hitObject)
         {
             flowContainer.Clear();
 
@@ -131,7 +132,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Position", (hitObject.BaseObject as OsuHitObject)!.StackedPosition),
-                new ObjectInspectorDifficultyValue("Strain Time", hitObject.StrainTime),
+                new ObjectInspectorDifficultyValue("Delta Time", hitObject.DeltaTime),
+                new ObjectInspectorDifficultyValue("Adjusted Delta Time", hitObject.AdjustedDeltaTime),
                 new ObjectInspectorDifficultyValue("Doubletapness", hitObject.GetDoubletapness((OsuDifficultyHitObject)hitObject.Next(0))),
                 new ObjectInspectorDifficultyValue("Lazy Jump Dist", hitObject.LazyJumpDistance),
                 new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
@@ -159,8 +161,13 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                         Alpha = 0.5f
                     },
                     new ObjectInspectorDifficultyValue("Travel Time", hitObject.TravelTime),
+                    new ObjectInspectorDifficultyValue("Lazy Travel Time", hitObject.LazyTravelTime),
                     new ObjectInspectorDifficultyValue("Travel Distance", hitObject.TravelDistance),
+                    new ObjectInspectorDifficultyValue("Lazy Travel Distance", hitObject.LazyTravelDistance)
                 });
+
+                if (hitObject.LazyEndPosition != null)
+                    flowContainer.Add(new ObjectInspectorDifficultyValue("Lazy End Position", hitObject.LazyEndPosition!.Value));
             }
         }
 
@@ -194,7 +201,15 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             flowContainer.AddRange(new[]
             {
                 new ObjectInspectorDifficultyValue("Strain Time", hitObject.StrainTime),
-                new ObjectInspectorDifficultyValue("Normalized Position", hitObject.NormalizedPosition)
+                new ObjectInspectorDifficultyValue("Normalized Position", hitObject.NormalizedPosition),
+                new ObjectInspectorDifficultyValue("Last Normalized Position", hitObject.LastNormalizedPosition),
+                new ObjectInspectorDifficultyValue("Player Position", hitObject.PlayerPosition),
+                new ObjectInspectorDifficultyValue("Last Player Position", hitObject.LastPlayerPosition),
+                new ObjectInspectorDifficultyValue("Distance Moved", hitObject.DistanceMoved),
+                new ObjectInspectorDifficultyValue("Exact Distance Moved", hitObject.ExactDistanceMoved),
+
+                // see https://github.com/ppy/osu/blob/a08f7327b11977f1de57b8a177bf26918ebfacda/osu.Game.Rulesets.Catch/Difficulty/Skills/Movement.cs#L36
+                new ObjectInspectorDifficultyValue("Movement Difficulty", MovementEvaluator.EvaluateDifficultyOf(hitObject, track.Rate)),
             });
         }
     }

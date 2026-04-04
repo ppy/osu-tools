@@ -4,8 +4,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Taiko.Edit;
@@ -16,25 +18,35 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class TaikoObjectInspectorRuleset : DrawableTaikoEditorRuleset
     {
-        private readonly TaikoDifficultyHitObject[] difficultyHitObjects;
+        private TaikoDifficultyHitObject[] difficultyHitObjects = [];
 
         [Resolved]
-        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
+        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; } = null!;
 
-        public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedTaikoDifficultyCalculator difficultyCalculator, double clockRate)
+        [Resolved]
+        private Bindable<DifficultyCalculator?> difficultyCalculator { get; set; } = null!;
+
+        public TaikoObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods)
             : base(ruleset, beatmap, mods)
         {
-            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate)
-                                                       .Cast<TaikoDifficultyHitObject>().ToArray();
-
             ShowSpeedChanges.Value = true;
+        }
+
+        protected override void LoadComplete()
+        {
+            var extendedDifficultyCalculator = (IExtendedDifficultyCalculator?)difficultyCalculator.Value;
+
+            if (extendedDifficultyCalculator != null)
+            {
+                difficultyHitObjects = extendedDifficultyCalculator.GetDifficultyHitObjects().Cast<TaikoDifficultyHitObject>().ToArray();
+            }
+
+            base.LoadComplete();
         }
 
         public override bool PropagatePositionalInputSubTree => false;
 
         public override bool PropagateNonPositionalInputSubTree => false;
-
-        public override bool AllowBackwardsSeeks => true;
 
         protected override Playfield CreatePlayfield() => new TaikoObjectInspectorPlayfield();
 
@@ -46,7 +58,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         private partial class TaikoObjectInspectorPlayfield : TaikoPlayfield
         {
-            protected override GameplayCursorContainer CreateCursor() => null;
+            protected override GameplayCursorContainer? CreateCursor() => null;
 
             public TaikoObjectInspectorPlayfield()
             {

@@ -4,9 +4,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
@@ -20,15 +22,29 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 {
     public partial class OsuObjectInspectorRuleset : DrawableOsuEditorRuleset
     {
-        private readonly OsuDifficultyHitObject[] difficultyHitObjects;
+        private OsuDifficultyHitObject[] difficultyHitObjects = [];
 
         [Resolved]
-        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; }
+        private ObjectDifficultyValuesContainer objectDifficultyValuesContainer { get; set; } = null!;
 
-        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods, ExtendedOsuDifficultyCalculator difficultyCalculator, double clockRate)
+        [Resolved]
+        private Bindable<DifficultyCalculator?> difficultyCalculator { get; set; } = null!;
+
+        public OsuObjectInspectorRuleset(Ruleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod> mods)
             : base(ruleset, beatmap, mods)
         {
-            difficultyHitObjects = difficultyCalculator.GetDifficultyHitObjects(beatmap, clockRate).Cast<OsuDifficultyHitObject>().ToArray();
+        }
+
+        protected override void LoadComplete()
+        {
+            var extendedDifficultyCalculator = (IExtendedDifficultyCalculator?)difficultyCalculator.Value;
+
+            if (extendedDifficultyCalculator != null)
+            {
+                difficultyHitObjects = extendedDifficultyCalculator.GetDifficultyHitObjects().Cast<OsuDifficultyHitObject>().ToArray();
+            }
+
+            base.LoadComplete();
         }
 
         protected override void Update()
@@ -41,14 +57,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
         public override bool PropagateNonPositionalInputSubTree => false;
 
-        public override bool AllowBackwardsSeeks => true;
-
         protected override Playfield CreatePlayfield() => new OsuObjectInspectorPlayfield(difficultyHitObjects);
 
         private partial class OsuObjectInspectorPlayfield : OsuPlayfield
         {
             private readonly IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects;
-            protected override GameplayCursorContainer CreateCursor() => null;
+            protected override GameplayCursorContainer? CreateCursor() => null;
 
             public OsuObjectInspectorPlayfield(IReadOnlyList<OsuDifficultyHitObject> difficultyHitObjects)
             {
@@ -76,7 +90,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 {
                     case DrawableSlider:
                     case DrawableHitCircle:
-                        var nextHitObject = difficultyHitObjects.FirstOrDefault(x => x.StartTime > hitObject.StartTimeBindable.Value)?.BaseObject;
+                        var nextHitObject = difficultyHitObjects.FirstOrDefault(x => x.BaseObject.StartTime > hitObject.StartTimeBindable.Value)?.BaseObject;
 
                         if (nextHitObject != null)
                         {

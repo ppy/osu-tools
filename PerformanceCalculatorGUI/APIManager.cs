@@ -20,7 +20,7 @@ namespace PerformanceCalculatorGUI
         private readonly Bindable<string> clientIdBindable;
         private readonly Bindable<string> clientSecretBindable;
 
-        private OAuthToken token;
+        private OAuthToken? token;
 
         // WARN: keep in sync with /osu.Game/Online/API/APIAccess.cs APIVersion
         private const int api_version = 20220705;
@@ -41,7 +41,7 @@ namespace PerformanceCalculatorGUI
 
             using var req = new JsonWebRequest<T>($"{ENDPOINT_CONFIGURATION.APIUrl}/api/v2/{request}");
             req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
-            req.AddHeader(System.Net.HttpRequestHeader.Authorization.ToString(), $"Bearer {token.AccessToken}");
+            req.AddHeader(nameof(System.Net.HttpRequestHeader.Authorization), $"Bearer {token.AccessToken}");
             await req.PerformAsync().ConfigureAwait(false);
 
             return req.ResponseObject;

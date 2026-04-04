@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using JetBrains.Annotations;
 
 namespace PerformanceCalculatorGUI
 {
@@ -11,7 +10,7 @@ namespace PerformanceCalculatorGUI
     /// </summary>
     internal static class HotReloadCallbackReceiver
     {
-        public static event Action<Type[]> CompilationFinished;
-        public static void UpdateApplication([CanBeNull] Type[] updatedTypes) => CompilationFinished?.Invoke(updatedTypes);
+        public static event Action<Type[]?>? CompilationFinished;
+        public static void UpdateApplication(Type[]? updatedTypes) => CompilationFinished?.Invoke(updatedTypes);
     }
 }

@@ -33,10 +33,10 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
 
         public IEnumerable<string> HandledExtensions => handledExtensions;
 
-        private readonly Bindable<FileInfo> currentFile = new Bindable<FileInfo>();
+        private readonly Bindable<FileInfo?> currentFile = new Bindable<FileInfo?>();
 
         [Resolved]
-        private OsuGameBase game { get; set; }
+        private OsuGameBase game { get; set; } = null!;
 
         public FileChooserLabelledTextBox(Bindable<string> initialPath, params string[] handledExtensions)
         {
@@ -62,7 +62,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
             currentFile.BindValueChanged(onFileSelected);
         }
 
-        private void onFileSelected(ValueChangedEvent<FileInfo> file)
+        private void onFileSelected(ValueChangedEvent<FileInfo?> file)
         {
             if (file.NewValue == null)
                 return;
@@ -87,7 +87,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
 
         private partial class FileChooserOsuTextBox : OsuTextBox
         {
-            public Action OnFocused;
+            public Action? OnFocused;
 
             protected override bool OnDragStart(DragStartEvent e)
             {
@@ -109,7 +109,7 @@ namespace PerformanceCalculatorGUI.Components.TextBoxes
 
         private partial class FileChooserPopover : OsuPopover
         {
-            public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo> currentFile, Bindable<string> initialPath = null)
+            public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo?> currentFile, Bindable<string>? initialPath = null)
                 : base(false)
             {
                 Child = new Container

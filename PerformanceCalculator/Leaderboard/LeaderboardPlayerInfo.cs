@@ -5,8 +5,8 @@ namespace PerformanceCalculator.Leaderboard
 {
     public class LeaderboardPlayerInfo
     {
-        public string Username;
-        public double LocalPP;
-        public double LivePP;
+        public required string Username;
+        public required double LocalPP;
+        public required double LivePP;
     }
 }

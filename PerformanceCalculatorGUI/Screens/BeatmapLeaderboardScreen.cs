@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework;
@@ -29,38 +30,43 @@ namespace PerformanceCalculatorGUI.Screens
 {
     public partial class BeatmapLeaderboardScreen : PerformanceCalculatorScreen
     {
-        private LimitedLabelledNumberBox beatmapIdTextBox;
-        private StatefulButton calculationButton;
-        private VerboseLoadingLayer loadingLayer;
+        private ExtendedLabelledTextBox beatmapIdTextBox = null!;
+        private StatefulButton calculationButton = null!;
+        private VerboseLoadingLayer loadingLayer = null!;
 
-        private GridContainer layout;
-        private ScoreTable scoreTable;
-        private OsuSpriteText noScoresPlaceholder;
+        private GridContainer layout = null!;
+        private ScoreTable scoreTable = null!;
+        private OsuSpriteText noScoresPlaceholder = null!;
 
-        private Container beatmapPanelContainer;
-        private BeatmapCard beatmapPanel;
+        private Container beatmapPanelContainer = null!;
+        private BeatmapCard? beatmapPanel;
 
-        private CancellationTokenSource calculationCancellatonToken;
+        private CancellationTokenSource? calculationCancellatonToken;
 
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Orange);
 
         [Resolved]
-        private NotificationDisplay notificationDisplay { get; set; }
+        private NotificationDisplay notificationDisplay { get; set; } = null!;
 
         [Resolved]
-        private APIManager apiManager { get; set; }
+        private APIManager apiManager { get; set; } = null!;
 
         [Resolved]
-        private Bindable<RulesetInfo> ruleset { get; set; }
+        private Bindable<RulesetInfo> ruleset { get; set; } = null!;
 
         [Resolved]
-        private RulesetStore rulesets { get; set; }
+        private RulesetStore rulesets { get; set; } = null!;
 
         [Resolved]
-        private SettingsManager configManager { get; set; }
+        private SettingsManager configManager { get; set; } = null!;
 
         public override bool ShouldShowConfirmationDialogOnSwitch => false;
+
+        [GeneratedRegex(@"osu\.ppy\.sh/(?:b|beatmapsets/\d+#\w+|beatmaps)/(\d+)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private partial Regex beatmapLinkRegex();
+
+        private int? queuedBeatmap;
 
         private const int settings_height = 40;
         private const int generate_score_amount = 50;
@@ -71,11 +77,22 @@ namespace PerformanceCalculatorGUI.Screens
             RelativeSizeAxes = Axes.Both;
         }
 
+        public BeatmapLeaderboardScreen(int beatmapId)
+        {
+            RelativeSizeAxes = Axes.Both;
+            queuedBeatmap = beatmapId;
+        }
+
         [BackgroundDependencyLoader]
         private void load()
         {
             InternalChildren = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colourProvider.Background6
+                },
                 layout = new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -103,14 +120,14 @@ namespace PerformanceCalculatorGUI.Screens
                                 {
                                     new Drawable[]
                                     {
-                                        beatmapIdTextBox = new LimitedLabelledNumberBox
+                                        beatmapIdTextBox = new ExtendedLabelledTextBox
                                         {
                                             RelativeSizeAxes = Axes.X,
                                             Anchor = Anchor.TopLeft,
                                             Label = "Beatmap ID",
-                                            PlaceholderText = "Enter beatmap ID",
-                                            MinValue = 1,
-                                            CommitOnFocusLoss = false
+                                            PlaceholderText = "Enter a beatmap ID or link",
+                                            CommitOnFocusLoss = false,
+                                            SelectAllOnFocus = true
                                         },
                                         calculationButton = new StatefulButton("Start calculation")
                                         {
@@ -180,6 +197,19 @@ namespace PerformanceCalculatorGUI.Screens
                 HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(calculate);
         }
 
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            if (queuedBeatmap != null)
+            {
+                beatmapIdTextBox.Current.Value = queuedBeatmap.Value.ToString();
+                calculate();
+            }
+
+            queuedBeatmap = null;
+        }
+
         private void calculate()
         {
             calculationCancellatonToken?.Cancel();
@@ -192,17 +222,25 @@ namespace PerformanceCalculatorGUI.Screens
             calculationCancellatonToken = new CancellationTokenSource();
             var token = calculationCancellatonToken.Token;
 
+            string beatmap = beatmapIdTextBox.Current.Value;
+            var beatmapLinkMatch = beatmapLinkRegex().Match(beatmap);
+
+            if (beatmapLinkMatch.Success && beatmapLinkMatch.Groups.Count == 2)
+            {
+                beatmap = beatmapLinkMatch.Groups[1].ToString();
+            }
+
             Task.Run(async () =>
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmapIdTextBox.Current.Value}/scores?scope=global&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
+                var leaderboard = await apiManager.GetJsonFromApi<APIScoresCollection>($@"beatmaps/{beatmap}/scores?scope=global&limit=100&mode={ruleset.Value.ShortName}").ConfigureAwait(false);
 
                 var plays = new List<SoloScoreInfo>();
 
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmapIdTextBox.Current.Value, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+                var working = ProcessorWorkingBeatmap.FromFileOrId(beatmap, cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
                 Schedule(() =>
                 {

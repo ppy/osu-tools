@@ -15,10 +15,12 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch.Beatmaps;
+using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Catch.UI;
-using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.UI;
@@ -34,7 +36,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
     [Cached(typeof(IBeatSnapProvider))]
     public partial class ObjectInspector : OsuFocusedOverlayContainer, IBeatSnapProvider
     {
-        private DependencyContainer dependencies;
+        private DependencyContainer dependencies = null!;
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
             => dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
@@ -43,24 +45,21 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         private BindableBeatDivisor beatDivisor = new BindableBeatDivisor(4);
 
         [Resolved]
-        private Bindable<WorkingBeatmap> beatmap { get; set; }
+        private Bindable<WorkingBeatmap> beatmap { get; set; } = null!;
 
         [Resolved]
-        private Bindable<IReadOnlyList<Mod>> mods { get; set; }
+        private Bindable<IReadOnlyList<Mod>> mods { get; set; } = null!;
 
         [Resolved]
-        private Bindable<RulesetInfo> ruleset { get; set; }
-
-        [Resolved]
-        private Bindable<DifficultyCalculator> difficultyCalculator { get; set; }
+        private Bindable<RulesetInfo> ruleset { get; set; } = null!;
 
         private readonly ProcessorWorkingBeatmap processorBeatmap;
-        private EditorClock clock;
-        private Container rulesetContainer;
+        private EditorClock clock = null!;
+        private Container rulesetContainer = null!;
 
-        private ObjectDifficultyValuesContainer difficultyValuesContainer;
-        private IBeatmap playableBeatmap;
-        private EditorBeatmap editorBeatmap;
+        private ObjectDifficultyValuesContainer difficultyValuesContainer = null!;
+        private EditorBeatmap editorBeatmap = null!;
+        private IReadOnlyList<HitObject> hitObjects = null!;
 
         protected override bool BlockNonPositionalInput => true;
 
@@ -80,8 +79,8 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
         {
             var rulesetInstance = ruleset.Value.CreateInstance();
             var modifiedMods = mods.Value.Append(rulesetInstance.GetAutoplayMod()).ToList();
+            var playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
 
-            playableBeatmap = processorBeatmap.GetPlayableBeatmap(ruleset.Value, modifiedMods);
             processorBeatmap.LoadTrack();
             modifiedMods.OfType<IApplicableToTrack>().ForEach(m => m.ApplyToTrack(processorBeatmap.Track));
 
@@ -94,6 +93,12 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
             dependencies.CacheAs(editorBeatmap);
 
             beatmap.Value = processorBeatmap;
+
+            hitObjects = ruleset.Value.ShortName switch
+            {
+                "fruits" => CatchBeatmap.GetPalpableObjects(playableBeatmap.HitObjects).Where(o => o is not (Banana or TinyDroplet)).ToList(),
+                _ => playableBeatmap.HitObjects,
+            };
 
             Timeline timeline;
 
@@ -196,8 +201,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                             RelativeSizeAxes = Axes.Both,
                             PlayfieldBorderStyle = { Value = PlayfieldBorderStyle.Corners }
                         },
-                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedOsuDifficultyCalculator,
-                            processorBeatmap.Track.Rate)
+                        new OsuObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -207,8 +211,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 },
                 "taiko" => new TaikoPlayfieldAdjustmentContainer
                 {
-                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedTaikoDifficultyCalculator,
-                        processorBeatmap.Track.Rate)
+                    Child = new TaikoObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!)
                     {
                         RelativeSizeAxes = Axes.Both,
                         Clock = clock,
@@ -221,8 +224,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                     Y = 100,
                     Children = new Drawable[]
                     {
-                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods, difficultyCalculator.Value as ExtendedCatchDifficultyCalculator,
-                            processorBeatmap.Track.Rate)
+                        new CatchObjectInspectorRuleset(rulesetInstance, playableBeatmap, modifiedMods!)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Clock = clock,
@@ -277,9 +279,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (e.Key == Key.Left)
             {
-                seekTo = playableBeatmap.HitObjects
-                                        .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
-                                        .StartTime;
+                seekTo = hitObjects
+                         .LastOrDefault(x => x.StartTime < clock.CurrentTime)?
+                         .StartTime;
 
                 // slight leeway to make going back beyond just one object possible when the clock is running
                 if (clock.IsRunning)
@@ -288,9 +290,9 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
             if (e.Key == Key.Right)
             {
-                seekTo = playableBeatmap.HitObjects
-                                        .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
-                                        .StartTime;
+                seekTo = hitObjects
+                         .FirstOrDefault(x => x.StartTime > clock.CurrentTime)?
+                         .StartTime;
             }
 
             if (seekTo != null)

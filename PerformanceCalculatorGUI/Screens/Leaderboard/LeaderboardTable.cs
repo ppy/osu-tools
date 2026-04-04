@@ -13,14 +13,14 @@ using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.Rankings.Tables;
 using osu.Game.Users;
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Screens.Leaderboard
 {
     public class LeaderboardUser
     {
-        public APIUser User;
-        public decimal LivePP;
-        public decimal LocalPP;
-        public decimal Difference;
+        public required APIUser User;
+        public required decimal LivePP;
+        public required decimal LocalPP;
+        public required decimal Difference;
     }
 
     public partial class LeaderboardTable : RankingsTable<LeaderboardUser>

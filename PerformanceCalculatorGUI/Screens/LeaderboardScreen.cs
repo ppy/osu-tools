@@ -11,6 +11,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Logging;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
@@ -23,6 +24,7 @@ using osu.Game.Users;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Components.TextBoxes;
 using PerformanceCalculatorGUI.Configuration;
+using PerformanceCalculatorGUI.Screens.Leaderboard;
 
 namespace PerformanceCalculatorGUI.Screens
 {
@@ -31,7 +33,7 @@ namespace PerformanceCalculatorGUI.Screens
         public decimal LivePP { get; set; }
         public decimal LocalPP { get; set; }
 
-        public List<ExtendedScore> Scores { get; set; }
+        public List<ExtendedScore> Scores { get; set; } = new List<ExtendedScore>();
     }
 
     public partial class LeaderboardScreen : PerformanceCalculatorScreen
@@ -45,33 +47,33 @@ namespace PerformanceCalculatorGUI.Screens
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Green);
 
-        private LimitedLabelledNumberBox playerAmountTextBox;
-        private LimitedLabelledNumberBox pageTextBox;
-        private StatefulButton calculationButton;
-        private VerboseLoadingLayer loadingLayer;
+        private LimitedLabelledNumberBox playerAmountTextBox = null!;
+        private LimitedLabelledNumberBox pageTextBox = null!;
+        private StatefulButton calculationButton = null!;
+        private VerboseLoadingLayer loadingLayer = null!;
 
-        private Container players;
-        private FillFlowContainer scores;
-        private OsuTabControl<Tabs> tabs;
+        private Container players = null!;
+        private FillFlowContainer scores = null!;
+        private OsuTabControl<Tabs> tabs = null!;
 
-        private CancellationTokenSource calculationCancellatonToken;
+        private CancellationTokenSource? calculationCancellatonToken;
 
         public override bool ShouldShowConfirmationDialogOnSwitch => players.Count > 0;
 
         [Resolved]
-        private NotificationDisplay notificationDisplay { get; set; }
+        private NotificationDisplay notificationDisplay { get; set; } = null!;
 
         [Resolved]
-        private APIManager apiManager { get; set; }
+        private APIManager apiManager { get; set; } = null!;
 
         [Resolved]
-        private Bindable<RulesetInfo> ruleset { get; set; }
+        private Bindable<RulesetInfo> ruleset { get; set; } = null!;
 
         [Resolved]
-        private RulesetStore rulesets { get; set; }
+        private RulesetStore rulesets { get; set; } = null!;
 
         [Resolved]
-        private SettingsManager configManager { get; set; }
+        private SettingsManager configManager { get; set; } = null!;
 
         private const int settings_height = 40;
         private const int tabs_height = 20;
@@ -86,6 +88,11 @@ namespace PerformanceCalculatorGUI.Screens
         {
             InternalChildren = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colourProvider.Background6
+                },
                 new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -239,7 +246,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 Schedule(() => loadingLayer.Text.Value = "Getting leaderboard...");
 
-                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value - 1}").ConfigureAwait(false);
+                var leaderboard = await apiManager.GetJsonFromApi<GetTopUsersResponse>($"rankings/{ruleset.Value.ShortName}/performance?cursor[page]={pageTextBox.Value.Value}").ConfigureAwait(false);
 
                 var calculatedPlayers = new List<LeaderboardUser>();
                 var calculatedScores = new List<ExtendedScore>();
@@ -275,9 +282,9 @@ namespace PerformanceCalculatorGUI.Screens
                     LoadComponent(leaderboardTable);
                     players.Add(leaderboardTable);
 
-                    foreach (var calculatedScore in calculatedScores.OrderByDescending(x => x.PerformanceAttributes.Total))
+                    foreach (var calculatedScore in calculatedScores.OrderByDescending(x => x.PerformanceAttributes?.Total))
                     {
-                        scores.Add(new ExtendedProfileScore(calculatedScore));
+                        scores.Add(new ExtendedProfileScore(calculatedScore, true));
                     }
                 });
             }, token).ContinueWith(t =>
@@ -323,11 +330,8 @@ namespace PerformanceCalculatorGUI.Screens
                         var difficultyAttributes = difficultyCalculator.Calculate(mods);
                         var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
 
-                        double? livePp = score.PP;
                         var perfAttributes = performanceCalculator?.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
-                        score.PP = perfAttributes?.Total ?? 0.0;
-
-                        var extendedScore = new ExtendedScore(score, livePp, perfAttributes);
+                        var extendedScore = new ExtendedScore(score, difficultyAttributes, perfAttributes);
                         plays.Add(extendedScore);
                     }
                     catch (Exception e)
@@ -345,11 +349,11 @@ namespace PerformanceCalculatorGUI.Screens
             }
             catch (OperationCanceledException) { }
 
-            var localOrdered = plays.OrderByDescending(x => x.SoloScore.PP).ToList();
+            var localOrdered = plays.OrderByDescending(x => x.PerformanceAttributes?.Total).ToList();
             var liveOrdered = plays.OrderByDescending(x => x.LivePP ?? 0.0).ToList();
 
             int index = 0;
-            decimal totalLocalPP = (decimal)(localOrdered.Select(x => x.SoloScore.PP).Sum(play => Math.Pow(0.95, index++) * play) ?? 0.0);
+            decimal totalLocalPP = (decimal)localOrdered.Select(x => x.PerformanceAttributes?.Total ?? 0).Sum(play => Math.Pow(0.95, index++) * play);
             decimal totalLivePP = player.PP ?? (decimal)0.0;
 
             index = 0;

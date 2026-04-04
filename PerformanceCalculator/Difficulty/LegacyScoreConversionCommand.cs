@@ -22,7 +22,7 @@ namespace PerformanceCalculator.Difficulty
         [UsedImplicitly]
         [Required]
         [Argument(0, Name = "beatmap", Description = "Required. Can be either a path to beatmap file (.osu) or beatmap ID.")]
-        public string Beatmap { get; }
+        public string Beatmap { get; } = null!;
 
         [UsedImplicitly]
         [Required]
@@ -32,32 +32,32 @@ namespace PerformanceCalculator.Difficulty
         public int Ruleset { get; }
 
         [UsedImplicitly]
-        [Option(CommandOptionType.MultipleValue, Template = "-m|--m <mod>", Description = "One for each mod. The mods to compute the difficulty with."
-                                                                                          + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
-        public string[] Mods { get; }
+        [Option(CommandOptionType.MultipleValue, Template = "-m|--mods <mod>", Description = "One for each mod. The mods to compute the difficulty with."
+                                                                                             + "Values: hr, dt, hd, fl, ez, 4k, 5k, etc...")]
+        public string[] Mods { get; } = [];
 
-        [Option(CommandOptionType.SingleValue, Template = "-T|--greats", Description = "Number of greats.")]
+        [Option(CommandOptionType.SingleValue, Template = "--greats", Description = "Number of greats.")]
         public int Greats { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-D|--goods", Description = "Number of goods.")]
+        [Option(CommandOptionType.SingleValue, Template = "--goods", Description = "Number of goods.")]
         public int Goods { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-M|--mehs", Description = "Number of mehs.")]
+        [Option(CommandOptionType.SingleValue, Template = "--mehs", Description = "Number of mehs.")]
         public int Mehs { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-X|--misses", Description = "Number of misses.")]
+        [Option(CommandOptionType.SingleValue, Template = "--misses", Description = "Number of misses.")]
         public int Misses { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-G|--geki", Description = "Number of gekis.")]
+        [Option(CommandOptionType.SingleValue, Template = "--geki", Description = "Number of gekis.")]
         public int Gekis { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-K|--katu", Description = "Number of katus.")]
+        [Option(CommandOptionType.SingleValue, Template = "--katu", Description = "Number of katus.")]
         public int Katus { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-c|--max-combo", Description = "Max combo achieved by user.")]
+        [Option(CommandOptionType.SingleValue, Template = "--max-combo", Description = "Max combo achieved by user.")]
         public int MaxCombo { get; set; }
 
-        [Option(CommandOptionType.SingleValue, Template = "-s|--score", Description = "Total score achieved by user.")]
+        [Option(CommandOptionType.SingleValue, Template = "--score", Description = "Total score achieved by user.")]
         public int TotalScore { get; set; }
 
         [UsedImplicitly]
@@ -66,7 +66,7 @@ namespace PerformanceCalculator.Difficulty
             var ruleset = LegacyHelper.GetRulesetFromLegacyID(Ruleset);
 
             var workingBeatmap = ProcessorWorkingBeatmap.FromFileOrId(Beatmap);
-            Mod[] mods = [ruleset.CreateMod<ModClassic>(), .. getMods(ruleset)];
+            Mod[] mods = [ruleset.CreateMod<ModClassic>()!, .. getMods(ruleset)];
 
             var beatmap = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
@@ -91,7 +91,7 @@ namespace PerformanceCalculator.Difficulty
 
         private Mod[] getMods(Ruleset ruleset)
         {
-            if (Mods == null)
+            if (Mods.Length == 0)
                 return Array.Empty<Mod>();
 
             var availableMods = ruleset.CreateAllMods().ToList();
@@ -99,7 +99,7 @@ namespace PerformanceCalculator.Difficulty
 
             foreach (string modString in Mods)
             {
-                Mod newMod = availableMods.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
+                Mod? newMod = availableMods?.FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.OrdinalIgnoreCase));
                 if (newMod == null)
                     throw new ArgumentException($"Invalid mod provided: {modString}");
 

@@ -1,10 +1,11 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-namespace PerformanceCalculatorGUI.Components
+namespace PerformanceCalculatorGUI.Screens.Collections
 {
-    public enum ProfileSortCriteria
+    public enum CollectionSortCriteria
     {
+        None,
         Live,
         Difference,
         Local

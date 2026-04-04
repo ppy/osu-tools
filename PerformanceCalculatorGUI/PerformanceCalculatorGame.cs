@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
+using osu.Framework.Input.Handlers.Mouse;
 using osu.Framework.Input.Handlers.Tablet;
 using osu.Framework.Platform;
 using osu.Game;
@@ -17,13 +17,14 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Configuration;
+using PerformanceCalculatorGUI.Screens.Collections;
 
 namespace PerformanceCalculatorGUI
 {
     public partial class PerformanceCalculatorGame : OsuGameBase
     {
-        private Bindable<WindowMode> windowMode;
-        private DependencyContainer dependencies;
+        private Bindable<WindowMode> windowMode = null!;
+        private DependencyContainer dependencies = null!;
 
         // This overwrites OsuGameBase's SelectedMods to make sure it can't tweak mods when we don't want it to
         [Cached]
@@ -31,7 +32,7 @@ namespace PerformanceCalculatorGUI
         private readonly Bindable<IReadOnlyList<Mod>> mods = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
 
         [Resolved]
-        private FrameworkConfigManager frameworkConfig { get; set; }
+        private FrameworkConfigManager frameworkConfig { get; set; } = null!;
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
@@ -56,6 +57,9 @@ namespace PerformanceCalculatorGUI
             var notificationDisplay = new NotificationDisplay();
             dependencies.CacheAs(notificationDisplay);
 
+            var scoreCache = new ScoreCache();
+            dependencies.CacheAs(scoreCache);
+
             AddRange(new Drawable[]
             {
                 new OsuContextMenuContainer
@@ -64,7 +68,8 @@ namespace PerformanceCalculatorGUI
                     Child = new PerformanceCalculatorSceneManager()
                 },
                 dialogOverlay,
-                notificationDisplay
+                notificationDisplay,
+                scoreCache
             });
         }
 
@@ -74,11 +79,17 @@ namespace PerformanceCalculatorGUI
 
             host.Window.CursorState |= CursorState.Hidden;
 
-            var tabletInputHandler = host.AvailableInputHandlers.FirstOrDefault(x => x is OpenTabletDriverHandler && x.IsActive);
-
-            if (tabletInputHandler != null)
+            foreach (var handler in host.AvailableInputHandlers)
             {
-                tabletInputHandler.Enabled.Value = false;
+                if (handler is MouseHandler mouseHandler && mouseHandler.UseRelativeMode.Value)
+                {
+                    mouseHandler.UseRelativeMode.Value = false;
+                }
+
+                if (handler is OpenTabletDriverHandler tabletInputHandler && tabletInputHandler.IsActive)
+                {
+                    tabletInputHandler.Enabled.Value = false;
+                }
             }
         }
 

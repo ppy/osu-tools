@@ -168,7 +168,7 @@ namespace PerformanceCalculator.Performance
             where T : DifficultyAttributes
         {
             [JsonProperty("attributes")]
-            public T Attributes { get; set; }
+            public required T Attributes { get; set; }
         }
     }
 }

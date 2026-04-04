@@ -23,7 +23,7 @@ namespace PerformanceCalculatorGUI
     public class ProcessorWorkingBeatmap : WorkingBeatmap
     {
         private readonly Beatmap beatmap;
-        private readonly AudioManager audioManager;
+        private readonly AudioManager? audioManager;
 
         /// <summary>
         /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a .osu file.
@@ -31,13 +31,13 @@ namespace PerformanceCalculatorGUI
         /// <param name="file">The .osu file.</param>
         /// <param name="beatmapId">An optional beatmap ID (for cases where .osu file doesn't have one).</param>
         /// <param name="audioManager"></param>
-        public ProcessorWorkingBeatmap(string file, int? beatmapId = null, AudioManager audioManager = null)
+        public ProcessorWorkingBeatmap(string file, int? beatmapId = null, AudioManager? audioManager = null)
             : this(readFromFile(file), beatmapId, audioManager)
         {
             this.audioManager = audioManager;
         }
 
-        private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null, AudioManager audioManager = null)
+        private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null, AudioManager? audioManager = null)
             : base(beatmap.BeatmapInfo, audioManager)
         {
             this.beatmap = beatmap;
@@ -56,7 +56,7 @@ namespace PerformanceCalculatorGUI
                 return Decoder.GetDecoder<Beatmap>(reader).Decode(reader);
         }
 
-        public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId, AudioManager audioManager = null, string cachePath = "cache")
+        public static ProcessorWorkingBeatmap FromFileOrId(string fileOrId, AudioManager? audioManager = null, string cachePath = "cache")
         {
             if (fileOrId.EndsWith(".osu", StringComparison.Ordinal))
             {
@@ -108,7 +108,7 @@ namespace PerformanceCalculatorGUI
             }
         }
 
-        protected override Track GetBeatmapTrack()
+        protected override Track? GetBeatmapTrack()
         {
             const double excess_length = 1000;
 
@@ -131,12 +131,12 @@ namespace PerformanceCalculatorGUI
                     break;
             }
 
-            return audioManager.Tracks.GetVirtual(length);
+            return audioManager?.Tracks.GetVirtual(length);
         }
 
         protected override IBeatmap GetBeatmap() => beatmap;
-        public override Texture GetBackground() => null;
-        protected override ISkin GetSkin() => null;
-        public override Stream GetStream(string storagePath) => null;
+        public override Texture GetBackground() => throw new NotImplementedException();
+        protected override ISkin GetSkin() => throw new NotImplementedException();
+        public override Stream GetStream(string storagePath) => throw new NotImplementedException();
     }
 }
