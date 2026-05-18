@@ -25,9 +25,9 @@ namespace PerformanceCalculatorGUI.Components
         private readonly string title;
         private readonly GlobalAction? hotkey;
 
-        public const float PADDING = 3;
+        private const float padding = 3;
 
-        protected Box HoverBackground;
+        private Box hoverBackground;
         private readonly Box flashBackground;
 
         public ScreenSelectionButton(string title, IconUsage? icon = null, GlobalAction? hotkey = null)
@@ -44,7 +44,7 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     Width = PerformanceCalculatorSceneManager.CONTROL_AREA_HEIGHT,
                     RelativeSizeAxes = Axes.Y,
-                    Padding = new MarginPadding(PADDING),
+                    Padding = new MarginPadding(padding),
                     Children = new Drawable[]
                     {
                         new Container
@@ -55,20 +55,20 @@ namespace PerformanceCalculatorGUI.Components
                             CornerExponent = 3f,
                             Children = new Drawable[]
                             {
-                                HoverBackground = new Box
+                                hoverBackground = new Box
                                 {
                                     RelativeSizeAxes = Axes.Both,
                                     Colour = OsuColour.Gray(80).Opacity(180),
                                     Blending = BlendingParameters.Additive,
-                                    Alpha = 0,
+                                    Alpha = 0
                                 },
                                 flashBackground = new Box
                                 {
                                     RelativeSizeAxes = Axes.Both,
                                     Alpha = 0,
                                     Colour = Color4.White.Opacity(100),
-                                    Blending = BlendingParameters.Additive,
-                                },
+                                    Blending = BlendingParameters.Additive
+                                }
                             }
                         },
                         new FillFlowContainer
@@ -87,11 +87,11 @@ namespace PerformanceCalculatorGUI.Components
                                     Origin = Anchor.CentreLeft,
                                     Size = new Vector2(25),
                                     Icon = new ScreenSelectionButtonIcon(icon) { IconSize = new Vector2(20) }
-                                },
-                            },
-                        },
-                    },
-                },
+                                }
+                            }
+                        }
+                    }
+                }
             };
         }
 
@@ -105,13 +105,13 @@ namespace PerformanceCalculatorGUI.Components
 
         protected override bool OnHover(HoverEvent e)
         {
-            HoverBackground.FadeIn(300, Easing.OutQuint);
+            hoverBackground.FadeIn(300, Easing.OutQuint);
             return true;
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
-            HoverBackground.FadeOut(200, Easing.Out);
+            hoverBackground.FadeOut(200, Easing.Out);
         }
 
         public bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
@@ -140,8 +140,8 @@ namespace PerformanceCalculatorGUI.Components
         {
             private (string, GlobalAction?)? currentData;
 
-            private FillFlowContainer subTooltipFlow;
-            private OsuSpriteText text;
+            private readonly FillFlowContainer subTooltipFlow;
+            private readonly OsuSpriteText text;
 
             public ScreenSelectionButtonTooltip()
             {
@@ -153,7 +153,7 @@ namespace PerformanceCalculatorGUI.Components
                 {
                     Type = EdgeEffectType.Shadow,
                     Colour = Color4.Black.Opacity(0.2f),
-                    Radius = 10f,
+                    Radius = 10f
                 };
 
                 Children = new Drawable[]
@@ -161,7 +161,7 @@ namespace PerformanceCalculatorGUI.Components
                     new Box
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Colour = OsuColour.Gray(0.1f),
+                        Colour = OsuColour.Gray(0.1f)
                     },
                     new FillFlowContainer
                     {
@@ -176,14 +176,14 @@ namespace PerformanceCalculatorGUI.Components
                                 Anchor = Anchor.TopLeft,
                                 Origin = Anchor.TopLeft,
                                 Shadow = true,
-                                Font = OsuFont.GetFont(size: 18, weight: FontWeight.Bold),
+                                Font = OsuFont.GetFont(size: 18, weight: FontWeight.Bold)
                             },
                             subTooltipFlow = new FillFlowContainer
                             {
                                 AutoSizeAxes = Axes.Both,
                                 Anchor = Anchor.TopLeft,
                                 Origin = Anchor.TopLeft,
-                                Direction = FillDirection.Horizontal,
+                                Direction = FillDirection.Horizontal
                             }
                         }
                     }
@@ -210,7 +210,7 @@ namespace PerformanceCalculatorGUI.Components
                         Anchor = Anchor.BottomLeft,
                         Origin = Anchor.BottomLeft,
                         Hotkey = new Hotkey(data.Item2.Value),
-                        Margin = new MarginPadding { Left = 3 },
+                        Margin = new MarginPadding { Left = 3 }
                     });
                 }
             }
