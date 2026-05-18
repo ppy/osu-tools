@@ -3,15 +3,12 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Screens;
-using osu.Game.Beatmaps.Drawables.Cards;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -19,8 +16,6 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Rulesets;
-using osuTK;
-using osuTK.Graphics;
 using PerformanceCalculatorGUI.Components;
 using PerformanceCalculatorGUI.Screens;
 
@@ -32,8 +27,6 @@ namespace PerformanceCalculatorGUI
         private ScreenStack screenStack = null!;
 
         private ToolbarRulesetSelector rulesetSelector = null!;
-
-        private Box hoverGradientBox = null!;
 
         public const float CONTROL_AREA_HEIGHT = 45;
 
@@ -68,19 +61,10 @@ namespace PerformanceCalculatorGUI
                         {
                             new Drawable[]
                             {
-                                new HoverHandlingContainer
+                                new Container
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     Height = CONTROL_AREA_HEIGHT,
-                                    Hovered = e =>
-                                    {
-                                        hoverGradientBox.FadeIn(100);
-                                        return false;
-                                    },
-                                    Unhovered = e =>
-                                    {
-                                        hoverGradientBox.FadeOut(100);
-                                    },
                                     Children = new Drawable[]
                                     {
                                         new Box
@@ -124,7 +108,6 @@ namespace PerformanceCalculatorGUI
                                             Direction = FillDirection.Horizontal,
                                             RelativeSizeAxes = Axes.Y,
                                             AutoSizeAxes = Axes.X,
-                                            Spacing = new Vector2(5),
                                             Children = new Drawable[]
                                             {
                                                 rulesetSelector = new ToolbarRulesetSelector(),
@@ -138,21 +121,10 @@ namespace PerformanceCalculatorGUI
                             {
                                 new ScalingContainer(ScalingMode.Everything)
                                 {
-                                    Depth = 1,
-                                    Children = new Drawable[]
+                                    Child = screenStack = new ScreenStack
                                     {
-                                        screenStack = new ScreenStack
-                                        {
-                                            RelativeSizeAxes = Axes.Both
-                                        },
-                                        hoverGradientBox = new Box
-                                        {
-                                            Colour = ColourInfo.GradientVertical(Color4.Black.Opacity(1.0f), Color4.Black.Opacity(1)),
-                                            RelativeSizeAxes = Axes.X,
-                                            Height = 100,
-                                            Alpha = 0
-                                        }
-                                    }
+                                        RelativeSizeAxes = Axes.Both
+                                    },
                                 }
                             }
                         }
