@@ -27,7 +27,7 @@ namespace PerformanceCalculatorGUI.Components
 
         private const float padding = 3;
 
-        private Box hoverBackground;
+        private readonly Box hoverBackground;
         private readonly Box flashBackground;
 
         public ScreenSelectionButton(string title, IconUsage? icon = null, GlobalAction? hotkey = null)
