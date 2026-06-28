@@ -747,7 +747,7 @@ namespace PerformanceCalculatorGUI.Screens
                 countMeh = mehsTextBox.Value.Value;
             }
 
-            int score = RulesetHelper.AdjustManiaScore(scoreTextBox.Value.Value, appliedMods.Value);
+            int score = RulesetHelper.AdjustManiaScore(scoreTextBox.Value.Value, appliedMods.Value, ruleset.Value.CreateInstance());
 
             try
             {

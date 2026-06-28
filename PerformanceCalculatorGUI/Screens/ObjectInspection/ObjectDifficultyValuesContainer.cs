@@ -136,7 +136,7 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
                 new ObjectInspectorDifficultyValue("Delta Time", hitObject.DeltaTime),
                 new ObjectInspectorDifficultyValue("Adjusted Delta Time", hitObject.AdjustedDeltaTime),
                 new ObjectInspectorDifficultyValue("Last Obj End Delta Time", hitObject.LastObjectEndDeltaTime),
-                new ObjectInspectorDifficultyValue("Doubletapness", hitObject.GetDoubletapness((OsuDifficultyHitObject)hitObject.Next(0))),
+                new ObjectInspectorDifficultyValue("Doubletap Feasibility", hitObject.CalculateDoubleTapFeasibility((OsuDifficultyHitObject)hitObject.Next())),
                 new ObjectInspectorDifficultyValue("Jump Distance", hitObject.JumpDistance),
                 new ObjectInspectorDifficultyValue("Lazy Jump Dist", hitObject.LazyJumpDistance),
                 new ObjectInspectorDifficultyValue("Min Jump Dist", hitObject.MinimumJumpDistance),
