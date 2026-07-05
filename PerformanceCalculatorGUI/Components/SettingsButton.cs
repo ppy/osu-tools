@@ -2,27 +2,19 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Extensions;
-using osu.Framework.Graphics;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Input.Bindings;
-using osu.Game.Overlays.Toolbar;
-using osuTK;
 
 namespace PerformanceCalculatorGUI.Components
 {
-    public partial class SettingsButton : ToolbarButton, IHasPopover
+    public partial class SettingsButton : ScreenSelectionButton, IHasPopover
     {
-        protected override Anchor TooltipAnchor => Anchor.TopRight;
-
         public SettingsButton()
+            : base("Settings", FontAwesome.Solid.Cog, GlobalAction.ToggleSettings)
         {
-            Hotkey = GlobalAction.ToggleSettings;
-            TooltipMain = "Settings";
-
-            SetIcon(new ScreenSelectionButtonIcon(FontAwesome.Solid.Cog) { IconSize = new Vector2(70) });
         }
 
         public Popover GetPopover() => new SettingsPopover();
