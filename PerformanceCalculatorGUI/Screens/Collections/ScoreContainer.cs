@@ -16,7 +16,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
 
         private readonly IconButton deleteButton;
 
-        public delegate void OnDeleteHandler(long scoreId);
+        public delegate void OnDeleteHandler(ExtendedScore score);
 
         public event OnDeleteHandler? OnDelete;
 
@@ -43,7 +43,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
                             Icon = FontAwesome.Regular.TrashAlt,
                             Action = () =>
                             {
-                                OnDelete?.Invoke((long)score.SoloScore.ID!);
+                                OnDelete?.Invoke(score);
                             }
                         },
                         new ExtendedProfileScore(score, true)

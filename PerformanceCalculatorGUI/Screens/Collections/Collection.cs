@@ -8,5 +8,6 @@ namespace PerformanceCalculatorGUI.Screens.Collections
         public required string FileName { get; set; }
         public required string Name { get; set; }
         public required long[] Scores { get; set; }
+        public StoredScore[]? StoredScores { get; set; }
     }
 }

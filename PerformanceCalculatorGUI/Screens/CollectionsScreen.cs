@@ -217,14 +217,21 @@ namespace PerformanceCalculatorGUI.Screens
                 return;
             }
 
-            currentCollection.Value.Scores = [..currentCollection.Value.Scores, scoreId];
+            currentCollection.Value.Scores = [.. currentCollection.Value.Scores, scoreId];
 
             saveCurrentCollection();
         }
 
-        private void onScoreRemove(long scoreId)
+        private void onScoreRemove(ExtendedScore score)
         {
-            currentCollection.Value!.Scores = currentCollection.Value.Scores.Where(x => x != scoreId).ToArray();
+            if (score.IsStoredScore)
+            {
+                currentCollection.Value!.StoredScores = currentCollection.Value.StoredScores?.Where(x => x.Id != score.StoredScoreId).ToArray();
+            }
+            else
+            {
+                currentCollection.Value!.Scores = currentCollection.Value.Scores.Where(x => x != (long)score.SoloScore.ID!).ToArray();
+            }
 
             saveCurrentCollection();
         }
@@ -296,6 +303,39 @@ namespace PerformanceCalculatorGUI.Screens
 
                         scoresList.Add(scoreContainer);
                     });
+                }
+
+                if (currentCollection.Value.StoredScores != null)
+                {
+                    foreach (var storedScore in currentCollection.Value.StoredScores)
+                    {
+                        var rulesetInstance = rulesets.GetRuleset(storedScore.RulesetID)!.CreateInstance();
+
+                        var working = ProcessorWorkingBeatmap.FromFileOrId(storedScore.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+
+                        var soloScore = storedScore.ToSoloScoreInfo(working);
+
+                        Mod[] mods = soloScore.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
+
+                        var scoreInfo = soloScore.ToScoreInfo(rulesets, working.BeatmapInfo);
+
+                        var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+
+                        var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                        var difficultyAttributes = difficultyCalculator.Calculate(mods);
+                        var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+                        if (performanceCalculator == null)
+                            continue;
+
+                        var perfAttributes = performanceCalculator.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                        Schedule(() =>
+                        {
+                            var scoreContainer = new ScoreContainer(new ExtendedScore(soloScore, difficultyAttributes, perfAttributes, storedScore.Id));
+                            scoreContainer.OnDelete += onScoreRemove;
+
+                            scoresList.Add(scoreContainer);
+                        });
+                    }
                 }
             }).ContinueWith(t =>
             {
@@ -386,9 +426,22 @@ namespace PerformanceCalculatorGUI.Screens
 
             if (sortCriteria == CollectionSortCriteria.None)
             {
+                int onlineCount = currentCollection.Value!.Scores.Length;
+
                 for (int i = 0; i < scoresList.Count; i++)
                 {
-                    scoresList.SetLayoutPosition(scoresList[i], Array.IndexOf(currentCollection.Value!.Scores, scoresList[i].Score.SoloScore.ID));
+                    var container = scoresList[i];
+
+                    if (container.Score.IsStoredScore)
+                    {
+                        var storedScores = currentCollection.Value.StoredScores;
+                        int storedIndex = storedScores != null ? Array.FindIndex(storedScores, s => s.Id == container.Score.StoredScoreId) : 0;
+                        scoresList.SetLayoutPosition(container, onlineCount + storedIndex);
+                    }
+                    else
+                    {
+                        scoresList.SetLayoutPosition(container, Array.IndexOf(currentCollection.Value.Scores, (long)container.Score.SoloScore.ID!));
+                    }
                 }
 
                 return;
