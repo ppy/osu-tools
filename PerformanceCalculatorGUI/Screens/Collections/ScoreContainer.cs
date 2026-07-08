@@ -12,7 +12,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
 {
     public partial class ScoreContainer : Container
     {
-        public ExtendedScore Score { get; }
+        public ExtendedScore ExtScore { get; }
 
         private readonly IconButton deleteButton;
 
@@ -25,7 +25,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
 
-            Score = score;
+            ExtScore = score;
             Child = new GridContainer
             {
                 RelativeSizeAxes = Axes.X,
@@ -43,7 +43,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
                             Icon = FontAwesome.Regular.TrashAlt,
                             Action = () =>
                             {
-                                OnDelete?.Invoke((long)score.SoloScore.ID!);
+                                OnDelete?.Invoke(ExtScore.Score.OnlineID!);
                             }
                         },
                         new ExtendedProfileScore(score, true)

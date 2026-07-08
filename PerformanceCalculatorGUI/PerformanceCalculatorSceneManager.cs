@@ -99,6 +99,10 @@ namespace PerformanceCalculatorGUI
                                                 {
                                                     Action = () => setScreen(new CollectionsScreen())
                                                 },
+                                                new ScreenSelectionButton("Realm", FontAwesome.Solid.List)
+                                                {
+                                                    Action = () => setScreen(new RealmScreen())
+                                                },
                                             }
                                         },
                                         new FillFlowContainer
