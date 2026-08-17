@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
@@ -18,9 +19,21 @@ namespace PerformanceCalculatorGUI.Screens.Collections
 
         protected override async Task<SoloScoreInfo?> ComputeValueAsync(long lookup, CancellationToken token = default)
         {
-            var score = await apiManager.GetJsonFromApi<SoloScoreInfo>($"scores/{lookup}").ConfigureAwait(false);
-            await Task.Delay(200, token).ConfigureAwait(false);
-            return score;
+            try
+            {
+                var score = await apiManager.GetJsonFromApi<SoloScoreInfo>($"scores/{lookup}").ConfigureAwait(false);
+                await Task.Delay(200, token).ConfigureAwait(false);
+                return score;
+            }
+            catch (WebException ex)
+            {
+                if (ex.Message == "Not Found")
+                {
+                    return null;
+                }
+
+                throw;
+            }
         }
     }
 }

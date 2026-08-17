@@ -80,7 +80,7 @@ namespace PerformanceCalculatorGUI.Components
 
     public partial class ExtendedProfileScore : CompositeDrawable
     {
-        private const int height = 35;
+        public const int HEIGHT = 35;
         private const int avatar_size = 35;
         private const int performance_width = 100;
         private const int rank_difference_width = 35;
@@ -106,7 +106,7 @@ namespace PerformanceCalculatorGUI.Components
             ShowAvatar = showAvatar;
 
             RelativeSizeAxes = Axes.X;
-            Height = height;
+            Height = HEIGHT;
         }
 
         [BackgroundDependencyLoader]

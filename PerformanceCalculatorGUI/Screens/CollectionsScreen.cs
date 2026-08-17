@@ -269,29 +269,34 @@ namespace PerformanceCalculatorGUI.Screens
                 foreach (long scoreId in currentCollection.Value.Scores)
                 {
                     var score = await scoreCache.GetScore(scoreId).ConfigureAwait(false);
-                    if (score == null)
-                        continue;
 
-                    var rulesetInstance = rulesets.GetRuleset(score.RulesetID)!.CreateInstance();
+                    ExtendedScore? extendedScore = null;
 
-                    var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
+                    if (score != null)
+                    {
+                        var rulesetInstance = rulesets.GetRuleset(score.RulesetID)!.CreateInstance();
 
-                    Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
+                        var working = ProcessorWorkingBeatmap.FromFileOrId(score.BeatmapID.ToString(), cachePath: configManager.GetBindable<string>(Settings.CachePath).Value);
 
-                    var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
+                        Mod[] mods = score.Mods.Select(x => x.ToMod(rulesetInstance)).ToArray();
 
-                    var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
+                        var scoreInfo = score.ToScoreInfo(rulesets, working.BeatmapInfo);
 
-                    var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
-                    var difficultyAttributes = difficultyCalculator.Calculate(mods);
-                    var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
-                    if (performanceCalculator == null)
-                        continue;
+                        var parsedScore = new ProcessorScoreDecoder(working).Parse(scoreInfo);
 
-                    var perfAttributes = performanceCalculator.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                        var difficultyCalculator = rulesetInstance.CreateDifficultyCalculator(working);
+                        var difficultyAttributes = difficultyCalculator.Calculate(mods);
+                        var performanceCalculator = rulesetInstance.CreatePerformanceCalculator();
+                        if (performanceCalculator == null)
+                            continue;
+
+                        var perfAttributes = performanceCalculator.Calculate(parsedScore.ScoreInfo, difficultyAttributes);
+                        extendedScore = new ExtendedScore(score, difficultyAttributes, perfAttributes);
+                    }
+
                     Schedule(() =>
                     {
-                        var scoreContainer = new ScoreContainer(new ExtendedScore(score, difficultyAttributes, perfAttributes));
+                        var scoreContainer = new ScoreContainer(scoreId, extendedScore);
                         scoreContainer.OnDelete += onScoreRemove;
 
                         scoresList.Add(scoreContainer);
@@ -388,7 +393,7 @@ namespace PerformanceCalculatorGUI.Screens
             {
                 for (int i = 0; i < scoresList.Count; i++)
                 {
-                    scoresList.SetLayoutPosition(scoresList[i], Array.IndexOf(currentCollection.Value!.Scores, scoresList[i].Score.SoloScore.ID));
+                    scoresList.SetLayoutPosition(scoresList[i], Array.IndexOf(currentCollection.Value!.Scores, scoresList[i].ScoreId));
                 }
 
                 return;
@@ -399,15 +404,15 @@ namespace PerformanceCalculatorGUI.Screens
             switch (sortCriteria)
             {
                 case CollectionSortCriteria.Live:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.LivePP).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score?.LivePP).ToArray();
                     break;
 
                 case CollectionSortCriteria.Local:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score?.PerformanceAttributes?.Total).ToArray();
                     break;
 
                 case CollectionSortCriteria.Difference:
-                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score.PerformanceAttributes?.Total - x.Score.LivePP).ToArray();
+                    sortedScores = scoresList.Children.OrderByDescending(x => x.Score?.PerformanceAttributes?.Total - x.Score?.LivePP).ToArray();
                     break;
 
                 default:
