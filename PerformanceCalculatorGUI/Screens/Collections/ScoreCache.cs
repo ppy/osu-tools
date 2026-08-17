@@ -27,7 +27,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
             }
             catch (WebException ex)
             {
-                if (ex.Message == "Not Found")
+                if (ex.Message == "NotFound")
                 {
                     return null;
                 }
