@@ -19,7 +19,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
         public long ScoreId { get; }
         public ExtendedScore? Score { get; }
 
-        private readonly IconButton? deleteButton;
+        private readonly IconButton deleteButton;
 
         public delegate void OnDeleteHandler(long scoreId);
 
@@ -60,7 +60,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
 
         protected override bool OnHover(HoverEvent e)
         {
-            deleteButton?
+            deleteButton
                 .Delay(500)
                 .ResizeWidthTo(35, 100, Easing.Out)
                 .OnComplete(b => b.Margin = new MarginPadding { Right = 5 });
@@ -70,7 +70,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
-            deleteButton?
+            deleteButton
                 .ResizeWidthTo(0, 100, Easing.Out)
                 .OnComplete(b => b.Margin = new MarginPadding());
 
@@ -87,7 +87,7 @@ namespace PerformanceCalculatorGUI.Screens.Collections
                 CornerRadius = ExtendedLabelledTextBox.CORNER_RADIUS;
                 AddRangeInternal(new Drawable[]
                 {
-                    new OsuSpriteText()
+                    new OsuSpriteText
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
