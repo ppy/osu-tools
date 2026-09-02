@@ -17,6 +17,7 @@ using osu.Framework.Logging;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
@@ -52,7 +53,7 @@ namespace PerformanceCalculatorGUI.Screens
         private Container userPanelContainer = null!;
         private UserCard? userPanel;
 
-        private string[] currentUsers = Array.Empty<string>();
+        private Bindable<string[]> currentUsers = new Bindable<string[]>([]);
 
         private CancellationTokenSource? calculationCancellatonToken;
 
@@ -118,7 +119,8 @@ namespace PerformanceCalculatorGUI.Screens
                                 ColumnDimensions = new[]
                                 {
                                     new Dimension(),
-                                    new Dimension(GridSizeMode.AutoSize)
+                                    new Dimension(GridSizeMode.Absolute, 130f),
+                                    new Dimension(GridSizeMode.Absolute, 150f)
                                 },
                                 RowDimensions = new[]
                                 {
@@ -131,16 +133,20 @@ namespace PerformanceCalculatorGUI.Screens
                                         usernameTextBox = new ExtendedLabelledTextBox
                                         {
                                             RelativeSizeAxes = Axes.X,
-                                            Anchor = Anchor.TopLeft,
                                             Label = "Username(s)",
                                             PlaceholderText = "peppy, rloseise, peppy2",
                                             CommitOnFocusLoss = false
                                         },
+                                        new FavouritesDropdown
+                                        {
+                                            RelativeSizeAxes = Axes.X,
+                                            CurrentUsers = currentUsers
+                                        },
                                         calculationButton = new StatefulButton("Start calculation")
                                         {
-                                            Width = 150,
+                                            RelativeSizeAxes = Axes.X,
                                             Height = username_container_height,
-                                            Action = () => { calculateProfiles(usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); }
+                                            Action = () => { currentUsers.Value = usernameTextBox.Current.Value.Split(", ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries); }
                                         }
                                     }
                                 }
@@ -151,7 +157,8 @@ namespace PerformanceCalculatorGUI.Screens
                             userPanelContainer = new Container
                             {
                                 RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y
+                                AutoSizeAxes = Axes.Y,
+                                Depth = 10
                             }
                         },
                         new Drawable[]
@@ -160,6 +167,7 @@ namespace PerformanceCalculatorGUI.Screens
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
+                                Depth = 10,
                                 Children = new Drawable[]
                                 {
                                     new FillFlowContainer
@@ -230,6 +238,7 @@ namespace PerformanceCalculatorGUI.Screens
                             new OsuScrollContainer(Direction.Vertical)
                             {
                                 RelativeSizeAxes = Axes.Both,
+                                Depth = 10,
                                 Child = scores = new FillFlowContainer<ExtendedProfileScore>
                                 {
                                     RelativeSizeAxes = Axes.X,
@@ -246,16 +255,21 @@ namespace PerformanceCalculatorGUI.Screens
                 }
             };
 
-            usernameTextBox.OnCommit += (_, _) => { calculateProfiles(usernameTextBox.Current.Value.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); };
+            usernameTextBox.OnCommit += (_, _) => { currentUsers.Value = usernameTextBox.Current.Value.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries); };
             sorting.ValueChanged += e => { updateSorting(e.NewValue); };
+            currentUsers.ValueChanged += e =>
+            {
+                usernameTextBox.Current.Value = string.Join(',', e.NewValue);
+                calculateProfiles(e.NewValue);
+            };
 
             if (RuntimeInfo.IsDesktop)
-                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfiles(currentUsers); });
+                HotReloadCallbackReceiver.CompilationFinished += _ => Schedule(() => { calculateProfiles(currentUsers.Value); });
         }
 
         private void calculateProfiles(string[] usernames)
         {
-            currentUsers = usernames.Distinct().ToArray();
+            string[] users = usernames.Distinct().ToArray();
 
             if (usernames.Length < 1)
             {
@@ -300,7 +314,7 @@ namespace PerformanceCalculatorGUI.Screens
                 var players = new List<APIUser>();
                 var rulesetInstance = ruleset.Value.CreateInstance();
 
-                foreach (string username in currentUsers)
+                foreach (string username in users)
                 {
                     try
                     {
