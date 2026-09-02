@@ -15,7 +15,7 @@ namespace PerformanceCalculatorGUI.Screens.Profile
     {
         public Bindable<string[]> CurrentUsers = null!;
 
-        private Bindable<string?> favouritesSelectionBindable = new Bindable<string?>();
+        private readonly Bindable<string?> favouritesSelectionBindable = new Bindable<string?>();
         private List<string> favourites = new List<string>();
 
         private const string favourites_file = "favourites.json";
@@ -38,7 +38,7 @@ namespace PerformanceCalculatorGUI.Screens.Profile
 
         private void onSelection(ValueChangedEvent<string?> e)
         {
-            if (e.NewValue == default_item)
+            if (e.NewValue == null || e.NewValue == default_item)
                 return;
 
             if (e.NewValue == add_current_item)

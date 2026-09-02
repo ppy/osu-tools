@@ -52,7 +52,7 @@ namespace PerformanceCalculatorGUI.Screens
         private Container userPanelContainer = null!;
         private UserCard? userPanel;
 
-        private Bindable<string[]> currentUsers = new Bindable<string[]>([]);
+        private readonly Bindable<string[]> currentUsers = new Bindable<string[]>([]);
 
         private CancellationTokenSource? calculationCancellatonToken;
 
