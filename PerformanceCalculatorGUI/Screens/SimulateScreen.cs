@@ -304,11 +304,11 @@ namespace PerformanceCalculatorGUI.Screens
                                     },
                                     introBeatmapTextBox = new ExtendedLabelledTextBox
                                     {
+                                        RelativeSizeAxes = Axes.None,
                                         Anchor = Anchor.Centre,
                                         Origin = Anchor.Centre,
                                         Width = 650,
                                         FixedLabelWidth = 100f,
-                                        RelativeSizeAxes = Axes.None,
                                         Label = "Beatmap ID",
                                         PlaceholderText = "Enter a beatmap ID or link",
                                         CommitOnFocusLoss = false,
@@ -320,23 +320,15 @@ namespace PerformanceCalculatorGUI.Screens
                                         Origin = Anchor.Centre,
                                         Text = "or"
                                     },
-                                    new FillFlowContainer
+                                    introScoreTextBox = new LabelledNumberBox
                                     {
+                                        RelativeSizeAxes = Axes.None,
                                         Anchor = Anchor.Centre,
                                         Origin = Anchor.Centre,
                                         Width = 650,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Horizontal,
-                                        Children = new Drawable[]
-                                        {
-                                            introScoreTextBox = new LabelledNumberBox
-                                            {
-                                                FixedLabelWidth = 100f,
-                                                RelativeSizeAxes = Axes.X,
-                                                Label = "Score ID",
-                                                PlaceholderText = "Enter a score ID",
-                                            },
-                                        }
+                                        FixedLabelWidth = 100f,
+                                        Label = "Score ID",
+                                        PlaceholderText = "Enter a score ID",
                                     },
                                     new RoundedButton
                                     {
@@ -346,17 +338,20 @@ namespace PerformanceCalculatorGUI.Screens
                                         Text = "Load",
                                         Action = () =>
                                         {
-                                            if (!string.IsNullOrEmpty(introScoreTextBox.Current.Value) && !string.IsNullOrEmpty(introBeatmapTextBox.Current.Value))
+                                            bool hasScoreId = !string.IsNullOrEmpty(introScoreTextBox.Current.Value);
+                                            bool hasBeatmapId = !string.IsNullOrEmpty(introBeatmapTextBox.Current.Value);
+
+                                            if (hasScoreId && hasBeatmapId)
                                             {
                                                 notificationDisplay.Display(new Notification("Please enter either beatmap ID or score ID"));
                                                 return;
                                             }
 
-                                            if (!string.IsNullOrEmpty(introScoreTextBox.Current.Value))
+                                            if (hasScoreId)
                                             {
                                                 populateSettingsFromScore(ulong.Parse(introScoreTextBox.Current.Value));
                                             }
-                                            else if (!string.IsNullOrEmpty(introBeatmapTextBox.Current.Value))
+                                            else if (hasBeatmapId)
                                             {
                                                 changeBeatmap(introBeatmapTextBox.Current.Value);
                                             }
