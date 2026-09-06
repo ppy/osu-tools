@@ -278,20 +278,20 @@ namespace PerformanceCalculatorGUI.Screens
                             },
                             new FillFlowContainer
                             {
-                                AutoSizeAxes = Axes.Both,
+                                AutoSizeAxes = Axes.Y,
+                                Width = 700,
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
                                 Direction = FillDirection.Vertical,
-                                Padding = new MarginPadding(16),
+                                Padding = new MarginPadding(16) { Left = 4 },
                                 Spacing = new Vector2(8),
                                 Children = new Drawable[]
                                 {
                                     introFileChooserBox = new FileChooserLabelledTextBox(configManager.GetBindable<string>(Settings.DefaultPath), ".osu")
                                     {
-                                        RelativeSizeAxes = Axes.None,
+                                        RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.Centre,
                                         Origin = Anchor.Centre,
-                                        Width = 650,
                                         Label = "Beatmap File",
                                         FixedLabelWidth = 100f,
                                         PlaceholderText = "Click to select a beatmap file"
@@ -304,10 +304,9 @@ namespace PerformanceCalculatorGUI.Screens
                                     },
                                     introBeatmapTextBox = new ExtendedLabelledTextBox
                                     {
-                                        RelativeSizeAxes = Axes.None,
+                                        RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.Centre,
                                         Origin = Anchor.Centre,
-                                        Width = 650,
                                         FixedLabelWidth = 100f,
                                         Label = "Beatmap ID",
                                         PlaceholderText = "Enter a beatmap ID or link",
@@ -322,10 +321,9 @@ namespace PerformanceCalculatorGUI.Screens
                                     },
                                     introScoreTextBox = new LabelledNumberBox
                                     {
-                                        RelativeSizeAxes = Axes.None,
+                                        RelativeSizeAxes = Axes.X,
                                         Anchor = Anchor.Centre,
                                         Origin = Anchor.Centre,
-                                        Width = 650,
                                         FixedLabelWidth = 100f,
                                         Label = "Score ID",
                                         PlaceholderText = "Enter a score ID",
@@ -336,6 +334,7 @@ namespace PerformanceCalculatorGUI.Screens
                                         Origin = Anchor.Centre,
                                         Width = 250,
                                         Text = "Load",
+                                        Margin = new MarginPadding { Top = 8 },
                                         Action = () =>
                                         {
                                             bool hasScoreId = !string.IsNullOrEmpty(introScoreTextBox.Current.Value);
@@ -354,6 +353,12 @@ namespace PerformanceCalculatorGUI.Screens
                                             else if (hasBeatmapId)
                                             {
                                                 changeBeatmap(introBeatmapTextBox.Current.Value);
+                                            }
+                                            else
+                                            {
+                                                introFileChooserBox.FlashColour(Colour4.Red, 200);
+                                                introBeatmapTextBox.FlashColour(Colour4.Red, 200);
+                                                introScoreTextBox.FlashColour(Colour4.Red, 200);
                                             }
                                         }
                                     }
