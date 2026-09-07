@@ -9,6 +9,7 @@ using System.Net.Http;
 using JetBrains.Annotations;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Framework.IO.Network;
+using osu.Game.Online.API;
 
 namespace PerformanceCalculator
 {
@@ -55,7 +56,7 @@ namespace PerformanceCalculator
 
         private void getAccessToken()
         {
-            using var req = new JsonWebRequest<dynamic>($"{Program.ENDPOINT_CONFIGURATION.APIUrl}/oauth/token")
+            using var req = new JsonWebRequest<OAuthToken>($"{Program.ENDPOINT_CONFIGURATION.APIUrl}/oauth/token")
             {
                 Method = HttpMethod.Post
             };
@@ -66,7 +67,7 @@ namespace PerformanceCalculator
             req.AddParameter("scope", "public");
             req.Perform();
 
-            apiAccessToken = req.ResponseObject.access_token.ToString();
+            apiAccessToken = req.ResponseObject.AccessToken;
         }
     }
 }
