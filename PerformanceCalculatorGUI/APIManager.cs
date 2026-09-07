@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
@@ -22,9 +23,6 @@ namespace PerformanceCalculatorGUI
 
         private OAuthToken? token;
 
-        // WARN: keep in sync with /osu.Game/Online/API/APIAccess.cs APIVersion
-        private const int api_version = 20220705;
-
         public APIManager(SettingsManager configManager)
         {
             clientIdBindable = configManager.GetBindable<string>(Settings.ClientId);
@@ -33,6 +31,9 @@ namespace PerformanceCalculatorGUI
 
         public async Task<T> GetJsonFromApi<T>(string request)
         {
+            var now = DateTimeOffset.Now;
+            int apiVersion = now.Year * 10000 + now.Month * 100 + now.Day;
+
             if (token == null)
             {
                 await getAccessToken().ConfigureAwait(false);
@@ -40,7 +41,7 @@ namespace PerformanceCalculatorGUI
             }
 
             using var req = new JsonWebRequest<T>($"{ENDPOINT_CONFIGURATION.APIUrl}/api/v2/{request}");
-            req.AddHeader("x-api-version", api_version.ToString(CultureInfo.InvariantCulture));
+            req.AddHeader("x-api-version", apiVersion.ToString(CultureInfo.InvariantCulture));
             req.AddHeader(nameof(System.Net.HttpRequestHeader.Authorization), $"Bearer {token.AccessToken}");
             await req.PerformAsync().ConfigureAwait(false);
 
