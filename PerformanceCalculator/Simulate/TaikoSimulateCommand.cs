@@ -45,8 +45,8 @@ namespace PerformanceCalculator.Simulate
             else
             {
                 // Let Great=2, Good=1, Miss=0. The total should be this.
-                int hitCount = totalResultCount - countMiss;
-                int targetTotal = (int)Math.Round(accuracy * hitCount * 2);
+                int relevantResultCount = totalResultCount - countMiss;
+                int targetTotal = (int)Math.Round(accuracy * relevantResultCount * 2);
 
                 countGreat = targetTotal - (totalResultCount - countMiss);
                 countGood = totalResultCount - countGreat - countMiss;
