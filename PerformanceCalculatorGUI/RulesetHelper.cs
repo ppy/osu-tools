@@ -174,7 +174,8 @@ namespace PerformanceCalculatorGUI
             else
             {
                 // Let Great=2, Good=1, Miss=0. The total should be this.
-                int targetTotal = (int)Math.Round(accuracy * totalResultCount * 2);
+                int relevantResultCount = totalResultCount - countMiss;
+                int targetTotal = (int)Math.Round(accuracy * relevantResultCount * 2);
 
                 countGreat = targetTotal - (totalResultCount - countMiss);
                 countGood = totalResultCount - countGreat - countMiss;
@@ -203,9 +204,9 @@ namespace PerformanceCalculatorGUI
             // Max value minus whatever misses are left. Negative if impossible missCount
             int countFruits = maxFruits - (countMiss - (maxDroplets - countDroplets));
 
-            // Either given or the max amount of hit objects with respect to accuracy minus the already calculated fruits and drops.
-            // Negative if accuracy not feasable with missCount.
-            int countTinyDroplets = countMeh ?? (int)Math.Round(accuracy * (maxCombo + maxTinyDroplets)) - countFruits - countDroplets;
+            // Either given or the max amount of "hit" hit objects with respect to accuracy minus the already calculated fruits and drops.
+            int relevantResultCount = maxCombo + maxTinyDroplets - countMiss;
+            int countTinyDroplets = countMeh ?? (int)Math.Round(accuracy * relevantResultCount) - countFruits - countDroplets;
 
             // Whatever droplets are left
             int countTinyMisses = maxTinyDroplets - countTinyDroplets;
