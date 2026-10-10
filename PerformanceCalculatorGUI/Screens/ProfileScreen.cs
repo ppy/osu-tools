@@ -22,6 +22,7 @@ using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Scoring;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;

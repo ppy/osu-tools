@@ -26,6 +26,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
+using osu.Game.Scoring;
 using osu.Game.Users.Drawables;
 using osu.Game.Utils;
 using osuTK;
