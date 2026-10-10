@@ -10,6 +10,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
@@ -175,6 +176,24 @@ namespace PerformanceCalculatorGUI.Screens.ObjectInspection
 
                 if (hitObject.LazyEndPosition != null)
                     flowContainer.Add(new ObjectInspectorDifficultyValue("Lazy End Position", hitObject.LazyEndPosition!.Value));
+            }
+
+            if (hitObject.BaseObject is Spinner spinner)
+            {
+                flowContainer.AddRange(new Drawable[]
+                {
+                    new Box
+                    {
+                        Name = "Separator",
+                        Height = 1,
+                        RelativeSizeAxes = Axes.X,
+                        Alpha = 0.5f
+                    },
+                    new ObjectInspectorDifficultyValue("Spins Required", spinner.SpinsRequired),
+                    new ObjectInspectorDifficultyValue("Spins Required (full)", spinner.SpinsRequiredForBonus),
+                    new ObjectInspectorDifficultyValue("Clear RPS", IBeatmapDifficultyInfo.DifficultyRange(hitObject.OverallDifficulty, Spinner.CLEAR_RPM_RANGE) / 60),
+                    new ObjectInspectorDifficultyValue("Complete RPS", IBeatmapDifficultyInfo.DifficultyRange(hitObject.OverallDifficulty, Spinner.COMPLETE_RPM_RANGE) / 60)
+                });
             }
         }
 
